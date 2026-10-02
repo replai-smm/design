@@ -1,0 +1,13 @@
+{
+  "$comment": "Пары, которые не проходили контраст до дизайн-системы. Radix — replai/frontend/src/index.css (статусы: текст шага 11 на фоне шага 3, белый на шаге 9), светлая тема; тёмная у Radix проходила. Carbon — голые support-* как текст или знак на фоне g10; так тон «внимание» сопоставлен в фикстуре договора Э0 (defs/fixtures/tokens/valid/carbon.json).",
+  "pairs": [
+    { "what": "Replai (Radix), светлая: «работает» — green-11 на green-3", "fg": "#218358", "bg": "#e6f6eb", "min": 4.5, "ratio": 4.21 },
+    { "what": "Replai (Radix), светлая: «внимание» — amber-11 на amber-3", "fg": "#ab6400", "bg": "#fff7c2", "min": 4.5, "ratio": 4.24 },
+    { "what": "Replai (Radix), светлая: белый на green-9", "fg": "#ffffff", "bg": "#30a46c", "min": 4.5, "ratio": 3.15 },
+    { "what": "Replai (Radix), светлая: белый на red-9", "fg": "#ffffff", "bg": "#e5484d", "min": 4.5, "ratio": 3.91 },
+    { "what": "Carbon g10: support-warning текстом на background", "fg": "#f1c21b", "bg": "#f4f4f4", "min": 4.5, "ratio": 1.53 },
+    { "what": "Carbon g10: support-warning знаком на background (тон «внимание» в фикстуре Э0)", "fg": "#f1c21b", "bg": "#f4f4f4", "min": 3, "ratio": 1.53 },
+    { "what": "Carbon g10: support-success текстом на background", "fg": "#24a148", "bg": "#f4f4f4", "min": 4.5, "ratio": 3.04 },
+    { "what": "Carbon g10: support-success текстом на layer-01", "fg": "#24a148", "bg": "#ffffff", "min": 4.5, "ratio": 3.35 }
+  ]
+}
