@@ -1,0 +1,8 @@
+/* Стили образцов ДС-React для design/dist/showcase.html: Tailwind + тема дизайн-системы + ds.css. Токены (tokens.css со
+   шрифтами внутри) страница образцов подставляет сама — здесь их нет, чтобы шрифт не лежал в файле дважды. */
+@import 'tailwindcss' source(none);
+@import '../../dist/tailwind.css';
+@import './ds.css';
+@source './components';
+@source './stories';
+@source './__tests__/showcase.test.tsx';

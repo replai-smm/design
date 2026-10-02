@@ -18,7 +18,8 @@
 | `dist/tokens.css` | **ДС-основа**: CSS-переменные `--cds-*` обеих тем | машина (`node design/build.mjs`) |
 | `dist/tailwind.css` | тема Tailwind 4 для Replai и дашборда | машина |
 | `dist/tokens.ts` | то же для TypeScript (ДС-React, дашборд, тесты) | машина |
-| `dist/showcase.html` | страница образцов | машина |
+| `dist/showcase.html` | страница образцов (с компонентами ДС-React) | машина |
+| `react/` | **ДС-React**: компоненты, истории, тесты (`react/README.md`) | руками, интентом «дизайн» |
 | `lint/` | сторож «только токены»: правило ESLint и командная строка с храповиком | — |
 | `lib/`, `build.mjs` | генератор, контраст, чтение шрифта | — |
 | `licenses/`, `NOTICE.md` | лицензия Carbon и откуда что взято | — |
@@ -99,7 +100,8 @@
 - **DF-Agency** (ванильный JS) и любые страницы без сборки: подключить `dist/tokens.css` и писать
   `color: var(--cds-text-primary)`, `padding: var(--cds-spacing-05)`. Шрифт подтянется сам из `fonts/`.
   Сторож — из командной строки, ESLint не нужен: `node design/lint/cli.mjs <папка>`.
-- **Дашборд** — так же, как Replai; компоненты ДС-React (shadcn, раскрашенные токенами) и Storybook — следующий шаг П6.
+- **Дашборд** и **Replai** — компоненты ДС-React (`react/`: Radix, раскрашенный токенами, истории Storybook, a11y):
+  как подключить — `react/README.md`; план переезда Replai — `react/MIGRATION-REPLAI.md`.
 - **Arena** остаётся на VKUI: цвета придут через переходник из этих же токенов (следующий шаг П6).
 
 ### Сторож «только токены»

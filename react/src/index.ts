@@ -1,0 +1,12 @@
+// ДС-React — компоненты дизайн-системы (CONCEPT §3.4, слой «ДС-React»). Импорт: `@replai-smm/ds-react` (README.md).
+export { Stack, Inline, Grid, Page, PageHeader, Section, SurfaceProvider, type Space, type StackProps, type InlineProps, type GridProps, type PageProps, type PageHeaderProps, type SectionProps } from './components/layout'
+export { Button, ActionArea, RowContext, type ButtonProps, type ButtonVariant, type ButtonSize, type ActionAreaProps, type PrimaryAction } from './components/Button'
+export { StatusBadge, ToneIcon, type StatusBadgeProps } from './components/StatusBadge'
+export { StateView, Skeleton, Loading, type StateKind, type StateViewProps } from './components/StateView'
+export { DataTable, List, type Column, type DataTableProps, type ListProps, type CollectionProps } from './components/Collection'
+export { FilterBar, SearchField, useUrlFilters, type FilterDef, type FilterOption, type FilterValue, type FilterBarProps, type SearchFieldProps } from './components/FilterBar'
+export { Tabs, type TabItem, type TabsProps } from './components/Tabs'
+export { Card, type CardProps } from './components/Card'
+export { Drawer, type DrawerProps } from './components/Drawer'
+export { Notification, Toaster, useToast, type NotificationProps, type NotificationTone, type ToasterProps } from './components/Notification'
+export { STATUS_IDS, TONE_ORDER, statusOf, toneOf, type StatusId, type Palette } from './lib/status'

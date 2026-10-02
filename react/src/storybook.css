@@ -1,0 +1,6 @@
+/* Стили историй и тестов: ровно то, что подключает продукт (README.md → «Как продукт берёт ДС-React»). */
+@import 'tailwindcss';
+@import '../../dist/tokens.css';
+@import '../../dist/tailwind.css';
+@import './ds.css';
+@source './';

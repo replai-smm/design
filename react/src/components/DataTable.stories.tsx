@@ -1,0 +1,67 @@
+import type { Meta, StoryObj } from '@storybook/react-vite'
+import { allWorking, groups, many, type GroupRow } from '../stories/fixtures'
+import { ActionArea, Button } from './Button'
+import { DataTable, type Column } from './Collection'
+
+const columns: Column<GroupRow>[] = [
+  { key: 'name', header: 'Группа', cell: (r) => r.name, face: true, grow: 2 },
+  { key: 'reason', header: 'Что случилось', cell: (r) => r.reason, face: true, grow: 2 },
+  { key: 'client', header: 'Клиент', cell: (r) => r.client },
+  { key: 'checked', header: 'Проверено', cell: (r) => r.checked, align: 'end' },
+]
+
+const meta = {
+  title: 'ДС/Таблица',
+  component: DataTable<GroupRow>,
+  parameters: { layout: 'padded' },
+  args: {
+    label: 'Группы клиентов',
+    rows: groups,
+    columns,
+    getKey: (r: GroupRow) => r.id,
+    getStatus: (r: GroupRow) => r.status,
+    onRowClick: () => {},
+    rowAction: (r: GroupRow) => (r.status === 'work.failing' ? <Button variant="ghost" size="sm">Починить</Button> : null),
+  },
+} satisfies Meta<typeof DataTable<GroupRow>>
+export default meta
+type S = StoryObj<typeof meta>
+
+/** Срочное сверху: «падает» → «хотят изменить» → без цвета; «работает» свёрнуто внизу. */
+export const Обычное: S = {}
+
+export const Загрузка: S = { tags: ['state:загрузка'], args: { state: 'loading' } }
+
+export const Ошибка: S = {
+  tags: ['state:ошибка'],
+  args: { state: 'error', error: { title: 'Список не загрузился', description: 'Сервер не ответил за 10 секунд.', onRetry: () => {} } },
+}
+
+export const ПервыйЗапуск: S = {
+  tags: ['state:первый запуск'],
+  args: {
+    rows: [],
+    empty: {
+      kind: 'первый запуск',
+      title: 'Групп пока нет',
+      description: 'Подключите первую группу VK.',
+      action: <ActionArea primary={{ label: 'Подключить группу' }} label="Первый шаг" />,
+    },
+  },
+}
+
+/** Всё работает: норма не пишется — одна свёрнутая группа. */
+export const ВсёСделано: S = { tags: ['state:всё сделано'], args: { rows: allWorking } }
+
+export const НичегоНеНайдено: S = {
+  tags: ['state:ничего не найдено'],
+  args: { rows: [], empty: { kind: 'ничего не найдено', title: 'Ничего не найдено', description: 'По этим фильтрам групп нет.', action: <Button variant="tertiary">Сбросить фильтры</Button> } },
+}
+
+export const НетДоступа: S = {
+  tags: ['state:нет доступа'],
+  args: { rows: [], empty: { kind: 'нет доступа', title: 'Нет доступа', description: 'Попросите владельца клиента открыть группы.' } },
+}
+
+/** 150 строк: первые 50, остальное за «показать ещё». */
+export const Много: S = { tags: ['state:много'], args: { rows: many } }

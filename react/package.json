@@ -1,0 +1,48 @@
+{
+  "name": "@replai-smm/ds-react",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "ДС-React: компоненты дизайн-системы для Replai и дашборда — Radix-примитивы, раскрашенные только токенами Carbon (design/dist). В npm не публикуется: продукт берёт исходники по пути (README.md).",
+  "engines": {
+    "node": ">=22"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./styles.css": "./src/ds.css"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "lint": "node ../lint/cli.mjs src .storybook",
+    "storybook": "storybook dev -p 6007",
+    "storybook:build": "storybook build -o storybook-static",
+    "showcase": "SHOWCASE_WRITE=1 vitest run src/__tests__/showcase.test.tsx",
+    "check": "npm run typecheck && npm run lint && npm test"
+  },
+  "peerDependencies": {
+    "radix-ui": "^1.4.3",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@storybook/react-vite": "^10.5.7",
+    "@tailwindcss/cli": "^4.3.0",
+    "@tailwindcss/vite": "^4.3.0",
+    "@testing-library/react": "^16.3.2",
+    "@types/node": "^24.12.3",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "axe-core": "^4.10.3",
+    "jsdom": "^29.1.1",
+    "radix-ui": "^1.4.3",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "storybook": "^10.5.7",
+    "tailwindcss": "^4.3.0",
+    "typescript": "~6.0.2",
+    "vite": "^8.0.12",
+    "vitest": "^4.1.7"
+  }
+}

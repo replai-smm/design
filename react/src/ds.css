@@ -1,0 +1,120 @@
+/*
+ * ДС-React: то немногое, чего нет в утилитах Tailwind, — движение и сетка таблицы. Только токены (var(--cds-…)).
+ * Подключение в продукте — после tokens.css и tailwind.css дизайн-системы (README.md рядом).
+ *
+ * Правило движения (scale.json → duration.move): раскрытие и выезд — 0,6 с, кривая move; соседи едут плавно,
+ * а не прыгают (высота меняется переходом grid-template-rows, панели — сдвигом transform). При «уменьшить движение»
+ * токены длительностей в tokens.css равны 0 — всё ниже срабатывает мгновенно само.
+ */
+
+/* раскрытие «подробнее» и свёрнутой группы: высота от 0 до содержимого без замера в JS */
+.ds-expand {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--cds-duration-move) var(--cds-easing-move);
+}
+.ds-expand[data-open='true'] {
+  grid-template-rows: 1fr;
+}
+.ds-expand > * {
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* таблица: сетка с подсеткой — колонки ровные во всех строках, свёрнутая группа раскрывается без прыжка */
+.ds-table {
+  display: grid;
+  grid-template-columns: var(--ds-cols-phone);
+}
+@media (min-width: 48rem) {
+  .ds-table {
+    grid-template-columns: var(--ds-cols);
+  }
+}
+.ds-table > *,
+.ds-table .ds-row,
+.ds-table .ds-rowgroup,
+.ds-table .ds-expand,
+.ds-table .ds-expand > * {
+  grid-column: 1 / -1;
+}
+.ds-table .ds-row,
+.ds-table .ds-rowgroup,
+.ds-table .ds-expand > * {
+  display: grid;
+  grid-template-columns: subgrid;
+}
+.ds-table .ds-expand {
+  grid-template-columns: subgrid;
+}
+@media (max-width: 47.99rem) {
+  .ds-table .ds-cell-more {
+    display: none;
+  }
+}
+
+/* панель деталей: справа на ноутбуке, снизу на телефоне */
+@keyframes ds-in-right {
+  from {
+    transform: translateX(100%);
+  }
+}
+@keyframes ds-out-right {
+  to {
+    transform: translateX(100%);
+  }
+}
+@keyframes ds-in-up {
+  from {
+    transform: translateY(100%);
+  }
+}
+@keyframes ds-out-down {
+  to {
+    transform: translateY(100%);
+  }
+}
+@keyframes ds-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes ds-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+.ds-drawer[data-state='open'] {
+  animation: ds-in-up var(--cds-duration-move) var(--cds-easing-move);
+}
+.ds-drawer[data-state='closed'] {
+  animation: ds-out-down var(--cds-duration-move) var(--cds-easing-move);
+}
+@media (min-width: 48rem) {
+  .ds-drawer[data-state='open'] {
+    animation-name: ds-in-right;
+  }
+  .ds-drawer[data-state='closed'] {
+    animation-name: ds-out-right;
+  }
+}
+.ds-overlay[data-state='open'] {
+  animation: ds-fade-in var(--cds-duration-move) var(--cds-easing-move);
+}
+.ds-overlay[data-state='closed'] {
+  animation: ds-fade-out var(--cds-duration-move) var(--cds-easing-move);
+}
+
+/* всплывашка выезжает снизу и уходит вбок по свайпу */
+.ds-toast[data-state='open'] {
+  animation: ds-in-up var(--cds-duration-move) var(--cds-easing-move);
+}
+.ds-toast[data-state='closed'] {
+  animation: ds-fade-out var(--cds-duration-moderate-02) var(--cds-easing-exit-productive);
+}
+.ds-toast[data-swipe='move'] {
+  transform: translateX(var(--radix-toast-swipe-move-x));
+}
+.ds-toast[data-swipe='end'] {
+  animation: ds-out-right var(--cds-duration-moderate-02) var(--cds-easing-exit-productive);
+}
