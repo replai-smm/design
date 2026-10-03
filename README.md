@@ -102,7 +102,7 @@
   Сторож — из командной строки, ESLint не нужен: `node design/lint/cli.mjs <папка>`.
 - **Дашборд** и **Replai** — компоненты ДС-React (`react/`: Radix, раскрашенный токенами, истории Storybook, a11y):
   как подключить — `react/README.md`; план переезда Replai — `react/MIGRATION-REPLAI.md`.
-- **Arena** остаётся на VKUI: цвета придут через переходник из этих же токенов (следующий шаг П6).
+- **Arena** остаётся на VKUI: облик — через переходник `dist/vkui-adapter.css` (копия в `arena/web/design/`, включается сборкой `ARENA_THEME=rsmm`, интент Арены `I-vkui-rsmm-theme`). Контраст переходника на заливках так, как их ставят компоненты VKUI, держит `__tests__/vkui.test.ts`.
 
 ### Сторож «только токены»
 

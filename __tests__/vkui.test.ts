@@ -9,7 +9,7 @@ import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { VKUI_CLASSES, COLORS, SPACING, LEFT, colorsFor, common, cssValue, referencedTokens, vkuiOutputs } from '../lib/vkui.mjs'
 import { load, scaleVars } from '../lib/generate.mjs'
-import { ratio, TEXT, NON_TEXT } from '../lib/contrast.mjs'
+import { over, ratio, TEXT, NON_TEXT } from '../lib/contrast.mjs'
 import { scan } from '../lint/scan.mjs'
 
 const design = resolve(import.meta.dirname, '..')
@@ -137,13 +137,29 @@ describe('переходник VKUI', () => {
     for (const bg of ['background_content', 'background']) pairs.push(['field_border_alpha', bg, NON_TEXT])
     for (const bg of ['background_accent', 'background_negative', 'background_positive']) pairs.push(['text_contrast', bg, TEXT])
     pairs.push(['text_negative', 'background_negative_tint', TEXT], ['text_positive', 'background_positive_tint', TEXT])
-    pairs.push(['text_contrast_themed', 'background_content_inverse', TEXT])
+    // текст на заливках VKUI так, как их ставят компоненты (vkui.css 8.3.1): главная кнопка и счётчик —
+    // text_contrast_themed на background_accent_themed; «нейтральная главная» — на background_content_inverse;
+    // подсказка «inversion» — на background_modal_inverse, «black» — text_contrast на background_contrast_inverse
+    for (const bg of ['background_accent_themed', 'background_content_inverse', 'background_modal_inverse'])
+      pairs.push(['text_contrast_themed', bg, TEXT])
+    pairs.push(['icon_contrast_themed', 'background_accent_themed', NON_TEXT], ['text_contrast', 'background_contrast_inverse', TEXT])
+    // SimpleCell пишет текст цветом значка (after, badge): icon_accent держит и текст
+    for (const bg of ['background_content', 'background_secondary', 'background']) pairs.push(['icon_accent', bg, TEXT])
+    // вторичная кнопка: text_accent_themed на полупрозрачной background_secondary_alpha поверх карточки и страницы
+    const onTop: [string, string, string][] = [
+      ['text_accent_themed', 'background_secondary_alpha', 'background_content'],
+      ['text_accent_themed', 'background_secondary_alpha', 'background'],
+    ]
     const low: string[] = []
     for (const th of ['light', 'dark'] as const) {
       const hex = (n: string) => tokens.themes[THEME[th]].colors[colorMaps[th][v(n)]]
       for (const [fg, bg, min] of pairs) {
         const r = ratio(hex(fg), hex(bg))
         if (r < min) low.push(`${th}: ${fg} на ${bg} — ${r} < ${min}`)
+      }
+      for (const [fg, tint, under] of onTop) {
+        const r = ratio(hex(fg), over(hex(tint), hex(under)))
+        if (r < TEXT) low.push(`${th}: ${fg} на ${tint} поверх ${under} — ${r} < ${TEXT}`)
       }
     }
     expect(low).toEqual([])
