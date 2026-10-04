@@ -28,6 +28,14 @@ const PROMISED: Record<string, string[]> = {
   'Drawer.stories.tsx': ['обычное'],
   'Notification.stories.tsx': ['обычное', 'ошибка'],
   'Page.stories.tsx': ['обычное', 'загрузка', 'ошибка', 'много'],
+  'Dialog.stories.tsx': ['обычное', 'загрузка', 'ошибка'],
+  'TextField.stories.tsx': ['обычное', 'ошибка'],
+  'Select.stories.tsx': ['обычное', 'ошибка'],
+  'Checkbox.stories.tsx': ['обычное', 'ошибка'],
+  'NumberField.stories.tsx': ['обычное', 'ошибка'],
+  'Combobox.stories.tsx': ['обычное', 'загрузка', 'ошибка', 'ничего не найдено', 'много'],
+  'Avatar.stories.tsx': ['обычное', 'ошибка'],
+  'Tooltip.stories.tsx': ['обычное'],
 }
 
 describe('истории на каждое состояние', () => {

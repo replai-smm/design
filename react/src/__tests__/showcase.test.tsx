@@ -83,6 +83,37 @@ const SECTIONS: Array<{ title: string; note: string; items: Array<[string, strin
       ['Notification.stories.tsx', 'Всплывашка', 'toast'],
     ],
   },
+  {
+    title: 'Окно и подтверждение',
+    note: 'Окно — своё состояние со своей главной кнопкой; на ноутбуке по центру, на телефоне снизу. Удаление — красной кнопкой без главной рядом, фокус сначала на «Отмена»: вместо window.confirm.',
+    items: [
+      ['Dialog.stories.tsx', 'Обычное', 'fixed'],
+      ['Dialog.stories.tsx', 'Удаление', 'fixed'],
+    ],
+  },
+  {
+    title: 'Поля формы',
+    note: 'Подпись над полем, подсказка под ним; ошибка заменяет подсказку — обводка, значок и текст, который читалка слышит вместе с полем. На телефоне поле — 48 px.',
+    items: [
+      ['TextField.stories.tsx', 'Обычное'],
+      ['TextField.stories.tsx', 'Ошибка'],
+      ['TextField.stories.tsx', 'Многострочное'],
+      ['Select.stories.tsx', 'Обычное'],
+      ['NumberField.stories.tsx', 'Обычное'],
+      ['NumberField.stories.tsx', 'ВнеГраниц'],
+      ['Checkbox.stories.tsx', 'Группа'],
+      ['Checkbox.stories.tsx', 'Ошибка'],
+    ],
+  },
+  {
+    title: 'Выбор с поиском',
+    note: 'Печать сужает список, стрелки ходят, Enter выбирает, Esc закрывает. Открытый список — в Storybook (здесь он не раскладывается без окна браузера).',
+    items: [
+      ['Combobox.stories.tsx', 'Обычное'],
+      ['Combobox.stories.tsx', 'Ошибка'],
+    ],
+  },
+  { title: 'Аватар', note: 'Картинка; нет или не загрузилась — буквы имени; нет и имени — значок человека.', items: [['Avatar.stories.tsx', 'Обычное']] },
 ]
 
 /** Рамки образцов — только токены. */

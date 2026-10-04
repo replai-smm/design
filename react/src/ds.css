@@ -105,6 +105,57 @@
   animation: ds-fade-out var(--cds-duration-move) var(--cds-easing-move);
 }
 
+/* окно: снизу на телефоне (выезд, как у панели), по центру на ноутбуке — проявляется с подъёмом */
+@keyframes ds-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(4%);
+  }
+}
+@keyframes ds-pop-out {
+  to {
+    opacity: 0;
+    transform: translateY(4%);
+  }
+}
+.ds-dialog[data-state='open'] {
+  animation: ds-in-up var(--cds-duration-move) var(--cds-easing-move);
+}
+.ds-dialog[data-state='closed'] {
+  animation: ds-out-down var(--cds-duration-move) var(--cds-easing-move);
+}
+@media (min-width: 48rem) {
+  .ds-dialog[data-state='open'] {
+    animation-name: ds-pop-in;
+  }
+  .ds-dialog[data-state='closed'] {
+    animation-name: ds-pop-out;
+  }
+  /* кнопки окна (Carbon Modal): во всю ширину нижней полосы, поровну, главная справа, высота 64 px */
+  .ds-dialog-footer [data-slot='action-area'] {
+    flex-direction: row-reverse;
+    flex-wrap: nowrap;
+    gap: 0;
+  }
+  .ds-dialog-footer [data-slot='action-area'] > [data-slot='button'] {
+    flex: 1 1 0;
+    min-height: var(--cds-spacing-10);
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding-top: var(--cds-spacing-04);
+  }
+}
+
+/* подсказка и список выбора: проявляются быстро (Carbon: fast-02), не сдвигая соседей */
+.ds-pop[data-state='delayed-open'],
+.ds-pop[data-state='instant-open'],
+.ds-pop[data-state='open'] {
+  animation: ds-fade-in var(--cds-duration-fast-02) var(--cds-easing-entrance-productive);
+}
+.ds-pop[data-state='closed'] {
+  animation: ds-fade-out var(--cds-duration-fast-02) var(--cds-easing-exit-productive);
+}
+
 /* всплывашка выезжает снизу и уходит вбок по свайпу */
 .ds-toast[data-state='open'] {
   animation: ds-in-up var(--cds-duration-move) var(--cds-easing-move);
