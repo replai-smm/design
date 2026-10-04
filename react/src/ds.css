@@ -156,6 +156,21 @@
   animation: ds-fade-out var(--cds-duration-fast-02) var(--cds-easing-exit-productive);
 }
 
+/* три колонки на телефоне: колонка выезжает — вперёд справа, назад слева (ThreeColumn); на ноутбуке видны все, без выезда */
+@keyframes ds-in-left {
+  from {
+    transform: translateX(-100%);
+  }
+}
+@media (max-width: 63.99rem) {
+  .ds-col[data-dir='forward'] {
+    animation: ds-in-right var(--cds-duration-move) var(--cds-easing-move);
+  }
+  .ds-col[data-dir='back'] {
+    animation: ds-in-left var(--cds-duration-move) var(--cds-easing-move);
+  }
+}
+
 /* всплывашка выезжает снизу и уходит вбок по свайпу */
 .ds-toast[data-state='open'] {
   animation: ds-in-up var(--cds-duration-move) var(--cds-easing-move);
