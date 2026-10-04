@@ -5,7 +5,7 @@
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, fireEvent, within, act } from '@testing-library/react'
-import { ActionArea, Button, Card, DataTable, List, Page, PageHeader, StatusBadge, FilterBar, useUrlFilters, Toaster, useToast, Drawer, Tabs } from '../index'
+import { ActionArea, Button, Card, DataTable, List, Page, PageHeader, StatusBadge, FilterBar, useUrlFilters, Toaster, useToast, Drawer, Tabs, CountBadge, countText } from '../index'
 import { STATUS_IDS, TONE_ORDER, statusOf, toneOf } from '../lib/status'
 import { groups, many, type GroupRow } from '../stories/fixtures'
 import statusesJson from '../../../statuses.json'
@@ -228,5 +228,25 @@ describe('фильтры в адресе и всплывашки', () => {
     )
     await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Сделать' })))
     expect(document.querySelector('[data-slot=toast]')?.textContent).toContain('Готово')
+  })
+})
+
+describe('счётчик (CountBadge)', () => {
+  it('число до потолка, «99+» сверху, строка как есть; label — для читалки', () => {
+    expect(countText(5)).toBe('5')
+    expect(countText(100)).toBe('99+')
+    expect(countText(1200, 999)).toBe('999+')
+    expect(countText('!')).toBe('!')
+    render(<CountBadge count={3} tone="info" label="непрочитанных" />)
+    const el = document.querySelector('[data-slot=count-badge]')!
+    expect(el.textContent).toBe('непрочитанных: 3')
+    expect(el.getAttribute('data-tone')).toBe('info')
+  })
+
+  it('срочное — со знаком тона, не только цветом', () => {
+    const { container } = render(<CountBadge count={7} tone="error" />)
+    expect(container.querySelector('[data-tone-icon=error]')).toBeTruthy()
+    const n = render(<CountBadge count={7} />)
+    expect(n.container.querySelector('[data-tone-icon]')).toBeNull()
   })
 })

@@ -16,6 +16,7 @@ export { Checkbox, CheckboxGroup, type CheckboxProps, type CheckboxGroupProps, t
 export { NumberField, type NumberFieldProps } from './components/NumberField'
 export { Combobox, type ComboboxProps, type ComboboxOption } from './components/Combobox'
 export { Avatar, type AvatarProps, type AvatarSize } from './components/Avatar'
+export { CountBadge, countText, type CountBadgeProps, type CountTone } from './components/CountBadge'
 export { Tooltip, type TooltipProps } from './components/Tooltip'
 export { STATUS_IDS, TONE_ORDER, statusOf, toneOf, type StatusId, type Palette } from './lib/status'
 export { ChatThread, type ChatMessage, type ChatThreadProps } from './components/ChatThread'

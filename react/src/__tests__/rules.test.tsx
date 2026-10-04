@@ -35,6 +35,7 @@ const PROMISED: Record<string, string[]> = {
   'NumberField.stories.tsx': ['обычное', 'ошибка'],
   'Combobox.stories.tsx': ['обычное', 'загрузка', 'ошибка', 'ничего не найдено', 'много'],
   'Avatar.stories.tsx': ['обычное', 'ошибка'],
+  'CountBadge.stories.tsx': ['обычное', 'много'],
   'Tooltip.stories.tsx': ['обычное'],
   // компоненты DF (DF-PORT решение 6)
   'ChatThread.stories.tsx': ['обычное', 'загрузка', 'ошибка', 'первый запуск', 'много'],
