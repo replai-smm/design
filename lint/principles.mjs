@@ -123,7 +123,7 @@ export function ownComponents(text, names) {
   return out
 }
 
-const git = (repo, args) => execFileSync('git', ['-C', repo, ...args], { encoding: 'utf8', maxBuffer: 64 << 20 })
+const git = (repo, args) => execFileSync('git', ['-C', repo, ...args], { encoding: 'utf8', maxBuffer: 64 << 20, stdio: ['ignore', 'pipe', 'pipe'] })
 const show = (repo, ref, path) => {
   try {
     return git(repo, ['show', `${ref}:${path}`])
