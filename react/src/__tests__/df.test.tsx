@@ -304,6 +304,36 @@ describe('ProofreadGrid — сетка сверки', () => {
     expect(screen.getByRole('alert')).toBeTruthy()
   })
 
+  it('шапка дней закреплена: рамка не выше экрана, шапка — top-0, угол — над шапкой и первой колонкой; можно выключить', () => {
+    const { rerender } = render(<ProofreadGrid {...base} />)
+    const region = screen.getByRole('region', { name: 'Посты по дням: прокрутка' })
+    expect(region.className).toContain('max-h-dvh')
+    expect(region.className).toContain('overflow-y-auto')
+    const heads = [...region.querySelectorAll('thead th')] as HTMLElement[]
+    expect(heads[0].className).toMatch(/sticky.*left-0.*top-0 z-30|top-0 z-30/)
+    expect(heads.slice(1).every((h) => /(^| )sticky( |$)/.test(h.className) && h.className.includes('top-0'))).toBe(true)
+    rerender(<ProofreadGrid {...base} stickyHeader={false} />)
+    const off = screen.getByRole('region', { name: 'Посты по дням: прокрутка' })
+    expect(off.className).not.toContain('max-h-dvh')
+    expect((off.querySelector('thead th:nth-child(2)') as HTMLElement).className).not.toContain('top-0')
+  })
+
+  it('колонки без тона (КМ, итоги): значение без цвета и без слова тона; пусто — пусто', () => {
+    const cols = [{ key: 'km', label: 'КМ', plain: true }, ...monthColumns.slice(0, 3), { key: 'plan', label: 'план', plain: true }]
+    const getCell = (c: (typeof communities)[0], col: { key: string }) =>
+      col.key === 'km' ? { value: c.id === 'c1' ? 'Алёна' : undefined } : col.key === 'plan' ? { value: 6, hint: 'сумма норм' } : proofCell(c, col as never)
+    render(<ProofreadGrid {...base} columns={cols} getCell={getCell} />)
+    const row = document.querySelector('[data-slot=grid-row]') as HTMLElement
+    const [km, , , , plan] = [...row.querySelectorAll('td')] as HTMLElement[]
+    expect(km.dataset.plain).toBe('true')
+    expect(km.dataset.tone).toBeUndefined()
+    expect(km.textContent).toBe('Алёна')
+    expect(plan.textContent).toBe('6. сумма норм')
+    expect(plan.className).not.toMatch(/bg-status-/)
+    const empty = (document.querySelectorAll('[data-slot=grid-row]')[1] as HTMLElement).querySelector('td') as HTMLElement
+    expect(empty.textContent).toBe('')
+  })
+
   it('легенда: образец и слово каждого тона', () => {
     render(<GridLegend items={[{ tone: 'success' }, { tone: 'error', label: 'пропуск дня' }]} note="возможен перенос" />)
     expect(screen.getAllByRole('listitem').map((li) => li.textContent)).toEqual(['в норме', 'пропуск дня', 'возможен перенос'])
