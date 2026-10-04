@@ -33,6 +33,9 @@ type S = StoryObj<typeof meta>
 /** «Сообщения»: Enter — новая строка, отправка кнопкой или Ctrl+Enter. */
 export const Обычное: S = { args: { enterToSend: false, defaultValue: 'Здравствуйте, Анна! Да, к субботе успеем.' } }
 
+/** Ответ, который уходит необратимо (DF: в ВК): с клавиатуры не уходит ничего — только кнопкой. */
+export const ТолькоКнопкой: S = { args: { enterToSend: false, sendShortcut: false, defaultValue: 'Спасибо за отзыв! Передали повару.' } }
+
 /** «ИИ» и «Чаты»: Enter отправляет, Shift+Enter — новая строка; приложен файл. */
 export const EnterОтправляет: S = {
   args: {

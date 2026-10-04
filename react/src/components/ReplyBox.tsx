@@ -1,7 +1,10 @@
 /**
  * Поле ответа с «Отправить» (DF: «Сообщения», «Комментарии», «✨ ИИ», «Чаты»; опись DF §6.2 ReplyComposer).
  * - Клавиши: `enterToSend` — Enter отправляет, Shift+Enter — новая строка (ИИ, Чаты). Без него Enter — новая строка
- *   (Сообщения: «Enter не отправляет»). Ctrl/⌘+Enter отправляет всегда. Набор через IME Enter не перехватывает.
+ *   (Сообщения: «Enter не отправляет»). Ctrl/⌘+Enter отправляет, пока `sendShortcut` не выключен (по умолчанию включён).
+ *   `sendShortcut={false}` и без `enterToSend` — с клавиатуры не уходит ничего, только кнопкой: там, где отправка
+ *   необратима и раньше горячей клавиши не было (DF: ответ в ВК — комментарий, личка, беседа заказчика).
+ *   Набор через IME Enter не перехватывает.
  * - Отправка идёт — кнопка «занята», поле только для чтения, второй раз не уходит (двойной клик и Enter).
  * - Неудача не теряет текст: `onSend` вернул отклонённое обещание — текст остаётся, ошибка видна под полем (`error`).
  *   Удача — поле очищается (если продукт не держит значение сам).
@@ -29,6 +32,8 @@ export interface ReplyBoxProps {
   sendLabel?: ReactNode
   /** Enter отправляет, Shift+Enter — новая строка. Иначе Enter — новая строка, отправка — Ctrl/⌘+Enter. */
   enterToSend?: boolean
+  /** Ctrl/⌘+Enter отправляет (по умолчанию да). `false` — горячей клавиши отправки нет: только кнопка (и Enter, если `enterToSend`). */
+  sendShortcut?: boolean
   /** Отправка идёт (если продукт ведёт её сам). */
   sending?: boolean
   disabled?: boolean
@@ -66,6 +71,7 @@ export const ReplyBox = forwardRef<ReplyBoxHandle, ReplyBoxProps>(function Reply
     placeholder,
     sendLabel = 'Отправить',
     enterToSend = true,
+    sendShortcut = true,
     sending: sendingProp,
     disabled,
     disabledReason,
@@ -125,14 +131,14 @@ export const ReplyBox = forwardRef<ReplyBoxHandle, ReplyBoxProps>(function Reply
   const onKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key !== 'Enter' || e.nativeEvent.isComposing) return
     const mod = e.ctrlKey || e.metaKey
-    if (mod || (enterToSend && !e.shiftKey && !e.altKey)) {
+    if ((mod && sendShortcut) || (enterToSend && !mod && !e.shiftKey && !e.altKey)) {
       e.preventDefault()
       void send()
     }
   }
 
   const shownError = error ?? (emptyShown ? emptyMessage : null)
-  const hintText = hint === false ? null : (hint ?? (enterToSend ? 'Enter — отправить, Shift+Enter — новая строка' : 'Ctrl+Enter — отправить'))
+  const hintText = hint === false ? null : (hint ?? (enterToSend ? 'Enter — отправить, Shift+Enter — новая строка' : sendShortcut ? 'Ctrl+Enter — отправить' : null))
   const describedBy = [shownError ? `${id}-err` : null, disabled && disabledReason ? `${id}-why` : null, hintText ? `${id}-hint` : null].filter(Boolean).join(' ') || undefined
   const sendProps = { onClick: () => void send(), loading: sending, disabled: disabled, 'data-slot': 'reply-send' }
 

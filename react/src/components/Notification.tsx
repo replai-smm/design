@@ -53,8 +53,10 @@ export function Notification({ tone, title, children, action, scope = 'list', on
     >
       <ToneIcon tone={ICON[tone]} className={cx('mt-0.5', MARK[tone])} />
       <div className={cx('flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2 gap-y-1', row ? 'text-body-compact-01' : 'text-body-01')}>
-        <p className="m-0 text-heading-compact-01">{title}</p>
-        {children && <div className="m-0 text-text-secondary">{children}</div>}
+        {/* min-w-0: пункт ряда с переносом иначе не уже своего содержимого — длинная строка (кнопки с обрезкой,
+            ссылка) распирала уведомление и страницу вбок на 390 (DF «Постинг», черновики недели) */}
+        <p className="m-0 min-w-0 text-heading-compact-01">{title}</p>
+        {children && <div className="m-0 min-w-0 text-text-secondary">{children}</div>}
         {action && <div className="basis-full md:basis-auto">{action}</div>}
       </div>
       {onClose && (

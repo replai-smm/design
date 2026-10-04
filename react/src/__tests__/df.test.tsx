@@ -101,6 +101,28 @@ describe('ReplyBox — поле ответа', () => {
     expect(onSend).not.toHaveBeenCalled()
     fireEvent.keyDown(field(), { key: 'Enter', ctrlKey: true })
     expect(onSend).toHaveBeenCalledWith('текст')
+    expect(screen.getByText('Ctrl+Enter — отправить')).toBeTruthy()
+  })
+
+  it('sendShortcut={false}: ни Enter, ни Ctrl/⌘+Enter не отправляют — только кнопка; подсказки о клавишах нет', () => {
+    const onSend = vi.fn()
+    render(<ReplyBox label="Ответ" onSend={onSend} enterToSend={false} sendShortcut={false} defaultValue="в ВК" />)
+    fireEvent.keyDown(field(), { key: 'Enter' })
+    fireEvent.keyDown(field(), { key: 'Enter', ctrlKey: true })
+    fireEvent.keyDown(field(), { key: 'Enter', metaKey: true })
+    expect(onSend).not.toHaveBeenCalled()
+    expect(screen.queryByText(/Ctrl\+Enter/)).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Отправить' }))
+    expect(onSend).toHaveBeenCalledWith('в ВК')
+  })
+
+  it('sendShortcut={false} с enterToSend: Enter отправляет, Ctrl+Enter — нет', () => {
+    const onSend = vi.fn()
+    render(<ReplyBox label="Ответ" onSend={onSend} sendShortcut={false} defaultValue="вопрос" />)
+    fireEvent.keyDown(field(), { key: 'Enter', ctrlKey: true })
+    expect(onSend).not.toHaveBeenCalled()
+    fireEvent.keyDown(field(), { key: 'Enter' })
+    expect(onSend).toHaveBeenCalledWith('вопрос')
   })
 
   it('набор через IME: Enter не перехватывается', () => {
