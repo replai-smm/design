@@ -11,7 +11,7 @@ const columns: Column<GroupRow>[] = [
 ]
 
 const meta = {
-  title: 'ДС/Таблица',
+  title: 'Компоненты/Таблица',
   component: DataTable<GroupRow>,
   parameters: { layout: 'padded' },
   args: {

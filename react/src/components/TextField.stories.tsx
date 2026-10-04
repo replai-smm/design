@@ -3,7 +3,7 @@ import { TextArea, TextField } from './TextField'
 import { Stack } from './layout'
 
 const meta = {
-  title: 'ДС/Поле ввода',
+  title: 'Компоненты/Поле ввода',
   component: TextField,
   parameters: { layout: 'padded' },
   args: { label: 'Название поста' },

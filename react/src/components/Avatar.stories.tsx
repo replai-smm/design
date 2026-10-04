@@ -7,7 +7,7 @@ const PHOTO =
   "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><rect width='48' height='48' fill='slategray'/><circle cx='24' cy='19' r='9' fill='lightgray'/><path d='M8 46c2-10 8-15 16-15s14 5 16 15z' fill='lightgray'/></svg>" // ds-allow: картинка-образец
 
 const meta = {
-  title: 'ДС/Аватар',
+  title: 'Компоненты/Аватар',
   component: Avatar,
   parameters: { layout: 'padded' },
   args: { name: 'Кофейня «Зерно»' },

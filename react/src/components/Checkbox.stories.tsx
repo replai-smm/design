@@ -4,7 +4,7 @@ import { Checkbox, CheckboxGroup, type CheckedState } from './Checkbox'
 import { Stack } from './layout'
 
 const meta = {
-  title: 'ДС/Галочка',
+  title: 'Компоненты/Галочка',
   component: Checkbox,
   parameters: { layout: 'padded' },
   args: { label: 'Лёгкий режим' },

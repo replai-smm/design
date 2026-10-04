@@ -82,7 +82,7 @@ function GroupsScreen({ state = 'ready', rows = groups, notice = false }: { stat
 }
 
 const meta = {
-  title: 'ДС/Страница списка',
+  title: 'Паттерны/Страница списка',
   component: GroupsScreen,
   parameters: { layout: 'fullscreen' },
 } satisfies Meta<typeof GroupsScreen>

@@ -3,7 +3,7 @@ import { ActionArea, Button } from './Button'
 import { Page, PageHeader, Stack } from './layout'
 
 const meta = {
-  title: 'ДС/Кнопка и область действий',
+  title: 'Компоненты/Кнопка и область действий',
   component: ActionArea,
   parameters: { layout: 'padded' },
 } satisfies Meta<typeof ActionArea>

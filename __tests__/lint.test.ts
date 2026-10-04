@@ -56,6 +56,26 @@ describe('ловит', () => {
   })
 })
 
+describe('сырые размеры (ds/raw-size)', () => {
+  it('CSS: отступы, размеры, текст, углы; @media — не объявление', () => {
+    expect(
+      rules(
+        `.a { padding: 12px 0; font-size: .8rem; border-radius: 4px; width: 100%; max-width: 45rem; max-height: 70vh; border: 1px solid var(--cds-border-subtle-01) }\n@media (min-width: 600px) { .b { gap: var(--cds-spacing-05, 16px); margin-top: 0 } }`,
+        'a.css',
+      ),
+    ).toEqual(['ds/raw-size padding: 12px', 'ds/raw-size font-size: .8rem', 'ds/raw-size border-radius: 4px'])
+  })
+  it('атрибут style, <style> в HTML и в строке JS, style={{ }} React, el.style', () => {
+    expect(rules(`<div style="width:240px;color:var(--cds-text-primary)"></div>`, 'a.html')).toEqual(['ds/raw-size width: 240px'])
+    expect(rules('const h = `<style>.x{margin:8px}</style><b style="height: 2rem">`', 'app.js')).toEqual(['ds/raw-size margin: 8px', 'ds/raw-size height: 2rem'])
+    expect(rules(`<div style={{ padding: 12, gap: '4px', lineHeight: 1.5, width: w, top: 0 }} />`)).toEqual(['ds/raw-size padding: 12', 'ds/raw-size gap: 4px'])
+    expect(rules(`el.style.marginTop = '10px'; el.style.width = pct + '%'`, 'app.js')).toEqual(['ds/raw-size marginTop: 10px'])
+  })
+  it('обычный JS с теми же словами — не CSS', () => {
+    expect(rules(`const top = 12; const o = { width: 300, height: 200 }; chart.resize({ width: 640 })`, 'a.ts')).toEqual([])
+  })
+})
+
 describe('не трогает', () => {
   it('токены, варианты Tailwind, утилиты из темы', () => {
     expect(

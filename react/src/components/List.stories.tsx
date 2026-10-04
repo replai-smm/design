@@ -4,7 +4,7 @@ import { Button } from './Button'
 import { List } from './Collection'
 
 const meta = {
-  title: 'ДС/Список',
+  title: 'Компоненты/Список',
   component: List<GroupRow>,
   parameters: { layout: 'padded' },
   args: {

@@ -199,7 +199,7 @@ async function fragment(): Promise<string> {
     const items: string[] = []
     for (const [file, name, frame] of s.items) {
       const e = find(file, name)
-      items.push(`<div class="dsr-item"><small>${e.title.replace('ДС/', '')} · ${name}</small>${await renderStory(e, n++, frame)}</div>`)
+      items.push(`<div class="dsr-item"><small>${e.title.replace(/^[^/]+\//, '')} · ${name}</small>${await renderStory(e, n++, frame)}</div>`)
     }
     parts.push(`<section class="dsr-sec"><h2>${s.title}</h2><p>${s.note}</p>${items.join('')}</section>`)
   }

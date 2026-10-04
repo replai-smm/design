@@ -7,7 +7,7 @@ import { Inline } from './layout'
 const warn = <ToneIcon tone="warning" className="text-status-warning" />
 
 const meta = {
-  title: 'ДС/Подсказка',
+  title: 'Компоненты/Подсказка',
   component: Tooltip,
   parameters: { layout: 'padded' },
   args: {

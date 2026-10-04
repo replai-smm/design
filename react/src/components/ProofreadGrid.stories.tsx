@@ -28,7 +28,7 @@ function Selectable(props: Partial<ProofreadGridProps<Community>>) {
 }
 
 const meta = {
-  title: 'ДС/Сетка сверки',
+  title: 'Компоненты/Сетка сверки',
   component: ProofreadGrid<Community>,
   parameters: { layout: 'padded' },
   args: base,

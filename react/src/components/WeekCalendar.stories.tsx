@@ -42,7 +42,7 @@ function WithNav(props: Partial<WeekCalendarProps<Post>>) {
 }
 
 const meta = {
-  title: 'ДС/Неделя',
+  title: 'Компоненты/Неделя',
   component: WeekCalendar<Post>,
   parameters: { layout: 'padded' },
   args: base,

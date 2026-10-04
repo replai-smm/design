@@ -8,7 +8,7 @@ import { TextField } from './TextField'
 import { Stack } from './layout'
 
 const meta = {
-  title: 'ДС/Окно',
+  title: 'Компоненты/Окно',
   component: Dialog,
   args: {
     defaultOpen: true,

@@ -4,7 +4,7 @@ import { Notification, Toaster, useToast } from './Notification'
 import { Stack } from './layout'
 
 const meta = {
-  title: 'ДС/Уведомление',
+  title: 'Компоненты/Уведомление',
   component: Notification,
   parameters: { layout: 'padded' },
   args: { tone: 'error', title: 'VK не отвечает', children: 'Ответы на отзывы стоят с 14:20.' },
