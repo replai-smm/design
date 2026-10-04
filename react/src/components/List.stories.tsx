@@ -34,3 +34,5 @@ export const ВсёСделано: S = { tags: ['state:всё сделано'], 
 export const НичегоНеНайдено: S = { tags: ['state:ничего не найдено'], args: { rows: [], empty: { kind: 'ничего не найдено', title: 'Ничего не найдено' } } }
 export const НетДоступа: S = { tags: ['state:нет доступа'], args: { rows: [], empty: { kind: 'нет доступа', title: 'Нет доступа' } } }
 export const Много: S = { tags: ['state:много'], args: { rows: many } }
+/** Открытая строка (карточка видна рядом, DF «Сообщения»): фон выбора и aria-current. */
+export const ВыбраннаяСтрока: S = { args: { activeKey: groups[1]?.id } }

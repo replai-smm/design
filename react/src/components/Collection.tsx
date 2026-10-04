@@ -264,10 +264,12 @@ export function DataTable<T>(props: DataTableProps<T>) {
 
 export interface ListProps<T> extends CollectionProps<T> {
   renderRow: (row: T) => ReactNode
+  /** Ключ открытой строки (её карточка видна рядом — «Сообщения», «Контент» DF): фон выбора и `aria-current`. */
+  activeKey?: string | null
 }
 
 export function List<T>(props: ListProps<T>) {
-  const { rows, renderRow, getKey, getStatus, statusLabel, state = 'ready', pageSize = 50, collapseHealthy = true, onRowClick, rowAction, label, className } = props
+  const { rows, renderRow, getKey, getStatus, statusLabel, state = 'ready', pageSize = 50, collapseHealthy = true, onRowClick, rowAction, label, className, activeKey } = props
   const groups = useGroups(rows, getStatus)
   const [limit, setLimit] = useState(pageSize)
   const [healthyOpen, setHealthyOpen] = useState(false)
@@ -276,26 +278,34 @@ export function List<T>(props: ListProps<T>) {
   const stateView = <CollectionState state={state} error={props.error} empty={props.empty} rows={rows} />
   if (state === 'error' || (state === 'ready' && rows.length === 0)) return <div className={className}>{stateView}</div>
 
-  const item = (r: T) => (
-    <li key={getKey(r)} data-slot="row" className="flex min-h-12 items-center gap-2 border-b border-border-subtle-01 bg-layer-01">
-      {onRowClick ? (
-        <button
-          type="button"
-          onClick={() => onRowClick(r)}
-          className="flex min-h-12 min-w-0 flex-1 cursor-pointer items-center px-4 py-2 text-start text-body-01 text-text-primary hover:bg-layer-hover-01 focus-visible:outline-2 focus-visible:outline-focus focus-visible:-outline-offset-2"
-        >
-          {renderRow(r)}
-        </button>
-      ) : (
-        <div className="min-w-0 flex-1 px-4 py-2 text-body-01">{renderRow(r)}</div>
-      )}
-      {rowAction && (
-        <div className="flex shrink-0 items-center gap-1 pr-2">
-          <RowContext.Provider value>{rowAction(r)}</RowContext.Provider>
-        </div>
-      )}
-    </li>
-  )
+  const item = (r: T) => {
+    const key = getKey(r)
+    const active = activeKey != null && key === activeKey
+    return (
+      <li key={key} data-slot="row" data-active={active || undefined} className={cx('flex min-h-12 items-center gap-2 border-b border-border-subtle-01', active ? 'bg-layer-selected-01' : 'bg-layer-01')}>
+        {onRowClick ? (
+          <button
+            type="button"
+            aria-current={active || undefined}
+            onClick={() => onRowClick(r)}
+            className={cx(
+              'flex min-h-12 min-w-0 flex-1 cursor-pointer items-center px-4 py-2 text-start text-body-01 text-text-primary focus-visible:outline-2 focus-visible:outline-focus focus-visible:-outline-offset-2',
+              active ? 'hover:bg-layer-selected-hover-01' : 'hover:bg-layer-hover-01',
+            )}
+          >
+            {renderRow(r)}
+          </button>
+        ) : (
+          <div className="min-w-0 flex-1 px-4 py-2 text-body-01">{renderRow(r)}</div>
+        )}
+        {rowAction && (
+          <div className="flex shrink-0 items-center gap-1 pr-2">
+            <RowContext.Provider value>{rowAction(r)}</RowContext.Provider>
+          </div>
+        )}
+      </li>
+    )
+  }
 
   if (state === 'loading')
     return (

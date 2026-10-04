@@ -250,3 +250,15 @@ describe('счётчик (CountBadge)', () => {
     expect(n.container.querySelector('[data-tone-icon]')).toBeNull()
   })
 })
+
+describe('список: открытая строка (activeKey)', () => {
+  it('строка с activeKey — aria-current и фон выбора; без него — нет', () => {
+    const { rerender } = render(<List label="Группы" rows={groups} getKey={(r: GroupRow) => r.id} renderRow={(r: GroupRow) => r.name} onRowClick={() => {}} activeKey={groups[0].id} />)
+    const current = document.querySelectorAll('[aria-current=true]')
+    expect(current).toHaveLength(1)
+    expect(current[0].textContent).toBe(groups[0].name)
+    expect(current[0].closest('li')!.className).toContain('bg-layer-selected-01')
+    rerender(<List label="Группы" rows={groups} getKey={(r: GroupRow) => r.id} renderRow={(r: GroupRow) => r.name} onRowClick={() => {}} />)
+    expect(document.querySelectorAll('[aria-current]')).toHaveLength(0)
+  })
+})
