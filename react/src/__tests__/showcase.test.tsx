@@ -113,6 +113,7 @@ const SECTIONS: Array<{ title: string; note: string; items: Array<[string, strin
       ['Combobox.stories.tsx', 'Ошибка'],
     ],
   },
+  { title: 'Шаги', note: 'Путь из нескольких шагов: пройден — галочка, текущий — точка, ошибка — знак «опасно»; на телефоне — «Шаг 2 из 4».', items: [['Steps.stories.tsx', 'Обычное'], ['Steps.stories.tsx', 'Ошибка']] },
   { title: 'Счётчик', note: 'Число у строки или кнопки; «99+» сверху потолка. Новое — тоном info, срочное — знаком тона, не только цветом.', items: [['CountBadge.stories.tsx', 'Обычное']] },
   { title: 'Аватар', note: 'Картинка; нет или не загрузилась — буквы имени; нет и имени — значок человека.', items: [['Avatar.stories.tsx', 'Обычное']] },
   {

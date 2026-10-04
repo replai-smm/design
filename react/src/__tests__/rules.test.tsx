@@ -45,6 +45,7 @@ const PROMISED: Record<string, string[]> = {
   'ProofreadGrid.stories.tsx': ['обычное', 'загрузка', 'ошибка', 'ничего не найдено', 'много'],
   'ChartFrame.stories.tsx': ['обычное', 'загрузка', 'ошибка', 'первый запуск', 'ничего не найдено'],
   'StatTile.stories.tsx': ['обычное'],
+  'Steps.stories.tsx': ['обычное', 'ошибка', 'всё сделано'],
 }
 
 describe('истории на каждое состояние', () => {
