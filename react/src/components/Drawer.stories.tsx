@@ -5,7 +5,7 @@ import { StatusBadge } from './StatusBadge'
 import { Stack } from './layout'
 
 const meta = {
-  title: 'ДС/Панель деталей',
+  title: 'Компоненты/Панель деталей',
   component: Drawer,
   args: {
     defaultOpen: true,

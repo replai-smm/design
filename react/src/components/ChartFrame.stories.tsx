@@ -51,7 +51,7 @@ const table = (
 )
 
 const meta = {
-  title: 'ДС/Рамка графика',
+  title: 'Компоненты/Рамка графика',
   component: ChartFrame,
   parameters: { layout: 'padded' },
   args: {

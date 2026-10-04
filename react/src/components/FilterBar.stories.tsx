@@ -27,7 +27,7 @@ function InUrl() {
 }
 
 const meta = {
-  title: 'ДС/Фильтры и поиск',
+  title: 'Компоненты/Фильтры и поиск',
   component: FilterBar,
   parameters: { layout: 'padded' },
   args: { filters, value: {}, onChange: () => {} },

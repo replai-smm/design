@@ -16,7 +16,7 @@ function Demo() {
 }
 
 const meta = {
-  title: 'ДС/Выбор',
+  title: 'Компоненты/Выбор',
   component: Select,
   parameters: { layout: 'padded' },
   args: { label: 'Период', options: periods },

@@ -16,7 +16,7 @@ function Demo({ initial = 'g1', open }: { initial?: string | null; open?: boolea
 }
 
 const meta = {
-  title: 'ДС/Выбор с поиском',
+  title: 'Компоненты/Выбор с поиском',
   component: Combobox,
   parameters: { layout: 'padded' },
   args: { label: 'Сообщество', options },

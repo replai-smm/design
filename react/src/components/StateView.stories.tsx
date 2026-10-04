@@ -4,7 +4,7 @@ import { Loading, Skeleton, StateView } from './StateView'
 import { Stack } from './layout'
 
 const meta = {
-  title: 'ДС/Состояния',
+  title: 'Компоненты/Состояния',
   component: StateView,
   parameters: { layout: 'padded' },
   args: { kind: 'ничего не найдено', title: 'Ничего не найдено' },

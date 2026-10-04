@@ -73,7 +73,7 @@ function Demo({ start = 0, picked = false }: { start?: ColumnIndex; picked?: boo
 }
 
 const meta = {
-  title: 'ДС/Три колонки',
+  title: 'Паттерны/Три колонки',
   component: ThreeColumn,
   parameters: { layout: 'fullscreen' },
 } satisfies Meta<typeof ThreeColumn>

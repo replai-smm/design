@@ -3,7 +3,7 @@ import { Button } from './Button'
 import { ReplyBox } from './ReplyBox'
 
 const meta = {
-  title: 'ДС/Поле ответа',
+  title: 'Компоненты/Поле ответа',
   component: ReplyBox,
   parameters: { layout: 'padded' },
   args: {

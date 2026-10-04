@@ -4,7 +4,7 @@ import { StatusBadge } from './StatusBadge'
 import { Inline, Stack } from './layout'
 
 const meta = {
-  title: 'ДС/Метка статуса',
+  title: 'Компоненты/Метка статуса',
   component: StatusBadge,
   parameters: { layout: 'padded' },
   args: { status: 'work.failing' },

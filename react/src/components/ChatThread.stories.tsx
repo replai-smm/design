@@ -5,7 +5,7 @@ import { Button } from './Button'
 import { ChatThread, type ChatMessage } from './ChatThread'
 
 const meta = {
-  title: 'ДС/Переписка',
+  title: 'Паттерны/Переписка',
   component: ChatThread,
   parameters: { layout: 'padded' },
   args: { label: 'Переписка с Анной Петровой', messages: chat },

@@ -9,7 +9,7 @@ function Demo() {
 }
 
 const meta = {
-  title: 'ДС/Число',
+  title: 'Компоненты/Число',
   component: NumberField,
   parameters: { layout: 'padded' },
   args: { label: 'Постов в день' },
