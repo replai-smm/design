@@ -148,6 +148,14 @@ const SECTIONS: Array<{ title: string; note: string; items: Array<[string, strin
       ['ChartFrame.stories.tsx', 'НетДанных'],
     ],
   },
+  {
+    title: 'Плитка с цифрой',
+    note: 'Число и подпись; сравнение периодов — метка цвета ряда и разница ▲▼ со словом для читалки; беда — знаком и словом. Плитка-переход — вся кнопка.',
+    items: [
+      ['StatTile.stories.tsx', 'Обычное'],
+      ['StatTile.stories.tsx', 'Сравнение'],
+    ],
+  },
 ]
 
 /** Рамки образцов — только токены. */

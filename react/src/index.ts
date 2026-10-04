@@ -24,4 +24,5 @@ export { ReplyBox, type ReplyBoxProps, type ReplyBoxHandle } from './components/
 export { ThreeColumn, type ThreeColumnProps, type ColumnIndex } from './components/ThreeColumn'
 export { WeekCalendar, mondayOf, addWeeks, weekTitle, type WeekCalendarProps } from './components/WeekCalendar'
 export { ProofreadGrid, GridLegend, GRID_TONE, GRID_TONE_LABEL, type ProofreadGridProps, type GridColumn, type GridCell, type GridTone, type GridLegendProps } from './components/ProofreadGrid'
-export { ChartFrame, SERIES, seriesVar, resolveSeriesColors, useSeriesColors, type ChartFrameProps, type LegendItem, type SeriesLine } from './components/ChartFrame'
+export { StatTile, Delta, type StatTileProps, type StatTileCompare } from './components/StatTile'
+export { ChartFrame, SERIES, SERIES_BG, seriesVar, resolveSeriesColors, useSeriesColors, type ChartFrameProps, type LegendItem, type SeriesLine } from './components/ChartFrame'

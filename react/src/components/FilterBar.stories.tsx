@@ -38,3 +38,24 @@ type S = StoryObj<typeof meta>
 export const Обычное: S = { render: () => <Demo initial={{}} /> }
 export const ВыбранФильтр: S = { render: () => <Demo initial={{ статус: 'падает', q: 'кофе' }} /> }
 export const ВАдресе: S = { render: () => <InUrl /> }
+
+const periods: FilterDef[] = [
+  {
+    key: 'период',
+    label: 'Период',
+    required: true,
+    options: [
+      { value: '30', label: '30 дней' },
+      { value: '90', label: '90 дней' },
+      { value: 'свой', label: '📅 период' },
+    ],
+  },
+]
+
+function Required() {
+  const [value, setValue] = useState<FilterValue>({})
+  return <FilterBar filters={periods} value={value} onChange={setValue} />
+}
+
+/** Выбор обязателен (`required`): без «все», выбранный не снимается — режим, а не фильтр. Без значения — первый. */
+export const ОбязательныйВыбор: S = { render: () => <Required /> }

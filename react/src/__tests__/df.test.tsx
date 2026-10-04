@@ -4,7 +4,7 @@
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, fireEvent, within, act } from '@testing-library/react'
-import { ChatThread, ReplyBox, ThreeColumn, WeekCalendar, ProofreadGrid, GridLegend, ChartFrame, mondayOf, addWeeks, weekTitle, seriesVar, resolveSeriesColors, SERIES } from '../index'
+import { StatTile, FilterBar, ChatThread, ReplyBox, ThreeColumn, WeekCalendar, ProofreadGrid, GridLegend, ChartFrame, mondayOf, addWeeks, weekTitle, seriesVar, resolveSeriesColors, SERIES } from '../index'
 import { chat, chatFailed, posts, weekStart, today, communities, monthColumns, proofCell, manyCommunities, type Post } from '../stories/df-fixtures'
 
 afterEach(() => vi.restoreAllMocks())
@@ -388,5 +388,54 @@ describe('ChartFrame — рамка графика', () => {
     expect(c).toHaveLength(SERIES.length)
     expect(c.slice(0, 2)).toEqual(['#0f62fe', '#24a148']) // ds-allow: тест подставляет значение токена и читает его обратно
     root.removeAttribute('style')
+  })
+})
+
+describe('StatTile — плитка с цифрой', () => {
+  it('с onClick — вся плитка кнопка; без перехода — не нажимается; со ссылкой — ссылка', () => {
+    const go = vi.fn()
+    const { rerender } = render(<StatTile value="12" label="неотв. диалогов" onClick={go} />)
+    fireEvent.click(screen.getByRole('button', { name: /12\s*неотв\. диалогов/ }))
+    expect(go).toHaveBeenCalledOnce()
+    rerender(<StatTile value="2/3" label="событий нет" />)
+    expect(screen.queryByRole('button')).toBeNull()
+    expect(screen.queryByRole('link')).toBeNull()
+    rerender(<StatTile value="3" label="кабинета" href="#target" />)
+    expect(screen.getByRole('link').getAttribute('href')).toBe('#target')
+  })
+
+  it('беда — знак тона и слово, не только цвет', () => {
+    render(<StatTile value="17" label="сообществ" alert={{ tone: 'error', text: '2 без доступа' }} />)
+    const a = document.querySelector('[data-slot=stat-alert]') as HTMLElement
+    expect(a.dataset.tone).toBe('error')
+    expect(a.textContent).toContain('2 без доступа')
+    expect(a.querySelector('[data-tone-icon=error]')).toBeTruthy()
+  })
+
+  it('сравнение: А и Б с меткой ряда, разница ▲▼ в % и словом для читалки; Б = 0 — без разницы', () => {
+    const { rerender } = render(<StatTile variant="metric" label="Ср. лайки" value="30" compare={{ value: '10', delta: 200 }} />)
+    const d = document.querySelector('[data-slot=delta]') as HTMLElement
+    expect(d.dataset.direction).toBe('up')
+    expect(d.textContent).toBe('▲больше на200,0%')
+    expect([...document.querySelectorAll('[data-series]')].map((m) => (m as HTMLElement).dataset.series)).toEqual(['0', '1'])
+    expect(document.querySelector('[data-slot=stat-compare]')?.textContent).toContain('10')
+    rerender(<StatTile variant="metric" label="Ср. лайки" value="2,1" compare={{ value: '2,6', delta: -19.2 }} />)
+    expect((document.querySelector('[data-slot=delta]') as HTMLElement).textContent).toBe('▼меньше на19,2%')
+    rerender(<StatTile variant="metric" label="Постов" value="7" compare={{ value: '0', delta: null }} />)
+    expect(document.querySelector('[data-slot=delta]')).toBeNull()
+  })
+})
+
+describe('FilterBar required — обязательный выбор', () => {
+  const f = [{ key: 'p', label: 'Период', required: true, options: [{ value: '30', label: '30 дней' }, { value: '90', label: '90 дней' }] }]
+  it('без «все»; пустое значение — первый; повторное нажатие на выбранный ничего не меняет', () => {
+    const on = vi.fn()
+    render(<FilterBar filters={f} value={{}} onChange={on} />)
+    expect(screen.queryByRole('radio', { name: 'все' })).toBeNull()
+    expect(screen.getByRole('radio', { name: '30 дней' }).getAttribute('aria-checked')).toBe('true')
+    fireEvent.click(screen.getByRole('radio', { name: '30 дней' }))
+    expect(on).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByRole('radio', { name: '90 дней' }))
+    expect(on).toHaveBeenCalledWith({ p: '90' })
   })
 })
