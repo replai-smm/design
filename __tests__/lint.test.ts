@@ -60,7 +60,7 @@ describe('сырые размеры (ds/raw-size)', () => {
   it('CSS: отступы, размеры, текст, углы; @media — не объявление', () => {
     expect(
       rules(
-        `.a { padding: 12px 0; font-size: .8rem; border-radius: 4px; width: 100%; max-width: 70ch; border: 1px solid var(--cds-border-subtle-01) }\n@media (min-width: 600px) { .b { gap: var(--cds-spacing-05, 16px); margin-top: 0 } }`,
+        `.a { padding: 12px 0; font-size: .8rem; border-radius: 4px; width: 100%; max-width: 45rem; max-height: 70vh; border: 1px solid var(--cds-border-subtle-01) }\n@media (min-width: 600px) { .b { gap: var(--cds-spacing-05, 16px); margin-top: 0 } }`,
         'a.css',
       ),
     ).toEqual(['ds/raw-size padding: 12px', 'ds/raw-size font-size: .8rem', 'ds/raw-size border-radius: 4px'])

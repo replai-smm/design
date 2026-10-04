@@ -8,7 +8,8 @@
 //   ds/palette        — класс палитры Tailwind: bg-red-500, text-slate-700, border-white (палитра сброшена)
 //   ds/raw-size       — сырой размер у отступа, места, размера, шрифта, угла: `padding: 12px`, `font-size: .8rem`,
 //                       `style="width:240px"`, `style={{ gap: 12 }}` — в CSS, в <style> и в атрибуте style
-//                       (у Tailwind то же ловит ds/arbitrary). 0 и 1px (волосяная линия), %, vw/vh, ch, fr — можно;
+//                       (у Tailwind то же ловит ds/arbitrary). 0 и 1px (волосяная линия), %, vw/vh, ch, fr — можно; max-width и
+//                       max-height — предел меры колонки, не шаг шкалы, — тоже можно;
 //                       @media и @container — не объявления, их не трогает
 // Что можно:
 //   ссылка на токен в скобках — bg-[var(--cds-layer-01)]; варианты — data-[state=open]:, aria-[x]:, [&_svg]:;
@@ -23,11 +24,11 @@ export const RULES = {
 
 // Свойства, у которых размер берётся из шкалы ДС (отступы, места, размеры, текст, углы).
 const SIZE_PROP_CSS =
-  '(?:margin|padding)(?:-(?:top|right|bottom|left|block|inline)(?:-(?:start|end))?)?|(?:row-|column-)?gap|inset(?:-(?:block|inline)(?:-(?:start|end))?)?|top|right|bottom|left|(?:min-|max-)?(?:width|height|block-size|inline-size)|font-size|line-height|letter-spacing|border(?:-(?:top|bottom|start|end)-(?:left|right|start|end))?-radius|flex-basis'
+  '(?:margin|padding)(?:-(?:top|right|bottom|left|block|inline)(?:-(?:start|end))?)?|(?:row-|column-)?gap|inset(?:-(?:block|inline)(?:-(?:start|end))?)?|top|right|bottom|left|(?:min-)?(?:width|height|block-size|inline-size)|font-size|line-height|letter-spacing|border(?:-(?:top|bottom|start|end)-(?:left|right|start|end))?-radius|flex-basis'
 // объявление: перед свойством — начало блока, «;», начало строки или кавычка атрибута style; у @media перед ним «(»
 const CSS_DECL = new RegExp(`(?<=(?:^|[{;"'])\\s*)(${SIZE_PROP_CSS})\\s*:\\s*([^;{}"'\\n]+)`, 'gim')
 const SIZE_PROP_JS =
-  '(?:margin|padding)(?:Top|Right|Bottom|Left|Block|Inline)?(?:Start|End)?|(?:row|column)?[gG]ap|inset|top|right|bottom|left|(?:min|max)?(?:[wW]idth|[hH]eight)|fontSize|lineHeight|letterSpacing|border(?:Top|Bottom)?(?:Left|Right)?Radius|flexBasis'
+  '(?:margin|padding)(?:Top|Right|Bottom|Left|Block|Inline)?(?:Start|End)?|(?:row|column)?[gG]ap|inset|top|right|bottom|left|(?:min)?(?:[wW]idth|[hH]eight)|fontSize|lineHeight|letterSpacing|border(?:Top|Bottom)?(?:Left|Right)?Radius|flexBasis'
 const JS_DECL = new RegExp(`(?<![\\w$.])(${SIZE_PROP_JS})\\s*:\\s*(-?\\d*\\.?\\d+(?![\\w.])|(['"\`])[^'"\`\\n]*\\3)`, 'g')
 const SIZE_UNIT = /(?<![\w.#-])-?(\d*\.?\d+)(px|rem|em|pt)(?![\w-])/g
 
