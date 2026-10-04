@@ -90,3 +90,36 @@ export const НичегоНеВыбрано: S = { tags: ['state:первый з
 
 /** Телефон на третьей колонке (переписка) — сверху «← Диалоги». */
 export const ТелефонПереписка: S = { args: noArgs, render: () => <Demo start={2} picked /> }
+
+/** Две колонки (без `third`): список и карточка — DF «Постинг → Черновики». Телефон: по одной, «← Черновики». */
+export const ДвеКолонки: S = {
+  args: noArgs,
+  render: function Two() {
+    const [active, setActive] = useState<ColumnIndex>(0)
+    return (
+      <div className="h-screen max-h-full">
+        <ThreeColumn
+          labels={['Черновики', 'Пост']}
+          active={active}
+          onBack={setActive}
+          first={
+            <ul className="m-0 list-none p-0">
+              {dialogs.map((d) => (
+                <li key={d.id}>
+                  <button type="button" className="flex min-h-12 w-full cursor-pointer items-center border-b border-border-subtle-01 px-4 py-2 text-start text-body-compact-01 text-text-primary hover:bg-layer-hover-01 focus-visible:outline-2 focus-visible:outline-focus focus-visible:-outline-offset-2" onClick={() => setActive(1)}>
+                    {d.last}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          }
+          second={
+            <div className="p-4">
+              <StateView kind="первый запуск" title="Выберите черновик слева или создайте новый" />
+            </div>
+          }
+        />
+      </div>
+    )
+  },
+}

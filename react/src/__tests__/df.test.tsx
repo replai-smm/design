@@ -191,6 +191,18 @@ describe('ThreeColumn — три колонки', () => {
     rerender(p(0))
     expect(container.querySelector('[data-column="0"]')?.getAttribute('data-dir')).toBe('back')
   })
+
+  it('две колонки без `third`: две области, вторая занимает остальное, «← назад» к первой', () => {
+    const onBack = vi.fn()
+    const { container } = render(<ThreeColumn labels={['Черновики', 'Пост']} active={1} onBack={onBack} first={<p>список</p>} second={<p>пост</p>} />)
+    const cols = screen.getAllByRole('region')
+    expect(cols.map((c) => c.getAttribute('aria-label'))).toEqual(['Черновики', 'Пост'])
+    expect(container.querySelector('[data-slot=three-column]')?.getAttribute('data-columns')).toBe('2')
+    expect(cols[1].className).toContain('lg:flex-1')
+    expect(cols[1].className).not.toContain('lg:border-x')
+    fireEvent.click(screen.getByRole('button', { name: /Черновики/ }))
+    expect(onBack).toHaveBeenCalledWith(0)
+  })
 })
 
 describe('WeekCalendar — неделя', () => {

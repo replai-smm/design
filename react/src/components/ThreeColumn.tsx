@@ -5,6 +5,8 @@
  * - Переход на телефоне — выезд 0,6 с (ds.css → .ds-col), вперёд справа, назад слева; «уменьшить движение» — сразу.
  * - Фокус после перехода на телефоне — на колонку, читалка слышит её название.
  * - Колонки — области с подписью (`labels`); главная кнопка — у содержимого колонки, раскладка своих кнопок не держит.
+ * - Две колонки «список → карточка» (DF «Постинг → Черновики», «Мои сообщества»): без `third` и с двумя подписями —
+ *   вторая занимает остальное, на телефоне так же по одной.
  */
 import { useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { cx } from '../lib/cx'
@@ -17,10 +19,10 @@ export interface ThreeColumnProps {
   first: ReactNode
   /** Вторая: посты, диалоги, чаты. */
   second: ReactNode
-  /** Третья: карточка, переписка. Пусто — подсказка «Выберите …» от продукта. */
-  third: ReactNode
-  /** Названия колонок — подписи областей и слова «← назад»: ['Сообщества', 'Посты', 'Пост']. */
-  labels: [string, string, string]
+  /** Третья: карточка, переписка. Пусто — подсказка «Выберите …» от продукта. Нет — раскладка в две колонки. */
+  third?: ReactNode
+  /** Названия колонок — подписи областей и слова «← назад»: ['Сообщества', 'Посты', 'Пост'] (две — ['Черновики', 'Пост']). */
+  labels: [string, string, string] | [string, string]
   /** Какая колонка видна на телефоне. На ноутбуке видны все. */
   active: ColumnIndex
   /** «← назад» на телефоне: перейти к колонке `to`. */
@@ -37,7 +39,8 @@ const THIRD = { md: 'lg:w-md', lg: 'lg:w-lg', xl: 'lg:w-xl' } as const
 const PHONE = '(max-width: 63.99rem)'
 
 export function ThreeColumn({ first, second, third, labels, active, onBack, firstWidth = 'sm', thirdWidth = 'lg', className }: ThreeColumnProps) {
-  const cols = [first, second, third]
+  const two = third === undefined
+  const cols = two ? [first, second] : [first, second, third]
   const refs = useRef<Array<HTMLElement | null>>([])
   const was = useRef(active)
   const [dir, setDir] = useState<'forward' | 'back' | undefined>(undefined)
@@ -50,7 +53,7 @@ export function ThreeColumn({ first, second, third, labels, active, onBack, firs
   }, [active])
 
   return (
-    <div data-slot="three-column" data-active={active} className={cx('flex h-full min-h-0 min-w-0 overflow-hidden bg-background', className)}>
+    <div data-slot="three-column" data-columns={cols.length} data-active={active} className={cx('flex h-full min-h-0 min-w-0 overflow-hidden bg-background', className)}>
       {cols.map((content, i) => {
         const on = i === active
         return (
@@ -69,7 +72,7 @@ export function ThreeColumn({ first, second, third, labels, active, onBack, firs
               on ? 'flex w-full' : 'hidden',
               'lg:flex',
               i === 0 && cx('lg:shrink-0', FIRST[firstWidth]),
-              i === 1 && 'lg:w-auto lg:flex-1 lg:border-x lg:border-border-subtle-01',
+              i === 1 && cx('lg:w-auto lg:flex-1 lg:border-border-subtle-01', two ? 'lg:border-l' : 'lg:border-x'),
               i === 2 && cx('lg:shrink-0', THIRD[thirdWidth]),
             )}
           >

@@ -5,6 +5,7 @@
  * активный пункт — через aria-activedescendant. Ушли из поля, не выбрав, — поле снова показывает выбранное.
  * Список — в слое поверх страницы (Radix Popover): не обрезается панелью или таблицей, ширина — как у поля.
  * Состояния: загрузка, «ничего не найдено», ошибка, много пунктов (список прокручивается, высота ограничена).
+ * Очень длинный список — `limit`: показаны первые N совпадений и строка «уточните поиск» (DF «Постинг»: не больше 60).
  */
 import { useId, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
 import { Popover } from 'radix-ui'
@@ -31,6 +32,10 @@ export interface ComboboxProps extends FieldBaseProps {
   loading?: boolean
   /** Слова пустого списка. */
   emptyText?: ReactNode
+  /** Потолок показа: не больше `limit` пунктов, под ними — «уточните поиск». */
+  limit?: number
+  /** Строка под урезанным списком: по умолчанию «Показаны первые 60 из 312 — уточните поиск». */
+  moreText?: (shown: number, total: number) => ReactNode
   /** Можно очистить выбор (кнопка «×» и Esc в закрытом поле). */
   clearable?: boolean
   /** Свой поиск; по умолчанию — часть названия или второй строки без учёта регистра. */
@@ -62,6 +67,8 @@ export function Combobox({
   disabled,
   loading,
   emptyText = 'Ничего не найдено',
+  limit,
+  moreText = (n, total) => `Показаны первые ${n} из ${total} — уточните поиск`,
   clearable = true,
   filter = defaultFilter,
   defaultOpen = false,
@@ -79,7 +86,8 @@ export function Combobox({
   const [query, setQuery] = useState<string | null>(null)
   const [open, setOpenRaw] = useState(defaultOpen && !disabled)
   const selected = options.find((o) => o.value === value) ?? null
-  const shown = useMemo(() => (query ? options.filter((o) => filter(o, query)) : options), [options, query, filter])
+  const matched = useMemo(() => (query ? options.filter((o) => filter(o, query)) : options), [options, query, filter])
+  const shown = useMemo(() => (limit !== undefined && limit > 0 ? matched.slice(0, limit) : matched), [matched, limit])
   const firstActive = () => {
     const i = selected ? shown.indexOf(selected) : -1
     return i >= 0 ? i : shown.findIndex((o) => !o.disabled)
@@ -282,6 +290,11 @@ export function Combobox({
                   )
                 })}
               </ul>
+            )}
+            {!loading && matched.length > shown.length && (
+              <p role="status" data-slot="combobox-more" className="m-0 border-t border-border-subtle-01 px-4 py-3 text-helper-text-01 text-text-helper">
+                {moreText(shown.length, matched.length)}
+              </p>
             )}
           </Popover.Content>
         </Popover.Portal>
