@@ -241,7 +241,14 @@ function main(argv) {
     console.error('node design/lint/principles.mjs --kind ds|product|arena [--base <ref>] [--strict] [--repo <папка>] <пути…>')
     return 2
   }
-  const r = check({ repo, kind, roots, base, strict })
+  let r
+  try {
+    r = check({ repo, kind, roots, base, strict })
+  } catch (e) {
+    const why = String(e.stderr || e.message).trim().split('\n')[0]
+    console.error(`✗ дизайн-система не проверена: ${why}${base ? ` (нужна история git до базы ${base}: fetch-depth: 0 и git fetch origin <база>)` : ''}`)
+    return 2
+  }
   const gh = !!process.env.GITHUB_ACTIONS
   const say = (level, x) => {
     console.log(`${x.file}:${x.line}  ${x.check}  ${x.text}`)
