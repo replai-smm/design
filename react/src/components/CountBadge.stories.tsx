@@ -4,7 +4,7 @@ import { Avatar } from './Avatar'
 import { Inline, Stack } from './layout'
 
 const meta = {
-  title: 'ДС/Счётчик',
+  title: 'Компоненты/Счётчик',
   component: CountBadge,
   parameters: { layout: 'padded' },
   args: { count: 3 },
