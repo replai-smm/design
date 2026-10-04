@@ -14,7 +14,8 @@ import { Loading, Skeleton, StateView, type StateKind } from './StateView'
 
 /** Токены цветов рядов по порядку: синий, зелёный, оранжевый, красный, фиолетовый, серый (Carbon support + interactive). */
 export const SERIES = ['interactive', 'support-success', 'support-caution-major', 'support-error', 'support-caution-undefined', 'text-secondary'] as const
-const SERIES_BG = ['bg-interactive', 'bg-support-success', 'bg-support-caution-major', 'bg-support-error', 'bg-support-caution-undefined', 'bg-text-secondary'] as const
+/** Классы фона цвета ряда `i` (метки рядов вне графика: легенда, плитка сравнения `StatTile`). */
+export const SERIES_BG = ['bg-interactive', 'bg-support-success', 'bg-support-caution-major', 'bg-support-error', 'bg-support-caution-undefined', 'bg-text-secondary'] as const
 const SERIES_BORDER = ['border-interactive', 'border-support-success', 'border-support-caution-major', 'border-support-error', 'border-support-caution-undefined', 'border-text-secondary'] as const
 
 /** Цвет ряда `i` для CSS и SVG: `var(--cds-…)`. Рядов больше шести — цвета идут по кругу (различает вид линии). */

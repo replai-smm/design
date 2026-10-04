@@ -67,6 +67,16 @@ export const Много: S = {
   ),
 }
 
+/** Потолок показа: 150 сообществ, видны первые 60 и «уточните поиск» (DF «Постинг», `limit`). */
+export const Потолок: S = {
+  tags: ['state:много'],
+  render: () => (
+    <div className="max-w-md">
+      <Combobox label="Сообщество" options={manyOptions} defaultOpen limit={60} />
+    </div>
+  ),
+}
+
 export const Недоступно: S = {
   render: () => (
     <div className="max-w-md">

@@ -292,6 +292,16 @@ describe('выбор с поиском', () => {
     expect(val()).toBe('null')
   })
 
+  it('limit: не больше N пунктов и «уточните поиск»; поиск ищет по всему списку', () => {
+    const many = Array.from({ length: 75 }, (_, i) => ({ value: `m${i}`, label: `Сообщество ${i}` }))
+    render(<Combobox label="Сообщество" options={many} limit={60} defaultOpen />)
+    expect(screen.getAllByRole('option')).toHaveLength(60)
+    expect(document.querySelector('[data-slot=combobox-more]')?.textContent).toBe('Показаны первые 60 из 75 — уточните поиск')
+    fireEvent.change(box(), { target: { value: 'Сообщество 74' } })
+    expect(screen.getAllByRole('option').map((o) => o.textContent)).toEqual(['Сообщество 74'])
+    expect(document.querySelector('[data-slot=combobox-more]')).toBeNull()
+  })
+
   it('ушли из поля, не выбрав, — поле показывает выбранное', () => {
     render(<Ctl initial="b" />)
     fireEvent.change(box(), { target: { value: 'кофе' } })

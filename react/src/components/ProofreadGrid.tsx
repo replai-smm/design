@@ -8,6 +8,9 @@
  * - Порядок строк задаёт продукт (DF: проблемные сверху). Много — первые `pageSize` и «показать ещё».
  * - На телефоне сетка прокручивается вбок, первая колонка стоит. Рамка прокрутки — relative: скрытые слова для читалки
  *   (sr-only, position: absolute) остаются внутри неё и не раздвигают страницу.
+ * - Шапка дней закреплена при прокрутке вниз (`stickyHeader`, по умолчанию да; DF §10.8 must 2): рамка не выше экрана
+ *   и прокручивается сама, шапка стоит сверху, первая колонка — слева, угол — над обеими.
+ * - Колонки без тона (`plain`: КМ, итоги «план», «вышло») — просто значение: без цвета, без слова тона для читалки.
  * Легенда — `GridLegend` (те же тона и слова).
  * Состояния: загрузка (скелет строк), ошибка, пусто (`empty`), много.
  */
@@ -28,6 +31,8 @@ export interface GridColumn {
   title?: string
   /** Выходной — серая шапка. */
   muted?: boolean
+  /** Колонка без тона (КМ, итоги): клетка — значение, без цвета и слова тона; пусто — пусто, а не «·». */
+  plain?: boolean
 }
 
 export interface GridCell {
@@ -57,6 +62,8 @@ export interface ProofreadGridProps<R> {
   /** Легенда над сеткой — `<GridLegend>`. */
   legend?: ReactNode
   pageSize?: number
+  /** Шапка дней стоит при прокрутке вниз: рамка не выше экрана и прокручивается сама. По умолчанию да. */
+  stickyHeader?: boolean
   state?: 'ready' | 'loading' | 'error'
   error?: { title: ReactNode; description?: ReactNode; onRetry?: () => void }
   empty?: { kind: Exclude<StateKind, 'ошибка'>; title: ReactNode; description?: ReactNode; action?: ReactNode }
@@ -96,6 +103,7 @@ export function ProofreadGrid<R>({
   noteLabel = 'возможен перенос',
   legend,
   pageSize = 50,
+  stickyHeader = true,
   state = 'ready',
   error,
   empty,
@@ -126,11 +134,17 @@ export function ProofreadGrid<R>({
   const shown = loading ? [] : rows.slice(0, limit)
   const hidden = loading ? 0 : rows.length - shown.length
   const table = (
-    <div className="relative min-w-0 overflow-x-auto border border-border-subtle-01" tabIndex={0} role="region" aria-label={`${label}: прокрутка`}>
+    <div
+      data-sticky-header={stickyHeader || undefined}
+      className={cx('relative min-w-0 overflow-x-auto border border-border-subtle-01', stickyHeader && 'max-h-dvh overflow-y-auto')}
+      tabIndex={0}
+      role="region"
+      aria-label={`${label}: прокрутка`}
+    >
       <table aria-label={label} aria-busy={loading || undefined} className="w-max min-w-full border-collapse bg-layer-01 text-text-primary">
         <thead>
           <tr>
-            <th scope="col" className="sticky left-0 z-10 min-w-40 bg-layer-accent-01 px-3 text-start text-heading-compact-01 md:min-w-56">
+            <th scope="col" className={cx('sticky left-0 min-w-40 bg-layer-accent-01 px-3 text-start text-heading-compact-01 md:min-w-56', stickyHeader ? 'top-0 z-30' : 'z-10')}>
               {rowHeader}
             </th>
             {columns.map((c) => (
@@ -138,7 +152,11 @@ export function ProofreadGrid<R>({
                 key={c.key}
                 scope="col"
                 data-muted={c.muted || undefined}
-                className={cx('h-12 min-w-10 border-l border-border-subtle-01 px-1 text-center font-normal', c.muted ? 'bg-layer-02 text-text-secondary' : 'bg-layer-accent-01 text-text-primary')}
+                className={cx(
+                  'h-12 min-w-10 border-l border-border-subtle-01 px-1 text-center font-normal',
+                  c.muted ? 'bg-layer-02 text-text-secondary' : 'bg-layer-accent-01 text-text-primary',
+                  stickyHeader && 'sticky top-0 z-20',
+                )}
               >
                 {c.title && <span className="sr-only">{c.title}</span>}
                 <span aria-hidden={c.title ? true : undefined} className="flex flex-col items-center">
@@ -184,6 +202,13 @@ export function ProofreadGrid<R>({
                     </th>
                     {columns.map((c) => {
                       const cell = getCell(r, c)
+                      if (c.plain)
+                        return (
+                          <td key={c.key} data-plain title={cell.hint} className={cx(cellBase, 'border-l border-border-subtle-01 bg-layer-01 text-text-primary')}>
+                            {cell.value}
+                            {cell.hint && <span className="sr-only">{`. ${cell.hint}`}</span>}
+                          </td>
+                        )
                       const tone = cell.tone ?? 'none'
                       return (
                         <td

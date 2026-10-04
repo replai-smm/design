@@ -16,6 +16,8 @@ export interface FilterDef {
   key: string
   label: string
   options: FilterOption[]
+  /** Выбор обязателен: без «все», выбранный не снимается повторным нажатием (режим «30 дней / 90 дней / свой период»). */
+  required?: boolean
 }
 export type FilterValue = Record<string, string>
 
@@ -117,11 +119,14 @@ export function FilterBar({ filters, value, onChange, search, allLabel = 'все
           <ToggleGroup.Root
             type="single"
             aria-labelledby={`ds-f-${uid}-${f.key}`}
-            value={value[f.key] || ALL}
-            onValueChange={(v) => onChange({ ...value, [f.key]: v === ALL ? '' : v })}
+            value={value[f.key] || (f.required ? (f.options[0]?.value ?? '') : ALL)}
+            onValueChange={(v) => {
+              if (f.required && !v) return // повторное нажатие на выбранный — выбор остаётся
+              onChange({ ...value, [f.key]: v === ALL ? '' : v })
+            }}
             className="flex min-w-0 flex-wrap gap-2"
           >
-            {[{ value: ALL, label: allLabel } as FilterOption, ...f.options].map((o) => (
+            {[...(f.required ? [] : [{ value: ALL, label: allLabel } as FilterOption]), ...f.options].map((o) => (
               <ToggleGroup.Item
                 key={o.value}
                 value={o.value}

@@ -5,7 +5,7 @@
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, fireEvent, within, act } from '@testing-library/react'
-import { ActionArea, Button, Card, DataTable, List, Page, PageHeader, StatusBadge, FilterBar, useUrlFilters, Toaster, useToast, Drawer, Tabs, CountBadge, countText } from '../index'
+import { ActionArea, Button, Card, DataTable, List, Page, PageHeader, StatusBadge, FilterBar, useUrlFilters, Toaster, useToast, Drawer, Tabs, CountBadge, countText, Steps, stepState } from '../index'
 import { STATUS_IDS, TONE_ORDER, statusOf, toneOf } from '../lib/status'
 import { groups, many, type GroupRow } from '../stories/fixtures'
 import statusesJson from '../../../statuses.json'
@@ -260,5 +260,37 @@ describe('список: открытая строка (activeKey)', () => {
     expect(current[0].closest('li')!.className).toContain('bg-layer-selected-01')
     rerender(<List label="Группы" rows={groups} getKey={(r: GroupRow) => r.id} renderRow={(r: GroupRow) => r.name} onRowClick={() => {}} />)
     expect(document.querySelectorAll('[aria-current]')).toHaveLength(0)
+  })
+})
+
+describe('шаги (Steps)', () => {
+  it('состояние шага: пройден, текущий, впереди, ошибка', () => {
+    expect([0, 1, 2, 3].map((i) => stepState(i, 2))).toEqual(['complete', 'complete', 'current', 'incomplete'])
+    expect(stepState(3, 3, 3)).toBe('error')
+  })
+
+  it('текущий — aria-current=step; состояние словом для читалки; телефон — «Шаг 2 из 4 · Куда»', () => {
+    render(<Steps label="Шаги публикации" steps={['Текст', 'Куда', 'Предпросмотр', 'Итог']} current={1} />)
+    const nav = screen.getByRole('navigation', { name: 'Шаги публикации' })
+    const items = nav.querySelectorAll('[data-slot=step]')
+    expect([...items].map((li) => li.getAttribute('data-state'))).toEqual(['complete', 'current', 'incomplete', 'incomplete'])
+    expect(items[1].getAttribute('aria-current')).toBe('step')
+    expect(items[0].textContent).toContain('пройден')
+    expect(nav.querySelector('[data-slot=steps-compact]')!.textContent).toBe('Шаг 2 из 4 · Куда')
+  })
+
+  it('назад — только к пройденным шагам; без onStepClick кнопок нет', () => {
+    const seen: number[] = []
+    const { rerender } = render(<Steps label="Шаги" steps={['А', 'Б', 'В']} current={2} onStepClick={(i) => seen.push(i)} />)
+    const btns = screen.getAllByRole('button')
+    expect(btns).toHaveLength(2)
+    fireEvent.click(btns[0])
+    expect(seen).toEqual([0])
+    rerender(<Steps label="Шаги" steps={['А', 'Б', 'В']} current={2} />)
+    expect(screen.queryAllByRole('button')).toHaveLength(0)
+  })
+
+  it('правило: меньше двух шагов — ошибка в разработке', () => {
+    expect(() => render(<Steps label="Шаги" steps={['А']} current={0} />)).toThrow(/шагов меньше двух/)
   })
 })

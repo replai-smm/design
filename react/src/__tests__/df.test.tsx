@@ -4,7 +4,7 @@
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, fireEvent, within, act } from '@testing-library/react'
-import { ChatThread, ReplyBox, ThreeColumn, WeekCalendar, ProofreadGrid, GridLegend, ChartFrame, mondayOf, addWeeks, weekTitle, seriesVar, resolveSeriesColors, SERIES } from '../index'
+import { StatTile, FilterBar, ChatThread, ReplyBox, ThreeColumn, WeekCalendar, ProofreadGrid, GridLegend, ChartFrame, mondayOf, addWeeks, weekTitle, seriesVar, resolveSeriesColors, SERIES } from '../index'
 import { chat, chatFailed, posts, weekStart, today, communities, monthColumns, proofCell, manyCommunities, type Post } from '../stories/df-fixtures'
 
 afterEach(() => vi.restoreAllMocks())
@@ -191,6 +191,18 @@ describe('ThreeColumn — три колонки', () => {
     rerender(p(0))
     expect(container.querySelector('[data-column="0"]')?.getAttribute('data-dir')).toBe('back')
   })
+
+  it('две колонки без `third`: две области, вторая занимает остальное, «← назад» к первой', () => {
+    const onBack = vi.fn()
+    const { container } = render(<ThreeColumn labels={['Черновики', 'Пост']} active={1} onBack={onBack} first={<p>список</p>} second={<p>пост</p>} />)
+    const cols = screen.getAllByRole('region')
+    expect(cols.map((c) => c.getAttribute('aria-label'))).toEqual(['Черновики', 'Пост'])
+    expect(container.querySelector('[data-slot=three-column]')?.getAttribute('data-columns')).toBe('2')
+    expect(cols[1].className).toContain('lg:flex-1')
+    expect(cols[1].className).not.toContain('lg:border-x')
+    fireEvent.click(screen.getByRole('button', { name: /Черновики/ }))
+    expect(onBack).toHaveBeenCalledWith(0)
+  })
 })
 
 describe('WeekCalendar — неделя', () => {
@@ -292,6 +304,36 @@ describe('ProofreadGrid — сетка сверки', () => {
     expect(screen.getByRole('alert')).toBeTruthy()
   })
 
+  it('шапка дней закреплена: рамка не выше экрана, шапка — top-0, угол — над шапкой и первой колонкой; можно выключить', () => {
+    const { rerender } = render(<ProofreadGrid {...base} />)
+    const region = screen.getByRole('region', { name: 'Посты по дням: прокрутка' })
+    expect(region.className).toContain('max-h-dvh')
+    expect(region.className).toContain('overflow-y-auto')
+    const heads = [...region.querySelectorAll('thead th')] as HTMLElement[]
+    expect(heads[0].className).toMatch(/sticky.*left-0.*top-0 z-30|top-0 z-30/)
+    expect(heads.slice(1).every((h) => /(^| )sticky( |$)/.test(h.className) && h.className.includes('top-0'))).toBe(true)
+    rerender(<ProofreadGrid {...base} stickyHeader={false} />)
+    const off = screen.getByRole('region', { name: 'Посты по дням: прокрутка' })
+    expect(off.className).not.toContain('max-h-dvh')
+    expect((off.querySelector('thead th:nth-child(2)') as HTMLElement).className).not.toContain('top-0')
+  })
+
+  it('колонки без тона (КМ, итоги): значение без цвета и без слова тона; пусто — пусто', () => {
+    const cols = [{ key: 'km', label: 'КМ', plain: true }, ...monthColumns.slice(0, 3), { key: 'plan', label: 'план', plain: true }]
+    const getCell = (c: (typeof communities)[0], col: { key: string }) =>
+      col.key === 'km' ? { value: c.id === 'c1' ? 'Алёна' : undefined } : col.key === 'plan' ? { value: 6, hint: 'сумма норм' } : proofCell(c, col as never)
+    render(<ProofreadGrid {...base} columns={cols} getCell={getCell} />)
+    const row = document.querySelector('[data-slot=grid-row]') as HTMLElement
+    const [km, , , , plan] = [...row.querySelectorAll('td')] as HTMLElement[]
+    expect(km.dataset.plain).toBe('true')
+    expect(km.dataset.tone).toBeUndefined()
+    expect(km.textContent).toBe('Алёна')
+    expect(plan.textContent).toBe('6. сумма норм')
+    expect(plan.className).not.toMatch(/bg-status-/)
+    const empty = (document.querySelectorAll('[data-slot=grid-row]')[1] as HTMLElement).querySelector('td') as HTMLElement
+    expect(empty.textContent).toBe('')
+  })
+
   it('легенда: образец и слово каждого тона', () => {
     render(<GridLegend items={[{ tone: 'success' }, { tone: 'error', label: 'пропуск дня' }]} note="возможен перенос" />)
     expect(screen.getAllByRole('listitem').map((li) => li.textContent)).toEqual(['в норме', 'пропуск дня', 'возможен перенос'])
@@ -346,5 +388,54 @@ describe('ChartFrame — рамка графика', () => {
     expect(c).toHaveLength(SERIES.length)
     expect(c.slice(0, 2)).toEqual(['#0f62fe', '#24a148']) // ds-allow: тест подставляет значение токена и читает его обратно
     root.removeAttribute('style')
+  })
+})
+
+describe('StatTile — плитка с цифрой', () => {
+  it('с onClick — вся плитка кнопка; без перехода — не нажимается; со ссылкой — ссылка', () => {
+    const go = vi.fn()
+    const { rerender } = render(<StatTile value="12" label="неотв. диалогов" onClick={go} />)
+    fireEvent.click(screen.getByRole('button', { name: /12\s*неотв\. диалогов/ }))
+    expect(go).toHaveBeenCalledOnce()
+    rerender(<StatTile value="2/3" label="событий нет" />)
+    expect(screen.queryByRole('button')).toBeNull()
+    expect(screen.queryByRole('link')).toBeNull()
+    rerender(<StatTile value="3" label="кабинета" href="#target" />)
+    expect(screen.getByRole('link').getAttribute('href')).toBe('#target')
+  })
+
+  it('беда — знак тона и слово, не только цвет', () => {
+    render(<StatTile value="17" label="сообществ" alert={{ tone: 'error', text: '2 без доступа' }} />)
+    const a = document.querySelector('[data-slot=stat-alert]') as HTMLElement
+    expect(a.dataset.tone).toBe('error')
+    expect(a.textContent).toContain('2 без доступа')
+    expect(a.querySelector('[data-tone-icon=error]')).toBeTruthy()
+  })
+
+  it('сравнение: А и Б с меткой ряда, разница ▲▼ в % и словом для читалки; Б = 0 — без разницы', () => {
+    const { rerender } = render(<StatTile variant="metric" label="Ср. лайки" value="30" compare={{ value: '10', delta: 200 }} />)
+    const d = document.querySelector('[data-slot=delta]') as HTMLElement
+    expect(d.dataset.direction).toBe('up')
+    expect(d.textContent).toBe('▲больше на200,0%')
+    expect([...document.querySelectorAll('[data-series]')].map((m) => (m as HTMLElement).dataset.series)).toEqual(['0', '1'])
+    expect(document.querySelector('[data-slot=stat-compare]')?.textContent).toContain('10')
+    rerender(<StatTile variant="metric" label="Ср. лайки" value="2,1" compare={{ value: '2,6', delta: -19.2 }} />)
+    expect((document.querySelector('[data-slot=delta]') as HTMLElement).textContent).toBe('▼меньше на19,2%')
+    rerender(<StatTile variant="metric" label="Постов" value="7" compare={{ value: '0', delta: null }} />)
+    expect(document.querySelector('[data-slot=delta]')).toBeNull()
+  })
+})
+
+describe('FilterBar required — обязательный выбор', () => {
+  const f = [{ key: 'p', label: 'Период', required: true, options: [{ value: '30', label: '30 дней' }, { value: '90', label: '90 дней' }] }]
+  it('без «все»; пустое значение — первый; повторное нажатие на выбранный ничего не меняет', () => {
+    const on = vi.fn()
+    render(<FilterBar filters={f} value={{}} onChange={on} />)
+    expect(screen.queryByRole('radio', { name: 'все' })).toBeNull()
+    expect(screen.getByRole('radio', { name: '30 дней' }).getAttribute('aria-checked')).toBe('true')
+    fireEvent.click(screen.getByRole('radio', { name: '30 дней' }))
+    expect(on).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByRole('radio', { name: '90 дней' }))
+    expect(on).toHaveBeenCalledWith({ p: '90' })
   })
 })
