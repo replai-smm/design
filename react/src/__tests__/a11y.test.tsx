@@ -5,7 +5,10 @@
  */
 import { describe, it, expect } from 'vitest'
 import { render } from '@testing-library/react'
-import axe from 'axe-core'
+import { readFileSync, readdirSync } from 'node:fs'
+import { resolve, join } from 'node:path'
+import type axe from 'axe-core'
+import { runAxe } from './axe'
 import { stories, type Theme } from './stories'
 import { many } from '../stories/fixtures'
 import { DataTable } from '../components/Collection'
@@ -22,12 +25,20 @@ const check = (page: boolean): axe.RunOptions => ({
   resultTypes: ['violations'],
 })
 
+/**
+ * Таймаут теста под прогон axe — одно место на файл. Историю «много» axe проходит за ~0,5 с на машине и за 6–7 с
+ * на раннере под нагрузкой (3 ядра); 5 с vitest по умолчанию — впритык. 30 с — запас, но зависший тест всё равно
+ * упадёт сам, а не съест таймаут задачи CI. Прогоны axe идут строго по одному (очередь в ./axe), а describe.sequential
+ * не даёт включить тестам параллель даже настройкой sequence.concurrent.
+ */
+const AXE_TEST = { timeout: 30_000 } as const
+
 const violations = async (page: boolean) => {
-  const res = await axe.run(document.body, check(page))
+  const res = await runAxe(document.body, check(page))
   return res.violations.map((v) => `${v.id}: ${v.help} — ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`)
 }
 
-describe('a11y: истории × темы — ноль нарушений axe', () => {
+describe.sequential('a11y: истории × темы — ноль нарушений axe', AXE_TEST, () => {
   for (const theme of ['light', 'dark'] as Theme[])
     for (const e of stories(theme))
       it(`${e.title} / ${e.name} · ${theme}`, async () => {
@@ -38,7 +49,7 @@ describe('a11y: истории × темы — ноль нарушений axe',
       })
 })
 
-describe('a11y: опции axe не глушат нарушения', () => {
+describe.sequential('a11y: опции axe не глушат нарушения', AXE_TEST, () => {
   // Сторож опций: в большом дереве (150 строк) нарушение в последней строке находится, и его селектор ведёт к узлу.
   it('кнопка без имени в 150 строках — нарушение button-name с селектором узла', async () => {
     render(
@@ -51,10 +62,25 @@ describe('a11y: опции axe не глушат нарушения', () => {
         rowAction={(r) => (r.id === 'm149' ? <button type="button" data-bad="" /> : null)}
       />,
     )
-    const res = await axe.run(document.body, check(false))
+    const res = await runAxe(document.body, check(false))
     expect(res.violations.map((v) => v.id)).toEqual(['button-name'])
     const targets = res.violations[0].nodes.map((n) => n.target.join(' '))
     expect(targets).toHaveLength(1)
     expect(document.querySelector(targets[0])?.hasAttribute('data-bad')).toBe(true)
+  })
+})
+
+describe('a11y: axe — только через очередь', () => {
+  // Сторож очереди: прямой вызов axe.run мимо ./axe снова открыл бы «Axe is already running» под нагрузкой.
+  const src = resolve(import.meta.dirname, '..')
+  const door = resolve(src, '__tests__', 'axe.ts')
+  const files = (dir: string): string[] =>
+    readdirSync(dir, { withFileTypes: true }).flatMap((d) => (d.isDirectory() ? files(join(dir, d.name)) : [join(dir, d.name)]))
+  it('axe.run зовёт только src/__tests__/axe.ts (runAxe)', () => {
+    const direct = files(src)
+      .filter((f) => /\.(ts|tsx)$/.test(f) && resolve(f) !== door)
+      .filter((f) => /\baxe\s*\.\s*run\s*\(/.test(readFileSync(f, 'utf8')))
+      .map((f) => f.slice(src.length + 1))
+    expect(direct).toEqual([])
   })
 })
