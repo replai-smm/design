@@ -5,7 +5,7 @@
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, fireEvent, within, act } from '@testing-library/react'
-import { ActionArea, Button, Card, DataTable, List, Page, PageHeader, StatusBadge, FilterBar, useUrlFilters, Toaster, useToast, Drawer } from '../index'
+import { ActionArea, Button, Card, DataTable, List, Page, PageHeader, StatusBadge, FilterBar, useUrlFilters, Toaster, useToast, Drawer, Tabs } from '../index'
 import { STATUS_IDS, TONE_ORDER, statusOf, toneOf } from '../lib/status'
 import { groups, many, type GroupRow } from '../stories/fixtures'
 import statusesJson from '../../../statuses.json'
@@ -197,6 +197,23 @@ describe('фильтры в адресе и всплывашки', () => {
     expect(new URLSearchParams(window.location.search).get('статус')).toBe('работает')
     fireEvent.click(screen.getByRole('radio', { name: 'все' }))
     expect(window.location.search).toBe('')
+  })
+
+  it('вкладки: неактивная размонтируется, keepMounted — живёт спрятанной; чужое значение — ни одна не выбрана', () => {
+    const items = () => [
+      { value: 'a', label: 'Первая', content: <p>первая</p> },
+      { value: 'b', label: 'Вторая', content: <p>вторая</p>, keepMounted: true },
+    ]
+    const { rerender } = render(<Tabs label="Разделы" items={items()} value="b" />)
+    expect(screen.getByText('вторая')).toBeTruthy()
+    rerender(<Tabs label="Разделы" items={items()} value="a" />)
+    expect(screen.getByText('первая')).toBeTruthy()
+    const kept = screen.getByText('вторая').closest('[role=tabpanel]')!
+    expect(kept.getAttribute('data-state')).toBe('inactive')
+    expect(kept.className).toContain('data-[state=inactive]:hidden')
+    rerender(<Tabs label="Разделы" items={items()} value="x" />)
+    expect(screen.queryByText('первая')).toBeNull()
+    expect(screen.getAllByRole('tab').every((t) => t.getAttribute('aria-selected') === 'false')).toBe(true)
   })
 
   it('useToast().show — всплывашка с ролью статуса', async () => {

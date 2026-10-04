@@ -2,6 +2,8 @@
  * Вкладки со счётчиками (Radix Tabs). Вкладка называется вопросом человека, а не значением поля (П1).
  * Счётчик — число рядом со словом; у срочного счётчика — знак тона «опасно» или «внимание», не только цвет.
  * На телефоне ряд вкладок прокручивается вбок, высота вкладки — 48 px (цель касания).
+ * Неактивная вкладка размонтируется; `keepMounted` — содержимое живёт спрятанным (вкладка-iframe DF хранит своё
+ * состояние между переходами). Значение, которого нет среди вкладок, — ни одна не выбрана (экран вне ряда вкладок).
  */
 import type { ReactNode } from 'react'
 import { Tabs as RTabs } from 'radix-ui'
@@ -15,6 +17,8 @@ export interface TabItem {
   /** Срочность счётчика: error — «опасно», warning — «внимание». Без него счётчик серый. */
   tone?: 'error' | 'warning'
   content: ReactNode
+  /** Не размонтировать содержимое, когда вкладка неактивна: оно остаётся в документе спрятанным. */
+  keepMounted?: boolean
 }
 
 export interface TabsProps {
@@ -61,7 +65,12 @@ export function Tabs({ items, label, value, defaultValue, onValueChange, classNa
         ))}
       </RTabs.List>
       {items.map((t) => (
-        <RTabs.Content key={t.value} value={t.value} className="min-w-0 focus-visible:outline-2 focus-visible:outline-focus">
+        <RTabs.Content
+          key={t.value}
+          value={t.value}
+          forceMount={t.keepMounted || undefined}
+          className={cx('min-w-0 focus-visible:outline-2 focus-visible:outline-focus', t.keepMounted && 'data-[state=inactive]:hidden')}
+        >
           {t.content}
         </RTabs.Content>
       ))}
