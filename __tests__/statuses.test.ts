@@ -10,7 +10,7 @@ const design = resolve(import.meta.dirname, '..')
 const json = (p: string) => JSON.parse(readFileSync(p, 'utf8'))
 const { statuses, tones, karta } = json(resolve(design, 'statuses.json'))
 const tokens = json(resolve(design, 'tokens.json'))
-const law = json(resolve(design, '../schema/karta.schema.json'))
+const law = json(resolve(design, '../schema/words.json'))
 
 describe('статусы', () => {
   it('тоны — те же четыре, что в tokens.json → palettes.product', () => {
