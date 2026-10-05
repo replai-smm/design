@@ -66,7 +66,7 @@
    в светлой теме у тёмной системы он оставит тёмные цвета.
 4. В приложение — `<Toaster>` и `<ConfirmProvider>` один раз вокруг всего.
 
-Пример экрана — `src/components/Page.stories.tsx` («Все группы» из `work/design/DESIGN-APPROACH.md` §7).
+Пример экрана — `src/components/Page.stories.tsx` («Все группы» из `archive/process-notes-2026-10-05:work/design/DESIGN-APPROACH.md` §7).
 План переезда Replai — `MIGRATION-REPLAI.md`.
 
 ## Проверки
