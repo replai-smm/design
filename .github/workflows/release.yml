@@ -102,4 +102,4 @@ jobs:
         if: steps.have.outputs.yes == 'true'
         env:
           SHA: ${{ needs.tag.outputs.sha }}
-        run: bash process/infra/deploy/storybook-ship.sh design storybook-static "$SHA"
+        run: bash process/infra/deploy/ship.sh storybook storybook-static "$SHA"
