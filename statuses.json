@@ -9,6 +9,7 @@
     { "id": "work.failing", "axis": "work", "value": "падает", "say": "падает", "tone": "опасно", "karta": "падает" },
     { "id": "work.unchecked", "axis": "work", "value": "не проверено", "say": "не проверено", "tone": "нейтрально", "karta": null },
     { "id": "work.awaiting-run", "axis": "work", "value": "ждёт прогона", "say": "ждёт прогона тестов", "tone": "нейтрально", "karta": null },
+    { "id": "work.not-on-prod", "axis": "work", "value": "не на проде", "say": "не на проде", "tone": "нейтрально", "karta": null },
     { "id": "work.off", "axis": "work", "value": "выключено", "say": "выключено", "tone": "нейтрально", "karta": null },
     { "id": "change.changing", "axis": "change", "value": "меняется", "say": "хотят изменить", "tone": "внимание", "karta": "хотят изменить" },
     { "id": "change.removing", "axis": "change", "value": "удаляется", "say": "хотят удалить", "tone": "внимание", "karta": "хотят изменить" },
