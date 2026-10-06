@@ -1,6 +1,7 @@
 {
   "doc": "статусы",
-  "source": "schema/words.json → $defs/work, $defs/change (x-say); tone — tokens.json → palettes.product, karta — palettes.karta (KARTA-VIEW C-SCR-3)",
+  "source": "слова — закон Карты, process: schema/words.json → $defs/work, $defs/change (x-say); сверяет process (тест design-contract); tone — tokens.json → palettes.product, karta — palettes.karta (KARTA-VIEW C-SCR-3)",
+  "axes": { "work": "работает ли", "change": "меняется ли" },
   "tones": ["опасно", "внимание", "хорошо", "нейтрально"],
   "karta": ["без изменений", "хотят изменить", "падает"],
   "statuses": [

@@ -1,7 +1,7 @@
 # Replai переезжает на ДС-React — план
 
 Поток П6 Карты 3 (`archive/process-notes-2026-10-05:work/karta-3/CONCEPT.md` §3.4–3.6). Замер 02.10.2026. Только план: код Replai здесь не меняется.
-Пакет — `@replai-smm/ds-react` (эта папка). Основа — `design/README.md`: токены, тема Tailwind, сторож «только токены».
+Пакет — `@replai-smm/design` (эта папка). Основа — `design/README.md`: токены, тема Tailwind, сторож «только токены».
 
 ## 1. Зачем и что не меняем в этом шаге
 
@@ -62,7 +62,7 @@
 
 ## 3. Нарушения линта
 
-Замер 02.10.2026: `node design/lint/cli.mjs replai/frontend/src` — **66 нарушений в 29 файлах**:
+Замер 02.10.2026: `node node_modules/@replai-smm/design/lint/cli.mjs replai/frontend/src` — **66 нарушений в 29 файлах**:
 `ds/arbitrary` — 34, `ds/raw-color` — 32, `ds/palette` — 0 (палитрой Tailwind Replai уже не пользуется).
 
 ### По причине
@@ -94,8 +94,8 @@
 
 ### Храповик
 
-- Шаг 0: `node design/lint/cli.mjs --baseline ds-baseline.json --write src` — файл `replai/frontend/ds-baseline.json`, 66.
-- В CI: `node design/lint/cli.mjs --baseline ds-baseline.json src`. Число по файлу только падает; новый файл с нарушением — красный.
+- Шаг 0: `node node_modules/@replai-smm/design/lint/cli.mjs --baseline ds-baseline.json --write src` — файл `replai/frontend/ds-baseline.json`, 66.
+- В CI: `node node_modules/@replai-smm/design/lint/cli.mjs --baseline ds-baseline.json src`. Число по файлу только падает; новый файл с нарушением — красный.
 - Каждый шаг в конце опускает храповик (`--write`). Ожидаемо: шаг 1 → 59, 3 → 52, 5 → 41, 6 → 35, 7 → 32, 8 → 24, 9 → 0.
 - На нуле `ds-baseline.json` удаляется, в `eslint.config.js` правило `ds/no-raw-values: 'error'` без храповика.
 
@@ -112,7 +112,7 @@
 
 | Шаг | Что | Клетки |
 |---|---|---|
-| 0. Подготовка (облик не меняется) | `ds-baseline.json`; пакет `@replai-smm/ds-react` по пути к копии `design/react` (её кладёт `/update`, П12); Storybook: проверка a11y (axe), ширины 390 и 1280, метки историй `state:*` по матрице; истории для экранов без историй | только новые клетки |
+| 0. Подготовка (облик не меняется) | `ds-baseline.json`; пакет `@replai-smm/design` по пути к копии `design/react` (её кладёт `/update`, П12); Storybook: проверка a11y (axe), ширины 390 и 1280, метки историй `state:*` по матрице; истории для экранов без историй | только новые клетки |
 | 1. Основа | В `index.css`: `@import` `tokens.css` и `tailwind.css`; убрать 12 `@import` Radix, блок шкал, `--radius` и свои `--radius-*`; Geist → IBM Plex (убрать `@fontsource-variable/geist`). Мост на время переезда: `bg-severity-*`, `bg-success*`, `bg-warning*`, `bg-mode-observe*` → токены `status-*` в своём `@theme inline` (иначе 73 класса молча пропадут: тема ДС делает `--color-*: initial`). `lib/theme.ts` и декоратор Storybook ставят `data-theme`, не только `.dark`. Удалить `ColorTokens` | `cells: all` |
 | 2. Проверка глазами | «так и хотел» на 2–3 кадрах шага 1 (телефон, тёмная, самый плотный экран) | — |
 | 3. Примитивы | `Button` + `ActionArea` (разобрать 10 файлов с 2–3 главными), `Toaster`, `Tabs`, `StateView` вместо `EmptyState`/`ErrorBlock`, `Notification` | истории `ui/*` + экраны с этими примитивами |

@@ -1,6 +1,6 @@
 /**
- * Статусы — закрытый список. Слово на экране берётся из закона (x-say схемы Карты), не придумывается здесь:
- * поменяли слово в законе — тест красный, пока statuses.json не догонит. Новое значение оси — тоже красный.
+ * Статусы — закрытый список. Слово на экране берётся из закона Карты (x-say схемы, репо process), не придумывается здесь:
+ * сверку «say = x-say» и полноту по закону держит process (scripts/__tests__/design-contract.test.ts) — здесь только то, что видно без закона.
  */
 import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
@@ -10,7 +10,6 @@ const design = resolve(import.meta.dirname, '..')
 const json = (p: string) => JSON.parse(readFileSync(p, 'utf8'))
 const { statuses, tones, karta } = json(resolve(design, 'statuses.json'))
 const tokens = json(resolve(design, 'tokens.json'))
-const law = json(resolve(design, '../schema/words.json'))
 
 describe('статусы', () => {
   it('тоны — те же четыре, что в tokens.json → palettes.product', () => {
@@ -30,24 +29,6 @@ describe('статусы', () => {
   it('id и пары (ось, значение) не повторяются', () => {
     expect(new Set(statuses.map((s: any) => s.id)).size).toBe(statuses.length)
     expect(new Set(statuses.map((s: any) => `${s.axis}|${s.value}`)).size).toBe(statuses.length)
-  })
-
-  it('слово — из закона: say = x-say схемы для этого значения оси', () => {
-    for (const s of statuses) {
-      const def = law.$defs[s.axis]
-      expect(def, `ось ${s.axis} есть в схеме`).toBeDefined()
-      expect(def.enum, s.id).toContain(s.value)
-      expect(s.say, s.id).toBe(def['x-say'][s.value])
-    }
-  })
-
-  it('список полный: каждое значение оси, у которого на экране есть слово, имеет статус', () => {
-    for (const axis of new Set(statuses.map((s: any) => s.axis))) {
-      const def = law.$defs[axis as string]
-      const shown = def.enum.filter((v: string) => def['x-say'][v] !== '')
-      const have = statuses.filter((s: any) => s.axis === axis).map((s: any) => s.value)
-      expect(have.sort(), `ось ${axis}`).toEqual([...shown].sort())
-    }
   })
 
   it('красное — только «падает» (KARTA-VIEW C-SCR-10: больше красного нигде нет)', () => {

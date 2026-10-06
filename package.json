@@ -1,0 +1,65 @@
+{
+  "name": "@replai-smm/design",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Дизайн-система replai-smm: токены Carbon, ДС-React, линт «только через ДС». Продукты ставят по тегу: github:replai-smm/design#vX.Y.Z (в теге лежит собранный dist/, сборки при установке нет).",
+  "engines": {
+    "node": ">=22"
+  },
+  "workspaces": [
+    "react"
+  ],
+  "exports": {
+    ".": "./react/src/index.ts",
+    "./styles.css": "./react/src/ds.css",
+    "./react/src/*": "./react/src/*",
+    "./tokens.css": "./dist/tokens.css",
+    "./tailwind.css": "./dist/tailwind.css",
+    "./tokens": "./dist/tokens.ts",
+    "./vkui-adapter.css": "./dist/vkui-adapter.css",
+    "./vkui-adapter": "./dist/vkui-adapter.ts",
+    "./tokens.json": "./tokens.json",
+    "./scale.json": "./scale.json",
+    "./statuses.json": "./statuses.json",
+    "./matrix.yaml": "./matrix.yaml",
+    "./fonts/*": "./fonts/*",
+    "./lint": "./lint/principles.mjs",
+    "./lint/cli": "./lint/cli.mjs",
+    "./lint/eslint-plugin": "./lint/eslint-plugin.mjs",
+    "./lint/scan": "./lint/scan.mjs",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "fonts",
+    "licenses",
+    "lint",
+    "react/src",
+    "!react/src/**/__tests__",
+    "!react/src/**/*.stories.tsx",
+    "!react/src/stories",
+    "tokens.json",
+    "scale.json",
+    "statuses.json",
+    "statuses.schema.json",
+    "matrix.yaml",
+    "NOTICE.md",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "node build.mjs",
+    "pretest": "node build.mjs",
+    "test": "npm run test:design && npm test -w react",
+    "test:design": "vitest run -c vitest.config.ts",
+    "typecheck": "npm run typecheck -w react",
+    "lint": "npm run lint -w react",
+    "storybook": "npm run storybook -w react",
+    "storybook:build": "npm run storybook:build -w react",
+    "check": "node build.mjs && npm run typecheck && npm run lint && npm test"
+  },
+  "devDependencies": {
+    "ajv": "^8.20.0",
+    "vitest": "^4.1.7"
+  }
+}

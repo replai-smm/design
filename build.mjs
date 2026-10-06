@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Собрать dist/ из tokens.json, scale.json, statuses.json.
-//   node design/build.mjs          — записать dist/
-//   node design/build.mjs --check  — только сверить: dist/ совпадает с источником? нет — выход 1 (так же проверяет тест)
+//   npm run build          — записать dist/
+//   node build.mjs --check  — только сверить: dist/ совпадает с источником? нет — выход 1 (так же проверяет тест)
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { DESIGN, outputs } from './lib/generate.mjs'
@@ -20,7 +20,7 @@ for (const [rel, content] of Object.entries(outputs())) {
   }
 }
 if (check && stale.length) {
-  console.error(`✗ dist/ отстал от источника: ${stale.join(', ')}. Собрать: node design/build.mjs`)
+  console.error(`✗ dist/ отстал от источника: ${stale.join(', ')}. Собрать: npm run build`)
   process.exit(1)
 }
 if (check) console.log('✓ dist/ совпадает с tokens.json, scale.json, statuses.json')

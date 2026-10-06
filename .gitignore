@@ -1,0 +1,5 @@
+node_modules/
+# машинная сборка (build.mjs): в main её нет, её кладёт в тег задача выпуска (.github/workflows/release.yml)
+/dist/
+storybook-static/
+*.log

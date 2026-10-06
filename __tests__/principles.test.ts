@@ -53,7 +53,7 @@ describe('свои компоненты с именами ДС', () => {
   })
   it('ловит function, const, class; не ловит импорт, вызов и строку с ds-allow', () => {
     const src = [
-      `import { Button } from '@replai-smm/ds-react'`,
+      `import { Button } from '@replai-smm/design'`,
       `export function Dialog(props) { return null }`,
       `const Tabs = ({ items }) => null`,
       `export const Card: FC = () => null`,

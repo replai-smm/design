@@ -6,7 +6,7 @@
 //             `Части продукта/…`; ДС внутри продукта не дублируется.
 //   токены  — только токены (scan.mjs: сырые цвета и размеры, произвольные значения и палитра Tailwind).
 //   свои    — продукт не заводит свой компонент с именем компонента ДС-React (Button, Dialog, ThreeColumn, …):
-//             недостающее добавляют в ДС-React (process/design/react), а не строят в продукте.
+//             недостающее добавляют в ДС-React (design/react), а не строят в продукте.
 //
 // Новое держит, старое — долг (храповик против базы PR, без файла чисел):
 //   - полки: новый файл историй, или файл, у которого на базе полка была верной, — красный; старый файл на старой
@@ -15,9 +15,9 @@
 //   - свои: имя компонента ДС объявлено в файле, где на базе его не было, — красный.
 // Строка с `ds-allow: <причина>` не считается (причина обязательна) — исключение видно в ревью.
 //
-//   node design/lint/principles.mjs --kind product --base origin/main frontend/src  — продукт на PR
-//   node design/lint/principles.mjs --kind arena --base origin/main web/src         — Арена (VKUI + наша тема)
-//   node design/lint/principles.mjs --kind ds --strict react/src react/.storybook   — сама ДС: держит всё, долга нет
+//   node node_modules/@replai-smm/design/lint/principles.mjs --kind product --base origin/main frontend/src  — продукт на PR
+//   node node_modules/@replai-smm/design/lint/principles.mjs --kind arena --base origin/main web/src         — Арена (VKUI + наша тема)
+//   node node_modules/@replai-smm/design/lint/principles.mjs --kind ds --strict react/src react/.storybook   — сама ДС: держит всё, долга нет
 // Без --base и --strict — только отчёт (выход 0): на main сравнивать не с чем. Пути — от --repo (по умолчанию cwd).
 // Без --base в git-клоне смотрятся все файлы путей; с --base — только изменённые против merge-base, вместе с
 // незакоммиченными и новыми (агент может проверить себя до коммита).
@@ -105,7 +105,7 @@ export function shelfProblem(title, kind) {
   if (title === null) return `у файла историй нет title — назови полку явно: ${rule.say}`
   if (rule.ok.test(title)) return null
   if (kind !== 'ds' && DS_SHELF.test(title))
-    return `«${title}» — это полка дизайн-системы: в Storybook продукта ДС не дублируется (компонент — в ДС-React, process/design/react). Полка продукта — ${rule.say}`
+    return `«${title}» — это полка дизайн-системы: в Storybook продукта ДС не дублируется (компонент — в ДС-React, design/react). Полка продукта — ${rule.say}`
   return `«${title}» — не полка: ${rule.say}`
 }
 
@@ -216,7 +216,7 @@ export function check({ repo, kind, roots, base, strict, names = dsNames() }) {
       const now = ownComponents(text, names)
       const had = new Set(mode === 'ratchet' && old !== null ? ownComponents(old, names).map((c) => c.name) : [])
       for (const c of now) {
-        const where = kind === 'arena' ? 'возьми компонент VKUI (облик — переходник ДС), а не свой' : 'возьми его из ДС-React (`@replai-smm/ds-react`); не хватает — добавь в ДС-React (process/design/react), а не в продукт'
+        const where = kind === 'arena' ? 'возьми компонент VKUI (облик — переходник ДС), а не свой' : 'возьми его из ДС-React (`@replai-smm/design`); не хватает — добавь в ДС-React (design/react), а не в продукт'
         const hard = mode === 'strict' || (mode === 'ratchet' && !had.has(c.name))
         put(hard, { file: e.path, line: c.line, check: 'свои', text: `свой компонент «${c.name}» — такой есть в дизайн-системе: ${where}${hard ? '' : ' (долг: был до этого PR)'}` })
       }
@@ -238,7 +238,7 @@ function main(argv) {
   const valued = new Set(['--kind', '--repo', '--base'])
   const roots = args.filter((a, i) => !a.startsWith('--') && !valued.has(args[i - 1]))
   if (!['ds', 'product', 'arena'].includes(kind ?? '') || !roots.length) {
-    console.error('node design/lint/principles.mjs --kind ds|product|arena [--base <ref>] [--strict] [--repo <папка>] <пути…>')
+    console.error('node node_modules/@replai-smm/design/lint/principles.mjs --kind ds|product|arena [--base <ref>] [--strict] [--repo <папка>] <пути…>')
     return 2
   }
   let r
@@ -261,7 +261,7 @@ function main(argv) {
   const by = (l) => ['полки', 'токены', 'свои'].map((c) => `${c} ${l.filter((x) => x.check === c).length}`).join(' · ')
   console.log(
     r.block.length
-      ? `✗ дизайн-система: новое нарушение (${by(r.block)}); долг ${r.warn.length}. Правила — process/design/README.md, «Правила для всех продуктов»`
+      ? `✗ дизайн-система: новое нарушение (${by(r.block)}); долг ${r.warn.length}. Правила — design/README.md, «Правила для всех продуктов»`
       : `✓ дизайн-система: нового нарушения нет (файлов ${r.files}; долг ${r.warn.length}${r.warn.length ? `: ${by(r.warn)}` : ''})`,
   )
   return r.block.length ? 1 : 0

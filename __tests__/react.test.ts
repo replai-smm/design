@@ -21,12 +21,12 @@ describe('ДС-React', () => {
     expect(found).toEqual([])
   })
 
-  it('на Radix и токенах, без Carbon React; зависимости закреплены замком', () => {
+  it('на Radix и токенах, без Carbon React; зависимости закреплены замком (package-lock.json в корне репо)', () => {
     const pkg = JSON.parse(readFileSync(join(react, 'package.json'), 'utf8'))
     const deps = Object.keys({ ...pkg.dependencies, ...pkg.devDependencies, ...pkg.peerDependencies })
     expect(deps.filter((d) => d.startsWith('@carbon/'))).toEqual([])
     expect(deps).toContain('radix-ui')
-    expect(existsSync(join(react, 'package-lock.json'))).toBe(true)
+    expect(existsSync(join(react, '..', 'package-lock.json'))).toBe(true)
   })
 
   it('у каждого компонента — истории', () => {

@@ -2,12 +2,13 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://replai-smm.ru/schema/karta/3/design/statuses.json",
   "title": "Статусы дизайн-системы",
-  "$comment": "Shape of process/design/statuses.json: the closed list of statuses the dashboard and products paint. Words come from x-say of the law schema (test design/__tests__/statuses.test.ts); tone — one of the four of tokens.json → palettes.product (product UIs); karta — one of the three of palettes.karta (Karta screens and dashboard, KARTA-VIEW C-SCR-3) or null: no state colour.",
+  "$comment": "Shape of design/statuses.json: the closed list of statuses the dashboard and products paint. Words come from x-say of the law schema (process test design-contract: slovo = x-say); tone — one of the four of tokens.json → palettes.product (product UIs); karta — one of the three of palettes.karta (Karta screens and dashboard, KARTA-VIEW C-SCR-3) or null: no state colour.",
   "type": "object",
   "additionalProperties": false,
   "required": [
     "doc",
     "source",
+    "axes",
     "tones",
     "karta",
     "statuses"
@@ -19,6 +20,24 @@
     "source": {
       "type": "string",
       "minLength": 1
+    },
+    "axes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "work",
+        "change"
+      ],
+      "properties": {
+        "work": {
+          "type": "string",
+          "minLength": 1
+        },
+        "change": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
     },
     "tones": {
       "const": [

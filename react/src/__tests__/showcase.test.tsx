@@ -1,7 +1,7 @@
 /**
  * Образцы ДС-React для страницы образцов основы (design/dist/showcase.html): истории, отрисованные в статичный HTML,
  * и скомпилированный CSS. Файл dist/showcase-components.html — вывод, руками не правят:
- *   SHOWCASE_WRITE=1 npx vitest run src/__tests__/showcase.test.tsx   — записать (npm run showcase), потом node design/build.mjs
+ *   SHOWCASE_WRITE=1 npx vitest run src/__tests__/showcase.test.tsx   — записать (npm run showcase), потом npm run build
  *   npx vitest run                                                     — сверить: отстал — красный
  * Страница образцов (lib/showcase.mjs) вставляет его в рамку iframe: у рамки своё окно, поэтому вид телефона (390)
  * и ноутбука (1280) включается переключателем ширины так же, как на настоящем экране.
@@ -11,7 +11,8 @@ import { act } from 'react'
 import { createRoot } from 'react-dom/client'
 import { execFileSync } from 'node:child_process'
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs'
-import { resolve } from 'node:path'
+import { dirname, resolve } from 'node:path'
+import { createRequire } from 'node:module'
 import { stories, type Entry } from './stories'
 
 const root = resolve(import.meta.dirname, '..', '..')
@@ -212,7 +213,7 @@ async function fragment(): Promise<string> {
     }
     parts.push(`<section class="dsr-sec"><h2>${s.title}</h2><p>${s.note}</p>${items.join('')}</section>`)
   }
-  const css = execFileSync(process.execPath, [resolve(root, 'node_modules/@tailwindcss/cli/dist/index.mjs'), '-i', resolve(root, 'src/showcase.css'), '--minify'], {
+  const css = execFileSync(process.execPath, [resolve(dirname(createRequire(import.meta.url).resolve('@tailwindcss/cli/package.json')), 'dist/index.mjs'), '-i', resolve(root, 'src/showcase.css'), '--minify'], {
     cwd: root,
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'ignore'],

@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 // Сторож «только токены» из командной строки — для любого продукта, с ESLint или без (CSS, HTML, ванильный JS).
 //
-//   node design/lint/cli.mjs <папки или файлы…>                       — все нарушения; есть — выход 1
-//   node design/lint/cli.mjs --baseline ds-baseline.json <папки…>      — храповик: по файлу нарушений не больше,
+//   node node_modules/@replai-smm/design/lint/cli.mjs <папки или файлы…>                       — все нарушения; есть — выход 1
+//   node node_modules/@replai-smm/design/lint/cli.mjs --baseline ds-baseline.json <папки…>      — храповик: по файлу нарушений не больше,
 //                                                                        чем записано; новых файлов с нарушениями нет
-//   node design/lint/cli.mjs --baseline ds-baseline.json --write <…>   — записать нынешние числа (только вниз —
+//   node node_modules/@replai-smm/design/lint/cli.mjs --baseline ds-baseline.json --write <…>   — записать нынешние числа (только вниз —
 //                                                                        поднять число этим ключом нельзя)
 import { readFileSync, readdirSync, statSync, writeFileSync, existsSync } from 'node:fs'
 import { join, relative, sep } from 'node:path'
@@ -58,7 +58,7 @@ function main(argv) {
   const write = args.includes('--write')
   const paths = args.filter((a, i) => !a.startsWith('--') && (bi < 0 || i !== bi + 1))
   if (!paths.length) {
-    console.error('укажи папки или файлы: node design/lint/cli.mjs src [--baseline ds-baseline.json [--write]]')
+    console.error('укажи папки или файлы: node node_modules/@replai-smm/design/lint/cli.mjs src [--baseline ds-baseline.json [--write]]')
     return 2
   }
   const found = lint(paths)

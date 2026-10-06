@@ -1,0 +1,105 @@
+# Выпуск версии ДС: кнопка Run workflow на main, вход `version` (например 0.1.0). Тег vX.Y.Z — единственный способ взять
+# ДС в продукт (`"@replai-smm/design": "github:replai-smm/design#vX.Y.Z"`). Руками теги не ставят.
+#
+# Почему dist/ в теге, а не `prepare`: npm при установке из git запускает `prepare` и ради него ставит все devDependencies
+# пакета — Storybook, Vite, jsdom (~330 пакетов, минута на каждый `npm ci` каждого продукта и на каждом раннере). Поэтому
+# в main dist/ нет, а тег — коммит-потомок main с готовым dist/ (git add -f): продукт ставит его как обычный пакет, без
+# скриптов и без сборки. main этим выпуском не трогается.
+#
+# Выпуск = проверки (те же, что CI) → коммит с dist/ → тег → публикация Storybook ДС на VPS (/tools/storybook/ds/).
+# Публикация идёт, только если в репо есть секреты выкатки (RSMM_DEPLOY_KEY, PROCESS_READ_TOKEN) — их заводит owner
+# (infra/deploy/keys.sh design); нет их — выпуск тега состоялся, публикация пропущена с пометкой.
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: версия без «v», например 0.1.0
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  tag:
+    name: проверки → тег
+    runs-on: ${{ fromJSON(vars.CI_RUNNER || '"ubuntu-latest"') }}
+    timeout-minutes: 20
+    env:
+      TZ: Asia/Yekaterinburg
+      VERSION: ${{ inputs.version }}
+    outputs:
+      sha: ${{ steps.commit.outputs.sha }}
+    steps:
+      - name: версия и ветка
+        run: |
+          [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::версия — X.Y.Z, получено «$VERSION»"; exit 1; }
+          [ "${GITHUB_REF_NAME}" = main ] || { echo "::error::выпуск — только с main"; exit 1; }
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: тега ещё нет
+        run: |
+          if git rev-parse -q --verify "refs/tags/v$VERSION" >/dev/null; then echo "::error::тег v$VERSION уже есть — теги не переписываются"; exit 1; fi
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --prefer-offline --no-audit --no-fund
+      - run: npm run check
+      - run: npm run storybook:build
+      - name: коммит с dist/ и тег
+        id: commit
+        run: |
+          npm version "$VERSION" --no-git-tag-version --allow-same-version >/dev/null
+          node build.mjs
+          git config user.name "rsmm-release"
+          git config user.email "release@replai-smm.invalid"
+          git add -f dist package.json package-lock.json
+          git commit -q -m "Выпуск v$VERSION: dist/ собран из main $(git rev-parse --short HEAD)"
+          git tag "v$VERSION"
+          git push -q origin "refs/tags/v$VERSION"
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "тег v$VERSION → $(git rev-parse --short HEAD)"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: storybook-ds
+          path: react/storybook-static
+          retention-days: 7
+
+  storybook:
+    name: Storybook ДС → /tools/storybook/ds/
+    needs: tag
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      RSMM_DEPLOY_KEY: ${{ secrets.RSMM_DEPLOY_KEY }}
+      READ_TOKEN: ${{ secrets.PROCESS_READ_TOKEN }}
+    steps:
+      - name: секреты выкатки есть?
+        id: have
+        run: |
+          if [ -n "$RSMM_DEPLOY_KEY" ] && [ -n "$READ_TOKEN" ]; then echo "yes=true" >> "$GITHUB_OUTPUT"
+          else echo "::notice::секретов выкатки (RSMM_DEPLOY_KEY, PROCESS_READ_TOKEN) в репо design нет — Storybook ДС не опубликован; завести: infra/deploy/keys.sh design (process)"; fi
+      - uses: actions/download-artifact@v4
+        if: steps.have.outputs.yes == 'true'
+        with:
+          name: storybook-ds
+          path: storybook-static
+      - uses: actions/checkout@v4
+        if: steps.have.outputs.yes == 'true'
+        with:
+          repository: replai-smm/process
+          ref: main
+          token: ${{ secrets.PROCESS_READ_TOKEN }}
+          path: process
+      - name: публикация (клиент выкатки — process main)
+        if: steps.have.outputs.yes == 'true'
+        env:
+          SHA: ${{ needs.tag.outputs.sha }}
+        run: bash process/infra/deploy/storybook-ship.sh design storybook-static "$SHA"

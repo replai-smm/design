@@ -1,0 +1,38 @@
+# CI дизайн-системы (репо design). Задача лёгкая и без секретов — идёт на раннере GitHub (ubuntu-latest); выбор —
+# переменная репозитория CI_RUNNER (нет — ubuntu-latest), как у process: вернуть на пул ПК — `gh variable set CI_RUNNER
+# -R replai-smm/design --body '["self-hosted","rsmm-pool"]'`, назад — `gh variable delete CI_RUNNER -R replai-smm/design`.
+# Что держит: сторож «только токены» на самой ДС (`--kind ds --strict`, долга нет), типы, тесты (контраст, формы, сборка,
+# состав пакета, a11y axe в обеих темах, правила API, истории на каждое состояние), сборка Storybook.
+# Закон Карты (слова статусов, договор формы tokens.json, G46, матрица G47) читает не этот репо, а process — на закреплённом
+# теге этого пакета (process: scripts/__tests__/design-contract.test.ts); здесь закона нет и секретов нет.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  check:
+    name: ДС · типы, сторож, тесты, Storybook
+    runs-on: ${{ fromJSON(vars.CI_RUNNER || '"ubuntu-latest"') }}
+    timeout-minutes: 15
+    # снимок showcase-components.html записан в поясе ПК (UTC+5: toISOString() в историях зависит от пояса)
+    env:
+      TZ: Asia/Yekaterinburg
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: ${{ runner.environment == 'github-hosted' && 'npm' || '' }}
+      - run: $(command -v rsmm-npm-ci || echo npm ci) --prefer-offline --no-audit --no-fund
+      - run: npm run check
+      - run: npm run storybook:build

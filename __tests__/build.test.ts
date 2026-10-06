@@ -16,7 +16,7 @@ const { statuses } = JSON.parse(read('statuses.json'))
 describe('dist', () => {
   const out = outputs()
 
-  it('совпадает с источником (собрать: node design/build.mjs)', () => {
+  it('совпадает с источником (собрать: npm run build)', () => {
     for (const [rel, content] of Object.entries<string>(out)) expect(read(rel) === content, `${rel} отстал`).toBe(true)
   })
 

@@ -1,20 +1,16 @@
 /**
  * Токены — форма и единый набор имён (G46, CONCEPT §3.4).
- * tokens.json и scale.json — договор schema/defs/tokens.json (корень и $defs/scale) через общий загрузчик договоров;
- * G46 — tokenProblems() оттуда же. statuses.json — своей схемой рядом.
+ * Договор формы tokens.json и scale.json (schema/defs/tokens.json) и G46 (tokenProblems) держит process —
+ * scripts/__tests__/design-contract.test.ts на закреплённом теге этого пакета. Здесь — то, что видно без закона.
  */
 import { describe, it, expect } from 'vitest'
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import Ajv2020 from 'ajv/dist/2020.js'
-// @ts-ignore — .mjs без типов
-import { contract, tokenProblems } from '../../schema/defs/index.mjs'
 
 const design = resolve(import.meta.dirname, '..')
-const repo = resolve(design, '..')
 const json = (p: string) => JSON.parse(readFileSync(p, 'utf8'))
 const tokens = json(resolve(design, 'tokens.json'))
-const errors = (v: any, data: unknown) => (v(data) ? [] : (v.errors ?? []).map((e: any) => `${e.instancePath} ${e.message}`))
 
 const validate = (schema: object, data: unknown) => {
   // allowMatchingProperties: обязательные «sans», «move» объявлены и в properties, и подходят под шаблон имён шкалы
@@ -24,13 +20,8 @@ const validate = (schema: object, data: unknown) => {
 }
 
 describe('tokens.json', () => {
-  it('проходит договор schema/defs/tokens.json — форма 3.1: палитры, без старых шкал в корне', () => {
-    expect(errors(contract('tokens'), tokens)).toEqual([])
+  it('форма 3.1: без старых шкал в корне (форму и G46 держит process)', () => {
     expect(Object.keys(tokens).filter((k) => ['status', 'spacing', 'type', 'motion', 'radius'].includes(k))).toEqual([])
-  })
-
-  it('G46 договора: имена тем, цвета обеих палитр в обеих темах, знаки ≥ 3:1, текст ≥ 4,5:1', () => {
-    expect(tokenProblems(tokens)).toEqual([])
   })
 
   it('источник — Carbon под Apache-2.0, светлая = g10, тёмная = g100', () => {
@@ -87,24 +78,7 @@ describe('tokens.json', () => {
   })
 })
 
-describe('scale.json и statuses.json', () => {
-  const scaleContract = contract('tokens', 'scale')
-
-  it('scale.json проходит договор schema/defs/tokens.json → $defs/scale', () => {
-    expect(errors(scaleContract, json(resolve(design, 'scale.json')))).toEqual([])
-  })
-
-  it('договор шкал ловит неправильное: отступ в em, длительность в секундах, нет «move»', () => {
-    const scale = json(resolve(design, 'scale.json'))
-    const bad1 = structuredClone(scale)
-    bad1.spacing['05'].$value = '1em'
-    const bad2 = structuredClone(scale)
-    bad2.duration['fast-01'].$value = '0.07s'
-    const bad3 = structuredClone(scale)
-    delete bad3.duration.move
-    for (const bad of [bad1, bad2, bad3]) expect(errors(scaleContract, bad)).not.toEqual([])
-  })
-
+describe('scale.json и statuses.json (форма scale.json — договор process)', () => {
   it('правило 0,6 с: duration-move = 600ms', () => {
     expect(json(resolve(design, 'scale.json')).duration.move.$value).toBe('600ms')
   })

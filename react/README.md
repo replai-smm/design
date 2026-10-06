@@ -1,7 +1,7 @@
 # ДС-React
 
 Второй слой дизайн-системы (`CONCEPT.md` §3.4): компоненты для Replai и дашборда. Внутри — Radix, раскрашенный
-только токенами из `design/dist` (Carbon React не ставим). В npm пакет не публикуется: продукт берёт исходники по пути.
+только токенами из `design/dist` (Carbon React не ставим). В npm пакет не публикуется: продукт берёт его из git по тегу.
 Собрано потоком П6 Карты 3.
 
 Посмотреть глазами: `design/dist/showcase.html`, раздел «Компоненты ДС-React» (на телефоне и ноутбуке, без сети).
@@ -44,24 +44,21 @@
 
 ## Как продукт берёт ДС-React
 
-`/update` кладёт папку `design/` в продукт целиком (поток П12) — вместе с `react/`. Дальше:
+Пакет `@replai-smm/design` ставится по тегу (`github:replai-smm/design#vX.Y.Z`, корневой README, «Как продукт берёт дизайн-систему»). Исходники ДС-React лежат в нём как TypeScript. Дальше:
 
 1. Главный CSS (после Tailwind):
    ```css
    @import "tailwindcss";
-   @import "<путь>/design/dist/tokens.css";
-   @import "<путь>/design/dist/tailwind.css";
-   @import "<путь>/design/react/src/ds.css";
-   @source "<путь>/design/react/src";
+   @import "@replai-smm/design/tokens.css";
+   @import "@replai-smm/design/tailwind.css";
+   @import "@replai-smm/design/styles.css";
+   @source "../node_modules/@replai-smm/design/react/src";
    ```
-2. `vite.config.ts`: путь к пакету и одна копия React и Radix:
+2. `vite.config.ts`: одна копия React и Radix (пакет — обычная зависимость, алиас не нужен):
    ```ts
-   resolve: {
-     alias: { '@replai-smm/ds-react': fileURLToPath(new URL('<путь>/design/react/src/index.ts', import.meta.url)) },
-     dedupe: ['react', 'react-dom', 'radix-ui'],
-   }
+   resolve: { dedupe: ['react', 'react-dom', 'radix-ui'] }
    ```
-   и `"paths": { "@replai-smm/ds-react": ["<путь>/design/react/src/index.ts"] }` в `tsconfig`.
+   Сборщик должен транспилировать TypeScript из `node_modules/@replai-smm/design` (Vite так и делает; проверено на DF).
 3. Тема — атрибут `data-theme="light|dark"` на `<html>` (без него — как в системе). Только класс `.dark` не годится:
    в светлой теме у тёмной системы он оставит тёмные цвета.
 4. В приложение — `<Toaster>` и `<ConfirmProvider>` один раз вокруг всего.
@@ -85,6 +82,6 @@ npm run storybook:build
 - `src/__tests__/rules.test.tsx` — истории на каждое состояние (теги `state:` — из `design/matrix.yaml`), только токены,
   движение токенами и 0,6 с без прыжка.
 - `src/__tests__/showcase.test.tsx` — образцы для `showcase.html` совпадают с историями. Поменяли компонент или историю:
-  `npm run showcase`, потом `node design/build.mjs`.
+  `npm run showcase`, потом `npm run build`.
 
 Истории — источник клеток скриншотов (поток П7): тег `state:<состояние>`, глобал темы `theme`, ширины 390 и 1280.

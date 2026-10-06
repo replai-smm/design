@@ -4,7 +4,9 @@
 Правило одно — **IBM Carbon** (Apache-2.0). Компоненты Replai остаются shadcn/Radix, но красятся только отсюда.
 Собрано потоком П6 Карты 3 (`archive/process-notes-2026-10-05:work/karta-3/BUILD-PLAN.md` §2, `CONCEPT.md` §3.4).
 
-Посмотреть всё глазами: открыть `dist/showcase.html` в браузере (на ноутбуке или телефоне — сборка и сеть не нужны).
+Это самостоятельный репозиторий (раньше — папка `design/` в process; история файлов сохранена). Продукты берут его как зависимость по тегу (ниже). Storybook ДС — `/tools/storybook/ds/` (под паролем `/tools/`).
+
+Посмотреть всё глазами: `npm ci && npm run build`, открыть `dist/showcase.html` в браузере (на ноутбуке или телефоне — сеть не нужна).
 Там обе темы, ширины 390 и 1280, все статусы и таблица контраста.
 
 ## Правила для всех продуктов (держит машина)
@@ -14,7 +16,7 @@
 дежурный, поток Карты 3. `CLAUDE.md` продуктов ссылается сюда, а не пересказывает.
 
 1. **Интерфейс — только через дизайн-систему.** Экраны собираются из компонентов ДС-React и токенов. Своих стилей,
-   цветов, размеров вне токенов в продукте нет. Не хватает компонента — его добавляют в ДС-React (`react/`, PR в process
+   цветов, размеров вне токенов в продукте нет. Не хватает компонента — его добавляют в ДС-React (`react/`, PR в репо design
    со Storybook и тестами), а не строят в продукте; продукт потом берёт его оттуда. **Арена** — исключение по компонентам:
    там компоненты VKUI, облик — наша тема через переходник (`dist/vkui-adapter.css`); своих компонентов и цветов нет и там.
    «Не до абсурда»: осознанный случай — строка с `ds-allow: <причина>` (видна в ревью).
@@ -38,9 +40,9 @@
 
 | Где | Команда | Что держит |
 |---|---|---|
-| CI продукта, задача `design-system` (`templates/product/.github/workflows/gates.yml`; у Replai — `intent-conformance.yml`) | `node <process>/design/lint/principles.mjs --kind product --base origin/main <папка интерфейса>` (Арена — `--kind arena`) | только новое: новый файл историй не на полке; файл, чья полка была верной, сломан; новое нарушение «только токены» в файле; новый свой компонент с именем ДС. Старое — предупреждение («долг»): истории Replai на старых полках переложат отдельной задачей после переезда DF |
-| ДС-React, `npm run lint` (CI process, задача `ds-react`) | `--kind ds --strict src .storybook` | всё: у ДС долга нет |
-| Агент до коммита | та же команда с `--base origin/main` | смотрит и незакоммиченное, и новые файлы |
+| CI продукта, задача `design-system` (`templates/product/.github/workflows/gates.yml` в process; у Replai — `intent-conformance.yml`) | `node <process>/scripts/design-principles.mjs --repo . --base origin/main` (линт берётся из пакета `@replai-smm/design`, закреплённого в process: `node_modules/@replai-smm/design/lint/principles.mjs`; Арена — `ui.kind arena` в `product.mjs`) | только новое: новый файл историй не на полке; файл, чья полка была верной, сломан; новое нарушение «только токены» в файле; новый свой компонент с именем ДС. Старое — предупреждение («долг») |
+| ДС-React, `npm run lint` (CI этого репо) | `--kind ds --strict src .storybook` | всё: у ДС долга нет |
+| Агент до коммита | `node <process>/scripts/design-principles.mjs --repo . --base origin/main` | смотрит и незакоммиченное, и новые файлы |
 
 Без `--base` и `--strict` — только отчёт (выход 0). Число долга печатается в конце: трогаешь файл с долгом — почини.
 
@@ -52,7 +54,7 @@
 | `scale.json` | отступы, высоты, наборы текста, углы, длительности, тень (формат W3C Design Tokens). Форма — тот же договор, `$defs/scale` | руками, интентом «дизайн» |
 | `statuses.json` | закрытый список статусов: слово с экрана, тон продукта и цвет Карты. Форма — `statuses.schema.json` | руками, вслед за законом |
 | `fonts/` | IBM Plex Sans 400 и 600 (кириллица есть — проверяет тест), лицензия OFL | — |
-| `dist/tokens.css` | **ДС-основа**: CSS-переменные `--cds-*` обеих тем | машина (`node design/build.mjs`) |
+| `dist/tokens.css` | **ДС-основа**: CSS-переменные `--cds-*` обеих тем | машина (`npm run build`; в main не лежит, кладётся в тег при выпуске) |
 | `dist/tailwind.css` | тема Tailwind 4 для Replai и дашборда | машина |
 | `dist/tokens.ts` | то же для TypeScript (ДС-React, дашборд, тесты) | машина |
 | `dist/showcase.html` | страница образцов (с компонентами ДС-React) | машина |
@@ -61,7 +63,7 @@
 | `lib/`, `build.mjs` | генератор, контраст, чтение шрифта | — |
 | `licenses/`, `NOTICE.md` | лицензия Carbon и откуда что взято | — |
 
-Файлы в `dist/` руками не правят: тест сверяет их с источником, и правка руками делает PR красным.
+`dist/` в main нет: его собирает `npm run build` (тесты и CI собирают сами), а при выпуске версии кладёт в тег `.github/workflows/release.yml`.
 
 ## Тема
 
@@ -116,30 +118,42 @@
 
 ## Как продукт берёт дизайн-систему
 
-`/update` кладёт копию папки `design/` в продукт (поток П12). Дальше — по продукту:
+Зависимость по тегу, в `package.json` той папки, где у продукта интерфейс (Replai — `frontend`, Арена и DF — `web`):
+
+```json
+"dependencies": { "@replai-smm/design": "github:replai-smm/design#v0.1.0" }
+```
+
+Репо приватный: `npm ci` на раннере читает его с токеном организации (секрет `PROCESS_READ_TOKEN`, шаг `.github/actions/git-auth` перед `npm ci` — образец в process: `templates/product/.github/actions/git-auth`). Без токена `npm ci` красный на «repository not found».
+Установка быстрая и без сборки: в теге лежит готовый `dist/`, у пакета нет скриптов установки и своих `dependencies`
+(React и Radix — из продукта). Версия растёт только тегом: выпуск — Run workflow «Release» в этом репо; продукт поднимает
+тег своим PR, когда готов (экраны/скриншоты покажут, что поменялось).
 
 - **Replai** (Tailwind 4, shadcn/Radix). В главном CSS:
   ```css
   @import "tailwindcss";
-  @import "<путь>/design/dist/tokens.css";
-  @import "<путь>/design/dist/tailwind.css";
+  @import "@replai-smm/design/tokens.css";
+  @import "@replai-smm/design/tailwind.css";
+  @import "@replai-smm/design/styles.css";
+  @source "../node_modules/@replai-smm/design/react/src";
   ```
   Палитра Tailwind и его углы сброшены: `bg-red-500` больше не существует. Есть цвета Carbon
   (`bg-layer-01`, `text-text-secondary`, `bg-status-error-background`) и псевдонимы shadcn (`bg-background`,
   `text-foreground`, `bg-primary`, `border-border`, `ring-ring`). Наборы текста — `text-body-01`, `text-heading-03`.
   Отступы — обычные числа Tailwind; шаги Carbon: 0.5 · 1 · 2 · 3 · 4 · 6 · 8 · 10 · 12 · 16 · 20 · 24 · 40.
-  Углы — прямые, как у Carbon; `rounded-full` — у метки статуса.
+  Углы — прямые, как у Carbon; `rounded-full` — у метки статуса. Компоненты: `import { Button } from '@replai-smm/design'`
+  (TypeScript-исходники: сборщик продукта транспилирует их сам; как — `react/README.md`).
   Сторож в `eslint.config.js`:
   ```js
-  import ds from '<путь>/design/lint/eslint-plugin.mjs'
+  import ds from '@replai-smm/design/lint/eslint-plugin'
   export default [{ files: ['src/**/*.{ts,tsx}'], plugins: { ds }, rules: { 'ds/no-raw-values': 'error' } }]
   ```
-- **DF-Agency** (ванильный JS) и любые страницы без сборки: подключить `dist/tokens.css` и писать
-  `color: var(--cds-text-primary)`, `padding: var(--cds-spacing-05)`. Шрифт подтянется сам из `fonts/`.
-  Сторож — из командной строки, ESLint не нужен: `node design/lint/cli.mjs <папка>`.
-- **Дашборд** и **Replai** — компоненты ДС-React (`react/`: Radix, раскрашенный токенами, истории Storybook, a11y):
+- **DF-Agency** (React + ДС-React) и любые страницы без сборки: `@import "@replai-smm/design/tokens.css"` и
+  `color: var(--cds-text-primary)`, `padding: var(--cds-spacing-05)`. Шрифт подтянется сам (`fonts/` пакета).
+  Сторож из командной строки, ESLint не нужен: `node node_modules/@replai-smm/design/lint/cli.mjs <папка>`.
+- **Дашборд Карты** и **Replai** — компоненты ДС-React (`react/`: Radix, раскрашенный токенами, истории Storybook, a11y):
   как подключить — `react/README.md`; план переезда Replai — `react/MIGRATION-REPLAI.md`.
-- **Arena** остаётся на VKUI: облик — через переходник `dist/vkui-adapter.css` (копия в `arena/web/design/`, включается сборкой `ARENA_THEME=rsmm`, интент Арены `I-vkui-rsmm-theme`). Контраст переходника на заливках так, как их ставят компоненты VKUI, держит `__tests__/vkui.test.ts`.
+- **Arena** остаётся на VKUI: облик — через переходник (`@replai-smm/design/vkui-adapter.css`, включается сборкой `ARENA_THEME=rsmm`, интент Арены `I-vkui-rsmm-theme`). Контраст переходника на заливках так, как их ставят компоненты VKUI, держит `__tests__/vkui.test.ts`.
 
 ### Сторож «только токены»
 
@@ -153,20 +167,20 @@
 
 Старые нарушения не чинят разом — включают **храповик**:
 ```
-node design/lint/cli.mjs --baseline ds-baseline.json --write src   # записать нынешние числа
-node design/lint/cli.mjs --baseline ds-baseline.json src           # в CI: по файлу не больше, чем записано
+node node_modules/@replai-smm/design/lint/cli.mjs --baseline ds-baseline.json --write src   # записать нынешние числа
+node node_modules/@replai-smm/design/lint/cli.mjs --baseline ds-baseline.json src           # в CI: по файлу не больше, чем записано
 ```
 Число по файлу может только падать. Замер на Replai 02.10: 66 нарушений (34 произвольных значения, 32 сырых цвета).
 
 ## Как поменять токен
 
-1. Интент вида «дизайн» с клетками `cells: all` — правка токена задевает все экраны всех продуктов.
+1. Интент вида «дизайн» (в process) с клетками `cells: all` — правка токена задевает все экраны всех продуктов.
 2. Поправить `tokens.json` или `scale.json` (цвет — только из палитры Carbon; новый тон, новая палитра или новая
    шкала — только через договор `schema/defs/tokens.json`, его меняет интегратор).
-3. `node design/build.mjs` — пересобрать `dist/`.
-4. `npx vitest run design` — контраст, форма, статусы, свежесть `dist/`, шрифт. Красное — не мержится.
+3. `npm run build` — пересобрать `dist/`.
+4. `npm test` — контраст, форма, статусы, состав пакета, шрифт, компоненты. Красное — не мержится. Закон Карты (слова статусов, договор формы, G46, матрица G47) сверяет process на закреплённом теге пакета: после выпуска process поднимает тег своим PR — красное там значит, что токен или статус разошёлся с законом.
 5. Открыть `dist/showcase.html` в обеих темах на телефоне и ноутбуке.
-6. `/update` разносит новую копию по продуктам; их скриншоты покажут, что поменялось.
+6. Выпуск: Run workflow «Release» (версия X.Y.Z) → тег `vX.Y.Z` с готовым `dist/` и Storybook ДС на `/tools/storybook/ds/`. Продукты поднимают тег своими PR.
 
 ## Откуда значения
 

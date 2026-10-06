@@ -1,9 +1,9 @@
 {
-  "name": "@replai-smm/ds-react",
+  "name": "@replai-smm/design-react",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "ДС-React: компоненты дизайн-системы для Replai и дашборда — Radix-примитивы, раскрашенные только токенами Carbon (design/dist). В npm не публикуется: продукт берёт исходники по пути (README.md).",
+  "description": "ДС-React (рабочее пространство репо design): исходники — react/src, их отдаёт корневой пакет @replai-smm/design. Здесь — инструменты разработки: Storybook, тесты, типы.",
   "engines": {
     "node": ">=22"
   },
