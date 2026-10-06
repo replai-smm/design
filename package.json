@@ -1,6 +1,6 @@
 {
   "name": "@replai-smm/design",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "description": "Дизайн-система replai-smm: токены Carbon, ДС-React, линт «только через ДС». Продукты ставят по тегу: github:replai-smm/design#vX.Y.Z (в теге лежит собранный dist/, сборки при установке нет).",
