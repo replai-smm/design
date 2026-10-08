@@ -1,0 +1,66 @@
+{
+  "schema": 3,
+  "doc": "токены",
+  "source": {
+    "name": "carbon",
+    "version": "11.62.0",
+    "license": "Apache-2.0"
+  },
+  "themes": {
+    "светлая": {
+      "carbon": "g10",
+      "colors": {
+        "background": "#f4f4f4",
+        "layer-01": "#ffffff",
+        "text-primary": "#161616",
+        "text-secondary": "#525252",
+        "border-subtle-01": "#c6c6c6",
+        "interactive": "#0f62fe",
+        "focus": "#0f62fe",
+        "link-primary": "#0f62fe",
+        "support-error": "#da1e28",
+        "support-warning": "#f1c21b",
+        "support-success": "#24a148",
+        "support-info": "#0043ce",
+        "status-warning": "#b28600"
+      }
+    },
+    "тёмная": {
+      "carbon": "g100",
+      "colors": {
+        "background": "#161616",
+        "layer-01": "#262626",
+        "text-primary": "#f4f4f4",
+        "text-secondary": "#c6c6c6",
+        "border-subtle-01": "#393939",
+        "interactive": "#4589ff",
+        "focus": "#ffffff",
+        "link-primary": "#78a9ff",
+        "support-error": "#fa4d56",
+        "support-warning": "#f1c21b",
+        "support-success": "#42be65",
+        "support-info": "#4589ff",
+        "status-warning": "#f1c21b"
+      }
+    }
+  },
+  "palettes": {
+    "karta": {
+      "без изменений": "support-info",
+      "хотят изменить": "status-warning"
+    },
+    "product": {
+      "опасно": "support-error",
+      "внимание": "status-warning",
+      "хорошо": "support-success",
+      "нейтрально": null
+    }
+  },
+  "font": {
+    "family": "IBM Plex Sans",
+    "files": [
+      "fonts/IBMPlexSans-Regular.woff2",
+      "fonts/IBMPlexSans-SemiBold.woff2"
+    ]
+  }
+}

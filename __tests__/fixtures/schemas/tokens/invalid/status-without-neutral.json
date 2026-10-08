@@ -1,0 +1,103 @@
+{
+  "schema": 3,
+  "doc": "токены",
+  "source": {
+    "name": "carbon",
+    "version": "11.62.0",
+    "license": "Apache-2.0"
+  },
+  "themes": {
+    "светлая": {
+      "carbon": "g10",
+      "colors": {
+        "background": "#f4f4f4",
+        "layer-01": "#ffffff",
+        "text-primary": "#161616",
+        "text-secondary": "#525252",
+        "border-subtle-01": "#c6c6c6",
+        "interactive": "#0f62fe",
+        "focus": "#0f62fe",
+        "link-primary": "#0f62fe",
+        "support-error": "#da1e28",
+        "support-warning": "#f1c21b",
+        "support-success": "#24a148",
+        "support-info": "#0043ce"
+      }
+    },
+    "тёмная": {
+      "carbon": "g100",
+      "colors": {
+        "background": "#161616",
+        "layer-01": "#262626",
+        "text-primary": "#f4f4f4",
+        "text-secondary": "#c6c6c6",
+        "border-subtle-01": "#393939",
+        "interactive": "#4589ff",
+        "focus": "#ffffff",
+        "link-primary": "#78a9ff",
+        "support-error": "#fa4d56",
+        "support-warning": "#f1c21b",
+        "support-success": "#42be65",
+        "support-info": "#4589ff"
+      }
+    }
+  },
+  "status": {
+    "опасно": "support-error",
+    "внимание": "support-warning",
+    "хорошо": "support-success"
+  },
+  "spacing": {
+    "spacing-01": 2,
+    "spacing-02": 4,
+    "spacing-03": 8,
+    "spacing-04": 12,
+    "spacing-05": 16,
+    "spacing-06": 24,
+    "spacing-07": 32
+  },
+  "type": {
+    "body-01": {
+      "size": 14,
+      "line": 20,
+      "weight": 400
+    },
+    "body-02": {
+      "size": 16,
+      "line": 24,
+      "weight": 400
+    },
+    "label-01": {
+      "size": 12,
+      "line": 16,
+      "weight": 400
+    },
+    "heading-02": {
+      "size": 16,
+      "line": 22,
+      "weight": 600
+    }
+  },
+  "motion": {
+    "move": {
+      "ms": 600,
+      "easing": "cubic-bezier(0.2, 0, 0.38, 0.9)"
+    },
+    "fast-02": {
+      "ms": 110,
+      "easing": "cubic-bezier(0.2, 0, 0.38, 0.9)"
+    }
+  },
+  "radius": {
+    "none": 0,
+    "radius-01": 2,
+    "radius-02": 4
+  },
+  "font": {
+    "family": "IBM Plex Sans",
+    "files": [
+      "fonts/IBMPlexSans-Regular.woff2",
+      "fonts/IBMPlexSans-SemiBold.woff2"
+    ]
+  }
+}

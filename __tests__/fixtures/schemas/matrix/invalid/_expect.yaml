@@ -1,0 +1,14 @@
+# неправильная фикстура → ошибка, ради которой она написана: путь в документе и правило схемы
+no-normal-state.yaml:
+  path: /states
+  keyword: contains
+width-as-text.yaml:
+  path: /widths/0
+  keyword: type
+negative-tolerance.yaml:
+  path: /max_diff_pixels
+  keyword: minimum
+no-active.yaml:
+  path: ""
+  keyword: required
+  missing: active

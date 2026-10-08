@@ -1,0 +1,18 @@
+# неправильная фикстура → ошибка, ради которой она написана: путь в документе и правило схемы
+spacing-in-em.json:
+  path: /spacing/05/$value
+  keyword: pattern
+duration-in-seconds.json:
+  path: /duration/fast-01/$value
+  keyword: pattern
+no-move.json:
+  path: /duration
+  keyword: required
+  missing: move
+move-not-600.json:
+  path: /duration/move/$value
+  keyword: const
+font-without-mono.json:
+  path: /font-family
+  keyword: required
+  missing: mono

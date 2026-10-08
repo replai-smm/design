@@ -1,0 +1,91 @@
+{
+  "$description": "Наименьшие шкалы: по одному значению, где можно.",
+  "spacing": {
+    "$type": "dimension",
+    "05": {
+      "$value": "1rem"
+    }
+  },
+  "size": {
+    "$type": "dimension",
+    "lg": {
+      "$value": "3rem"
+    }
+  },
+  "icon-size": {
+    "$type": "dimension",
+    "01": {
+      "$value": "16px"
+    }
+  },
+  "font-family": {
+    "$type": "fontFamily",
+    "sans": {
+      "$value": [
+        "IBM Plex Sans",
+        "sans-serif"
+      ]
+    },
+    "mono": {
+      "$value": [
+        "IBM Plex Mono",
+        "monospace"
+      ]
+    }
+  },
+  "font-weight": {
+    "$type": "fontWeight",
+    "regular": {
+      "$value": 400
+    }
+  },
+  "type": {
+    "$type": "typography",
+    "body-01": {
+      "$value": {
+        "fontSize": "0.875rem",
+        "lineHeight": 1.42857,
+        "letterSpacing": "0.16px",
+        "fontWeight": 400
+      }
+    }
+  },
+  "radius": {
+    "$type": "dimension",
+    "none": {
+      "$value": "0px"
+    }
+  },
+  "duration": {
+    "$type": "duration",
+    "move": {
+      "$value": "600ms"
+    },
+    "fast-01": {
+      "$value": "0.07s"
+    }
+  },
+  "easing": {
+    "$type": "cubicBezier",
+    "move": {
+      "$value": [
+        0.4,
+        0.14,
+        0.3,
+        1
+      ]
+    }
+  },
+  "shadow": {
+    "$type": "shadow",
+    "raised": {
+      "$value": {
+        "color": "{color.shadow}",
+        "offsetX": "0px",
+        "offsetY": "2px",
+        "blur": "6px",
+        "spread": "0px"
+      }
+    }
+  }
+}
