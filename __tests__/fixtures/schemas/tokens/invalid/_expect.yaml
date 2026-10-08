@@ -1,0 +1,36 @@
+# неправильная фикстура → ошибка, ради которой она написана: путь в документе и правило схемы
+missing-required-token.json:
+  path: /themes/тёмная/colors
+  keyword: required
+  missing: focus
+rgb-colour.json:
+  path: /themes/светлая/colors/background
+  keyword: pattern
+dark-theme-g90.json:
+  path: /themes/тёмная/carbon
+  keyword: const
+radix-source.json:
+  path: /source/name
+  keyword: const
+status-without-neutral.json:
+  path: /status
+  keyword: required
+  missing: нейтрально
+no-card-motion.json:
+  path: /motion
+  keyword: required
+  missing: move
+spacing-in-rem.json:
+  path: /spacing/spacing-03
+  keyword: type
+no-palettes.json:
+  path: ""
+  keyword: required
+  missing: palettes
+karta-without-red.json:
+  path: /palettes/karta
+  keyword: required
+  missing: падает
+karta-grey-state.json:
+  path: /palettes/karta
+  keyword: additionalProperties

@@ -1,0 +1,907 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://replai-smm.ru/schema/karta/3/design/tokens.json",
+  "title": "Токены",
+  "$comment": "Shape of design/tokens.json: IBM Carbon colours for both themes, two named palettes (karta — Karta screens and dashboard, KARTA-VIEW C-SCR-3; product — the four status tones of product UIs), the font. The non-colour scale (spacing, sizes, type sets, radius, motion incl. move = 600 ms, shadow) is design/scale.json — $defs/scale, contract('tokens', 'scale'). Old documents may still carry status/spacing/type/motion/radius (3.0); new ones write palettes and scale.json. Contrast and cross-file rules — CHECKS.md G46.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "doc",
+    "source",
+    "themes",
+    "font"
+  ],
+  "properties": {
+    "schema": {
+      "$comment": "law version of this document shape",
+      "const": 3
+    },
+    "doc": {
+      "const": "токены"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "version",
+        "license"
+      ],
+      "properties": {
+        "name": {
+          "const": "carbon"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        },
+        "license": {
+          "const": "Apache-2.0"
+        }
+      }
+    },
+    "themes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "светлая",
+        "тёмная"
+      ],
+      "properties": {
+        "светлая": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "carbon",
+            "colors"
+          ],
+          "properties": {
+            "carbon": {
+              "const": "g10"
+            },
+            "colors": {
+              "type": "object",
+              "required": [
+                "background",
+                "layer-01",
+                "text-primary",
+                "text-secondary",
+                "border-subtle-01",
+                "interactive",
+                "focus",
+                "link-primary",
+                "support-error",
+                "support-warning",
+                "support-success",
+                "support-info"
+              ],
+              "properties": {
+                "background": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-f]{6}(?:[0-9a-f]{2})?$"
+                },
+                "layer-01": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-f]{6}(?:[0-9a-f]{2})?$"
+                },
+                "text-primary": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-f]{6}(?:[0-9a-f]{2})?$"
+                },
+                "text-secondary": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-f]{6}(?:[0-9a-f]{2})?$"
+                },
+                "border-subtle-01": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-f]{6}(?:[0-9a-f]{2})?$"
+                },
+                "interactive": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-f]{6}(?:[0-9a-f]{2})?$"
+                },
+                "focus": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-f]{6}(?:[0-9a-f]{2})?$"
+                },
+                "link-primary": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-f]{6}(?:[0-9a-f]{2})?$"
+                },
+                "support-error": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-f]{6}(?:[0-9a-f]{2})?$"
+                },
+                "support-warning": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-f]{6}(?:[0-9a-f]{2})?$"
+                },
+                "support-success": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-f]{6}(?:[0-9a-f]{2})?$"
+                },
+                "support-info": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-f]{6}(?:[0-9a-f]{2})?$"
+                }
+              },
+              "propertyNames": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+              },
+              "additionalProperties": {
+                "type": "string",
+                "pattern": "^#[0-9a-f]{6}(?:[0-9a-f]{2})?$"
+              }
+            }
+          }
+        },
+        "тёмная": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "carbon",
+            "colors"
+          ],
+          "properties": {
+            "carbon": {
+              "const": "g100"
+            },
+            "colors": {
+              "type": "object",
+              "required": [
+                "background",
+                "layer-01",
+                "text-primary",
+                "text-secondary",
+                "border-subtle-01",
+                "interactive",
+                "focus",
+                "link-primary",
+                "support-error",
+                "support-warning",
+                "support-success",
+                "support-info"
+              ],
+              "properties": {
+                "background": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-f]{6}(?:[0-9a-f]{2})?$"
+                },
+                "layer-01": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-f]{6}(?:[0-9a-f]{2})?$"
+                },
+                "text-primary": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-f]{6}(?:[0-9a-f]{2})?$"
+                },
+                "text-secondary": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-f]{6}(?:[0-9a-f]{2})?$"
+                },
+                "border-subtle-01": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-f]{6}(?:[0-9a-f]{2})?$"
+                },
+                "interactive": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-f]{6}(?:[0-9a-f]{2})?$"
+                },
+                "focus": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-f]{6}(?:[0-9a-f]{2})?$"
+                },
+                "link-primary": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-f]{6}(?:[0-9a-f]{2})?$"
+                },
+                "support-error": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-f]{6}(?:[0-9a-f]{2})?$"
+                },
+                "support-warning": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-f]{6}(?:[0-9a-f]{2})?$"
+                },
+                "support-success": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-f]{6}(?:[0-9a-f]{2})?$"
+                },
+                "support-info": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-f]{6}(?:[0-9a-f]{2})?$"
+                }
+              },
+              "propertyNames": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+              },
+              "additionalProperties": {
+                "type": "string",
+                "pattern": "^#[0-9a-f]{6}(?:[0-9a-f]{2})?$"
+              }
+            }
+          }
+        }
+      }
+    },
+    "palettes": {
+      "$comment": "palette → state → colour token present in both themes (G46: sign colour, ≥ 3:1 on background and layers in both themes)",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "karta",
+        "product"
+      ],
+      "properties": {
+        "karta": {
+          "$comment": "Karta screens and the dashboard (KARTA-VIEW C-SCR-3): three state colours — blue «без изменений» (also «работает»), yellow «хотят изменить» (also «хотят добавить», «хотят удалить»), red «падает». Grey is not a state colour there",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "без изменений",
+            "хотят изменить",
+            "падает"
+          ],
+          "properties": {
+            "без изменений": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+            },
+            "хотят изменить": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+            },
+            "падает": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+            }
+          }
+        },
+        "product": {
+          "$comment": "product UIs: the four status tones (CONCEPT §3.4); нейтрально = null — no colour",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "опасно",
+            "внимание",
+            "хорошо",
+            "нейтрально"
+          ],
+          "properties": {
+            "опасно": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+            },
+            "внимание": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+            },
+            "хорошо": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+            },
+            "нейтрально": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "status": {
+      "$comment": "3.0 form of palettes.product; new documents write palettes (G46: if both are present, status = palettes.product)",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "опасно",
+        "внимание",
+        "хорошо",
+        "нейтрально"
+      ],
+      "properties": {
+        "опасно": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+        },
+        "внимание": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+        },
+        "хорошо": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+        },
+        "нейтрально": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "deprecated": true
+    },
+    "spacing": {
+      "$comment": "3.0, spacing scale, px; moved to scale.json ($defs/scale), new documents do not write it",
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+      },
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 256
+      },
+      "deprecated": true
+    },
+    "type": {
+      "$comment": "3.0, type scale; moved to scale.json ($defs/scale), new documents do not write it",
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "size",
+          "line",
+          "weight"
+        ],
+        "properties": {
+          "size": {
+            "type": "integer",
+            "minimum": 8,
+            "maximum": 96
+          },
+          "line": {
+            "type": "integer",
+            "minimum": 8,
+            "maximum": 128
+          },
+          "weight": {
+            "enum": [
+              300,
+              400,
+              600,
+              700
+            ]
+          }
+        }
+      },
+      "deprecated": true
+    },
+    "motion": {
+      "$comment": "3.0, durations and easing; «move» = card movement (owner: 0.6 s, no jump); moved to scale.json ($defs/scale), new documents do not write it",
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "ms",
+          "easing"
+        ],
+        "properties": {
+          "ms": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2000
+          },
+          "easing": {
+            "type": "string",
+            "pattern": "^(?:linear|cubic-bezier\\((?:-?[0-9.]+, ?){3}-?[0-9.]+\\))$"
+          }
+        }
+      },
+      "required": [
+        "move"
+      ],
+      "properties": {
+        "move": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "ms",
+            "easing"
+          ],
+          "properties": {
+            "ms": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2000
+            },
+            "easing": {
+              "type": "string",
+              "pattern": "^(?:linear|cubic-bezier\\((?:-?[0-9.]+, ?){3}-?[0-9.]+\\))$"
+            }
+          }
+        }
+      },
+      "deprecated": true
+    },
+    "radius": {
+      "$comment": "3.0, corner radius, px; moved to scale.json ($defs/scale), new documents do not write it",
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+      },
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 64
+      },
+      "deprecated": true
+    },
+    "font": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "family",
+        "files"
+      ],
+      "properties": {
+        "family": {
+          "const": "IBM Plex Sans"
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^fonts/[A-Za-z0-9._-]+\\.woff2$"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      }
+    }
+  },
+  "anyOf": [
+    {
+      "$comment": "3.1: two named palettes",
+      "properties": {
+        "palettes": true
+      },
+      "required": [
+        "palettes"
+      ]
+    },
+    {
+      "$comment": "3.0: one status map (= palettes.product), kept for old documents",
+      "properties": {
+        "status": true
+      },
+      "required": [
+        "status"
+      ]
+    }
+  ],
+  "$defs": {
+    "scale": {
+      "$comment": "Shape of design/scale.json (W3C DTCG subset): spacing, sizes, fonts, type sets, radius, motion, shadow. Colours live in the document root (design/tokens.json). duration.move = 600 ms — owner’s word «0,6 с, без прыжка»",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "$description",
+        "spacing",
+        "size",
+        "icon-size",
+        "font-family",
+        "font-weight",
+        "type",
+        "radius",
+        "duration",
+        "easing",
+        "shadow"
+      ],
+      "properties": {
+        "$description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "spacing": {
+          "$ref": "#/$defs/scale_dimensions"
+        },
+        "size": {
+          "$ref": "#/$defs/scale_dimensions"
+        },
+        "icon-size": {
+          "$ref": "#/$defs/scale_dimensions"
+        },
+        "radius": {
+          "$ref": "#/$defs/scale_dimensions"
+        },
+        "font-family": {
+          "type": "object",
+          "minProperties": 2,
+          "required": [
+            "$type",
+            "sans",
+            "mono"
+          ],
+          "properties": {
+            "$type": {
+              "const": "fontFamily"
+            },
+            "$description": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sans": {
+              "$ref": "#/$defs/scale_font_family"
+            },
+            "mono": {
+              "$ref": "#/$defs/scale_font_family"
+            }
+          },
+          "propertyNames": {
+            "pattern": "^(?:\\$type|\\$description|[a-z0-9][a-z0-9-]*)$"
+          },
+          "additionalProperties": false
+        },
+        "font-weight": {
+          "type": "object",
+          "minProperties": 2,
+          "required": [
+            "$type"
+          ],
+          "properties": {
+            "$type": {
+              "const": "fontWeight"
+            },
+            "$description": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "propertyNames": {
+            "pattern": "^(?:\\$type|\\$description|[a-z0-9][a-z0-9-]*)$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/scale_font_weight"
+          }
+        },
+        "type": {
+          "type": "object",
+          "minProperties": 2,
+          "required": [
+            "$type"
+          ],
+          "properties": {
+            "$type": {
+              "const": "typography"
+            },
+            "$description": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "propertyNames": {
+            "pattern": "^(?:\\$type|\\$description|[a-z0-9][a-z0-9-]*)$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/scale_type_set"
+          }
+        },
+        "duration": {
+          "type": "object",
+          "minProperties": 2,
+          "required": [
+            "$type",
+            "move"
+          ],
+          "properties": {
+            "$type": {
+              "const": "duration"
+            },
+            "$description": {
+              "type": "string",
+              "minLength": 1
+            },
+            "move": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "$value"
+              ],
+              "properties": {
+                "$value": {
+                  "const": "600ms"
+                },
+                "$description": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "$comment": "card moves or opens in 0.6 s, neighbours do not jump"
+            }
+          },
+          "propertyNames": {
+            "pattern": "^(?:\\$type|\\$description|[a-z0-9][a-z0-9-]*)$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/scale_duration"
+          }
+        },
+        "easing": {
+          "type": "object",
+          "minProperties": 2,
+          "required": [
+            "$type"
+          ],
+          "properties": {
+            "$type": {
+              "const": "cubicBezier"
+            },
+            "$description": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "propertyNames": {
+            "pattern": "^(?:\\$type|\\$description|[a-z0-9][a-z0-9-]*)$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/scale_easing"
+          }
+        },
+        "shadow": {
+          "type": "object",
+          "minProperties": 2,
+          "required": [
+            "$type"
+          ],
+          "properties": {
+            "$type": {
+              "const": "shadow"
+            },
+            "$description": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "propertyNames": {
+            "pattern": "^(?:\\$type|\\$description|[a-z0-9][a-z0-9-]*)$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/scale_shadow"
+          }
+        }
+      }
+    },
+    "scale_dimensions": {
+      "type": "object",
+      "minProperties": 2,
+      "required": [
+        "$type"
+      ],
+      "properties": {
+        "$type": {
+          "const": "dimension"
+        },
+        "$description": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "propertyNames": {
+        "pattern": "^(?:\\$type|\\$description|[a-z0-9][a-z0-9-]*)$"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/scale_dimension"
+      }
+    },
+    "scale_dimension": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "$value"
+      ],
+      "properties": {
+        "$value": {
+          "type": "string",
+          "pattern": "^[0-9.]+(?:rem|px)$"
+        },
+        "$description": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "scale_font_family": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "$value"
+      ],
+      "properties": {
+        "$value": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 2
+        },
+        "$description": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "scale_font_weight": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "$value"
+      ],
+      "properties": {
+        "$value": {
+          "enum": [
+            300,
+            400,
+            600
+          ]
+        },
+        "$description": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "scale_type_set": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "$value"
+      ],
+      "properties": {
+        "$value": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "fontSize",
+            "lineHeight",
+            "letterSpacing",
+            "fontWeight"
+          ],
+          "properties": {
+            "fontSize": {
+              "type": "string",
+              "pattern": "^[0-9.]+rem$"
+            },
+            "lineHeight": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 2
+            },
+            "letterSpacing": {
+              "type": "string",
+              "pattern": "^[0-9.]+px$"
+            },
+            "fontWeight": {
+              "enum": [
+                300,
+                400,
+                600
+              ]
+            }
+          }
+        },
+        "$description": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "scale_duration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "$value"
+      ],
+      "properties": {
+        "$value": {
+          "type": "string",
+          "pattern": "^[0-9]+ms$"
+        },
+        "$description": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "scale_easing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "$value"
+      ],
+      "properties": {
+        "$value": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 4,
+          "maxItems": 4
+        },
+        "$description": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "scale_shadow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "$value"
+      ],
+      "properties": {
+        "$value": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "color",
+            "offsetX",
+            "offsetY",
+            "blur",
+            "spread"
+          ],
+          "properties": {
+            "color": {
+              "type": "string",
+              "pattern": "^\\{color\\.[a-z][a-z0-9-]*\\}$",
+              "$comment": "reference to a colour token of the themes — themed"
+            },
+            "offsetX": {
+              "type": "string",
+              "pattern": "^-?[0-9.]+px$"
+            },
+            "offsetY": {
+              "type": "string",
+              "pattern": "^-?[0-9.]+px$"
+            },
+            "blur": {
+              "type": "string",
+              "pattern": "^-?[0-9.]+px$"
+            },
+            "spread": {
+              "type": "string",
+              "pattern": "^-?[0-9.]+px$"
+            }
+          }
+        },
+        "$description": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

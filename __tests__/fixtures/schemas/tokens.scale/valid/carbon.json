@@ -1,0 +1,329 @@
+{
+  "$description": "Шкалы дизайн-системы без цвета: отступы, размеры, шрифт, текст, углы, движение, тень. Значения IBM Carbon (@carbon/layout 11.60.0, @carbon/type 11.68.0, @carbon/motion 11.53.0; Apache-2.0). Формат — W3C Design Tokens (DTCG). Цвета — в tokens.json (договор schema/defs/tokens.json).",
+  "spacing": {
+    "10": {
+      "$value": "4rem"
+    },
+    "11": {
+      "$value": "5rem"
+    },
+    "12": {
+      "$value": "6rem"
+    },
+    "13": {
+      "$value": "10rem"
+    },
+    "$type": "dimension",
+    "$description": "Отступы Carbon. В Tailwind — числа шага 4px: 01 = 0.5, 02 = 1, 03 = 2, 04 = 3, 05 = 4, 06 = 6, 07 = 8, 08 = 10, 09 = 12, 10 = 16, 11 = 20, 12 = 24, 13 = 40.",
+    "01": {
+      "$value": "0.125rem"
+    },
+    "02": {
+      "$value": "0.25rem"
+    },
+    "03": {
+      "$value": "0.5rem"
+    },
+    "04": {
+      "$value": "0.75rem"
+    },
+    "05": {
+      "$value": "1rem"
+    },
+    "06": {
+      "$value": "1.5rem"
+    },
+    "07": {
+      "$value": "2rem"
+    },
+    "08": {
+      "$value": "2.5rem"
+    },
+    "09": {
+      "$value": "3rem"
+    }
+  },
+  "size": {
+    "$type": "dimension",
+    "$description": "Высоты полей, кнопок и строк таблицы Carbon. Цель касания на телефоне — не меньше size-lg (48px).",
+    "xs": {
+      "$value": "1.5rem"
+    },
+    "sm": {
+      "$value": "2rem"
+    },
+    "md": {
+      "$value": "2.5rem"
+    },
+    "lg": {
+      "$value": "3rem"
+    },
+    "xl": {
+      "$value": "4rem"
+    },
+    "2xl": {
+      "$value": "5rem"
+    }
+  },
+  "icon-size": {
+    "$type": "dimension",
+    "01": {
+      "$value": "1rem"
+    },
+    "02": {
+      "$value": "1.25rem"
+    }
+  },
+  "font-family": {
+    "$type": "fontFamily",
+    "sans": {
+      "$value": [
+        "IBM Plex Sans",
+        "system-ui",
+        "-apple-system",
+        "BlinkMacSystemFont",
+        "Segoe UI",
+        "Roboto",
+        "sans-serif"
+      ]
+    },
+    "mono": {
+      "$value": [
+        "IBM Plex Mono",
+        "Menlo",
+        "DejaVu Sans Mono",
+        "Consolas",
+        "monospace"
+      ]
+    }
+  },
+  "font-weight": {
+    "$type": "fontWeight",
+    "regular": {
+      "$value": 400
+    },
+    "semibold": {
+      "$value": 600
+    }
+  },
+  "type": {
+    "$type": "typography",
+    "$description": "Наборы текста Carbon (productive). Шрифт — IBM Plex Sans, кириллица есть; в репозитории — 400 и 600.",
+    "label-01": {
+      "$value": {
+        "fontSize": "0.75rem",
+        "lineHeight": 1.33333,
+        "letterSpacing": "0.32px",
+        "fontWeight": 400
+      }
+    },
+    "helper-text-01": {
+      "$value": {
+        "fontSize": "0.75rem",
+        "lineHeight": 1.33333,
+        "letterSpacing": "0.32px",
+        "fontWeight": 400
+      }
+    },
+    "body-compact-01": {
+      "$value": {
+        "fontSize": "0.875rem",
+        "lineHeight": 1.28572,
+        "letterSpacing": "0.16px",
+        "fontWeight": 400
+      }
+    },
+    "body-compact-02": {
+      "$value": {
+        "fontSize": "1rem",
+        "lineHeight": 1.375,
+        "letterSpacing": "0px",
+        "fontWeight": 400
+      }
+    },
+    "body-01": {
+      "$value": {
+        "fontSize": "0.875rem",
+        "lineHeight": 1.42857,
+        "letterSpacing": "0.16px",
+        "fontWeight": 400
+      }
+    },
+    "body-02": {
+      "$value": {
+        "fontSize": "1rem",
+        "lineHeight": 1.5,
+        "letterSpacing": "0px",
+        "fontWeight": 400
+      }
+    },
+    "code-01": {
+      "$value": {
+        "fontSize": "0.75rem",
+        "lineHeight": 1.33333,
+        "letterSpacing": "0.32px",
+        "fontWeight": 400
+      }
+    },
+    "code-02": {
+      "$value": {
+        "fontSize": "0.875rem",
+        "lineHeight": 1.42857,
+        "letterSpacing": "0.32px",
+        "fontWeight": 400
+      }
+    },
+    "heading-compact-01": {
+      "$value": {
+        "fontSize": "0.875rem",
+        "lineHeight": 1.28572,
+        "letterSpacing": "0.16px",
+        "fontWeight": 600
+      }
+    },
+    "heading-compact-02": {
+      "$value": {
+        "fontSize": "1rem",
+        "lineHeight": 1.375,
+        "letterSpacing": "0px",
+        "fontWeight": 600
+      }
+    },
+    "heading-03": {
+      "$value": {
+        "fontSize": "1.25rem",
+        "lineHeight": 1.4,
+        "letterSpacing": "0px",
+        "fontWeight": 400
+      }
+    },
+    "heading-04": {
+      "$value": {
+        "fontSize": "1.75rem",
+        "lineHeight": 1.28572,
+        "letterSpacing": "0px",
+        "fontWeight": 400
+      }
+    },
+    "heading-05": {
+      "$value": {
+        "fontSize": "2rem",
+        "lineHeight": 1.25,
+        "letterSpacing": "0px",
+        "fontWeight": 400
+      }
+    }
+  },
+  "radius": {
+    "$type": "dimension",
+    "$description": "Углы Carbon прямые. sm — флажок, full — метка статуса (таблетка).",
+    "none": {
+      "$value": "0px"
+    },
+    "sm": {
+      "$value": "2px"
+    },
+    "full": {
+      "$value": "9999px"
+    }
+  },
+  "duration": {
+    "$type": "duration",
+    "$description": "Длительности Carbon плюс наше правило: перемещение и раскрытие — 0,6 с, без прыжка (move). При «уменьшить движение» в системе все длительности — 0.",
+    "fast-01": {
+      "$value": "70ms"
+    },
+    "fast-02": {
+      "$value": "110ms"
+    },
+    "moderate-01": {
+      "$value": "150ms"
+    },
+    "moderate-02": {
+      "$value": "240ms"
+    },
+    "slow-01": {
+      "$value": "400ms"
+    },
+    "slow-02": {
+      "$value": "700ms"
+    },
+    "move": {
+      "$value": "600ms",
+      "$description": "наше правило 0,6 с: карточка едет или раскрывается за 0,6 с, соседи не прыгают"
+    }
+  },
+  "easing": {
+    "$type": "cubicBezier",
+    "standard-productive": {
+      "$value": [
+        0.2,
+        0,
+        0.38,
+        0.9
+      ]
+    },
+    "standard-expressive": {
+      "$value": [
+        0.4,
+        0.14,
+        0.3,
+        1
+      ]
+    },
+    "entrance-productive": {
+      "$value": [
+        0,
+        0,
+        0.38,
+        0.9
+      ]
+    },
+    "entrance-expressive": {
+      "$value": [
+        0,
+        0,
+        0.3,
+        1
+      ]
+    },
+    "exit-productive": {
+      "$value": [
+        0.2,
+        0,
+        1,
+        0.9
+      ]
+    },
+    "exit-expressive": {
+      "$value": [
+        0.4,
+        0.14,
+        1,
+        1
+      ]
+    },
+    "move": {
+      "$value": [
+        0.4,
+        0.14,
+        0.3,
+        1
+      ],
+      "$description": "для duration-move: standard-expressive Carbon"
+    }
+  },
+  "shadow": {
+    "$type": "shadow",
+    "$description": "Одна тень Carbon — у всплывающего слоя (меню, подсказка). Цвет — токен shadow своей темы.",
+    "raised": {
+      "$value": {
+        "color": "{color.shadow}",
+        "offsetX": "0px",
+        "offsetY": "2px",
+        "blur": "6px",
+        "spread": "0px"
+      }
+    }
+  }
+}

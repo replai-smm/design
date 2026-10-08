@@ -3,8 +3,8 @@
 # -R replai-smm/design --body '["self-hosted","rsmm-pool"]'`, назад — `gh variable delete CI_RUNNER -R replai-smm/design`.
 # Что держит: сторож «только токены» на самой ДС (`--kind ds --strict`, долга нет), типы, тесты (контраст, формы, сборка,
 # состав пакета, a11y axe в обеих темах, правила API, истории на каждое состояние), сборка Storybook.
-# Закон Карты (слова статусов, договор формы tokens.json, G46, матрица G47) читает не этот репо, а process — на закреплённом
-# теге этого пакета (process: scripts/__tests__/design-contract.test.ts); здесь закона нет и секретов нет.
+# Закон Карты (слова статусов) сверяет не этот репо, а process — на закреплённом теге этого пакета
+# (process: scripts/__tests__/design-contract.test.ts); форма токенов, шкал и матрицы (G46, схемы) — здесь; секретов нет.
 name: CI
 
 on:

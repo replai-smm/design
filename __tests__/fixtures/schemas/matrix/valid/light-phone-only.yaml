@@ -1,0 +1,21 @@
+schema: 3
+doc: матрица
+themes:
+  - светлая
+widths:
+  - 390
+states:
+  - обычное
+  - ошибка
+max_diff_pixels: 0
+active:
+  - state: обычное
+    themes:
+      - светлая
+    widths:
+      - 390
+  - state: ошибка
+    themes:
+      - светлая
+    widths:
+      - 390

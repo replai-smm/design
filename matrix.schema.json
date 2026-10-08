@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://replai-smm.ru/schema/karta/3/design/matrix.json",
+  "title": "Матрица облика",
+  "$comment": "Shape of design/matrix.yaml — the one source of themes, widths and which states are shot where; a product narrows it in karta.yaml → look (contract of Э1). Values are checked by G47, not by enums here.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "doc",
+    "themes",
+    "widths",
+    "states",
+    "max_diff_pixels",
+    "active"
+  ],
+  "properties": {
+    "schema": {
+      "$comment": "law version of this document shape",
+      "const": 3
+    },
+    "doc": {
+      "const": "матрица"
+    },
+    "themes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/theme"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "widths": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/width"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "states": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/state"
+      },
+      "minItems": 1,
+      "uniqueItems": true,
+      "contains": {
+        "const": "обычное"
+      }
+    },
+    "max_diff_pixels": {
+      "$comment": "tolerance per picture (Playwright maxDiffPixels)",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1000
+    },
+    "active": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "state",
+          "themes",
+          "widths"
+        ],
+        "properties": {
+          "state": {
+            "$ref": "#/$defs/state"
+          },
+          "themes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/theme"
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "widths": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/width"
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          }
+        }
+      },
+      "minItems": 1
+    }
+  },
+  "$defs": {
+    "theme": {
+      "$comment": "colour theme of the design system: Carbon g10 = светлая, g100 = тёмная",
+      "enum": [
+        "светлая",
+        "тёмная"
+      ]
+    },
+    "width": {
+      "$comment": "viewport width in CSS px — form only; the widths in use live in design/matrix.yaml (G47)",
+      "type": "integer",
+      "minimum": 320,
+      "maximum": 2560
+    },
+    "state": {
+      "$comment": "closed list of screen states (law; DESIGN-APPROACH П12). Which are shot where — design/matrix.yaml",
+      "enum": [
+        "обычное",
+        "загрузка",
+        "ошибка",
+        "первый запуск",
+        "всё сделано",
+        "ничего не найдено",
+        "нет доступа",
+        "много"
+      ]
+    }
+  }
+}

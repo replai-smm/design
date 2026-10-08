@@ -1,7 +1,7 @@
 /**
  * Токены — форма и единый набор имён (G46, CONCEPT §3.4).
- * Договор формы tokens.json и scale.json (schema/defs/tokens.json) и G46 (tokenProblems) держит process —
- * scripts/__tests__/design-contract.test.ts на закреплённом теге этого пакета. Здесь — то, что видно без закона.
+ * Схема формы tokens.json и scale.json — tokens.schema.json (тест — schemas.test.ts, с примерами); G46 — contrast.test.ts.
+ * Слова статусов против закона Карты сверяет process (scripts/__tests__/design-contract.test.ts).
  */
 import { describe, it, expect } from 'vitest'
 import { existsSync, readFileSync } from 'node:fs'
@@ -20,7 +20,7 @@ const validate = (schema: object, data: unknown) => {
 }
 
 describe('tokens.json', () => {
-  it('форма 3.1: без старых шкал в корне (форму и G46 держит process)', () => {
+  it('форма 3.1: без старых шкал в корне (форму держит tokens.schema.json)', () => {
     expect(Object.keys(tokens).filter((k) => ['status', 'spacing', 'type', 'motion', 'radius'].includes(k))).toEqual([])
   })
 

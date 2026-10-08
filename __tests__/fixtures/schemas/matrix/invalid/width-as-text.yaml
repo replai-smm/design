@@ -1,0 +1,61 @@
+schema: 3
+doc: матрица
+themes:
+  - светлая
+  - тёмная
+widths:
+  - "390"
+  - 1280
+states:
+  - обычное
+  - загрузка
+  - ошибка
+  - первый запуск
+  - всё сделано
+  - ничего не найдено
+  - нет доступа
+  - много
+max_diff_pixels: 50
+active:
+  - state: обычное
+    themes:
+      - светлая
+      - тёмная
+    widths:
+      - 390
+      - 1280
+  - state: загрузка
+    themes:
+      - светлая
+    widths:
+      - 390
+  - state: ошибка
+    themes:
+      - светлая
+    widths:
+      - 390
+  - state: первый запуск
+    themes:
+      - светлая
+    widths:
+      - 390
+  - state: всё сделано
+    themes:
+      - светлая
+    widths:
+      - 390
+  - state: ничего не найдено
+    themes:
+      - светлая
+    widths:
+      - 390
+  - state: нет доступа
+    themes:
+      - светлая
+    widths:
+      - 390
+  - state: много
+    themes:
+      - светлая
+    widths:
+      - 390
