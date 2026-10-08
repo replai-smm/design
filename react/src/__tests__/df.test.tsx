@@ -545,3 +545,61 @@ describe('Delta — разница в процентах и рублях', () =>
     expect(deltaText(-1234567, '₽').replace(/\s/g, ' ')).toBe('1 234 567 ₽')
   })
 })
+
+describe('ProofreadGrid — широкая матрица (Статистика)', () => {
+  type P = { id: string; name: string; v: number[] }
+  const rows: P[] = [
+    { id: 'a', name: 'Зерно', v: [1000, 1200] },
+    { id: 'b', name: 'Йога', v: [500, 400] },
+  ]
+  const cols = [
+    { key: '0', label: 'янв', plain: true, width: 'money' as const },
+    { key: '1', label: 'фев', plain: true, width: 'money' as const },
+  ]
+  const grid = (sticky = true) =>
+    render(
+      <ProofreadGrid<P>
+        label="Динамика"
+        rowHeader="Проект"
+        columns={cols}
+        rows={rows}
+        getKey={(r) => r.id}
+        renderRowHeader={(r) => r.name}
+        stickyHeader={sticky}
+        getCell={(r, c) => ({ value: `${r.v[Number(c.key)]} ₽`, delta: c.key === '1' ? { value: ((r.v[1] - r.v[0]) / r.v[0]) * 100 } : undefined })}
+        totals={{ label: 'Итого', getCell: (c) => ({ value: `${rows.reduce((a, r) => a + r.v[Number(c.key)], 0)} ₽` }) }}
+      />,
+    )
+
+  it('колонка денег — шире и вправо, в шапке тоже', () => {
+    grid()
+    const head = screen.getAllByRole('columnheader')[1]
+    expect(head.className).toContain('text-end')
+    const cell = screen.getAllByRole('row')[1].querySelectorAll('td')[0]
+    expect(cell.className).toContain('min-w-28')
+    expect(cell.className).toContain('text-end')
+  })
+
+  it('Δ в клетке — Delta без тона рядом с числом', () => {
+    grid()
+    const cell = screen.getAllByRole('row')[1].querySelectorAll('td')[1]
+    const d = cell.querySelector('[data-slot=delta]')!
+    expect(cell.textContent).toContain('1200 ₽')
+    expect(d.textContent).toBe('▲больше на20,0%')
+    expect(d.querySelector('[aria-hidden]')?.className ?? '').toBe('')
+  })
+
+  it('итог-строка — tfoot, заголовок строки и сумма каждой колонки; стоит внизу при прокрутке', () => {
+    grid()
+    const foot = document.querySelector('tfoot[data-slot=grid-totals]')!
+    expect(within(foot as HTMLElement).getByRole('rowheader').textContent).toBe('Итого')
+    expect([...foot.querySelectorAll('td')].map((td) => td.textContent)).toEqual(['1500 ₽', '1600 ₽'])
+    expect(foot.querySelector('th')!.className).toContain('sticky')
+    expect(foot.querySelector('td')!.className).toContain('bottom-0')
+  })
+
+  it('без stickyHeader итог-строка не закреплена снизу; без totals — tfoot нет', () => {
+    grid(false)
+    expect(document.querySelector('tfoot td')!.className).not.toContain('bottom-0')
+  })
+})

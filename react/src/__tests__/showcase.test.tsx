@@ -161,6 +161,7 @@ const SECTIONS: Array<{ title: string; note: string; items: Array<[string, strin
       ['ChartFrame.stories.tsx', 'НетДанных'],
       ['Chart.stories.tsx', 'Обычное'],
       ['Chart.stories.tsx', 'Столбцы'],
+      ['ProofreadGrid.stories.tsx', 'Матрица'],
     ],
   },
   {
