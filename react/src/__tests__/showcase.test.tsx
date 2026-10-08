@@ -26,6 +26,7 @@ const SECTIONS: Array<{ title: string; note: string; items: Array<[string, strin
     items: [
       ['Button.stories.tsx', 'Варианты'],
       ['Button.stories.tsx', 'Загрузка'],
+      ['Button.stories.tsx', 'Ссылки'],
     ],
   },
   {

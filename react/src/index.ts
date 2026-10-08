@@ -1,6 +1,6 @@
 // ДС-React — компоненты дизайн-системы (CONCEPT §3.4, слой «ДС-React»). Импорт: `@replai-smm/design` (README.md).
 export { Stack, Inline, Grid, Page, PageHeader, Section, SurfaceProvider, type Space, type StackProps, type InlineProps, type GridProps, type PageProps, type PageHeaderProps, type SectionProps } from './components/layout'
-export { Button, ActionArea, RowContext, type ButtonProps, type ButtonVariant, type ButtonSize, type ActionAreaProps, type PrimaryAction } from './components/Button'
+export { Button, ActionArea, RowContext, ExternalMark, type ButtonProps, type ButtonVariant, type ButtonSize, type ActionAreaProps, type PrimaryAction } from './components/Button'
 export { StatusBadge, ToneIcon, type StatusBadgeProps } from './components/StatusBadge'
 export { ToneTag, type ToneTagProps } from './components/ToneTag'
 export { StateView, Skeleton, Loading, type StateKind, type StateViewProps } from './components/StateView'
