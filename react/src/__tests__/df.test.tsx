@@ -4,7 +4,7 @@
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, fireEvent, within, act } from '@testing-library/react'
-import { StatTile, FilterBar, ChatThread, ReplyBox, ThreeColumn, WeekCalendar, ProofreadGrid, GridLegend, ChartFrame, mondayOf, addWeeks, weekTitle, seriesVar, resolveSeriesColors, SERIES } from '../index'
+import { Delta, deltaText, StatTile, FilterBar, ChatThread, ReplyBox, ThreeColumn, WeekCalendar, ProofreadGrid, GridLegend, ChartFrame, mondayOf, addWeeks, weekTitle, seriesVar, resolveSeriesColors, SERIES } from '../index'
 import { Chart, chartHasData, niceMax, tickIndexes, ticksOf } from '../components/Chart'
 import { chat, chatFailed, posts, weekStart, today, communities, monthColumns, proofCell, manyCommunities, type Post } from '../stories/df-fixtures'
 
@@ -512,5 +512,36 @@ describe('Chart — график линий и столбцов', () => {
     expect(chartHasData('line', [{ key: 'a', label: 'А', data: [5] }])).toBe(false)
     expect(chartHasData('line', [{ key: 'a', label: 'А', data: [5, null, 6] }])).toBe(true)
     expect(chartHasData('bar', [{ key: 'a', label: 'А', data: [5] }])).toBe(true)
+  })
+})
+
+describe('Delta — разница в процентах и рублях', () => {
+  it('рубли: модуль с группами разрядов, стрелка и слово; перерасход (рост при higherIsBetter=false) — тон «опасно»', () => {
+    render(<Delta value={1234} unit="₽" higherIsBetter={false} />)
+    const d = document.querySelector('[data-slot=delta]')!
+    expect(d.getAttribute('data-unit')).toBe('₽')
+    expect(d.textContent?.replace(/\s/g, ' ')).toBe('▲больше на1 234 ₽')
+    expect(d.querySelector('[aria-hidden]')?.className).toContain('text-status-error')
+  })
+
+  it('минус в рублях — «меньше на», ноль — без стрелки и «без изменений»', () => {
+    render(<><Delta value={-560.4} unit="₽" /><Delta value={0.3} unit="₽" /></>)
+    const [a, b] = [...document.querySelectorAll('[data-slot=delta]')]
+    expect(a.getAttribute('data-direction')).toBe('down')
+    expect(a.textContent).toContain('меньше на')
+    expect(a.textContent).toContain('560 ₽')
+    expect(b.getAttribute('data-direction')).toBe('none')
+    expect(b.textContent).toBe('без изменений,0 ₽')
+    expect(b.querySelector('[aria-hidden]')).toBeNull()
+  })
+
+  it('проценты — как было; tone=false — стрелка без цвета тона', () => {
+    render(<><Delta value={12.5} /><Delta value={-3} tone={false} /></>)
+    const [a, b] = [...document.querySelectorAll('[data-slot=delta]')]
+    expect(a.textContent).toBe('▲больше на12,5%')
+    expect(a.querySelector('[aria-hidden]')?.className).toContain('text-status-success')
+    expect(b.querySelector('[aria-hidden]')?.className ?? '').toBe('')
+    expect(deltaText(-3, '%')).toBe('3,0%')
+    expect(deltaText(-1234567, '₽').replace(/\s/g, ' ')).toBe('1 234 567 ₽')
   })
 })

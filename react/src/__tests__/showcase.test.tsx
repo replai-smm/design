@@ -169,6 +169,7 @@ const SECTIONS: Array<{ title: string; note: string; items: Array<[string, strin
     items: [
       ['StatTile.stories.tsx', 'Обычное'],
       ['StatTile.stories.tsx', 'Сравнение'],
+      ['StatTile.stories.tsx', 'Разница'],
     ],
   },
 ]

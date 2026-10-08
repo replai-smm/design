@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Inline } from './layout'
-import { StatTile } from './StatTile'
+import { Delta, StatTile } from './StatTile'
 
 const meta = {
   title: 'Компоненты/Плитка с цифрой',
@@ -47,3 +47,17 @@ export const Сравнение: S = {
 
 /** Ссылка вместо кнопки: переход на другой экран адресом. */
 export const Ссылкой: S = { args: { value: '3', label: 'кабинета крутится', detail: '· встало 1', href: '#target' } }
+
+/** Разница словами и стрелкой: в процентах и в рублях («Переходящая» = факт − план); без тона — для широкой таблицы. */
+export const Разница: S = {
+  render: () => (
+    <Inline gap="06">
+      <Delta value={12.5} />
+      <Delta value={-3.2} />
+      <Delta value={1234} unit="₽" higherIsBetter={false} />
+      <Delta value={-560} unit="₽" higherIsBetter={false} />
+      <Delta value={0} unit="₽" />
+      <Delta value={8.1} tone={false} />
+    </Inline>
+  ),
+}
