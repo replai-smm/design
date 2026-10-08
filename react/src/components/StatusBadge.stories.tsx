@@ -46,3 +46,16 @@ export const СловоПродукта: S = {
     </Stack>
   ),
 }
+
+/** Тон со своим словом (светофор «Таргета», оценка поста, «не запускался»): те же четыре тона и формы значка, слово — продукта. */
+export const Тон: S = {
+  render: () => (
+    <Inline gap="03">
+      <StatusBadge tone="опасно" label="встало" />
+      <StatusBadge tone="внимание" label="хватит на 3 дня" />
+      <StatusBadge tone="хорошо" label="крутится" />
+      <StatusBadge tone="нейтрально" label="не запускался" />
+      <StatusBadge tone="хорошо" label="A+" />
+    </Inline>
+  ),
+}
