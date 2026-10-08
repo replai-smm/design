@@ -19,7 +19,8 @@ import { ActionArea, Button } from './Button'
 import { Notification } from './Notification'
 import { SurfaceProvider } from './layout'
 
-export type DialogSize = 'sm' | 'md' | 'lg'
+/** sm · md · lg — ширина на ноутбуке; full — во весь экран (длинная работа в окне: «Чат с ИИ» Статистики). */
+export type DialogSize = 'sm' | 'md' | 'lg' | 'full'
 
 export interface DialogProps {
   open?: boolean
@@ -42,7 +43,12 @@ export interface DialogProps {
   children?: ReactNode
 }
 
-const WIDTH: Record<DialogSize, string> = { sm: 'md:max-w-md', md: 'md:max-w-2xl', lg: 'md:max-w-4xl' }
+const WIDTH: Record<Exclude<DialogSize, 'full'>, string> = { sm: 'md:max-w-md', md: 'md:max-w-2xl', lg: 'md:max-w-4xl' }
+/** Где стоит окно: снизу на телефоне и по центру на ноутбуке; во весь экран — везде. */
+const place = (size: DialogSize) =>
+  size === 'full'
+    ? 'inset-0 h-dvh'
+    : cx('inset-x-0 bottom-0 max-h-11/12', 'md:inset-x-auto md:top-1/2 md:bottom-auto md:left-1/2 md:max-h-10/12 md:-translate-x-1/2 md:-translate-y-1/2', WIDTH[size])
 const TABBABLE = 'input:not([disabled]):not([type=hidden]),select:not([disabled]),textarea:not([disabled]),button:not([disabled]),[href],[tabindex]:not([tabindex="-1"])'
 
 export function Dialog({ open, defaultOpen, onOpenChange, trigger, title, label, description, size = 'sm', actions, persistent, closeLabel = 'закрыть', children }: DialogProps) {
@@ -70,10 +76,8 @@ export function Dialog({ open, defaultOpen, onOpenChange, trigger, title, label,
           }}
           onPointerDownOutside={(e) => persistent && e.preventDefault()}
           className={cx(
-            'ds-dialog fixed z-50 flex max-h-11/12 w-full flex-col bg-layer-01 text-text-primary shadow-raised focus-visible:outline-none',
-            'inset-x-0 bottom-0',
-            'md:inset-x-auto md:top-1/2 md:bottom-auto md:left-1/2 md:max-h-10/12 md:-translate-x-1/2 md:-translate-y-1/2',
-            WIDTH[size],
+            'ds-dialog fixed z-50 flex w-full flex-col bg-layer-01 text-text-primary shadow-raised focus-visible:outline-none',
+            place(size),
           )}
         >
           <SurfaceProvider name="окно">

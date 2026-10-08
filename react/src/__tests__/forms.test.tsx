@@ -620,3 +620,22 @@ describe('выбор файла', () => {
     expect(fileMatches(file('a.txt', 1, 'text/plain'), '.pdf,image/*')).toBe(false)
   })
 })
+
+describe('окно во весь экран', () => {
+  it('size="full" — во весь экран на телефоне и ноутбуке, без ширины и центровки', () => {
+    render(<Dialog defaultOpen size="full" title="Чат с ИИ">тело</Dialog>)
+    const d = screen.getByRole('dialog', { name: 'Чат с ИИ' })
+    expect(d.dataset.size).toBe('full')
+    expect(d.className).toContain('inset-0')
+    expect(d.className).toContain('h-dvh')
+    expect(d.className).not.toMatch(/max-w-|max-h-|top-1\/2/)
+  })
+
+  it('обычные размеры — как были: снизу на телефоне, по центру с шириной на ноутбуке', () => {
+    render(<Dialog defaultOpen size="lg" title="Окно">тело</Dialog>)
+    const d = screen.getByRole('dialog', { name: 'Окно' })
+    expect(d.className).toContain('md:max-w-4xl')
+    expect(d.className).toContain('md:top-1/2')
+    expect(d.className).toContain('bottom-0')
+  })
+})

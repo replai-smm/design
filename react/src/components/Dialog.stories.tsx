@@ -2,7 +2,10 @@ import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { ActionArea, Button } from './Button'
 import { ConfirmDialog, ConfirmProvider, Dialog, useConfirm } from './Dialog'
+import { ChatThread } from './ChatThread'
 import { Notification } from './Notification'
+import { ReplyBox } from './ReplyBox'
+import { chat } from '../stories/df-fixtures'
 import { Select } from './Select'
 import { TextField } from './TextField'
 import { Stack } from './layout'
@@ -119,4 +122,21 @@ export const ОднойСтрокой: S = {
       <WithHook />
     </ConfirmProvider>
   ),
+}
+
+/** Во весь экран (`size="full"`): длинная работа в окне — «Чат с ИИ» Статистики; на телефоне и ноутбуке — весь экран. */
+export const ВоВесьЭкран: S = {
+  args: {
+    size: 'full',
+    label: 'Статистика',
+    title: 'Чат с ИИ',
+    persistent: true,
+    actions: undefined,
+    children: (
+      <Stack gap="05" className="min-h-0 flex-1">
+        <ChatThread label="Переписка с ИИ" messages={chat} />
+        <ReplyBox label="Вопрос ИИ" placeholder="Вопрос ИИ — он знает бриф, примеры и цифры Статистики" sendLabel="Спросить" onSend={() => {}} />
+      </Stack>
+    ),
+  },
 }
