@@ -24,6 +24,10 @@ import {
   Tooltip,
   useConfirm,
   Drawer,
+  FileField,
+  acceptText,
+  fileMatches,
+  fileSizeText,
 } from '../index'
 import { initials } from '../components/Avatar'
 
@@ -533,5 +537,86 @@ describe('подтверждение (вместо window.confirm)', () => {
       return null
     }
     expect(() => render(<Bad />)).toThrow(/ConfirmProvider/)
+  })
+})
+
+describe('выбор файла', () => {
+  const MB = 1024 * 1024
+  const file = (name: string, size: number, type = '') => new File([new Uint8Array(size)], name, { type })
+  const choose = (files: File[]) => {
+    const input = document.querySelector('input[type=file]') as HTMLInputElement
+    fireEvent.change(input, { target: { files } })
+  }
+
+  it('кнопка названа подписью и своим словом, ограничения словами в подсказке', () => {
+    render(<FileField label="Вложение" accept=".pdf,image/*" maxSize={10 * MB} />)
+    const b = screen.getByRole('button', { name: 'Вложение Выбрать файл' })
+    expect(describedText(b)).toBe('Можно: PDF, картинки · до 10 МБ')
+    const input = document.querySelector('input[type=file]') as HTMLInputElement
+    expect(input.hidden).toBe(true)
+    expect(input.accept).toBe('.pdf,image/*')
+  })
+
+  it('кнопка открывает выбор файла (клик по скрытому input) и ref.open() тоже', () => {
+    const ref = { current: null as null | { open: () => void } }
+    render(<FileField ref={ref} label="Вложение" />)
+    const input = document.querySelector('input[type=file]') as HTMLInputElement
+    const click = vi.spyOn(input, 'click').mockImplementation(() => {})
+    fireEvent.click(screen.getByRole('button', { name: /Выбрать файл/ }))
+    ref.current!.open()
+    expect(click).toHaveBeenCalledTimes(2)
+  })
+
+  it('выбран файл — имя, размер и «убрать»; onChange получает файлы', () => {
+    const onChange = vi.fn()
+    render(<FileField label="Вложение" accept=".pdf" onChange={onChange} />)
+    choose([file('отчёт.pdf', 870 * 1024, 'application/pdf')])
+    expect(onChange).toHaveBeenLastCalledWith([expect.objectContaining({ name: 'отчёт.pdf' })])
+    expect(screen.getByRole('list', { name: 'Выбранные файлы' }).textContent).toContain('870 КБ')
+    fireEvent.click(screen.getByRole('button', { name: 'Убрать «отчёт.pdf»' }))
+    expect(onChange).toHaveBeenLastCalledWith([])
+    expect(screen.queryByRole('list', { name: 'Выбранные файлы' })).toBeNull()
+  })
+
+  it('не тот тип и больше предела — файл не взят, ошибка словами вместо подсказки', () => {
+    const onChange = vi.fn()
+    render(<FileField label="Вложение" accept=".pdf,image/*" maxSize={1 * MB} onChange={onChange} />)
+    choose([file('вирус.exe', 10)])
+    expect(onChange).not.toHaveBeenCalled()
+    const b = screen.getByRole('button', { name: /Выбрать файл/ })
+    expect(describedText(b)).toBe('«вирус.exe» — не тот тип, можно: PDF, картинки')
+    expect(document.querySelector('[data-slot=file-field]')?.getAttribute('data-invalid')).toBe('true')
+    choose([file('большой.pdf', 3 * MB, 'application/pdf')])
+    expect(describedText(b)).toBe('«большой.pdf» больше 1 МБ (3 МБ)')
+    choose([file('фото.JPG', 100, 'image/jpeg')])
+    expect(onChange).toHaveBeenLastCalledWith([expect.objectContaining({ name: 'фото.JPG' })])
+    expect(describedText(b)).toBe('Можно: PDF, картинки · до 1 МБ')
+  })
+
+  it('несколько файлов: добавляются к выбранным, сверх maxFiles — не взяты и сказано', () => {
+    const onChange = vi.fn()
+    render(<FileField label="Фото" multiple maxFiles={2} onChange={onChange} />)
+    choose([file('1.jpg', 1)])
+    choose([file('2.jpg', 1), file('3.jpg', 1)])
+    expect(onChange).toHaveBeenLastCalledWith([expect.objectContaining({ name: '1.jpg' }), expect.objectContaining({ name: '2.jpg' })])
+    expect(describedText(screen.getByRole('button', { name: /Выбрать файлы/ }))).toBe('Файлов больше 2 — лишние не взяты')
+  })
+
+  it('внешняя ошибка важнее своей; недоступно — кнопка не нажимается', () => {
+    render(<FileField label="Вложение" error="Сервер не принял файл" disabled />)
+    const b = screen.getByRole('button', { name: /Выбрать файл/ }) as HTMLButtonElement
+    expect(describedText(b)).toBe('Сервер не принял файл')
+    expect(b.disabled).toBe(true)
+  })
+
+  it('слова: размер, типы, совпадение типа', () => {
+    expect(fileSizeText(512)).toBe('512 Б')
+    expect(fileSizeText(870 * 1024)).toBe('870 КБ')
+    expect(fileSizeText(12.34 * MB)).toBe('12 МБ')
+    expect(fileSizeText(1.5 * MB)).toBe('1,5 МБ')
+    expect(acceptText('.pdf, .docx,image/*,application/vnd.ms-excel')).toBe('PDF, DOCX, картинки, VND.MS-EXCEL')
+    expect(fileMatches(file('a.PDF', 1), '.pdf')).toBe(true)
+    expect(fileMatches(file('a.png', 1, 'image/png'), 'image/*')).toBe(true)
+    expect(fileMatches(file('a.txt', 1, 'text/plain'), '.pdf,image/*')).toBe(false)
   })
 })

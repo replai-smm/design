@@ -118,6 +118,8 @@ const SECTIONS: Array<{ title: string; note: string; items: Array<[string, strin
       ['NumberField.stories.tsx', 'ВнеГраниц'],
       ['Checkbox.stories.tsx', 'Группа'],
       ['Checkbox.stories.tsx', 'Ошибка'],
+      ['FileField.stories.tsx', 'Обычное'],
+      ['FileField.stories.tsx', 'Ошибка'],
     ],
   },
   {

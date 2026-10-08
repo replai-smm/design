@@ -34,6 +34,7 @@ const PROMISED: Record<string, string[]> = {
   'Select.stories.tsx': ['обычное', 'ошибка'],
   'Checkbox.stories.tsx': ['обычное', 'ошибка'],
   'NumberField.stories.tsx': ['обычное', 'ошибка'],
+  'FileField.stories.tsx': ['обычное', 'ошибка'],
   'Combobox.stories.tsx': ['обычное', 'загрузка', 'ошибка', 'ничего не найдено', 'много'],
   'Avatar.stories.tsx': ['обычное', 'ошибка'],
   'CountBadge.stories.tsx': ['обычное', 'много'],
