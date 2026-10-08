@@ -42,19 +42,49 @@ export interface StatTileProps {
   className?: string
 }
 
-const fmtPct = (n: number) => new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 1, minimumFractionDigits: 1 }).format(Math.abs(n))
+const PCT = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 1, minimumFractionDigits: 1 })
+const RUB = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 })
 
-/** Разница ▲▼ в процентах: стрелка цвета тона (знак, контраст 3:1), число — цвета текста, слово — для читалки. */
-export function Delta({ value, higherIsBetter = true }: { value: number; higherIsBetter?: boolean }) {
-  const up = value >= 0
+/** Единица разницы: проценты (сравнение периодов) или рубли («Переходящая»: факт − план). */
+export type DeltaUnit = '%' | '₽'
+
+/** Модуль разницы словами с единицей: «12,5%», «1 234 ₽». */
+export function deltaText(value: number, unit: DeltaUnit = '%'): string {
+  return unit === '₽' ? `${RUB.format(Math.abs(Math.round(value)))} ₽` : `${PCT.format(Math.abs(value))}%`
+}
+
+export interface DeltaProps {
+  /** Разница со знаком: рост — больше нуля. */
+  value: number
+  /** Рост — хорошо (по умолчанию) или плохо (расход, перерасход): от этого тон стрелки. */
+  higherIsBetter?: boolean
+  /** `%` (по умолчанию) или `₽`. */
+  unit?: DeltaUnit
+  /** Стрелка тоном (по умолчанию). `false` — без тона: в широкой таблице, где тон отвлекает от чисел. */
+  tone?: boolean
+}
+
+/**
+ * Разница ▲▼: стрелка цвета тона (знак, контраст 3:1), число — цвета текста, слово — для читалки («больше на 12,5%»,
+ * «меньше на 1 234 ₽»). Ноль — без стрелки и тона («без изменений»).
+ */
+export function Delta({ value, higherIsBetter = true, unit = '%', tone = true }: DeltaProps) {
+  const zero = unit === '₽' ? Math.round(value) === 0 : value === 0
+  const up = value > 0
   const good = up === higherIsBetter
   return (
-    <span data-slot="delta" data-direction={up ? 'up' : 'down'} className="inline-flex items-center gap-1 text-label-01 text-text-secondary">
-      <span aria-hidden="true" className={good ? MARK.success : MARK.error}>
-        {up ? '▲' : '▼'}
-      </span>
-      <span className="sr-only">{up ? 'больше на' : 'меньше на'}</span>
-      {fmtPct(value)}%
+    <span data-slot="delta" data-direction={zero ? 'none' : up ? 'up' : 'down'} data-unit={unit} className="inline-flex items-center gap-1 text-label-01 text-text-secondary whitespace-nowrap">
+      {zero ? (
+        <span className="sr-only">без изменений,</span>
+      ) : (
+        <>
+          <span aria-hidden="true" className={tone ? (good ? MARK.success : MARK.error) : undefined}>
+            {up ? '▲' : '▼'}
+          </span>
+          <span className="sr-only">{up ? 'больше на' : 'меньше на'}</span>
+        </>
+      )}
+      {deltaText(value, unit)}
     </span>
   )
 }
