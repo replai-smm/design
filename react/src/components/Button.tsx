@@ -5,8 +5,11 @@
  * - в строке списка главной нет: `<ActionArea>` в строке — ошибка, у кнопок строки — только тихие варианты;
  * - опасное не стоит рядом с главным (П10): danger в области с главной — ошибка.
  * Высота: sm 32 · md 40 · lg 48 px (Carbon); на телефоне главная — во всю ширину и не ниже 48 px (П6).
+ * Кнопка-ссылка: `href` — та же кнопка тегом `<a>` (те же варианты и правила); `external` или `target="_blank"` —
+ * новая вкладка с `rel="noopener noreferrer"` и знаком «внешняя ссылка» (читалка слышит «откроется в новой вкладке»);
+ * `download` — выгрузка файла. Своя ссылка через `asChild` с `target="_blank"` получает тот же `rel` и знак.
  */
-import { Children, createContext, forwardRef, isValidElement, useContext, useId, useLayoutEffect, type ButtonHTMLAttributes, type ReactNode } from 'react'
+import { Children, cloneElement, createContext, forwardRef, isValidElement, useContext, useId, useLayoutEffect, type ButtonHTMLAttributes, type ReactElement, type ReactNode, type Ref } from 'react'
 import { Slot } from 'radix-ui'
 import { cx, rule } from '../lib/cx'
 import { useSurface } from './layout'
@@ -44,6 +47,31 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   /** Отрисовать ребёнка (ссылку) с видом кнопки. */
   asChild?: boolean
   icon?: ReactNode
+  /** Адрес — кнопка становится ссылкой `<a>` с тем же видом. */
+  href?: string
+  /** Открыть в новой вкладке: `target="_blank"`, `rel="noopener noreferrer"`, знак «внешняя ссылка». */
+  external?: boolean
+  /** Выгрузка файла (`<a download>`): `true` или имя файла. */
+  download?: boolean | string
+  /** Для ссылки: `_blank` — то же, что `external`. */
+  target?: string
+  rel?: string
+}
+
+const NEW_TAB = 'откроется в новой вкладке'
+const SAFE_REL = ['noopener', 'noreferrer']
+const relWith = (rel?: string) => [...new Set([...(rel ?? '').split(/\s+/).filter(Boolean), ...SAFE_REL])].join(' ')
+
+/** Знак «внешняя ссылка» (Carbon Launch): стрелка из квадрата; для читалки — словами. */
+export function ExternalMark() {
+  return (
+    <>
+      <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false" data-slot="external-mark" className="size-4 shrink-0">
+        <path d="M9.5 2.5h4v4M13.5 2.5 7.5 8.5M11.5 9.5v4h-9v-9h4" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      </svg>
+      <span className="sr-only">{` (${NEW_TAB})`}</span>
+    </>
+  )
 }
 
 function useButtonClass(variant: AnyVariant, size: ButtonSize, className?: string) {
@@ -51,10 +79,43 @@ function useButtonClass(variant: AnyVariant, size: ButtonSize, className?: strin
 }
 
 const ButtonBase = forwardRef<HTMLButtonElement, Omit<ButtonProps, 'variant'> & { variant?: AnyVariant }>(function ButtonBase(
-  { variant = 'secondary', size = 'md', rule: ruleId, loading, asChild, icon, className, children, disabled, type, ...rest },
+  { variant = 'secondary', size = 'md', rule: ruleId, loading, asChild, icon, className, children, disabled, type, href, external, download, target, rel, ...rest },
   ref,
 ) {
   const cls = useButtonClass(variant, size, className)
+  const lead = icon && <span aria-hidden="true" className="inline-flex size-4 shrink-0 items-center justify-center">{icon}</span>
+  if (href !== undefined && !asChild) {
+    const off = disabled || loading
+    const newTab = external || target === '_blank'
+    return (
+      <a
+        ref={ref as Ref<HTMLAnchorElement>}
+        data-slot="button"
+        data-variant={variant}
+        data-rule={ruleId}
+        className={cls}
+        // недоступная ссылка — без адреса: не открывается ни мышью, ни клавиатурой; роль ссылки и «недоступно» — словами для читалки
+        href={off ? undefined : href}
+        role={off ? 'link' : undefined}
+        aria-disabled={off || undefined}
+        aria-busy={loading || undefined}
+        target={newTab ? '_blank' : target}
+        rel={newTab ? relWith(rel) : rel}
+        download={download === true ? '' : download || undefined}
+        {...(rest as Record<string, unknown>)}
+      >
+        {lead}
+        {children}
+        {newTab && <ExternalMark />}
+      </a>
+    )
+  }
+  // своя ссылка через asChild в новую вкладку — тот же rel и знак, что у href
+  let child = children
+  if (asChild && isValidElement<{ target?: string; rel?: string; children?: ReactNode }>(children) && children.props.target === '_blank') {
+    const el = children as ReactElement<{ target?: string; rel?: string; children?: ReactNode }>
+    child = cloneElement(el, { rel: relWith(el.props.rel) }, <>{el.props.children}<ExternalMark /></>)
+  }
   const Comp = asChild ? Slot.Root : 'button'
   return (
     <Comp
@@ -69,10 +130,10 @@ const ButtonBase = forwardRef<HTMLButtonElement, Omit<ButtonProps, 'variant'> & 
       {...rest}
     >
       {asChild ? (
-        children
+        child
       ) : (
         <>
-          {icon && <span aria-hidden="true" className="inline-flex size-4 shrink-0 items-center justify-center">{icon}</span>}
+          {lead}
           {children}
         </>
       )}

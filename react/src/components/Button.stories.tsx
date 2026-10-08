@@ -61,3 +61,34 @@ export const НаСтранице: S = {
     </Page>
   ),
 }
+
+/**
+ * Кнопка-ссылка: те же варианты тегом `<a>`. Новая вкладка — знак «внешняя ссылка» и `rel="noopener noreferrer"`;
+ * выгрузка — `download`. Главная области тоже может быть ссылкой.
+ */
+export const Ссылки: S = {
+  args: { primary: { label: 'Полный отчёт', href: '#report', external: true } },
+  render: (args) => (
+    <Stack gap="06">
+      <ActionArea {...args} label="Отчёт">
+        <Button variant="tertiary" href="#xlsx" download="таргет.xlsx">
+          Выгрузить .xlsx
+        </Button>
+        <Button variant="ghost" href="#content" external>
+          Контент
+        </Button>
+      </ActionArea>
+      <ActionArea label="Размеры и недоступная">
+        <Button href="#a" size="sm">
+          Маленькая
+        </Button>
+        <Button href="#b" variant="tertiary" external>
+          Таргет-отчёт
+        </Button>
+        <Button href="#c" disabled>
+          Недоступна
+        </Button>
+      </ActionArea>
+    </Stack>
+  ),
+}
