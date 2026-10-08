@@ -19,6 +19,7 @@ const MATRIX_STATES = ['обычное', 'загрузка', 'ошибка', 'п
 const PROMISED: Record<string, string[]> = {
   'Button.stories.tsx': ['обычное', 'загрузка'],
   'StatusBadge.stories.tsx': ['обычное'],
+  'ToneTag.stories.tsx': ['обычное'],
   'StateView.stories.tsx': ['загрузка', 'ошибка', 'первый запуск', 'всё сделано', 'ничего не найдено', 'нет доступа'],
   'DataTable.stories.tsx': MATRIX_STATES,
   'List.stories.tsx': MATRIX_STATES,

@@ -14,7 +14,8 @@ export const MARK: Record<ToneKey, string> = {
   success: 'text-status-success',
   neutral: 'text-status-neutral',
 }
-const PILL: Record<ToneKey, string> = {
+/** Метка тона: фон и текст тона — пара проверена контрастом ≥ 4,5:1 (ToneTag берёт ту же). */
+export const PILL: Record<ToneKey, string> = {
   error: 'bg-status-error-background text-status-error-text',
   warning: 'bg-status-warning-background text-status-warning-text',
   success: 'bg-status-success-background text-status-success-text',
