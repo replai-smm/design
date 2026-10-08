@@ -7,7 +7,8 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, fireEvent, within, act } from '@testing-library/react'
 import { ActionArea, Button, Card, DataTable, List, Page, PageHeader, StatusBadge, FilterBar, useUrlFilters, Toaster, useToast, Drawer, Tabs, CountBadge, countText, Steps, stepState } from '../index'
 import { STATUS_IDS, TONE_ORDER, statusOf, toneOf } from '../lib/status'
-import { groups, many, type GroupRow } from '../stories/fixtures'
+import { cabinets, groups, many, type CabinetRow, type GroupRow } from '../stories/fixtures'
+import { compareSortValues, type Column, type SortState } from '../components/Collection'
 import statusesJson from '../../../statuses.json'
 
 const quiet = () => vi.spyOn(console, 'error').mockImplementation(() => {})
@@ -292,5 +293,73 @@ describe('шаги (Steps)', () => {
 
   it('правило: меньше двух шагов — ошибка в разработке', () => {
     expect(() => render(<Steps label="Шаги" steps={['А']} current={0} />)).toThrow(/шагов меньше двух/)
+  })
+})
+
+describe('таблица: сортировка по заголовку — выбор человека, срочное сверху остаётся (П2)', () => {
+  const cols: Column<CabinetRow>[] = [
+    { key: 'name', header: 'Кабинет', cell: (r) => r.name, face: true, sortValue: (r) => r.name },
+    { key: 'tg', header: 'Таргетолог', cell: (r) => r.targetologist },
+    { key: 'left', header: 'Остаток', cell: (r) => (r.left == null ? '—' : String(r.left)), align: 'end', sortValue: (r) => r.left, sortFirst: 'descending' },
+  ]
+  const names = () => screen.getAllByRole('row').slice(1).map((r) => within(r).getAllByRole('cell')[0]?.textContent)
+  const header = (name: string) => screen.getByRole('columnheader', { name: new RegExp(name) })
+
+  it('без сортировки — порядок данных; сортируемый заголовок — кнопка, aria-sort только у выбранной колонки', () => {
+    render(<DataTable<CabinetRow> label="К" rows={cabinets} columns={cols} getKey={(r) => r.id} />)
+    expect(names()).toEqual(cabinets.map((c) => c.name))
+    expect(within(header('Кабинет')).getByRole('button', { name: 'Кабинет' })).toBeTruthy()
+    expect(within(header('Таргетолог')).queryByRole('button')).toBeNull()
+    expect(document.querySelectorAll('[aria-sort]')).toHaveLength(0)
+  })
+
+  it('нажатие — в сторону колонки (sortFirst), повторное — в обратную; пустое внизу в обе стороны', () => {
+    render(<DataTable<CabinetRow> label="К" rows={cabinets} columns={cols} getKey={(r) => r.id} />)
+    fireEvent.click(within(header('Остаток')).getByRole('button'))
+    expect(header('Остаток').getAttribute('aria-sort')).toBe('descending')
+    expect(names()).toEqual(['Студия йоги', 'Барбершоп', 'Цветы на Ленина', 'Кофейня «Зерно»', 'Детский клуб', 'Автосервис «Ключ»'])
+    fireEvent.click(within(header('Остаток')).getByRole('button'))
+    expect(header('Остаток').getAttribute('aria-sort')).toBe('ascending')
+    expect(names()).toEqual(['Детский клуб', 'Кофейня «Зерно»', 'Цветы на Ленина', 'Барбершоп', 'Студия йоги', 'Автосервис «Ключ»'])
+    // другая колонка: её первое направление, у прежней aria-sort снят
+    fireEvent.click(within(header('Кабинет')).getByRole('button'))
+    expect(header('Кабинет').getAttribute('aria-sort')).toBe('ascending')
+    expect(header('Остаток').hasAttribute('aria-sort')).toBe(false)
+    expect(names()[0]).toBe('Автосервис «Ключ»')
+  })
+
+  it('клавиатура: заголовок берёт фокус Tab и сортирует Enter и пробелом (это <button>)', () => {
+    render(<DataTable<CabinetRow> label="К" rows={cabinets} columns={cols} getKey={(r) => r.id} />)
+    const b = within(header('Кабинет')).getByRole('button')
+    expect(b.tagName).toBe('BUTTON')
+    expect(b.getAttribute('type')).toBe('button')
+    b.focus()
+    expect(document.activeElement).toBe(b)
+  })
+
+  it('с группами тона — строки сортируются внутри группы, группы срочного не двигаются (П2)', () => {
+    render(<DataTable<CabinetRow> label="К" rows={cabinets} columns={cols} getKey={(r) => r.id} getStatus={(r) => r.status} defaultSort={{ key: 'name', direction: 'descending' }} />)
+    const order = [...document.querySelectorAll('[data-group]')].map((g) => g.getAttribute('data-group'))
+    expect(order).toEqual(['work.failing', 'work.unchecked', 'work.working'])
+    const failing = document.querySelector('[data-group="work.failing"]')!
+    expect([...failing.querySelectorAll('[data-slot=row] [role=cell]:first-child')].map((c) => c.textContent)).toEqual(['Кофейня «Зерно»', 'Детский клуб'])
+  })
+
+  it('управляемая: таблица зовёт onSortChange и показывает только то, что дали', () => {
+    const onSortChange = vi.fn()
+    const { rerender } = render(<DataTable<CabinetRow> label="К" rows={cabinets} columns={cols} getKey={(r) => r.id} sort={null} onSortChange={onSortChange} />)
+    fireEvent.click(within(header('Кабинет')).getByRole('button'))
+    expect(onSortChange).toHaveBeenCalledWith({ key: 'name', direction: 'ascending' } satisfies SortState)
+    expect(names()).toEqual(cabinets.map((c) => c.name))
+    rerender(<DataTable<CabinetRow> label="К" rows={cabinets} columns={cols} getKey={(r) => r.id} sort={{ key: 'name', direction: 'ascending' }} onSortChange={onSortChange} />)
+    expect(names()[0]).toBe('Автосервис «Ключ»')
+  })
+
+  it('сравнение: числа как числа, строки по-русски с числами внутри, пустое внизу', () => {
+    const asc = (xs: Array<number | string | null>) => [...xs].sort((a, b) => compareSortValues(a, b, 'ascending'))
+    expect(asc([10, 9, null, 100])).toEqual([9, 10, 100, null])
+    expect([10, 9, null, 100].sort((a, b) => compareSortValues(a, b, 'descending'))).toEqual([100, 10, 9, null])
+    expect(asc(['кабинет 10', 'кабинет 9', 'Анна', ''])).toEqual(['Анна', 'кабинет 9', 'кабинет 10', ''])
+    expect(asc(['Жук', 'ель', 'ёж'])).toEqual(['ёж', 'ель', 'Жук']) // ё как е, регистр не важен
   })
 })

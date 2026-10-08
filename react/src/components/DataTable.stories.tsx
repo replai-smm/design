@@ -1,7 +1,15 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { allWorking, groups, many, type GroupRow } from '../stories/fixtures'
+import { allWorking, cabinets, groups, many, type CabinetRow, type GroupRow } from '../stories/fixtures'
 import { ActionArea, Button } from './Button'
 import { DataTable, type Column } from './Collection'
+
+const rub = (n: number | null) => (n == null ? '—' : `${n.toLocaleString('ru-RU')} ₽`)
+const cabinetColumns: Column<CabinetRow>[] = [
+  { key: 'name', header: 'Кабинет', cell: (r) => r.name, face: true, grow: 2, sortValue: (r) => r.name },
+  { key: 'tg', header: 'Таргетолог', cell: (r) => r.targetologist, sortValue: (r) => r.targetologist },
+  { key: 'week', header: '7 дней', cell: (r) => rub(r.week), face: true, align: 'end', sortValue: (r) => r.week, sortFirst: 'descending' },
+  { key: 'left', header: 'Остаток', cell: (r) => rub(r.left), align: 'end', sortValue: (r) => r.left, sortFirst: 'descending' },
+]
 
 const columns: Column<GroupRow>[] = [
   { key: 'name', header: 'Группа', cell: (r) => r.name, face: true, grow: 2 },
@@ -65,3 +73,18 @@ export const НетДоступа: S = {
 
 /** 150 строк: первые 50, остальное за «показать ещё». */
 export const Много: S = { tags: ['state:много'], args: { rows: many } }
+
+/**
+ * Сортировка по заголовку — выбор человека: первое нажатие — в сторону колонки (`sortFirst`: суммы — от больших),
+ * повторное — в обратную; пустое («—») всегда внизу. Без групп тона сортируется вся таблица.
+ */
+export const Сортировка: S = {
+  render: () => <DataTable<CabinetRow> label="Кабинеты" rows={cabinets} columns={cabinetColumns} getKey={(r) => r.id} defaultSort={{ key: 'week', direction: 'descending' }} />,
+}
+
+/** С группами тона сортировка переставляет строки внутри группы: «падает» остаётся сверху (П2), «работает» — свёрнуто внизу. */
+export const СортировкаВГруппах: S = {
+  render: () => (
+    <DataTable<CabinetRow> label="Кабинеты" rows={cabinets} columns={cabinetColumns} getKey={(r) => r.id} getStatus={(r) => r.status} defaultSort={{ key: 'left', direction: 'ascending' }} />
+  ),
+}

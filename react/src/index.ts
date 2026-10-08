@@ -3,7 +3,7 @@ export { Stack, Inline, Grid, Page, PageHeader, Section, SurfaceProvider, type S
 export { Button, ActionArea, RowContext, type ButtonProps, type ButtonVariant, type ButtonSize, type ActionAreaProps, type PrimaryAction } from './components/Button'
 export { StatusBadge, ToneIcon, type StatusBadgeProps } from './components/StatusBadge'
 export { StateView, Skeleton, Loading, type StateKind, type StateViewProps } from './components/StateView'
-export { DataTable, List, type Column, type DataTableProps, type ListProps, type CollectionProps } from './components/Collection'
+export { DataTable, List, compareSortValues, type Column, type SortDirection, type SortState, type DataTableProps, type ListProps, type CollectionProps } from './components/Collection'
 export { FilterBar, SearchField, useUrlFilters, type FilterDef, type FilterOption, type FilterValue, type FilterBarProps, type SearchFieldProps } from './components/FilterBar'
 export { Tabs, type TabItem, type TabsProps } from './components/Tabs'
 export { Card, type CardProps } from './components/Card'
