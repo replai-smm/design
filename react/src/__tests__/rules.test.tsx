@@ -44,6 +44,7 @@ const PROMISED: Record<string, string[]> = {
   'ThreeColumn.stories.tsx': ['обычное', 'первый запуск'],
   'WeekCalendar.stories.tsx': ['обычное', 'загрузка', 'ошибка', 'первый запуск', 'ничего не найдено', 'много'],
   'ProofreadGrid.stories.tsx': ['обычное', 'загрузка', 'ошибка', 'ничего не найдено', 'много'],
+  'Chart.stories.tsx': ['обычное', 'ничего не найдено'],
   'ChartFrame.stories.tsx': ['обычное', 'загрузка', 'ошибка', 'первый запуск', 'ничего не найдено'],
   'StatTile.stories.tsx': ['обычное'],
   'Steps.stories.tsx': ['обычное', 'ошибка', 'всё сделано'],

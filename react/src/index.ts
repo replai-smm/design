@@ -26,5 +26,6 @@ export { ThreeColumn, type ThreeColumnProps, type ColumnIndex } from './componen
 export { WeekCalendar, mondayOf, addWeeks, weekTitle, type WeekCalendarProps } from './components/WeekCalendar'
 export { ProofreadGrid, GridLegend, GRID_TONE, GRID_TONE_LABEL, type ProofreadGridProps, type GridColumn, type GridCell, type GridTone, type GridLegendProps } from './components/ProofreadGrid'
 export { StatTile, Delta, type StatTileProps, type StatTileCompare } from './components/StatTile'
+export { Chart, chartHasData, niceMax, ticksOf, tickIndexes, type ChartProps, type ChartSeries } from './components/Chart'
 export { ChartFrame, SERIES, SERIES_BG, seriesVar, resolveSeriesColors, useSeriesColors, type ChartFrameProps, type LegendItem, type SeriesLine } from './components/ChartFrame'
 export { Steps, stepState, type StepsProps, type StepState } from './components/Steps'
