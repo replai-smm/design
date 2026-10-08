@@ -5,6 +5,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, fireEvent, within, act } from '@testing-library/react'
 import { StatTile, FilterBar, ChatThread, ReplyBox, ThreeColumn, WeekCalendar, ProofreadGrid, GridLegend, ChartFrame, mondayOf, addWeeks, weekTitle, seriesVar, resolveSeriesColors, SERIES } from '../index'
+import { Chart, chartHasData, niceMax, tickIndexes, ticksOf } from '../components/Chart'
 import { chat, chatFailed, posts, weekStart, today, communities, monthColumns, proofCell, manyCommunities, type Post } from '../stories/df-fixtures'
 
 afterEach(() => vi.restoreAllMocks())
@@ -459,5 +460,57 @@ describe('FilterBar required — обязательный выбор', () => {
     expect(on).not.toHaveBeenCalled()
     fireEvent.click(screen.getByRole('radio', { name: '90 дней' }))
     expect(on).toHaveBeenCalledWith({ p: '90' })
+  })
+})
+
+describe('Chart — график линий и столбцов', () => {
+  const labels = ['янв', 'фев', 'мар']
+  it('линия: ряд — цвет токена и вид линии, без заливки, подсказка точки, читалка — role=img', () => {
+    render(<Chart kind="line" labels={labels} series={[{ key: 'a', label: 'Вступления', data: [10, 20, 15] }]} label="Вступления по месяцам" />)
+    const svg = screen.getByRole('img', { name: 'Вступления по месяцам' })
+    expect(svg.querySelector('polyline')?.getAttribute('class')).toContain('stroke-interactive')
+    expect(svg.querySelectorAll('path')).toHaveLength(0)
+    expect([...svg.querySelectorAll('circle title')].map((t) => t.textContent)).toEqual(['янв · Вступления: 10', 'фев · Вступления: 20', 'мар · Вступления: 15'])
+    expect(svg.querySelectorAll('[data-slot=chart-value]')).toHaveLength(0)
+  })
+
+  it('values — подписи значений над точками; null — точки нет; второй ряд пунктиром', () => {
+    render(
+      <Chart
+        kind="line"
+        labels={labels}
+        values
+        format={(v) => `${v} ₽`}
+        series={[
+          { key: 'a', label: 'А', data: [1000, 2000, 3000] },
+          { key: 'b', label: 'Б', data: [500, null, 700], line: 'dashed' },
+        ]}
+        label="Затраты"
+      />,
+    )
+    const svg = screen.getByRole('img', { name: 'Затраты' })
+    expect([...svg.querySelectorAll('[data-slot=chart-value]')].map((t) => t.textContent)).toEqual(['1000 ₽', '2000 ₽', '3000 ₽', '500 ₽', '700 ₽'])
+    const b = svg.querySelector('[data-line=dashed] polyline')!
+    expect(b.getAttribute('stroke-dasharray')).toBe('6 4')
+    expect(b.getAttribute('class')).toContain('stroke-support-success')
+  })
+
+  it('столбцы: прямоугольник на значение, значения над столбцами', () => {
+    render(<Chart kind="bar" labels={labels} values series={[{ key: 'p', label: 'План', data: [2, 4, 6] }, { key: 'f', label: 'Факт', data: [1, null, 5], series: 3 }]} label="Посты" />)
+    const svg = screen.getByRole('img', { name: 'Посты' })
+    expect(svg.querySelectorAll('rect')).toHaveLength(5)
+    expect(svg.querySelector('[data-series="3"] rect')?.getAttribute('class')).toContain('fill-support-error')
+    expect(svg.querySelectorAll('[data-slot=chart-value]')).toHaveLength(5)
+  })
+
+  it('ось: верх — круглое число, подписи X не чаще 10, мало данных — chartHasData ложь', () => {
+    expect([niceMax(0), niceMax(7), niceMax(12), niceMax(760), niceMax(64000)]).toEqual([1, 10, 20, 1000, 100000])
+    expect(ticksOf(1000)).toEqual([0, 250, 500, 750, 1000])
+    expect(ticksOf(50)).toEqual([0, 10, 20, 30, 40, 50])
+    expect(tickIndexes(30)).toEqual([0, 3, 6, 9, 12, 15, 18, 21, 24, 27])
+    expect(tickIndexes(9)).toHaveLength(9)
+    expect(chartHasData('line', [{ key: 'a', label: 'А', data: [5] }])).toBe(false)
+    expect(chartHasData('line', [{ key: 'a', label: 'А', data: [5, null, 6] }])).toBe(true)
+    expect(chartHasData('bar', [{ key: 'a', label: 'А', data: [5] }])).toBe(true)
   })
 })

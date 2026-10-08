@@ -159,6 +159,8 @@ const SECTIONS: Array<{ title: string; note: string; items: Array<[string, strin
     items: [
       ['ChartFrame.stories.tsx', 'Обычное'],
       ['ChartFrame.stories.tsx', 'НетДанных'],
+      ['Chart.stories.tsx', 'Обычное'],
+      ['Chart.stories.tsx', 'Столбцы'],
     ],
   },
   {
