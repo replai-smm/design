@@ -99,6 +99,7 @@ const SECTIONS: Array<{ title: string; note: string; items: Array<[string, strin
     items: [
       ['Dialog.stories.tsx', 'Обычное', 'fixed'],
       ['Dialog.stories.tsx', 'Удаление', 'fixed'],
+      ['Dialog.stories.tsx', 'ВоВесьЭкран', 'fixed'],
     ],
   },
   {
