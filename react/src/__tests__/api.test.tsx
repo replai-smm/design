@@ -6,7 +6,8 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, fireEvent, within, act } from '@testing-library/react'
 import { ActionArea, Button, Card, DataTable, List, Page, PageHeader, StatusBadge, FilterBar, useUrlFilters, Toaster, useToast, Drawer, Tabs, CountBadge, countText, Steps, stepState } from '../index'
-import { STATUS_IDS, TONE_ORDER, statusOf, toneOf } from '../lib/status'
+import { STATUS_IDS, TONE_ORDER, statusOf, toneOf, type Tone } from '../lib/status'
+import { ToneTag } from '../components/ToneTag'
 import { cabinets, groups, many, type CabinetRow, type GroupRow } from '../stories/fixtures'
 import { compareSortValues, type Column, type SortState } from '../components/Collection'
 import statusesJson from '../../../statuses.json'
@@ -361,5 +362,29 @@ describe('таблица: сортировка по заголовку — вы�
     expect([10, 9, null, 100].sort((a, b) => compareSortValues(a, b, 'descending'))).toEqual([100, 10, 9, null])
     expect(asc(['кабинет 10', 'кабинет 9', 'Анна', ''])).toEqual(['Анна', 'кабинет 9', 'кабинет 10', ''])
     expect(asc(['Жук', 'ель', 'ёж'])).toEqual(['ёж', 'ель', 'Жук']) // ё как е, регистр не важен
+  })
+})
+
+describe('метка тона (ToneTag): четыре тона продукта, своя форма значка, слово обязательно', () => {
+  it('каждый тон — свой знак и токены status-*; слово — продукта', () => {
+    const tones: Array<[Tone, string]> = [['опасно', 'error'], ['внимание', 'warning'], ['хорошо', 'success'], ['нейтрально', 'neutral']]
+    render(<>{tones.map(([t]) => <ToneTag key={t} tone={t}>{`слово ${t}`}</ToneTag>)}</>)
+    const tags = [...document.querySelectorAll('[data-slot=tone-tag]')]
+    expect(tags.map((t) => t.getAttribute('data-tone'))).toEqual(tones.map(([, k]) => k))
+    tags.forEach((t, i) => {
+      const k = tones[i][1]
+      expect(t.className).toContain(`bg-status-${k}-background`)
+      expect(t.className).toContain(`text-status-${k}-text`)
+      expect(t.querySelector('svg')?.getAttribute('data-tone-icon')).toBe(k)
+      expect(t.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true')
+    })
+    expect(screen.getByText('слово опасно')).toBeTruthy()
+  })
+
+  it('чужой тон и метка без слова — ошибка', () => {
+    quiet()
+    // @ts-expect-error — тонов четыре
+    expect(() => render(<ToneTag tone="синий">x</ToneTag>)).toThrow(/тонов продукта четыре/)
+    expect(() => render(<ToneTag tone="опасно">{''}</ToneTag>)).toThrow(/слово обязательно/)
   })
 })
