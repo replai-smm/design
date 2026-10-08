@@ -15,6 +15,7 @@ export { TextField, TextArea, type TextFieldProps, type TextAreaProps, type Fiel
 export { Select, type SelectProps, type SelectOption } from './components/Select'
 export { Checkbox, CheckboxGroup, type CheckboxProps, type CheckboxGroupProps, type CheckedState } from './components/Checkbox'
 export { NumberField, type NumberFieldProps } from './components/NumberField'
+export { FileField, fileSizeText, acceptText, fileMatches, type FileFieldProps, type FileFieldHandle } from './components/FileField'
 export { Combobox, type ComboboxProps, type ComboboxOption } from './components/Combobox'
 export { Avatar, type AvatarProps, type AvatarSize } from './components/Avatar'
 export { CountBadge, countText, type CountBadgeProps, type CountTone } from './components/CountBadge'
