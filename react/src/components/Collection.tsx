@@ -6,8 +6,11 @@
  *   ничего не найдено, нет доступа), много — первые `pageSize` строк и «показать ещё».
  * - В строке главной кнопки нет (П5): действие строки — тихая кнопка или нажатие на строку (открыть панель деталей).
  * - На телефоне в таблице видны только колонки лица (`face`), остальные — в панели деталей.
+ * - Сортировка по заголовку (`DataTable`, колонка с `sortValue`) — выбор человека, а не порядок продукта: без неё
+ *   порядок данных; с ней строки переставляются внутри группы тона, группы срочного остаются сверху (П2 не ломается).
  */
 import { Fragment, useId, useMemo, useState, type CSSProperties, type ReactNode } from 'react'
+import { useControllable } from '../lib/controllable'
 import { cx } from '../lib/cx'
 import { rankOf, toneOf, type StatusId } from '../lib/status'
 import { Button, RowContext } from './Button'
@@ -131,16 +134,78 @@ export interface Column<T> {
   /** Доля ширины (fr). По умолчанию 1; 0 — по содержимому. */
   grow?: number
   align?: 'start' | 'end'
+  /**
+   * Значение для сортировки — колонку можно сортировать нажатием на заголовок. Числа сравниваются как числа, строки —
+   * по-русски (с числами внутри); `null`/`undefined` — всегда внизу, в любую сторону.
+   */
+  sortValue?: (row: T) => number | string | null | undefined
+  /** Первое нажатие сортирует в эту сторону (по умолчанию по возрастанию); повторное — в обратную. */
+  sortFirst?: SortDirection
+}
+
+/** Направление — те же слова, что у `aria-sort`. */
+export type SortDirection = 'ascending' | 'descending'
+export interface SortState {
+  key: string
+  direction: SortDirection
 }
 
 export interface DataTableProps<T> extends CollectionProps<T> {
   columns: Column<T>[]
+  /** Управляемая сортировка (`null` — порядок продукта). Без неё таблица держит сортировку сама с `defaultSort`. */
+  sort?: SortState | null
+  defaultSort?: SortState | null
+  onSortChange?: (sort: SortState | null) => void
+}
+
+const collator = new Intl.Collator('ru', { numeric: true, sensitivity: 'base' })
+
+type SortValue = number | string | null | undefined
+const isEmpty = (v: SortValue) => v == null || v === '' || (typeof v === 'number' && Number.isNaN(v))
+
+/** Сравнение значений сортировки: пустое — в конце при любом направлении; число раньше строки. */
+export function compareSortValues(a: SortValue, b: SortValue, direction: SortDirection): number {
+  const ea = isEmpty(a)
+  const eb = isEmpty(b)
+  if (ea || eb) return ea === eb ? 0 : ea ? 1 : -1
+  const sign = direction === 'ascending' ? 1 : -1
+  if (typeof a === 'number' && typeof b === 'number') return (a - b) * sign
+  if (typeof a === 'number') return -sign
+  if (typeof b === 'number') return sign
+  return collator.compare(String(a), String(b)) * sign
+}
+
+/** Строки по сортировке; порядок равных — как в данных (сортировка устойчивая). */
+function sortRows<T>(rows: T[], columns: Column<T>[], sort: SortState | null): T[] {
+  const get = sort ? columns.find((c) => c.key === sort.key)?.sortValue : undefined
+  if (!sort || !get) return rows
+  return rows
+    .map((r, i) => ({ r, i, v: get(r) }))
+    .sort((x, y) => compareSortValues(x.v, y.v, sort.direction) || x.i - y.i)
+    .map((x) => x.r)
+}
+
+function SortIcon({ direction }: { direction?: SortDirection }) {
+  return (
+    <svg viewBox="0 0 16 16" aria-hidden="true" data-slot="sort-icon" className={cx('size-4 shrink-0', direction ? 'text-icon-primary' : 'text-icon-secondary')}>
+      {direction === 'ascending' ? (
+        <path d="M8 13V3M4 7l4-4 4 4" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      ) : direction === 'descending' ? (
+        <path d="M8 3v10M4 9l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      ) : (
+        <path d="M5 13V2M2.5 4.5 5 2l2.5 2.5M11 3v11M8.5 11.5 11 14l2.5-2.5" fill="none" stroke="currentColor" strokeWidth="1.25" />
+      )}
+    </svg>
+  )
 }
 
 const track = (grow = 1) => (grow === 0 ? 'max-content' : `minmax(0, ${grow}fr)`)
 
 export function DataTable<T>(props: DataTableProps<T>) {
-  const { rows, columns, getKey, getStatus, statusLabel, state = 'ready', pageSize = 50, collapseHealthy = true, onRowClick, rowAction, label, className } = props
+  const { rows: dataRows, columns, getKey, getStatus, statusLabel, state = 'ready', pageSize = 50, collapseHealthy = true, onRowClick, rowAction, label, className } = props
+  const [sort, setSort] = useControllable<SortState | null>(props.sort, props.defaultSort ?? null, props.onSortChange)
+  // сортируем до групп: группы срочного стоят на месте (П2), внутри группы — порядок, выбранный человеком
+  const rows = useMemo(() => sortRows(dataRows, columns, sort), [dataRows, columns, sort])
   const groups = useGroups(rows, getStatus)
   const [limit, setLimit] = useState(pageSize)
   const [healthyOpen, setHealthyOpen] = useState(false)
@@ -197,11 +262,29 @@ export function DataTable<T>(props: DataTableProps<T>) {
       <div role="table" aria-label={label} aria-busy={state === 'loading' || undefined} aria-rowcount={state === 'loading' ? undefined : rows.length + 1} className="ds-table min-w-0 border-t border-border-subtle-01" style={vars}>
         <div role="rowgroup" className="ds-rowgroup">
           <div role="row" className="ds-row bg-layer-accent-01">
-            {columns.map((c) => (
-              <div key={c.key} role="columnheader" className={cx(cellCls(c), 'text-heading-compact-01 text-text-primary')}>
-                {c.header}
-              </div>
-            ))}
+            {columns.map((c) => {
+              const active = c.sortValue && sort?.key === c.key ? sort.direction : undefined
+              return (
+                <div key={c.key} role="columnheader" aria-sort={active} className={cx(cellCls(c), 'text-heading-compact-01 text-text-primary', c.sortValue && 'px-0 py-0')}>
+                  {c.sortValue ? (
+                    <button
+                      type="button"
+                      data-slot="sort"
+                      onClick={() => setSort({ key: c.key, direction: active ? (active === 'ascending' ? 'descending' : 'ascending') : (c.sortFirst ?? 'ascending') })}
+                      className={cx(
+                        'flex min-h-12 w-full min-w-0 cursor-pointer items-center gap-2 px-4 py-2 text-heading-compact-01 text-text-primary hover:bg-layer-accent-hover-01 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus',
+                        c.align === 'end' ? 'justify-end text-end' : 'text-start',
+                      )}
+                    >
+                      <span className="min-w-0">{c.header}</span>
+                      <SortIcon direction={active} />
+                    </button>
+                  ) : (
+                    c.header
+                  )}
+                </div>
+              )
+            })}
             {withAction && (
               <div role="columnheader" className="flex min-h-12 items-center px-2">
                 <span className="sr-only">действия</span>

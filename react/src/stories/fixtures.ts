@@ -30,3 +30,22 @@ export const many: GroupRow[] = Array.from({ length: 150 }, (_, i) => {
 })
 
 export const allWorking: GroupRow[] = base.map((g) => ({ ...g, status: 'work.working' as StatusId, reason: '—' }))
+
+/** Кабинеты рекламы — как таблица «Таргет» Статистики (сортировка по заголовку), без настоящих имён и сумм. */
+export interface CabinetRow {
+  id: string
+  name: string
+  targetologist: string
+  status: StatusId
+  week: number
+  left: number | null
+}
+
+export const cabinets: CabinetRow[] = [
+  { id: 'c1', name: 'Кофейня «Зерно»', targetologist: 'Анна', status: 'work.failing', week: 18400, left: 2100 },
+  { id: 'c2', name: 'Студия йоги', targetologist: 'Борис', status: 'work.working', week: 9200, left: 15400 },
+  { id: 'c3', name: 'Автосервис «Ключ»', targetologist: 'Анна', status: 'work.working', week: 31000, left: null },
+  { id: 'c4', name: 'Детский клуб', targetologist: 'Вера', status: 'work.failing', week: 4600, left: 300 },
+  { id: 'c5', name: 'Барбершоп', targetologist: 'Борис', status: 'work.unchecked', week: 12750, left: 8800 },
+  { id: 'c6', name: 'Цветы на Ленина', targetologist: 'Вера', status: 'work.working', week: 21300, left: 6400 },
+]
