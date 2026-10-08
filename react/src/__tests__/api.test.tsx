@@ -7,7 +7,6 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, fireEvent, within, act } from '@testing-library/react'
 import { ActionArea, Button, Card, DataTable, List, Page, PageHeader, StatusBadge, FilterBar, useUrlFilters, Toaster, useToast, Drawer, Tabs, CountBadge, countText, Steps, stepState } from '../index'
 import { STATUS_IDS, TONE_ORDER, statusOf, toneOf, type Tone } from '../lib/status'
-import { ToneTag } from '../components/ToneTag'
 import { cabinets, groups, many, type CabinetRow, type GroupRow } from '../stories/fixtures'
 import { compareSortValues, type Column, type SortState } from '../components/Collection'
 import statusesJson from '../../../statuses.json'
@@ -365,26 +364,34 @@ describe('таблица: сортировка по заголовку — вы�
   })
 })
 
-describe('метка тона (ToneTag): четыре тона продукта, своя форма значка, слово обязательно', () => {
-  it('каждый тон — свой знак и токены status-*; слово — продукта', () => {
+describe('метка тона: StatusBadge с tone — четыре тона продукта, своя форма значка, слово обязательно', () => {
+  it('каждый тон — свой знак и токены status-*; слово — продукта; data-status нет', () => {
     const tones: Array<[Tone, string]> = [['опасно', 'error'], ['внимание', 'warning'], ['хорошо', 'success'], ['нейтрально', 'neutral']]
-    render(<>{tones.map(([t]) => <ToneTag key={t} tone={t}>{`слово ${t}`}</ToneTag>)}</>)
-    const tags = [...document.querySelectorAll('[data-slot=tone-tag]')]
+    render(<>{tones.map(([t]) => <StatusBadge key={t} tone={t} label={`слово ${t}`} />)}</>)
+    const tags = [...document.querySelectorAll('[data-slot=status-badge]')]
     expect(tags.map((t) => t.getAttribute('data-tone'))).toEqual(tones.map(([, k]) => k))
     tags.forEach((t, i) => {
       const k = tones[i][1]
+      expect(t.hasAttribute('data-status')).toBe(false)
       expect(t.className).toContain(`bg-status-${k}-background`)
       expect(t.className).toContain(`text-status-${k}-text`)
       expect(t.querySelector('svg')?.getAttribute('data-tone-icon')).toBe(k)
-      expect(t.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true')
     })
     expect(screen.getByText('слово опасно')).toBeTruthy()
   })
 
-  it('чужой тон и метка без слова — ошибка', () => {
+  it('тот же облик, что у статуса того же тона', () => {
+    render(<><StatusBadge status="work.failing" /><StatusBadge tone="опасно" label="встало" /></>)
+    const [a, b] = [...document.querySelectorAll('[data-slot=status-badge]')]
+    expect(b.className).toBe(a.className)
+  })
+
+  it('чужой тон, метка без слова, тон в палитре Карты — ошибка', () => {
     quiet()
     // @ts-expect-error — тонов четыре
-    expect(() => render(<ToneTag tone="синий">x</ToneTag>)).toThrow(/тонов продукта четыре/)
-    expect(() => render(<ToneTag tone="опасно">{''}</ToneTag>)).toThrow(/слово обязательно/)
+    expect(() => render(<StatusBadge tone="синий" label="x" />)).toThrow(/тонов продукта четыре/)
+    // @ts-expect-error — у метки тона слово обязательно
+    expect(() => render(<StatusBadge tone="опасно" />)).toThrow(/нет слова/)
+    expect(() => render(<StatusBadge tone="опасно" label="x" palette="karta" />)).toThrow(/только палитра product/)
   })
 })

@@ -34,12 +34,8 @@ const SECTIONS: Array<{ title: string; note: string; items: Array<[string, strin
     items: [
       ['StatusBadge.stories.tsx', 'Продукт'],
       ['StatusBadge.stories.tsx', 'Карта'],
+      ['StatusBadge.stories.tsx', 'Тон'],
     ],
-  },
-  {
-    title: 'Метка тона',
-    note: 'Тон продукта со своим словом (светофор, «не запускался», статус версии): те же четыре тона и формы значка, слово — продукта.',
-    items: [['ToneTag.stories.tsx', 'Обычное']],
   },
   {
     title: 'Страница списка',

@@ -2,10 +2,12 @@
  * Метка статуса (шаблон «метка статуса», CONCEPT §3.4). Статус — только из закрытого списка (design/statuses.json),
  * цвет — только из палитры: `product` — четыре тона продукта, `karta` — цвета Карты (рамка, слово обычным текстом).
  * Цвет никогда не один: у тона своя форма значка (крест, треугольник, галочка, пустой круг) и слово.
+ * Метка тона со своим словом (светофор, оценка поста, «не запускался»): `tone` вместо `status` и обязательный `label` —
+ * тот же облик палитры `product`, тонов те же четыре; `data-status` у неё нет (слово не из закрытого списка).
  */
 import { useId } from 'react'
-import { cx } from '../lib/cx'
-import { kartaKeyOf, statusOf, TONE_KEY, toneOf, type Palette, type StatusId, type ToneKey } from '../lib/status'
+import { cx, rule } from '../lib/cx'
+import { kartaKeyOf, statusOf, TONE_KEY, TONE_ORDER, toneOf, type Palette, type StatusId, type Tone, type ToneKey } from '../lib/status'
 
 /** Знак тона на поверхности (background, layer-01, layer-02) — пара проверена контрастом ≥ 3:1. */
 export const MARK: Record<ToneKey, string> = {
@@ -14,8 +16,7 @@ export const MARK: Record<ToneKey, string> = {
   success: 'text-status-success',
   neutral: 'text-status-neutral',
 }
-/** Метка тона: фон и текст тона — пара проверена контрастом ≥ 4,5:1 (ToneTag берёт ту же). */
-export const PILL: Record<ToneKey, string> = {
+const PILL: Record<ToneKey, string> = {
   error: 'bg-status-error-background text-status-error-text',
   warning: 'bg-status-warning-background text-status-warning-text',
   success: 'bg-status-success-background text-status-success-text',
@@ -60,17 +61,43 @@ export function ToneIcon({ tone, className }: { tone: ToneKey; className?: strin
   )
 }
 
-export interface StatusBadgeProps {
-  /** id из закрытого списка: work.working, work.failing, … change.adding. */
-  status: StatusId
+interface BadgeCommon {
   /** product — интерфейсы продуктов (четыре тона); karta — экраны Карты и дашборд (рамка цвета Карты). */
   palette?: Palette
-  /** Слово продукта вместо слова закона. Тон остаётся тоном статуса. */
-  label?: string
   className?: string
 }
+interface ByStatus extends BadgeCommon {
+  /** id из закрытого списка: work.working, work.failing, … change.adding. */
+  status: StatusId
+  tone?: never
+  /** Слово продукта вместо слова закона. Тон остаётся тоном статуса. */
+  label?: string
+}
+interface ByTone extends BadgeCommon {
+  status?: never
+  /** Тон продукта (опасно · внимание · хорошо · нейтрально) — для слова не из закрытого списка: светофор, оценка, «не запускался». */
+  tone: Tone
+  /** Слово продукта — обязательно: цвет никогда не один. */
+  label: string
+}
+export type StatusBadgeProps = ByStatus | ByTone
 
-export function StatusBadge({ status, palette = 'product', label, className }: StatusBadgeProps) {
+export function StatusBadge(props: StatusBadgeProps) {
+  const { palette = 'product', label, className } = props
+  if (props.tone !== undefined) {
+    rule(props.status === undefined, 'у метки статус или тон, не оба')
+    rule(TONE_ORDER.includes(props.tone), `тона «${String(props.tone)}» нет: тонов продукта четыре — ${TONE_ORDER.join(' · ')}`)
+    rule(palette === 'product', 'метка тона — только палитра product: у Карты цвет даёт закрытый список статусов')
+    rule(Boolean(label), 'у метки тона нет слова (label): цвет никогда не один')
+    const key = TONE_KEY[props.tone]
+    return (
+      <span data-slot="status-badge" data-tone={key} data-palette="product" className={cx('inline-flex min-h-6 items-center gap-1 rounded-full px-2 text-label-01', PILL[key], className)}>
+        <ToneIcon tone={key} />
+        {label}
+      </span>
+    )
+  }
+  const status = props.status
   const s = statusOf(status)
   const tone = TONE_KEY[toneOf(status)]
   const text = label ?? s.say
