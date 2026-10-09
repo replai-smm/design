@@ -6,6 +6,8 @@
  * Список — в слое поверх страницы (Radix Popover): не обрезается панелью или таблицей, ширина — как у поля.
  * Состояния: загрузка, «ничего не найдено», ошибка, много пунктов (список прокручивается, высота ограничена).
  * Очень длинный список — `limit`: показаны первые N совпадений и строка «уточните поиск» (DF «Постинг»: не больше 60).
+ * Текст поиска можно задать: `defaultInputValue` — начальный (окно выбора открывается уже с подсказкой — первым словом
+ * проекта), `inputValue` + `onInputValueChange` — управляемый. Текст, равный названию выбранного, — не поиск: список полный.
  */
 import { useId, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
 import { Popover } from 'radix-ui'
@@ -40,6 +42,12 @@ export interface ComboboxProps extends FieldBaseProps {
   clearable?: boolean
   /** Свой поиск; по умолчанию — часть названия или второй строки без учёта регистра. */
   filter?: (option: ComboboxOption, query: string) => boolean
+  /** Начальный текст поиска: список сразу сужен им (окно «Выберите сообщество» — первое слово проекта). */
+  defaultInputValue?: string
+  /** Управляемый текст поля. Равен названию выбранного (или пуст без выбора) — поиска нет, список полный. */
+  inputValue?: string
+  /** Текст поля изменился: печать, выбор (название пункта), очистка, уход из поля (снова название выбранного). */
+  onInputValueChange?: (text: string) => void
   /** Открыть список сразу (истории, образцы). */
   defaultOpen?: boolean
   /** Подписи кнопок для читалки. */
@@ -71,6 +79,9 @@ export function Combobox({
   moreText = (n, total) => `Показаны первые ${n} из ${total} — уточните поиск`,
   clearable = true,
   filter = defaultFilter,
+  defaultInputValue,
+  inputValue,
+  onInputValueChange,
   defaultOpen = false,
   clearLabel = 'очистить выбор',
   toggleLabel = 'список',
@@ -83,9 +94,19 @@ export function Combobox({
   const anchor = useRef<HTMLDivElement>(null)
   const input = useRef<HTMLInputElement>(null)
   const [value, setValue] = useControllable<string | null>(valueProp, defaultValue, onChange)
-  const [query, setQuery] = useState<string | null>(null)
-  const [open, setOpenRaw] = useState(defaultOpen && !disabled)
   const selected = options.find((o) => o.value === value) ?? null
+  // query — текст поиска; null — поиска нет, поле показывает название выбранного
+  const [innerQuery, setInnerQuery] = useState<string | null>(defaultInputValue ? defaultInputValue : null)
+  const textControlled = inputValue !== undefined
+  const query = textControlled ? (inputValue === (selected?.label ?? '') ? null : inputValue) : innerQuery
+  const text = query ?? selected?.label ?? ''
+  /** Сменить текст поиска; `label` — что поле покажет при `null` (после выбора — название нового пункта). */
+  const setQuery = (q: string | null, label = selected?.label ?? '') => {
+    if (!textControlled) setInnerQuery(q)
+    const next = q ?? label
+    if (next !== text) onInputValueChange?.(next)
+  }
+  const [open, setOpenRaw] = useState(defaultOpen && !disabled)
   const matched = useMemo(() => (query ? options.filter((o) => filter(o, query)) : options), [options, query, filter])
   const shown = useMemo(() => (limit !== undefined && limit > 0 ? matched.slice(0, limit) : matched), [matched, limit])
   const firstActive = () => {
@@ -101,15 +122,15 @@ export function Combobox({
     setOpenRaw(v)
     if (v) setActive(firstActive())
   }
-  const close = () => {
+  const close = (label?: string) => {
     setOpenRaw(false)
-    setQuery(null)
+    setQuery(null, label)
     setActive(-1)
   }
   const choose = (o: ComboboxOption) => {
     if (o.disabled) return
     setValue(o.value)
-    close()
+    close(o.label)
   }
   const move = (dir: 1 | -1) => {
     if (!shown.length) return
@@ -140,6 +161,7 @@ export function Combobox({
       if (query) return setQuery(null)
       if (clearable && value !== null) {
         e.preventDefault()
+        setQuery(null, '')
         return setValue(null)
       }
     }
@@ -173,7 +195,7 @@ export function Combobox({
               aria-activedescendant={hasList && active >= 0 ? optId(active) : undefined}
               disabled={disabled}
               placeholder={placeholder}
-              value={query ?? selected?.label ?? ''}
+              value={text}
               onChange={(e) => {
                 setQuery(e.target.value)
                 setOpenRaw(true)
@@ -197,7 +219,7 @@ export function Combobox({
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => {
                   setValue(null)
-                  setQuery(null)
+                  setQuery(null, '')
                   input.current?.focus()
                 }}
                 className={iconBtn}
