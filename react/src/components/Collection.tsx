@@ -156,6 +156,12 @@ export interface DataTableProps<T> extends CollectionProps<T> {
   sort?: SortState | null
   defaultSort?: SortState | null
   onSortChange?: (sort: SortState | null) => void
+  /**
+   * Приглушённая строка — неактивное, что всё же показываем (кабинет не крутится 10+ дней, не запускался): текст строки
+   * вторым цветом (`text-secondary`, контраст ≥ 4,5:1 на слое и при наведении — тест токенов), фон и порядок те же.
+   * Причину пишут словом в строке (статус) — цвет её не заменяет; спрятать такие строки — фильтр продукта.
+   */
+  rowMuted?: (row: T) => boolean
 }
 
 const collator = new Intl.Collator('ru', { numeric: true, sensitivity: 'base' })
@@ -202,7 +208,7 @@ function SortIcon({ direction }: { direction?: SortDirection }) {
 const track = (grow = 1) => (grow === 0 ? 'max-content' : `minmax(0, ${grow}fr)`)
 
 export function DataTable<T>(props: DataTableProps<T>) {
-  const { rows: dataRows, columns, getKey, getStatus, statusLabel, state = 'ready', pageSize = 50, collapseHealthy = true, onRowClick, rowAction, label, className } = props
+  const { rows: dataRows, columns, getKey, getStatus, statusLabel, state = 'ready', pageSize = 50, collapseHealthy = true, onRowClick, rowAction, rowMuted, label, className } = props
   const [sort, setSort] = useControllable<SortState | null>(props.sort, props.defaultSort ?? null, props.onSortChange)
   // сортируем до групп: группы срочного стоят на месте (П2), внутри группы — порядок, выбранный человеком
   const rows = useMemo(() => sortRows(dataRows, columns, sort), [dataRows, columns, sort])
@@ -223,39 +229,43 @@ export function DataTable<T>(props: DataTableProps<T>) {
   const cellCls = (c: Column<T>) =>
     cx('flex min-h-12 min-w-0 items-center px-4 py-2 text-body-compact-01', c.align === 'end' && 'justify-end text-end', !c.face && 'ds-cell-more')
 
-  const row = (r: T) => (
-    <div
-      key={getKey(r)}
-      role="row"
-      data-slot="row"
-      className={cx('ds-row border-b border-border-subtle-01 bg-layer-01', onRowClick && 'cursor-pointer hover:bg-layer-hover-01')}
-      onClick={onRowClick ? () => onRowClick(r) : undefined}
-    >
-      {columns.map((c, i) => (
-        <div key={c.key} role="cell" className={cellCls(c)}>
-          {i === 0 && onRowClick ? (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation()
-                onRowClick(r)
-              }}
-              className="min-w-0 cursor-pointer text-start text-text-primary hover:underline focus-visible:outline-2 focus-visible:outline-focus"
-            >
-              {c.cell(r)}
-            </button>
-          ) : (
-            c.cell(r)
-          )}
-        </div>
-      ))}
-      {withAction && (
-        <div role="cell" className="flex min-h-12 items-center justify-end gap-1 px-2" onClick={(e) => e.stopPropagation()}>
-          <RowContext.Provider value>{rowAction!(r)}</RowContext.Provider>
-        </div>
-      )}
-    </div>
-  )
+  const row = (r: T) => {
+    const muted = rowMuted?.(r) ?? false
+    return (
+      <div
+        key={getKey(r)}
+        role="row"
+        data-slot="row"
+        data-muted={muted || undefined}
+        className={cx('ds-row border-b border-border-subtle-01 bg-layer-01', muted && 'text-text-secondary', onRowClick && 'cursor-pointer hover:bg-layer-hover-01')}
+        onClick={onRowClick ? () => onRowClick(r) : undefined}
+      >
+        {columns.map((c, i) => (
+          <div key={c.key} role="cell" className={cellCls(c)}>
+            {i === 0 && onRowClick ? (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onRowClick(r)
+                }}
+                className={cx('min-w-0 cursor-pointer text-start hover:underline focus-visible:outline-2 focus-visible:outline-focus', muted ? 'text-text-secondary' : 'text-text-primary')}
+              >
+                {c.cell(r)}
+              </button>
+            ) : (
+              c.cell(r)
+            )}
+          </div>
+        ))}
+        {withAction && (
+          <div role="cell" className="flex min-h-12 items-center justify-end gap-1 px-2" onClick={(e) => e.stopPropagation()}>
+            <RowContext.Provider value>{rowAction!(r)}</RowContext.Provider>
+          </div>
+        )}
+      </div>
+    )
+  }
 
   return (
     <div data-slot="data-table" className={cx('flex min-w-0 flex-col', className)}>

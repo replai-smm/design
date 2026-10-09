@@ -395,3 +395,37 @@ describe('метка тона: StatusBadge с tone — четыре тона п�
     expect(() => render(<StatusBadge tone="опасно" label="x" palette="karta" />)).toThrow(/только палитра product/)
   })
 })
+
+describe('таблица: приглушённая строка (rowMuted) — неактивное серым, но читается', () => {
+  const cols: Column<CabinetRow>[] = [
+    { key: 'name', header: 'Кабинет', cell: (r) => r.name, face: true },
+    { key: 'idle', header: 'Открутка', cell: (r) => r.idle ?? 'крутится' },
+  ]
+  const rowOf = (name: string) => screen.getByText(name).closest('[role=row]') as HTMLElement
+
+  it('приглушена только строка с rowMuted: второй цвет текста токеном, фон и порядок те же, причина словом', () => {
+    render(<DataTable<CabinetRow> label="К" rows={cabinets} columns={cols} getKey={(r) => r.id} rowMuted={(r) => Boolean(r.idle)} />)
+    const muted = rowOf('Барбершоп')
+    expect(muted.getAttribute('data-muted')).toBe('true')
+    expect(muted.className).toContain('text-text-secondary')
+    expect(muted.className).toContain('bg-layer-01')
+    expect(within(muted).getByText('не крутится 12 дней')).toBeTruthy()
+    const live = rowOf('Студия йоги')
+    expect(live.hasAttribute('data-muted')).toBe(false)
+    expect(live.className).not.toContain('text-text-secondary')
+    expect(document.querySelectorAll('[data-muted]')).toHaveLength(cabinets.filter((c) => c.idle).length)
+    const names = screen.getAllByRole('row').slice(1).map((r) => within(r).getAllByRole('cell')[0]?.textContent)
+    expect(names).toEqual(cabinets.map((c) => c.name))
+  })
+
+  it('кнопка первой колонки приглушённой строки — тоже вторым цветом (а не основным поверх серой строки)', () => {
+    render(<DataTable<CabinetRow> label="К" rows={cabinets} columns={cols} getKey={(r) => r.id} rowMuted={(r) => Boolean(r.idle)} onRowClick={() => {}} />)
+    expect(within(rowOf('Барбершоп')).getByRole('button').className).toContain('text-text-secondary')
+    expect(within(rowOf('Студия йоги')).getByRole('button').className).toContain('text-text-primary')
+  })
+
+  it('без rowMuted приглушённых строк нет', () => {
+    render(<DataTable<CabinetRow> label="К" rows={cabinets} columns={cols} getKey={(r) => r.id} />)
+    expect(document.querySelectorAll('[data-muted]')).toHaveLength(0)
+  })
+})
