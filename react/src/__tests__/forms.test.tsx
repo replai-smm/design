@@ -328,6 +328,50 @@ describe('выбор с поиском', () => {
     expect(val()).toBe('a')
   })
 
+  it('defaultInputValue: поле открывается с текстом поиска, список сразу сужен, активный — первое совпадение', () => {
+    render(<Ctl defaultInputValue="йог" defaultOpen />)
+    expect(box().value).toBe('йог')
+    expect(screen.getAllByRole('option').map((o) => o.textContent)).toEqual(['Студия йогиклиент «Асана»'])
+    expect(document.getElementById(box().getAttribute('aria-activedescendant')!)?.textContent).toContain('Студия йоги')
+    fireEvent.keyDown(box(), { key: 'Enter' })
+    expect(val()).toBe('b')
+    expect(box().value).toBe('Студия йоги')
+  })
+
+  it('onInputValueChange: печать, выбор (название), очистка — каждый раз новый текст, без повторов', () => {
+    const onText = vi.fn()
+    render(<Ctl onInputValueChange={onText} />)
+    fireEvent.change(box(), { target: { value: 'кофе' } })
+    fireEvent.keyDown(box(), { key: 'Enter' })
+    expect(val()).toBe('a')
+    fireEvent.blur(box())
+    fireEvent.click(screen.getByRole('button', { name: 'очистить выбор' }))
+    expect(onText.mock.calls.map((c) => c[0])).toEqual(['кофе', 'Кофейня «Зерно»', ''])
+  })
+
+  it('управляемый inputValue: поле показывает данный текст и сужает им список; текст = название выбранного — список полный', () => {
+    function Text({ start }: { start: string }) {
+      const [t, setT] = useState(start)
+      return (
+        <>
+          <Ctl inputValue={t} onInputValueChange={setT} defaultOpen initial="a" />
+          <button type="button" onClick={() => setT('лавка')}>снаружи</button>
+        </>
+      )
+    }
+    render(<Text start="Кофейня «Зерно»" />)
+    expect(box().value).toBe('Кофейня «Зерно»')
+    expect(screen.getAllByRole('option')).toHaveLength(4)
+    fireEvent.change(box(), { target: { value: 'ёлк' } })
+    expect(box().value).toBe('ёлк')
+    expect(screen.getAllByRole('option').map((o) => o.textContent)).toEqual(['Ёлки-палки'])
+    fireEvent.keyDown(box(), { key: 'Enter' })
+    expect(val()).toBe('d')
+    expect(box().value).toBe('Ёлки-палки')
+    fireEvent.click(screen.getByRole('button', { name: 'снаружи' }))
+    expect(box().value).toBe('лавка')
+  })
+
   it('пусто — «ничего не найдено», aria-controls ведёт на открытый слой', () => {
     render(<Ctl emptyText="Таких нет" />)
     fireEvent.change(box(), { target: { value: 'щщщ' } })

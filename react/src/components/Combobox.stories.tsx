@@ -30,6 +30,18 @@ export const Обычное: S = { render: () => <Demo /> }
 /** Список открыт: выбранный пункт отмечен галкой, активный — подсветкой. */
 export const Открыт: S = { render: () => <Demo open /> }
 
+/**
+ * Начальный текст поиска (`defaultInputValue`): окно выбора открывается с подсказкой — первым словом проекта, список
+ * уже сужен; стереть — полный список. Управляемый текст — `inputValue` + `onInputValueChange` («Таблицы 2026»).
+ */
+export const НачальныйПоиск: S = {
+  render: () => (
+    <div className="max-w-md">
+      <Combobox label="Название или город" options={options} defaultOpen defaultInputValue="студия" clearable={false} />
+    </div>
+  ),
+}
+
 export const НичегоНеНайдено: S = {
   tags: ['state:ничего не найдено'],
   render: () => (
