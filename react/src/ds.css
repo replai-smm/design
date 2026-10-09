@@ -53,6 +53,22 @@
   }
 }
 
+/*
+ * широкая таблица прокручивается вбок внутри себя ([data-slot=table-scroll]); первая колонка стоит — фон строки
+ * (наведение, шапка) наследует, чтобы прокрученное уходило под неё. В свёрнутой группе обрезка — clip, а не hidden:
+ * hidden делает свой контейнер прокрутки, и закрепление внутри него не работает.
+ */
+.ds-table .ds-row > [role='cell']:first-child,
+.ds-table .ds-row > [role='columnheader']:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background-color: inherit;
+}
+.ds-table .ds-expand > * {
+  overflow: clip;
+}
+
 /* панель деталей: справа на ноутбуке, снизу на телефоне */
 @keyframes ds-in-right {
   from {

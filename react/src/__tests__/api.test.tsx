@@ -10,6 +10,8 @@ import { STATUS_IDS, TONE_ORDER, statusOf, toneOf, type Tone } from '../lib/stat
 import { cabinets, groups, many, type CabinetRow, type GroupRow } from '../stories/fixtures'
 import { compareSortValues, type Column, type SortState } from '../components/Collection'
 import statusesJson from '../../../statuses.json'
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 
 const quiet = () => vi.spyOn(console, 'error').mockImplementation(() => {})
 afterEach(() => vi.restoreAllMocks())
@@ -470,5 +472,47 @@ describe('таблица: подсказка у заголовка (Column.hint)
     render(<DataTable<CabinetRow> label="К" rows={cabinets} columns={cols} getKey={(r) => r.id} />)
     expect(within(header('Кабинет')).queryByRole('button')).toBeNull()
     expect(document.querySelectorAll('[role=columnheader] [aria-describedby]')).toHaveLength(2)
+  })
+})
+
+describe('таблица: широкая — колонки не ужимаются, прокрутка вбок, первая колонка стоит', () => {
+  const cols: Column<CabinetRow>[] = [
+    { key: 'name', header: 'Кабинет', cell: (r) => r.name, face: true, grow: 2 },
+    { key: 'week', header: 'Открутка за 7 дней', cell: (r) => `${r.week} ₽`, align: 'end', minWidth: '12' },
+    { key: 'tg', header: 'Таргетолог', cell: (r) => r.targetologist, grow: 0 },
+  ]
+  const table = () => screen.getByRole('table')
+
+  it('колонка не уже самого длинного слова (min-content), а не ужимается в ноль; grow 0 — по содержимому', () => {
+    render(<DataTable<CabinetRow> label="К" rows={cabinets} columns={cols} getKey={(r) => r.id} />)
+    expect(table().style.getPropertyValue('--ds-cols')).toBe('minmax(min-content, 2fr) minmax(min-content, 1fr) max-content')
+    expect(table().style.getPropertyValue('--ds-cols-phone')).toBe('minmax(min-content, 2fr)')
+  })
+
+  it('minWidth: шаг шкалы у шапки и клеток, значение в одну строку только в клетках (шапка переносится)', () => {
+    render(<DataTable<CabinetRow> label="К" rows={cabinets} columns={cols} getKey={(r) => r.id} />)
+    const head = screen.getByRole('columnheader', { name: 'Открутка за 7 дней' })
+    expect(head.className).toContain('min-w-24')
+    expect(head.className).not.toContain('whitespace-nowrap')
+    const cell = screen.getByText('18400 ₽')
+    expect(cell.className).toContain('min-w-24')
+    expect(cell.className).toContain('whitespace-nowrap')
+    expect(screen.getAllByText('Анна', { selector: '[role=cell]' })[0]!.className).toContain('min-w-0')
+  })
+
+  it('таблица — внутри своей прокрутки вбок и не уже суммы колонок (строки и рамки во всю ширину)', () => {
+    render(<DataTable<CabinetRow> label="К" rows={cabinets} columns={cols} getKey={(r) => r.id} />)
+    const scroll = table().parentElement!
+    expect(scroll.getAttribute('data-slot')).toBe('table-scroll')
+    expect(scroll.className).toContain('overflow-x-auto')
+    expect(table().className).toContain('min-w-min')
+  })
+
+  it('первая колонка и слово группы закреплены (ds.css: sticky, фон строки; в свёрнутой группе — clip, не hidden)', () => {
+    const css = readFileSync(resolve(import.meta.dirname, '..', 'ds.css'), 'utf8')
+    expect(css).toMatch(/\.ds-table \.ds-row > \[role='cell'\]:first-child,\s*\.ds-table \.ds-row > \[role='columnheader'\]:first-child \{\s*position: sticky;\s*left: 0;\s*z-index: 1;\s*background-color: inherit;/)
+    expect(css).toMatch(/\.ds-table \.ds-expand > \* \{\s*overflow: clip;/)
+    render(<DataTable<CabinetRow> label="К" rows={cabinets} columns={cols} getKey={(r) => r.id} getStatus={(r) => r.status} />)
+    for (const h of screen.getAllByRole('rowheader')) expect(h.firstElementChild?.className).toContain('sticky')
   })
 })

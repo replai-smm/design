@@ -6,6 +6,9 @@
  *   ничего не найдено, нет доступа), много — первые `pageSize` строк и «показать ещё».
  * - В строке главной кнопки нет (П5): действие строки — тихая кнопка или нажатие на строку (открыть панель деталей).
  * - На телефоне в таблице видны только колонки лица (`face`), остальные — в панели деталей.
+ * - Широкая таблица (11–13 колонок денег) не ужимается до переноса чисел: колонка не уже самого длинного слова,
+ *   `minWidth` — не уже шага шкалы и значение в одну строку; не влезает — таблица прокручивается по горизонтали внутри
+ *   себя, первая колонка (и слово группы) стоит на месте.
  * - Сортировка по заголовку (`DataTable`, колонка с `sortValue`) — выбор человека, а не порядок продукта: без неё
  *   порядок данных; с ней строки переставляются внутри группы тона, группы срочного остаются сверху (П2 не ломается).
  */
@@ -148,7 +151,16 @@ export interface Column<T> {
    * её как описание заголовка. У сортируемой колонки подсказка — у той же кнопки сортировки (второй остановки Tab нет).
    */
   hint?: ReactNode
+  /**
+   * Не уже шага шкалы отступов (`09` 48 px · `10` 64 · `11` 80 · `12` 96 · `13` 160) и значение в одну строку — деньги
+   * «12 000 ₽», даты. Сумма колонок не влезает — таблица прокручивается по горизонтали, первая колонка стоит.
+   */
+  minWidth?: ColumnMinWidth
 }
+
+/** Шаги шкалы отступов (scale.json → spacing) для `Column.minWidth`. */
+export type ColumnMinWidth = '09' | '10' | '11' | '12' | '13'
+const MIN_W: Record<ColumnMinWidth, string> = { '09': 'min-w-12', '10': 'min-w-16', '11': 'min-w-20', '12': 'min-w-24', '13': 'min-w-40' }
 
 /** Направление — те же слова, что у `aria-sort`. */
 export type SortDirection = 'ascending' | 'descending'
@@ -212,7 +224,8 @@ function SortIcon({ direction }: { direction?: SortDirection }) {
   )
 }
 
-const track = (grow = 1) => (grow === 0 ? 'max-content' : `minmax(0, ${grow}fr)`)
+// колонка не уже самого длинного слова (min-content): не влезает — прокрутка, а не наезд текста и не колонка в ноль
+const track = (grow = 1) => (grow === 0 ? 'max-content' : `minmax(min-content, ${grow}fr)`)
 
 export function DataTable<T>(props: DataTableProps<T>) {
   const { rows: dataRows, columns, getKey, getStatus, statusLabel, state = 'ready', pageSize = 50, collapseHealthy = true, onRowClick, rowAction, rowMuted, label, className } = props
@@ -233,8 +246,14 @@ export function DataTable<T>(props: DataTableProps<T>) {
 
   const shown = budget(groups, limit, collapseHealthy)
   const hidden = groups.reduce((n, g, i) => n + (collapseHealthy && g.healthy ? 0 : g.rows.length - shown[i]), 0)
-  const cellCls = (c: Column<T>) =>
-    cx('flex min-h-12 min-w-0 items-center px-4 py-2 text-body-compact-01', c.align === 'end' && 'justify-end text-end', !c.face && 'ds-cell-more')
+  const cellCls = (c: Column<T>, body = false) =>
+    cx(
+      'flex min-h-12 items-center px-4 py-2 text-body-compact-01',
+      c.minWidth ? MIN_W[c.minWidth] : 'min-w-0',
+      body && c.minWidth && 'whitespace-nowrap',
+      c.align === 'end' && 'justify-end text-end',
+      !c.face && 'ds-cell-more',
+    )
 
   const row = (r: T) => {
     const muted = rowMuted?.(r) ?? false
@@ -248,7 +267,7 @@ export function DataTable<T>(props: DataTableProps<T>) {
         onClick={onRowClick ? () => onRowClick(r) : undefined}
       >
         {columns.map((c, i) => (
-          <div key={c.key} role="cell" className={cellCls(c)}>
+          <div key={c.key} role="cell" className={cellCls(c, true)}>
             {i === 0 && onRowClick ? (
               <button
                 type="button"
@@ -276,111 +295,116 @@ export function DataTable<T>(props: DataTableProps<T>) {
 
   return (
     <div data-slot="data-table" className={cx('flex min-w-0 flex-col', className)}>
-      <div role="table" aria-label={label} aria-busy={state === 'loading' || undefined} aria-rowcount={state === 'loading' ? undefined : rows.length + 1} className="ds-table min-w-0 border-t border-border-subtle-01" style={vars}>
-        <div role="rowgroup" className="ds-rowgroup">
-          <div role="row" className="ds-row bg-layer-accent-01">
-            {columns.map((c) => {
-              const active = c.sortValue && sort?.key === c.key ? sort.direction : undefined
-              const hintId = c.hint ? `${uid}-hint-${c.key}` : undefined
-              const title = <span className={cx('min-w-0', Boolean(c.hint) && 'underline decoration-dotted underline-offset-4')}>{c.header}</span>
-              const withHint = (trigger: ReactElement) =>
-                c.hint ? (
-                  <>
-                    <Tooltip content={c.hint}>{trigger}</Tooltip>
-                    <span id={hintId} hidden>
-                      {c.hint}
-                    </span>
-                  </>
-                ) : (
-                  trigger
-                )
-              return (
-                <div key={c.key} role="columnheader" aria-sort={active} className={cx(cellCls(c), 'text-heading-compact-01 text-text-primary', c.sortValue && 'px-0 py-0')}>
-                  {c.sortValue ? (
-                    withHint(
-                      <button
-                        type="button"
-                        data-slot="sort"
-                        aria-describedby={hintId}
-                        onClick={() => setSort({ key: c.key, direction: active ? (active === 'ascending' ? 'descending' : 'ascending') : (c.sortFirst ?? 'ascending') })}
-                        className={cx(
-                          'flex min-h-12 w-full min-w-0 cursor-pointer items-center gap-2 px-4 py-2 text-heading-compact-01 text-text-primary hover:bg-layer-accent-hover-01 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus',
-                          c.align === 'end' ? 'justify-end text-end' : 'text-start',
-                        )}
-                      >
-                        {title}
-                        <SortIcon direction={active} />
-                      </button>,
-                    )
-                  ) : c.hint ? (
-                    withHint(
-                      <button
-                        type="button"
-                        data-slot="column-hint"
-                        aria-describedby={hintId}
-                        className={cx('min-w-0 cursor-help text-heading-compact-01 text-text-primary focus-visible:outline-2 focus-visible:outline-focus', c.align === 'end' ? 'text-end' : 'text-start')}
-                      >
-                        {title}
-                      </button>,
-                    )
+      <div data-slot="table-scroll" className="min-w-0 overflow-x-auto">
+        <div role="table" aria-label={label} aria-busy={state === 'loading' || undefined} aria-rowcount={state === 'loading' ? undefined : rows.length + 1} className="ds-table min-w-min border-t border-border-subtle-01" style={vars}>
+          <div role="rowgroup" className="ds-rowgroup">
+            <div role="row" className="ds-row bg-layer-accent-01">
+              {columns.map((c) => {
+                const active = c.sortValue && sort?.key === c.key ? sort.direction : undefined
+                const hintId = c.hint ? `${uid}-hint-${c.key}` : undefined
+                const title = <span className={cx('min-w-0', Boolean(c.hint) && 'underline decoration-dotted underline-offset-4')}>{c.header}</span>
+                const withHint = (trigger: ReactElement) =>
+                  c.hint ? (
+                    <>
+                      <Tooltip content={c.hint}>{trigger}</Tooltip>
+                      <span id={hintId} hidden>
+                        {c.hint}
+                      </span>
+                    </>
                   ) : (
-                    c.header
-                  )}
+                    trigger
+                  )
+                return (
+                  <div key={c.key} role="columnheader" aria-sort={active} className={cx(cellCls(c), 'text-heading-compact-01 text-text-primary', c.sortValue && 'px-0 py-0')}>
+                    {c.sortValue ? (
+                      withHint(
+                        <button
+                          type="button"
+                          data-slot="sort"
+                          aria-describedby={hintId}
+                          onClick={() => setSort({ key: c.key, direction: active ? (active === 'ascending' ? 'descending' : 'ascending') : (c.sortFirst ?? 'ascending') })}
+                          className={cx(
+                            'flex min-h-12 w-full min-w-0 cursor-pointer items-center gap-2 px-4 py-2 text-heading-compact-01 text-text-primary hover:bg-layer-accent-hover-01 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus',
+                            c.align === 'end' ? 'justify-end text-end' : 'text-start',
+                          )}
+                        >
+                          {title}
+                          <SortIcon direction={active} />
+                        </button>,
+                      )
+                    ) : c.hint ? (
+                      withHint(
+                        <button
+                          type="button"
+                          data-slot="column-hint"
+                          aria-describedby={hintId}
+                          className={cx('min-w-0 cursor-help text-heading-compact-01 text-text-primary focus-visible:outline-2 focus-visible:outline-focus', c.align === 'end' ? 'text-end' : 'text-start')}
+                        >
+                          {title}
+                        </button>,
+                      )
+                    ) : (
+                      c.header
+                    )}
+                  </div>
+                )
+              })}
+              {withAction && (
+                <div role="columnheader" className="flex min-h-12 items-center px-2">
+                  <span className="sr-only">действия</span>
+                </div>
+              )}
+            </div>
+          </div>
+          {state === 'loading' ? (
+            <div role="rowgroup" className="ds-rowgroup" data-state="загрузка">
+              {Array.from({ length: 5 }, (_, i) => (
+                <div key={i} role="row" className="ds-row border-b border-border-subtle-01 bg-layer-01">
+                  {columns.map((c) => (
+                    <div key={c.key} role="cell" className={cellCls(c)}>
+                      <Skeleton width={c.face ? '3/4' : '1/2'} />
+                    </div>
+                  ))}
+                  {withAction && <div role="cell" className="min-h-12" />}
+                </div>
+              ))}
+            </div>
+          ) : (
+            groups.map((g, gi) => {
+              const head = g.status && (
+                <div role="row" className="ds-row bg-layer-01">
+                  <div role="rowheader" className="flex min-h-12 items-center px-4 pt-4" style={{ gridColumn: '1 / -1' }}>
+                    {/* слово группы стоит при прокрутке вбок, как первая колонка */}
+                    <div className="sticky left-4">
+                      <GroupHead
+                        status={g.status}
+                        count={g.rows.length}
+                        label={statusLabel?.(g.status)}
+                        toggle={collapseHealthy && g.healthy ? { open: healthyOpen, onClick: () => setHealthyOpen(!healthyOpen), controls: `${uid}-ok` } : undefined}
+                      />
+                    </div>
+                  </div>
                 </div>
               )
-            })}
-            {withAction && (
-              <div role="columnheader" className="flex min-h-12 items-center px-2">
-                <span className="sr-only">действия</span>
-              </div>
-            )}
-          </div>
-        </div>
-        {state === 'loading' ? (
-          <div role="rowgroup" className="ds-rowgroup" data-state="загрузка">
-            {Array.from({ length: 5 }, (_, i) => (
-              <div key={i} role="row" className="ds-row border-b border-border-subtle-01 bg-layer-01">
-                {columns.map((c) => (
-                  <div key={c.key} role="cell" className={cellCls(c)}>
-                    <Skeleton width={c.face ? '3/4' : '1/2'} />
+              if (collapseHealthy && g.healthy)
+                return (
+                  <div key={g.status ?? gi} role="rowgroup" className="ds-rowgroup" data-group={g.status}>
+                    {head}
+                    <div id={`${uid}-ok`} className="ds-expand" data-open={healthyOpen} inert={!healthyOpen}>
+                      <div>{g.rows.map(row)}</div>
+                    </div>
                   </div>
-                ))}
-                {withAction && <div role="cell" className="min-h-12" />}
-              </div>
-            ))}
-          </div>
-        ) : (
-          groups.map((g, gi) => {
-            const head = g.status && (
-              <div role="row" className="ds-row bg-layer-01">
-                <div role="rowheader" className="flex min-h-12 items-center px-4 pt-4" style={{ gridColumn: '1 / -1' }}>
-                  <GroupHead
-                    status={g.status}
-                    count={g.rows.length}
-                    label={statusLabel?.(g.status)}
-                    toggle={collapseHealthy && g.healthy ? { open: healthyOpen, onClick: () => setHealthyOpen(!healthyOpen), controls: `${uid}-ok` } : undefined}
-                  />
-                </div>
-              </div>
-            )
-            if (collapseHealthy && g.healthy)
+                )
+              if (shown[gi] === 0) return null
               return (
-                <div key={g.status ?? gi} role="rowgroup" className="ds-rowgroup" data-group={g.status}>
+                <div key={g.status ?? gi} role="rowgroup" className="ds-rowgroup" data-group={g.status ?? undefined}>
                   {head}
-                  <div id={`${uid}-ok`} className="ds-expand" data-open={healthyOpen} inert={!healthyOpen}>
-                    <div>{g.rows.map(row)}</div>
-                  </div>
+                  {g.rows.slice(0, shown[gi]).map(row)}
                 </div>
               )
-            if (shown[gi] === 0) return null
-            return (
-              <div key={g.status ?? gi} role="rowgroup" className="ds-rowgroup" data-group={g.status ?? undefined}>
-                {head}
-                {g.rows.slice(0, shown[gi]).map(row)}
-              </div>
-            )
-          })
-        )}
+            })
+          )}
+        </div>
       </div>
       {hidden > 0 && state === 'ready' && <MoreButton hidden={hidden} onMore={() => setLimit(limit + pageSize)} />}
     </div>
