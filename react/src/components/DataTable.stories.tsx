@@ -125,3 +125,39 @@ export const ПодсказкаУЗаголовка: S = {
     />
   ),
 }
+
+interface MonthRow {
+  id: string
+  name: string
+  months: Array<number | null>
+}
+const MONTHS = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь']
+const monthRows: MonthRow[] = cabinets.map((c, i) => ({
+  id: c.id,
+  name: c.name,
+  months: MONTHS.map((_, m) => (m > 8 && i % 3 === 0 ? null : Math.round((c.week * (m + 3)) / 4 / 10) * 10 + i * 1000)),
+}))
+const monthColumns: Column<MonthRow>[] = [
+  { key: 'name', header: 'Кабинет', cell: (r) => r.name, face: true, grow: 2, sortValue: (r) => r.name },
+  ...MONTHS.map(
+    (m, i): Column<MonthRow> => ({
+      key: `m${i}`,
+      header: m,
+      cell: (r) => rub(r.months[i] ?? null),
+      align: 'end',
+      minWidth: '12',
+      face: i >= 9,
+      sortValue: (r) => r.months[i],
+      sortFirst: 'descending',
+    }),
+  ),
+]
+
+/**
+ * Широкая таблица (13 колонок денег, «Динамика по месяцам» Статистики): деньги не переносятся — колонка не уже шага
+ * шкалы (`minWidth: '12'`) и значение в одну строку. Не влезает (1280 — все месяцы, 390 — кабинет и три месяца лица) —
+ * таблица прокручивается вбок внутри себя, «Кабинет» стоит на месте.
+ */
+export const ШирокаяТаблица: S = {
+  render: () => <DataTable<MonthRow> label="Открутка по месяцам" rows={monthRows} columns={monthColumns} getKey={(r) => r.id} onRowClick={() => {}} />,
+}
