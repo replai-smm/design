@@ -161,3 +161,20 @@ const monthColumns: Column<MonthRow>[] = [
 export const ШирокаяТаблица: S = {
   render: () => <DataTable<MonthRow> label="Открутка по месяцам" rows={monthRows} columns={monthColumns} getKey={(r) => r.id} onRowClick={() => {}} />,
 }
+
+/**
+ * Широкая таблица со скрытым текстом в клетке (подпись поля или «в работе:» для чтения с экрана — `sr-only`, это
+ * `position: absolute`). Обёртка прокрутки `table-scroll` — `relative`, поэтому скрытое не вырывается из прокрутки и
+ * не растягивает страницу вбок (на 390 ширина документа не больше окна). Ловит проверка на горизонтальную прокрутку.
+ */
+export const ШирокаяСоСкрытымТекстом: S = {
+  render: () => (
+    <DataTable<MonthRow>
+      label="Открутка по месяцам"
+      rows={monthRows}
+      columns={monthColumns.map((c, i) => (i === 0 ? c : { ...c, cell: (r: MonthRow) => (<><span className="sr-only">{c.header}: </span>{rub(r.months[i - 1] ?? null)}</>) }))}
+      getKey={(r) => r.id}
+      onRowClick={() => {}}
+    />
+  ),
+}
