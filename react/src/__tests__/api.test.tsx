@@ -505,7 +505,27 @@ describe('таблица: широкая — колонки не ужимают�
     const scroll = table().parentElement!
     expect(scroll.getAttribute('data-slot')).toBe('table-scroll')
     expect(scroll.className).toContain('overflow-x-auto')
+    // position: relative — иначе absolute-потомки (sr-only: скрытые подписи, текст в клетках) вырываются из прокрутки и страница едет вбок
+    expect(scroll.className.split(/\s+/)).toContain('relative')
     expect(table().className).toContain('min-w-min')
+  })
+
+  it('скрытый текст (sr-only, absolute) в клетке остаётся внутри обёртки прокрутки: ближайший позиционированный предок — table-scroll', () => {
+    render(
+      <DataTable<CabinetRow>
+        label="К"
+        rows={cabinets}
+        columns={[
+          { key: 'n', header: 'Кабинет', cell: (r) => r.name, face: true },
+          { key: 't', header: 'Таргетолог', cell: (r) => <><span className="sr-only">подпись скрыта</span>{r.targetologist}</> },
+        ]}
+        getKey={(r) => r.id}
+      />,
+    )
+    const hidden = screen.getAllByText('подпись скрыта')[0]!
+    let el: HTMLElement | null = hidden.parentElement
+    while (el && !el.className.split(/\s+/).some((c) => ['relative', 'absolute', 'sticky', 'fixed'].includes(c))) el = el.parentElement
+    expect(el?.getAttribute('data-slot')).toBe('table-scroll')
   })
 
   it('первая колонка и слово группы закреплены (ds.css: sticky, фон строки; в свёрнутой группе — clip, не hidden)', () => {

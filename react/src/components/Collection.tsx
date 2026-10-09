@@ -295,7 +295,7 @@ export function DataTable<T>(props: DataTableProps<T>) {
 
   return (
     <div data-slot="data-table" className={cx('flex min-w-0 flex-col', className)}>
-      <div data-slot="table-scroll" className="min-w-0 overflow-x-auto">
+      <div data-slot="table-scroll" className="relative min-w-0 overflow-x-auto">
         <div role="table" aria-label={label} aria-busy={state === 'loading' || undefined} aria-rowcount={state === 'loading' ? undefined : rows.length + 1} className="ds-table min-w-min border-t border-border-subtle-01" style={vars}>
           <div role="rowgroup" className="ds-rowgroup">
             <div role="row" className="ds-row bg-layer-accent-01">
