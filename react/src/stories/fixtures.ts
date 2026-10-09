@@ -39,13 +39,15 @@ export interface CabinetRow {
   status: StatusId
   week: number
   left: number | null
+  /** Не крутится — слово причины (приглушённая строка «Таргета»). */
+  idle?: string
 }
 
 export const cabinets: CabinetRow[] = [
   { id: 'c1', name: 'Кофейня «Зерно»', targetologist: 'Анна', status: 'work.failing', week: 18400, left: 2100 },
   { id: 'c2', name: 'Студия йоги', targetologist: 'Борис', status: 'work.working', week: 9200, left: 15400 },
-  { id: 'c3', name: 'Автосервис «Ключ»', targetologist: 'Анна', status: 'work.working', week: 31000, left: null },
+  { id: 'c3', name: 'Автосервис «Ключ»', targetologist: 'Анна', status: 'work.working', week: 31000, left: null, idle: 'не запускался' },
   { id: 'c4', name: 'Детский клуб', targetologist: 'Вера', status: 'work.failing', week: 4600, left: 300 },
-  { id: 'c5', name: 'Барбершоп', targetologist: 'Борис', status: 'work.unchecked', week: 12750, left: 8800 },
+  { id: 'c5', name: 'Барбершоп', targetologist: 'Борис', status: 'work.unchecked', week: 12750, left: 8800, idle: 'не крутится 12 дней' },
   { id: 'c6', name: 'Цветы на Ленина', targetologist: 'Вера', status: 'work.working', week: 21300, left: 6400 },
 ]

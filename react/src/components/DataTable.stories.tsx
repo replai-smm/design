@@ -88,3 +88,20 @@ export const СортировкаВГруппах: S = {
     <DataTable<CabinetRow> label="Кабинеты" rows={cabinets} columns={cabinetColumns} getKey={(r) => r.id} getStatus={(r) => r.status} defaultSort={{ key: 'left', direction: 'ascending' }} />
   ),
 }
+
+/**
+ * Приглушённые строки (`rowMuted`): неактивные кабинеты — текст вторым цветом, читается (≥ 4,5:1), порядок тот же.
+ * Причина — словом в колонке «Открутка», цвет её не заменяет; спрятать такие строки — фильтр продукта («Скрыть серые»).
+ */
+export const ПриглушённыеСтроки: S = {
+  render: () => (
+    <DataTable<CabinetRow>
+      label="Кабинеты"
+      rows={cabinets}
+      columns={[...cabinetColumns, { key: 'idle', header: 'Открутка', cell: (r) => r.idle ?? 'крутится' }]}
+      getKey={(r) => r.id}
+      rowMuted={(r) => Boolean(r.idle)}
+      onRowClick={() => {}}
+    />
+  ),
+}
