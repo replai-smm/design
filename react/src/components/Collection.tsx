@@ -9,12 +9,13 @@
  * - Сортировка по заголовку (`DataTable`, колонка с `sortValue`) — выбор человека, а не порядок продукта: без неё
  *   порядок данных; с ней строки переставляются внутри группы тона, группы срочного остаются сверху (П2 не ломается).
  */
-import { Fragment, useId, useMemo, useState, type CSSProperties, type ReactNode } from 'react'
+import { Fragment, useId, useMemo, useState, type CSSProperties, type ReactElement, type ReactNode } from 'react'
 import { useControllable } from '../lib/controllable'
 import { cx } from '../lib/cx'
 import { rankOf, toneOf, type StatusId } from '../lib/status'
 import { Button, RowContext } from './Button'
 import { StatusBadge } from './StatusBadge'
+import { Tooltip } from './Tooltip'
 import { Skeleton, StateView, type StateKind } from './StateView'
 
 export interface CollectionProps<T> {
@@ -141,6 +142,12 @@ export interface Column<T> {
   sortValue?: (row: T) => number | string | null | undefined
   /** Первое нажатие сортирует в эту сторону (по умолчанию по возрастанию); повторное — в обратную. */
   sortFirst?: SortDirection
+  /**
+   * Подсказка заголовка — что значит колонка («Факт минус план с даты пополнения до вчера»). Заголовок подчёркнут
+   * пунктиром (Carbon DefinitionTooltip) и берёт фокус; подсказка — `Tooltip` ДС при наведении и фокусе, читалка слышит
+   * её как описание заголовка. У сортируемой колонки подсказка — у той же кнопки сортировки (второй остановки Tab нет).
+   */
+  hint?: ReactNode
 }
 
 /** Направление — те же слова, что у `aria-sort`. */
@@ -274,21 +281,48 @@ export function DataTable<T>(props: DataTableProps<T>) {
           <div role="row" className="ds-row bg-layer-accent-01">
             {columns.map((c) => {
               const active = c.sortValue && sort?.key === c.key ? sort.direction : undefined
+              const hintId = c.hint ? `${uid}-hint-${c.key}` : undefined
+              const title = <span className={cx('min-w-0', Boolean(c.hint) && 'underline decoration-dotted underline-offset-4')}>{c.header}</span>
+              const withHint = (trigger: ReactElement) =>
+                c.hint ? (
+                  <>
+                    <Tooltip content={c.hint}>{trigger}</Tooltip>
+                    <span id={hintId} hidden>
+                      {c.hint}
+                    </span>
+                  </>
+                ) : (
+                  trigger
+                )
               return (
                 <div key={c.key} role="columnheader" aria-sort={active} className={cx(cellCls(c), 'text-heading-compact-01 text-text-primary', c.sortValue && 'px-0 py-0')}>
                   {c.sortValue ? (
-                    <button
-                      type="button"
-                      data-slot="sort"
-                      onClick={() => setSort({ key: c.key, direction: active ? (active === 'ascending' ? 'descending' : 'ascending') : (c.sortFirst ?? 'ascending') })}
-                      className={cx(
-                        'flex min-h-12 w-full min-w-0 cursor-pointer items-center gap-2 px-4 py-2 text-heading-compact-01 text-text-primary hover:bg-layer-accent-hover-01 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus',
-                        c.align === 'end' ? 'justify-end text-end' : 'text-start',
-                      )}
-                    >
-                      <span className="min-w-0">{c.header}</span>
-                      <SortIcon direction={active} />
-                    </button>
+                    withHint(
+                      <button
+                        type="button"
+                        data-slot="sort"
+                        aria-describedby={hintId}
+                        onClick={() => setSort({ key: c.key, direction: active ? (active === 'ascending' ? 'descending' : 'ascending') : (c.sortFirst ?? 'ascending') })}
+                        className={cx(
+                          'flex min-h-12 w-full min-w-0 cursor-pointer items-center gap-2 px-4 py-2 text-heading-compact-01 text-text-primary hover:bg-layer-accent-hover-01 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus',
+                          c.align === 'end' ? 'justify-end text-end' : 'text-start',
+                        )}
+                      >
+                        {title}
+                        <SortIcon direction={active} />
+                      </button>,
+                    )
+                  ) : c.hint ? (
+                    withHint(
+                      <button
+                        type="button"
+                        data-slot="column-hint"
+                        aria-describedby={hintId}
+                        className={cx('min-w-0 cursor-help text-heading-compact-01 text-text-primary focus-visible:outline-2 focus-visible:outline-focus', c.align === 'end' ? 'text-end' : 'text-start')}
+                      >
+                        {title}
+                      </button>,
+                    )
                   ) : (
                     c.header
                   )}

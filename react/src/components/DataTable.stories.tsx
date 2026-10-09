@@ -105,3 +105,23 @@ export const ПриглушённыеСтроки: S = {
     />
   ),
 }
+
+/**
+ * Подсказка у заголовка (`Column.hint`): заголовок подчёркнут пунктиром, наведение или Tab — подсказка ДС (`Tooltip`),
+ * читалка слышит её как описание. У сортируемой колонки («7 дней») подсказка — у той же кнопки сортировки.
+ */
+export const ПодсказкаУЗаголовка: S = {
+  render: () => (
+    <DataTable<CabinetRow>
+      label="Кабинеты"
+      rows={cabinets}
+      getKey={(r) => r.id}
+      columns={[
+        cabinetColumns[0]!,
+        { ...cabinetColumns[1]!, sortValue: undefined, hint: 'Кто ведёт кабинет; поменять — в строке «Бюджетов»' },
+        { ...cabinetColumns[2]!, hint: 'Открутка за 7 дней до вчера, без НДС' },
+        cabinetColumns[3]!,
+      ]}
+    />
+  ),
+}

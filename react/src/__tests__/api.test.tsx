@@ -4,7 +4,7 @@
  * свёрнута (П2, П3), «много» — «показать ещё» (П12), закрытый список статусов, фильтры в адресе.
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen, fireEvent, within, act } from '@testing-library/react'
+import { render, screen, fireEvent, within, act, waitFor } from '@testing-library/react'
 import { ActionArea, Button, Card, DataTable, List, Page, PageHeader, StatusBadge, FilterBar, useUrlFilters, Toaster, useToast, Drawer, Tabs, CountBadge, countText, Steps, stepState } from '../index'
 import { STATUS_IDS, TONE_ORDER, statusOf, toneOf, type Tone } from '../lib/status'
 import { cabinets, groups, many, type CabinetRow, type GroupRow } from '../stories/fixtures'
@@ -427,5 +427,48 @@ describe('таблица: приглушённая строка (rowMuted) — �
   it('без rowMuted приглушённых строк нет', () => {
     render(<DataTable<CabinetRow> label="К" rows={cabinets} columns={cols} getKey={(r) => r.id} />)
     expect(document.querySelectorAll('[data-muted]')).toHaveLength(0)
+  })
+})
+
+describe('таблица: подсказка у заголовка (Column.hint) — Tooltip ДС, не title', () => {
+  const cols: Column<CabinetRow>[] = [
+    { key: 'name', header: 'Кабинет', cell: (r) => r.name, face: true },
+    { key: 'tg', header: 'Таргетолог', cell: (r) => r.targetologist, hint: 'Кто ведёт кабинет' },
+    { key: 'week', header: '7 дней', cell: (r) => String(r.week), align: 'end', sortValue: (r) => r.week, sortFirst: 'descending', hint: 'Открутка за 7 дней до вчера' },
+  ]
+  const header = (name: string) => screen.getByRole('columnheader', { name: new RegExp(name) })
+  const described = (el: Element) => document.getElementById(el.getAttribute('aria-describedby') ?? '')?.textContent
+
+  it('несортируемый: заголовок — кнопка с пунктиром, подсказка — описание; фокус открывает Tooltip, Esc прячет', async () => {
+    render(<DataTable<CabinetRow> label="К" rows={cabinets} columns={cols} getKey={(r) => r.id} />)
+    const b = within(header('Таргетолог')).getByRole('button', { name: 'Таргетолог' })
+    expect(b.getAttribute('data-slot')).toBe('column-hint')
+    expect(described(b)).toBe('Кто ведёт кабинет')
+    expect(b.querySelector('.decoration-dotted')).toBeTruthy()
+    expect(header('Таргетолог').hasAttribute('title')).toBe(false)
+    expect(document.querySelector('[role=columnheader] [title]')).toBeNull()
+    act(() => b.focus())
+    await waitFor(() => expect(screen.getByRole('tooltip').textContent).toBe('Кто ведёт кабинет'))
+    fireEvent.keyDown(b, { key: 'Escape' })
+    await waitFor(() => expect(screen.queryByRole('tooltip')).toBeNull())
+  })
+
+  it('сортируемый: одна кнопка — и сортирует, и держит подсказку (одна остановка Tab)', async () => {
+    render(<DataTable<CabinetRow> label="К" rows={cabinets} columns={cols} getKey={(r) => r.id} />)
+    const buttons = within(header('7 дней')).getAllByRole('button')
+    expect(buttons).toHaveLength(1)
+    const b = buttons[0]!
+    expect(b.getAttribute('data-slot')).toBe('sort')
+    expect(described(b)).toBe('Открутка за 7 дней до вчера')
+    act(() => b.focus())
+    await waitFor(() => expect(screen.getByRole('tooltip').textContent).toBe('Открутка за 7 дней до вчера'))
+    fireEvent.click(b)
+    expect(header('7 дней').getAttribute('aria-sort')).toBe('descending')
+  })
+
+  it('без hint — заголовок как был: текст без кнопки и без описания', () => {
+    render(<DataTable<CabinetRow> label="К" rows={cabinets} columns={cols} getKey={(r) => r.id} />)
+    expect(within(header('Кабинет')).queryByRole('button')).toBeNull()
+    expect(document.querySelectorAll('[role=columnheader] [aria-describedby]')).toHaveLength(2)
   })
 })
