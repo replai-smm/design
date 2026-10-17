@@ -8,7 +8,8 @@
  *   `aria-current`), `dim` — остальное приглушить, `hide` — убрать. Этим управляет агент: адреса, а не координаты.
  * - Связи — дугой вокруг центра (`ring`) или прямо. Цвет — только знак тона у строки или точки (внимание, опасно).
  * - `onSelect(адрес)` — узел, строка и точка становятся кнопками (провалиться в станцию).
- * Поле держит пропорцию (`aspect`); в узком месте (< 448 px по ширине схемы) узлы уже, `fit` — поле выше.
+ * Поле держит пропорцию (`aspect`); в узком месте (< 448 px по ширине схемы) узлы уже, `fit` — поле выше, а строка узла
+ * переносится (число уходит под подпись), а не обрезается.
  */
 import { useEffect, useRef, type ReactNode } from 'react'
 import { cx } from '../lib/cx'
@@ -191,13 +192,13 @@ export function Diagram({ nodes, edges = [], label, ring, aspect = 'square', hig
                       <Row
                         {...(onSelect ? { type: 'button' as const, onClick: pick(it.id) } : {})}
                         className={cx(
-                          'flex w-full min-w-0 items-center gap-1 border-t border-border-subtle-01 py-1 text-start text-label-01',
+                          'flex w-full min-w-0 flex-wrap items-center gap-x-1 border-t border-border-subtle-01 py-1 text-start text-label-01 @md:flex-nowrap',
                           onSelect && 'cursor-pointer hover:bg-layer-hover-01 focus-visible:outline-2 focus-visible:outline-focus',
                         )}
                       >
                         {it.tone && <ToneIcon tone={it.tone} className={cx('size-3', MARK[it.tone])} />}
-                        <span className="min-w-0 flex-1 truncate">{it.label}</span>
-                        {it.value !== undefined && <span className="shrink-0 text-text-secondary">{it.value}</span>}
+                        <span className="min-w-0 flex-auto break-words @md:flex-1 @md:truncate">{it.label}</span>
+                        {it.value !== undefined && <span className="ml-auto shrink-0 text-text-secondary">{it.value}</span>}
                       </Row>
                     </li>
                   )

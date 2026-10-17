@@ -42,3 +42,23 @@ export const ringEdges: DiagramEdge[] = [
   { from: 'execution', to: 'output' },
   { from: 'output', to: 'event' },
 ]
+
+/** 200 строк кода и одна строка в 300 знаков: предел высоты `maxLines` и прокрутка вбок. */
+export const longCode = [
+  ...Array.from({ length: 199 }, (_, i) => `export const row${i + 1} = ${i + 1}`),
+  `export const wide = '${'0123456789'.repeat(29)}'`,
+].join('\n')
+
+/** Список «как в system/init»: 78 команд и 42 скилла. */
+export const manyCommands: CommandItem[] = [
+  ...Array.from({ length: 78 }, (_, i) => ({ value: `/cmd-${String(i + 1).padStart(2, '0')}`, group: 'Команды', description: `команда номер ${i + 1}` })),
+  ...Array.from({ length: 42 }, (_, i) => ({ value: `/skill-${String(i + 1).padStart(2, '0')}`, group: 'Скиллы', description: `скилл номер ${i + 1}` })),
+]
+
+/** Вывод команды человека `!npm test`, пришедший не весь: прогон ещё идёт. */
+export const shellOutput = `> replai@2.41.0 test
+> vitest run
+
+ ✓ src/export/csv.test.ts (6)
+ ✓ src/comments/list.test.ts (14)
+ ⠋ src/inbox/filter.test.ts`

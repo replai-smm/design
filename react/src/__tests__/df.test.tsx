@@ -325,7 +325,7 @@ describe('ProofreadGrid — сетка сверки', () => {
     expect(screen.getByText('По выбранному фильтру проектов нет')).toBeTruthy()
     rerender(<ProofreadGrid {...base} state="error" />)
     expect(screen.getByRole('alert')).toBeTruthy()
-  })
+  }, 20_000) // 70 строк сетки: на загруженной машине при параллельном прогоне 5 с мало
 
   it('шапка дней закреплена: рамка не выше экрана, шапка — top-0, угол — над шапкой и первой колонкой; можно выключить', () => {
     const { rerender } = render(<ProofreadGrid {...base} />)

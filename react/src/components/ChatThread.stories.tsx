@@ -109,3 +109,15 @@ export const САгентом: S = {
     ] as ChatMessage[],
   },
 }
+
+/** Лента только из вестей: рамка слева, подпись «orbit · весть», время; своих и чужих пузырей нет. */
+export const ТолькоВести: S = {
+  args: {
+    label: 'Сессия: Штаб',
+    messages: [
+      { id: 'n1', direction: 'in', variant: 'notice', author: 'orbit · весть', day: 'сегодня', time: '14:02', text: 'Датчик прода: тесты replai не дождались ответа за 5 минут.' },
+      { id: 'n2', direction: 'in', variant: 'notice', author: 'orbit · весть', time: '14:06', text: 'Изменение n5t2vd собрано: PR 418, CI зелёный. Ждёт вашего слова.' },
+      { id: 'n3', direction: 'in', variant: 'notice', author: 'orbit · весть', time: '14:11', text: 'Изменение k8w1qa: сборка упала на проверке типов.' },
+    ],
+  },
+}

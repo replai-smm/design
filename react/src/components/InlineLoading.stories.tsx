@@ -21,3 +21,12 @@ export const Обычное: S = {
     </Stack>
   ),
 }
+
+/** Идёт: дуга и слово. */
+export const Идёт: S = { args: { label: 'агент работает' } }
+
+/** Готово: знак и слово. */
+export const Готово: S = { args: { state: 'finished', label: 'тесты прошли' } }
+
+/** Ошибка: крест и слово. */
+export const Ошибка: S = { args: { state: 'error', label: 'сборка упала' } }

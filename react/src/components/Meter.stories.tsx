@@ -26,3 +26,14 @@ export const Обычное: S = {
     </Stack>
   ),
 }
+
+/** Выше предела (230k при 200k): полоса полная, знак «опасно», слово — как пришло. */
+export const ВышеПредела: S = {
+  tags: ['state:много'],
+  render: () => (
+    <Stack gap="05">
+      <Meter label="Контекст" value={230} max={200} valueText="230k / 200k" />
+      <Meter inline label="Неделя" value={100} valueText="100 % · сброс пн 09:00" />
+    </Stack>
+  ),
+}

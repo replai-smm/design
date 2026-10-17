@@ -50,13 +50,13 @@ const PROMISED: Record<string, string[]> = {
   'Steps.stories.tsx': ['обычное', 'ошибка', 'всё сделано'],
   // чат агента (orbit)
   'InlineLoading.stories.tsx': ['обычное'],
-  'Meter.stories.tsx': ['обычное'],
-  'CodeBlock.stories.tsx': ['обычное'],
+  'Meter.stories.tsx': ['обычное', 'много'],
+  'CodeBlock.stories.tsx': ['обычное', 'много'],
   'Prose.stories.tsx': ['обычное'],
-  'AgentStep.stories.tsx': ['обычное'],
-  'DecisionCard.stories.tsx': ['обычное'],
-  'CommandMenu.stories.tsx': ['обычное'],
-  'Diagram.stories.tsx': ['обычное'],
+  'AgentStep.stories.tsx': ['обычное', 'ошибка', 'много'],
+  'DecisionCard.stories.tsx': ['обычное', 'загрузка', 'ошибка'],
+  'CommandMenu.stories.tsx': ['обычное', 'ничего не найдено', 'много'],
+  'Diagram.stories.tsx': ['обычное', 'ничего не найдено'],
 }
 
 describe('истории на каждое состояние', () => {

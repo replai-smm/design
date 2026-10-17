@@ -129,28 +129,39 @@ export const ДвеКолонки: S = {
 export const РабочееМесто: S = {
   args: noArgs,
   render: function Workplace() {
-    const [sheet, setSheet] = useState<0 | 2 | null>(null)
-    return (
-      <div className="h-screen max-h-full">
-        <ThreeColumn
-          phone="sheets"
-          sheet={sheet}
-          onSheetChange={setSheet}
-          labels={['Сессии', 'Чат', 'Панель']}
-          active={1}
-          onBack={() => {}}
-          header={
-            <div className="flex min-h-12 items-center gap-2 px-2">
-              <Button variant="ghost" onClick={() => setSheet(0)} className="lg:hidden">☰ Сессии</Button>
-              <span className="text-body-compact-01 text-text-secondary">шапка приложения</span>
-              <Button variant="ghost" onClick={() => setSheet(2)} className="ml-auto lg:hidden">Панель</Button>
-            </div>
-          }
-          first={<p className="m-0 p-4 text-body-01">Сессии</p>}
-          second={<ChatThread label="Переписка" messages={chat} />}
-          third={<p className="m-0 p-4 text-body-01">Панель</p>}
-        />
-      </div>
-    )
+    return <WorkplaceDemo />
   },
+}
+
+function WorkplaceDemo({ open = null }: { open?: 0 | 2 | null }) {
+  const [sheet, setSheet] = useState<0 | 2 | null>(open)
+  return (
+    <div className="h-screen max-h-full">
+      <ThreeColumn
+        phone="sheets"
+        sheet={sheet}
+        onSheetChange={setSheet}
+        labels={['Сессии', 'Чат', 'Панель']}
+        active={1}
+        onBack={() => {}}
+        header={
+          <div className="flex min-h-12 items-center gap-2 px-2">
+            <Button variant="ghost" onClick={() => setSheet(0)} className="lg:hidden">☰ Сессии</Button>
+            <span className="text-body-compact-01 text-text-secondary">шапка приложения</span>
+            <Button variant="ghost" onClick={() => setSheet(2)} className="ml-auto lg:hidden">Панель</Button>
+          </div>
+        }
+        first={<p className="m-0 p-4 text-body-01">Сессии</p>}
+        second={<ChatThread label="Переписка" messages={chat} />}
+        third={<p className="m-0 p-4 text-body-01">Панель</p>}
+      />
+    </div>
+  )
+}
+
+/** Телефон 390 с открытой панелью снизу: видна только вторая колонка, панель выехала, «×» и Esc закрывают. */
+export const ТелефонПанель: S = {
+  args: noArgs,
+  globals: { viewport: { value: 'phone', isRotated: false } },
+  render: () => <WorkplaceDemo open={2} />,
 }

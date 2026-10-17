@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { csvCode } from '../stories/agent-fixtures'
+import { csvCode, longCode } from '../stories/agent-fixtures'
 import { CodeBlock } from './CodeBlock'
 
 const meta = {
@@ -14,3 +14,6 @@ type S = StoryObj<typeof meta>
 
 /** Код как есть: подпись — путь, «Копировать»; длинная строка прокручивается вбок внутри блока. */
 export const Обычное: S = {}
+
+/** 200 строк при пределе 12: блок не растёт, прокручивается внутри; последняя строка в 300 знаков уходит вбок. */
+export const ДлинныйКод: S = { tags: ['state:много'], args: { code: longCode, label: 'src/export/rows.ts', maxLines: 12 } }

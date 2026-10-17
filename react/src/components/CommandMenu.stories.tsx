@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { commands } from '../stories/agent-fixtures'
+import { commands, manyCommands } from '../stories/agent-fixtures'
 import { CommandMenu, type CommandMenuHandle } from './CommandMenu'
 
 const meta = {
@@ -31,4 +31,24 @@ export const Обычное: S = {
       </div>
     )
   },
+}
+
+/** Запрос «zzz»: ни команды, ни описания не начинаются так — строка «Ничего не найдено». */
+export const НичегоНеНайдено: S = {
+  tags: ['state:ничего не найдено'],
+  render: () => (
+    <div className="max-w-lg">
+      <CommandMenu items={commands} query="zzz" label="Команды и скиллы" onPick={() => {}} />
+    </div>
+  ),
+}
+
+/** 78 команд и 42 скилла, как в system/init: меню прокручивается внутри себя, группы по порядку данных. */
+export const Много: S = {
+  tags: ['state:много'],
+  render: () => (
+    <div className="max-w-lg">
+      <CommandMenu items={manyCommands} query="" label="Команды и скиллы" onPick={() => {}} />
+    </div>
+  ),
 }
