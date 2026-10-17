@@ -1,48 +1,46 @@
 /**
- * Переписка (DF: «Сообщения», «✨ ИИ», «Чаты»; опись DF §6.2). Лента сообщений: входящие слева, наши справа, автор,
- * время, вложения, разделитель дня; «⇡ показать более ранние» сверху; прокрутка вниз при новом сообщении.
- * - Цвет пузыря не один: у наших подпись автора «вы» (или своя) и выравнивание вправо; у ошибки — знак и слово.
- * - Лента — `role="log"`: читалка слышит новые сообщения, не перечитывая старые.
- * - Более ранние вставляются сверху без прыжка: прокрутка держит то сообщение, что было на экране.
- * - Лента внизу и выросла сама (набор ответа, догрузилась картинка) — остаётся внизу; прокрутил вверх — не дёргаем.
- * - Аватар — слот (`avatar`): кружок даёт продукт или `Avatar` ДС; лента от него не зависит.
- * - Вид сообщения (`variant`): `bubble` — пузырь (переписка людей); `wide` — во всю ширину без рамки (ответ агента:
- *   текст, шаги, карточки решений); `notice` — весть со стороны (система, orbit): рамка слева и подпись автора,
- *   глазом отличается и от собеседника, и от нас.
- * - Наше сообщение, посланное, пока собеседник занят, — «в очереди» (`status="queued"`), пока его не взяли.
- * Состояния: загрузка (скелет пузырей той же формы), ошибка, пусто (первый запуск — «спросите первое»), много.
+ * Переписка (DF: «Сообщения», «ИИ», «Чаты»; чат orbit): входящие слева, наши справа, автор, время, вложения,
+ * разделитель дня; «Показать более ранние» сверху без прыжка; новое внизу — лента остаётся внизу.
+ * - Вид сообщения (`variant`): `bubble` — пузырь (переписка людей; наше — утопленное, входящее — на поверхности);
+ *   `wide` — во всю ширину без рамки (ответ агента: текст, шаги, решения); `notice` — весть со стороны (система,
+ *   orbit) — поверхность с меткой, как уведомление.
+ * - Наше — словарь хода: в очереди, отправляется, не отправлено — словом; у ошибки — знак «опасно» и «Повторить».
+ * - Лента — `role="log"`: читалка слышит новое, не перечитывая старое.
+ * Состояния: загрузка (скелет пузырей той же формы), ошибка, пусто, много.
  */
 import { Fragment, useLayoutEffect, useRef, type ReactNode } from 'react'
+import { SUNKEN, SURFACE } from '../lib/anatomy'
 import { cx } from '../lib/cx'
+import type { DataState, EmptyView, ErrorView, Progress } from '../lib/vocab'
 import { Button } from './Button'
-import { Loading, Skeleton, StateView, type StateKind } from './StateView'
-import { ToneIcon } from './StatusBadge'
+import { Icon } from './Icon'
+import { Loading, Skeleton } from './Skeleton'
+import { StateView } from './StateView'
+import { Surface } from './Surface'
 
 export interface ChatMessage {
   id: string
   /** in — от собеседника (слева), out — от нас (справа). */
   direction: 'in' | 'out'
-  /** Кто написал: имя клиента, «ИИ», имя менеджера. */
   author?: ReactNode
-  /** Кружок автора — `<Avatar>` или своя картинка. */
+  /** Кружок автора — `<Avatar>`. */
   avatar?: ReactNode
   /** Время на экране: «14:20». */
   time: string
   /** То же время машинно (ISO) — для `<time dateTime>`. */
   datetime?: string
-  /** День сообщения на экране («сегодня», «3 октября»): при смене дня в ленте встаёт разделитель. */
+  /** День («сегодня», «3 октября»): при смене дня встаёт разделитель. */
   day?: string
   text?: ReactNode
-  /** Фото, файлы, «[виды вложений]» — под текстом. */
+  /** Фото, файлы — под текстом. */
   attachments?: ReactNode
-  /** Только у наших: отправляется / в очереди (собеседник занят) / ушло / не ушло. */
-  status?: 'sending' | 'queued' | 'sent' | 'error'
-  /** bubble — пузырь; wide — во всю ширину без рамки (ответ агента); notice — весть со стороны (рамка слева). */
+  /** Только у наших — словарь хода: `idle` — в очереди, `running` — отправляется, `done` — отправлено, `error` — не ушло. */
+  status?: Progress
   variant?: 'bubble' | 'wide' | 'notice'
-  /** Почему не ушло — рядом со знаком ошибки. */
+  /** Почему не ушло. */
   error?: ReactNode
   onRetry?: () => void
-  /** Тихие кнопки под сообщением: «Копировать», «→ в Постинг». */
+  /** Тихие кнопки под сообщением. */
   actions?: ReactNode
 }
 
@@ -50,13 +48,11 @@ export interface ChatThreadProps {
   messages: ChatMessage[]
   /** Подпись ленты для читалки: «Переписка с Анной». */
   label: string
-  /** ready — сообщения; loading — скелет; error — ошибка с «Повторить». */
-  state?: 'ready' | 'loading' | 'error'
-  error?: { title: ReactNode; description?: ReactNode; onRetry?: () => void }
-  /** Что показать в пустой переписке. */
-  empty?: { kind: Exclude<StateKind, 'ошибка'>; title: ReactNode; description?: ReactNode; action?: ReactNode }
-  /** «⇡ показать более ранние»: onLoad — догрузить; done — всё загружено. */
-  earlier?: { onLoad: () => void; loading?: boolean; done?: boolean; label?: ReactNode; doneLabel?: ReactNode }
+  state?: DataState
+  error?: ErrorView
+  empty?: EmptyView
+  /** «Показать более ранние»: onLoad — догрузить; done — всё загружено. */
+  earlier?: { onLoad: () => void; loading?: boolean; done?: boolean }
   /** Строка «ИИ думает…» под последним сообщением. */
   pending?: ReactNode
   /** Подпись наших сообщений без автора. */
@@ -64,59 +60,59 @@ export interface ChatThreadProps {
   className?: string
 }
 
-const messageNode = (el: HTMLElement, id?: string) =>
-  id === undefined ? undefined : [...el.querySelectorAll<HTMLElement>('[data-slot=chat-message]')].find((n) => n.dataset.id === id)
+const messageNode = (el: HTMLElement, id?: string) => (id === undefined ? undefined : [...el.querySelectorAll<HTMLElement>('[data-part=message]')].find((n) => n.dataset.id === id))
 
-const SEND_WORD = { sending: 'отправляется…', queued: 'в очереди', sent: 'отправлено', error: 'не отправлено' } as const
+const SEND_WORD: Record<Progress, string> = { idle: 'в очереди', running: 'отправляется…', done: 'отправлено', error: 'не отправлено' }
 
-function Bubble({ m, ownLabel }: { m: ChatMessage; ownLabel: string }) {
+function Message({ m, ownLabel }: { m: ChatMessage; ownLabel: string }) {
   const out = m.direction === 'out'
   const variant = m.variant ?? 'bubble'
   const bubble = variant === 'bubble'
+  const body = (
+    <>
+      {m.text}
+      {m.attachments && <div className="flex flex-wrap gap-items">{m.attachments}</div>}
+    </>
+  )
   return (
-    <li
-      data-slot="chat-message"
-      data-id={m.id}
-      data-direction={m.direction}
-      data-status={m.status}
-      data-variant={variant}
-      className={cx('flex min-w-0 gap-2', out ? 'flex-row-reverse' : 'flex-row')}
-    >
+    <li data-part="message" data-id={m.id} data-direction={m.direction} data-status={m.status} data-variant={variant} className={cx('flex min-w-0 gap-items', out ? 'flex-row-reverse' : 'flex-row')}>
       {m.avatar && <span className="flex shrink-0 items-end">{m.avatar}</span>}
-      <div className={cx('flex min-w-0 flex-col gap-1', bubble ? 'max-w-4/5 md:max-w-2/3' : 'flex-1', out ? 'items-end' : 'items-start')}>
-        <div className={cx('flex flex-wrap items-baseline gap-2 text-label-01 text-text-secondary', out && 'flex-row-reverse')}>
-          <span className="text-text-primary">{m.author ?? (out ? ownLabel : null)}</span>
+      <div className={cx('flex min-w-0 flex-col gap-tight', bubble ? 'max-w-4/5 md:max-w-2/3' : 'flex-1', out ? 'items-end' : 'items-start')}>
+        <div className={cx('flex flex-wrap items-baseline gap-items text-caption text-fg-muted', out && 'flex-row-reverse')}>
+          <span className="text-fg">{m.author ?? (out ? ownLabel : null)}</span>
           <time dateTime={m.datetime}>{m.time}</time>
         </div>
-        <div
-          className={cx(
-            'flex min-w-0 flex-col gap-2 text-body-01 break-words text-text-primary',
-            bubble && 'px-4 py-3 whitespace-pre-wrap',
-            bubble && (out ? 'bg-layer-accent-01' : 'border border-border-subtle-01 bg-layer-01'),
-            variant === 'wide' && 'w-full',
-            variant === 'notice' && 'w-full border border-l-4 border-border-subtle-01 border-l-support-info bg-layer-01 px-4 py-3',
-            m.status === 'error' && 'border border-support-error',
-            (m.status === 'sending' || m.status === 'queued') && 'text-text-secondary',
-          )}
-        >
-          {m.text}
-          {m.attachments && <div className="flex flex-wrap gap-2">{m.attachments}</div>}
-        </div>
-        {out && m.status && m.status !== 'sent' && (
-          <div className="flex flex-wrap items-center gap-2 text-label-01" role={m.status === 'error' ? 'alert' : undefined}>
-            {m.status === 'error' && <ToneIcon tone="error" className="size-4 text-status-error" />}
-            <span className={m.status === 'error' ? 'text-text-error' : 'text-text-secondary'}>
+        {variant === 'notice' ? (
+          <Surface mark="инфо" className="w-full gap-items text-body break-words">
+            {body}
+          </Surface>
+        ) : (
+          <div
+            className={cx(
+              'flex min-w-0 flex-col gap-items text-body break-words text-fg',
+              bubble && cx('px-compact py-items whitespace-pre-wrap', m.status === 'error' ? 'rounded-surface border border-danger bg-canvas' : out ? SUNKEN : SURFACE),
+              variant === 'wide' && 'w-full',
+              (m.status === 'running' || m.status === 'idle') && 'text-fg-muted',
+            )}
+          >
+            {body}
+          </div>
+        )}
+        {out && m.status && m.status !== 'done' && (
+          <div className="flex flex-wrap items-center gap-items text-caption" role={m.status === 'error' ? 'alert' : undefined}>
+            {m.status === 'error' && <Icon tone="опасно" />}
+            <span className={m.status === 'error' ? 'text-danger-fg' : 'text-fg-muted'}>
               {SEND_WORD[m.status]}
               {m.status === 'error' && m.error ? <>: {m.error}</> : null}
             </span>
             {m.status === 'error' && m.onRetry && (
-              <Button variant="ghost" size="sm" onClick={m.onRetry}>
+              <Button variant="ghost" dense onClick={m.onRetry}>
                 Повторить
               </Button>
             )}
           </div>
         )}
-        {m.actions && <div className="flex flex-wrap gap-1">{m.actions}</div>}
+        {m.actions && <div className="flex flex-wrap gap-tight">{m.actions}</div>}
       </div>
     </li>
   )
@@ -124,7 +120,6 @@ function Bubble({ m, ownLabel }: { m: ChatMessage; ownLabel: string }) {
 
 export function ChatThread({ messages, label, state = 'ready', error, empty, earlier, pending, ownLabel = 'вы', className }: ChatThreadProps) {
   const scroller = useRef<HTMLDivElement>(null)
-  // что было в ленте на прошлой отрисовке: первое и последнее сообщение, высота, прижата ли лента к низу
   const prev = useRef<{ first?: string; last?: string; height: number; firstTop: number; atBottom: boolean }>({ height: 0, firstTop: 0, atBottom: true })
   const first = messages[0]?.id
   const last = messages[messages.length - 1]?.id
@@ -134,18 +129,16 @@ export function ChatThread({ messages, label, state = 'ready', error, empty, ear
     if (!el) return
     const p = prev.current
     if (p.first !== undefined && first !== p.first && last === p.last) {
-      // сверху добавили более ранние — держим на экране то же сообщение: сдвиг — на сколько оно уехало вниз
-      // (якорь прокрутки браузера выключен, чтобы не сдвигать дважды); не нашли его — на сколько выросла лента
+      // сверху добавили более ранние — держим на экране то же сообщение
       const was = messageNode(el, p.first)
       el.scrollTop = el.scrollTop + (was ? was.offsetTop - p.firstTop : el.scrollHeight - p.height)
     } else if ((last !== p.last && (p.atBottom || first !== p.first || messages[messages.length - 1]?.direction === 'out')) || (pending && p.atBottom)) {
-      // новое внизу: прокрутить к нему, если человек и так был внизу, это наше сообщение или открыта другая переписка
       el.scrollTop = el.scrollHeight
     }
     prev.current = { first, last, height: el.scrollHeight, firstTop: messageNode(el, first)?.offsetTop ?? 0, atBottom: el.scrollHeight - el.scrollTop - el.clientHeight < 48 }
   }, [first, last, messages, pending])
 
-  // лента прижата к низу, а содержимое выросло или окно ленты сжалось (набор ответа, картинка, поле ответа выше) — остаёмся внизу
+  // лента прижата к низу, а содержимое выросло или окно ленты сжалось — остаёмся внизу
   useLayoutEffect(() => {
     const el = scroller.current
     const list = el?.querySelector('ol')
@@ -160,19 +153,13 @@ export function ChatThread({ messages, label, state = 'ready', error, empty, ear
 
   const onScroll = () => {
     const el = scroller.current
-    if (!el) return
-    prev.current.atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 48
+    if (el) prev.current.atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 48
   }
 
   if (state === 'error')
     return (
       <div data-slot="chat-thread" className={className}>
-        <StateView
-          kind="ошибка"
-          title={error?.title ?? 'Переписка не загрузилась'}
-          description={error?.description}
-          action={error?.onRetry && <Button variant="tertiary" onClick={error.onRetry}>Повторить</Button>}
-        />
+        <StateView kind="ошибка" title={error?.title ?? 'Переписка не загрузилась'} description={error?.description} action={error?.onRetry && <Button onClick={error.onRetry}>Повторить</Button>} />
       </div>
     )
 
@@ -180,11 +167,11 @@ export function ChatThread({ messages, label, state = 'ready', error, empty, ear
     return (
       <div data-slot="chat-thread" className={cx('flex min-h-0 flex-col', className)}>
         <Loading label={`${label}: загрузка`}>
-          <ul className="m-0 flex list-none flex-col gap-4 p-4">
+          <ul className="m-0 flex list-none flex-col gap-blocks p-blocks">
             {(['in', 'out', 'in'] as const).map((d, i) => (
-              <li key={i} className={cx('flex flex-col gap-1', d === 'out' ? 'items-end' : 'items-start')}>
-                <Skeleton width="1/3" className="h-3" />
-                <div className={cx('flex w-2/3 flex-col gap-2 px-4 py-3', d === 'out' ? 'bg-layer-accent-01' : 'border border-border-subtle-01 bg-layer-01')}>
+              <li key={i} className={cx('flex flex-col gap-tight', d === 'out' ? 'items-end' : 'items-start')}>
+                <Skeleton width="1/3" />
+                <div className={cx('flex w-2/3 flex-col gap-items px-compact py-items', d === 'out' ? SUNKEN : SURFACE)}>
                   <Skeleton />
                   <Skeleton width="1/2" />
                 </div>
@@ -205,38 +192,38 @@ export function ChatThread({ messages, label, state = 'ready', error, empty, ear
   return (
     <div data-slot="chat-thread" ref={scroller} onScroll={onScroll} style={{ overflowAnchor: 'none' }} className={cx('flex min-h-0 flex-col overflow-y-auto', className)}>
       {earlier && (
-        <div className="flex justify-center px-4 pt-4">
+        <div className="flex justify-center px-blocks pt-blocks">
           {earlier.done ? (
-            <span data-slot="chat-earlier-done" className="text-label-01 text-text-secondary">
-              {earlier.doneLabel ?? 'Это вся переписка'}
+            <span data-part="earlier-done" className="text-caption text-fg-muted">
+              Это вся переписка
             </span>
           ) : (
-            <Button variant="ghost" size="sm" loading={earlier.loading} onClick={earlier.onLoad} data-slot="chat-earlier">
-              <span aria-hidden="true">⇡</span> {earlier.label ?? 'Показать более ранние'}
+            <Button variant="ghost" dense icon="arrow-up" loading={earlier.loading} onClick={earlier.onLoad} data-part="earlier">
+              Показать более ранние
             </Button>
           )}
         </div>
       )}
       <div role="log" aria-label={label}>
-        <ol className="m-0 flex list-none flex-col gap-4 p-4">
-        {messages.map((m, i) => (
-          <Fragment key={m.id}>
-            {m.day && m.day !== messages[i - 1]?.day && (
-              <li data-slot="chat-day" className="flex items-center gap-3 text-label-01 text-text-secondary">
-                <span aria-hidden="true" className="h-px flex-1 bg-border-subtle-01" />
-                <span>{m.day}</span>
-                <span aria-hidden="true" className="h-px flex-1 bg-border-subtle-01" />
-              </li>
-            )}
-            <Bubble m={m} ownLabel={ownLabel} />
-          </Fragment>
-        ))}
-        {pending && (
-          <li data-slot="chat-pending" className="flex items-center gap-2 text-label-01 text-text-secondary">
-            <span aria-hidden="true" className="inline-flex size-2 rounded-full bg-icon-secondary" />
-            {pending}
-          </li>
-        )}
+        <ol className="m-0 flex list-none flex-col gap-blocks p-blocks">
+          {messages.map((m, i) => (
+            <Fragment key={m.id}>
+              {m.day && m.day !== messages[i - 1]?.day && (
+                <li data-part="day" className="flex items-center gap-compact text-caption text-fg-muted">
+                  <span aria-hidden="true" className="h-px flex-1 bg-line" />
+                  <span>{m.day}</span>
+                  <span aria-hidden="true" className="h-px flex-1 bg-line" />
+                </li>
+              )}
+              <Message m={m} ownLabel={ownLabel} />
+            </Fragment>
+          ))}
+          {pending && (
+            <li data-part="pending" className="flex items-center gap-items text-caption text-fg-muted">
+              <span aria-hidden="true" className="inline-flex size-items rounded-full bg-fg-muted" />
+              {pending}
+            </li>
+          )}
         </ol>
       </div>
     </div>

@@ -1,22 +1,25 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Tabs } from './Tabs'
 
+const panel = (t: string) => <p className="m-0 text-body text-fg-muted">{t}</p>
+
 const meta = {
-  title: 'Компоненты/Вкладки',
+  title: 'Паттерны/Вкладки',
   component: Tabs,
   parameters: { layout: 'padded' },
   args: {
-    label: 'Обращения',
+    label: 'Разделы',
+    defaultValue: 'inbox',
     items: [
-      { value: 'now', label: 'Что ждёт ответа', count: 4, tone: 'error', content: <p className="m-0 text-body-01">Четыре обращения ждут ответа.</p> },
-      { value: 'mine', label: 'Что взял я', count: 2, tone: 'warning', content: <p className="m-0 text-body-01">Два в работе у вас.</p> },
-      { value: 'done', label: 'Что сделано', count: 128, content: <p className="m-0 text-body-01">Сделанное за неделю.</p> },
+      { value: 'inbox', label: 'Ждут ответа', count: 7, tone: 'опасно', content: panel('Семь сообщений без ответа больше часа.') },
+      { value: 'new', label: 'Новые', count: 3, tone: 'инфо', content: panel('Три новых.') },
+      { value: 'done', label: 'Отвечено', count: 120, content: panel('Отвеченные за неделю.') },
+      { value: 'all', label: 'Все', content: panel('Все переписки.') },
     ],
   },
 } satisfies Meta<typeof Tabs>
 export default meta
 type S = StoryObj<typeof meta>
 
-/** Вкладки названы вопросами человека; у срочного счётчика — знак тона, не только цвет. */
+/** Тот же ряд сегментов, что у фильтров; выбранная — «выбрано»; счётчик тоном словаря. */
 export const Обычное: S = {}
-export const ВтораяВкладка: S = { args: { defaultValue: 'mine' } }

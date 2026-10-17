@@ -1,12 +1,11 @@
 /**
- * Выбор из короткого списка (Carbon Select): родной `<select>` системы — на телефоне открывается колесом системы,
- * клавиатура и читалка работают без доработок. Вид — как у поля ввода: подпись, черта, подсказка или ошибка.
- * Список длинный или нужен поиск — `Combobox`.
+ * Выбор из короткого списка: родной `<select>` системы — на телефоне колесо системы, клавиатура и читалка работают сами.
+ * Вид — как у поля ввода. Список длинный или нужен поиск — `Combobox`.
  */
 import { forwardRef, type SelectHTMLAttributes } from 'react'
 import { cx } from '../lib/cx'
-import { useLayer } from '../lib/controllable'
-import { ErrorMark, FIELD_HEIGHT, FieldShell, fieldAria, fieldBoxClass, useFieldIds, type FieldBaseProps } from './TextField'
+import { Icon } from './Icon'
+import { FieldShell, fieldAria, fieldBox, useFieldIds, type FieldBaseProps } from './TextField'
 
 export interface SelectOption {
   value: string
@@ -19,16 +18,15 @@ export interface SelectProps extends FieldBaseProps, Omit<SelectHTMLAttributes<H
   value?: string
   defaultValue?: string
   onChange?: (value: string) => void
-  /** Пустой первый пункт «Выберите …» — пока ничего не выбрано; выбрать его обратно нельзя. */
+  /** Пустой первый пункт «Выберите …», пока ничего не выбрано; выбрать его обратно нельзя. */
   placeholder?: string
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select(
-  { label, hideLabel, helperText, error, size = 'md', className, id, disabled, options, value, defaultValue, onChange, placeholder, ...rest },
+  { label, hideLabel, helperText, error, dense, className, id, disabled, options, value, defaultValue, onChange, placeholder, ...rest },
   ref,
 ) {
   const ids = useFieldIds(id)
-  const layer = useLayer()
   return (
     <FieldShell slot="select" ids={ids} label={label} hideLabel={hideLabel} helperText={helperText} error={error} disabled={disabled} className={className}>
       <div className="relative flex items-center">
@@ -41,12 +39,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
           onChange={(e) => onChange?.(e.target.value)}
           {...fieldAria(ids, { helperText, error })}
           {...rest}
-          className={cx(
-            fieldBoxClass({ layer, invalid: Boolean(error), disabled }),
-            FIELD_HEIGHT[size],
-            'cursor-pointer appearance-none pr-12 pl-4',
-            Boolean(error) && 'pr-16',
-          )}
+          className={cx(fieldBox({ invalid: Boolean(error), disabled, dense }), 'cursor-pointer appearance-none pr-sections pl-compact')}
         >
           {placeholder && (
             <option value="" disabled>
@@ -59,10 +52,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
             </option>
           ))}
         </select>
-        {error && <ErrorMark className="absolute right-10" />}
-        <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false" className={cx('pointer-events-none absolute right-4 size-4', disabled ? 'text-icon-disabled' : 'text-icon-primary')}>
-          <path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
+        <Icon name="chevron-down" className={cx('pointer-events-none absolute right-compact', disabled ? 'text-fg-disabled' : 'text-fg')} />
       </div>
     </FieldShell>
   )

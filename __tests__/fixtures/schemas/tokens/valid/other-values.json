@@ -1,0 +1,192 @@
+{
+  "doc": "роли цвета",
+  "colors": {
+    "canvas": {
+      "light": "#f4f4f4",
+      "dark": "#f4f4f4",
+      "role": "холст страницы; утопленное на поверхности (код, выходной день)"
+    },
+    "surface": {
+      "light": "#ffffff",
+      "dark": "#ffffff",
+      "role": "поверхность: карточка, колонка, поле, окно"
+    },
+    "inverse": {
+      "light": "#161616",
+      "dark": "#161616",
+      "role": "главное действие и подсказка: инверсия, не цвет"
+    },
+    "inverse-hover": {
+      "light": "#393939",
+      "dark": "#393939",
+      "role": "главное действие под указателем"
+    },
+    "fg": {
+      "light": "#161616",
+      "dark": "#161616",
+      "role": "текст и значки"
+    },
+    "fg-muted": {
+      "light": "#525252",
+      "dark": "#525252",
+      "role": "второй текст: подпись, подсказка, плейсхолдер"
+    },
+    "fg-disabled": {
+      "light": "#a8a8a8",
+      "dark": "#a8a8a8",
+      "role": "выключенное"
+    },
+    "fg-inverse": {
+      "light": "#ffffff",
+      "dark": "#ffffff",
+      "role": "текст на инверсии"
+    },
+    "line": {
+      "light": "#e0e0e0",
+      "dark": "#e0e0e0",
+      "role": "тихая рамка: край поверхности, разделитель, скелет"
+    },
+    "line-strong": {
+      "light": "#8d8d8d",
+      "dark": "#8d8d8d",
+      "role": "граница того, что нажимают и заполняют: поле, тихая кнопка, галочка"
+    },
+    "hover": {
+      "light": "#8d8d8d1f",
+      "dark": "#8d8d8d1f",
+      "role": "под указателем — поверх любой поверхности"
+    },
+    "selected": {
+      "light": "#8d8d8d33",
+      "dark": "#8d8d8d33",
+      "role": "выбрано: вкладка, фильтр, открытая строка, пункт списка"
+    },
+    "accent": {
+      "light": "#0f62fe",
+      "dark": "#0f62fe",
+      "role": "единственный синий: ссылка и фокус"
+    },
+    "scrim": {
+      "light": "#16161680",
+      "dark": "#16161680",
+      "role": "затемнение под окном"
+    },
+    "shadow": {
+      "light": "#0000002e",
+      "dark": "#0000002e",
+      "role": "тень всплывающего и окна"
+    },
+    "danger": {
+      "light": "#da1e28",
+      "dark": "#da1e28",
+      "role": "знак тона «опасно»"
+    },
+    "danger-fg": {
+      "light": "#a2191f",
+      "dark": "#a2191f",
+      "role": "текст тона «опасно»: ошибка поля, «не отправлено»"
+    },
+    "danger-bg": {
+      "light": "#fff1f1",
+      "dark": "#fff1f1",
+      "role": "подложка тона «опасно»: метка, клетка сетки"
+    },
+    "warning": {
+      "light": "#b28600",
+      "dark": "#b28600",
+      "role": "знак тона «внимание»"
+    },
+    "warning-fg": {
+      "light": "#684e00",
+      "dark": "#684e00",
+      "role": "текст тона «внимание» на его подложке"
+    },
+    "warning-bg": {
+      "light": "#fcf4d6",
+      "dark": "#fcf4d6",
+      "role": "подложка тона «внимание»"
+    },
+    "success": {
+      "light": "#198038",
+      "dark": "#198038",
+      "role": "знак тона «хорошо»; подложки нет — норма не кричит"
+    },
+    "series-1": {
+      "light": "#6929c4",
+      "dark": "#6929c4",
+      "role": "ряд данных 1"
+    },
+    "series-2": {
+      "light": "#1192e8",
+      "dark": "#1192e8",
+      "role": "ряд данных 2"
+    },
+    "series-3": {
+      "light": "#005d5d",
+      "dark": "#005d5d",
+      "role": "ряд данных 3"
+    },
+    "series-4": {
+      "light": "#9f1853",
+      "dark": "#9f1853",
+      "role": "ряд данных 4"
+    },
+    "series-5": {
+      "light": "#8a3800",
+      "dark": "#8a3800",
+      "role": "ряд данных 5"
+    },
+    "series-6": {
+      "light": "#6f6f6f",
+      "dark": "#6f6f6f",
+      "role": "ряд данных 6: прочее"
+    }
+  },
+  "tones": {
+    "опасно": {
+      "key": "danger",
+      "mark": "danger",
+      "text": "danger-fg",
+      "bg": "danger-bg"
+    },
+    "внимание": {
+      "key": "warning",
+      "mark": "warning",
+      "text": "warning-fg",
+      "bg": "warning-bg"
+    },
+    "инфо": {
+      "key": "info",
+      "mark": "fg",
+      "text": "fg",
+      "bg": null
+    },
+    "нейтрально": {
+      "key": "neutral",
+      "mark": "fg-muted",
+      "text": "fg",
+      "bg": null
+    },
+    "хорошо": {
+      "key": "success",
+      "mark": "success",
+      "text": "fg",
+      "bg": null
+    }
+  },
+  "font": {
+    "sans": {
+      "family": "IBM Plex Sans",
+      "files": [
+        "fonts/IBMPlexSans-Regular.woff2",
+        "fonts/IBMPlexSans-SemiBold.woff2"
+      ]
+    },
+    "mono": {
+      "family": "IBM Plex Mono",
+      "files": [
+        "fonts/IBMPlexMono-Regular.woff2"
+      ]
+    }
+  }
+}

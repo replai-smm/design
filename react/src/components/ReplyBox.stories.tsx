@@ -1,71 +1,45 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Button } from './Button'
+import { CommandMenu } from './CommandMenu'
 import { ReplyBox } from './ReplyBox'
+import { commands } from '../stories/agent-fixtures'
 
 const meta = {
-  title: 'Компоненты/Поле ответа',
+  title: 'Паттерны/Поле ответа',
   component: ReplyBox,
   parameters: { layout: 'padded' },
   args: {
-    label: 'Ответ клиенту',
-    placeholder: 'Напишите ответ…',
-    onSend: () => new Promise((r) => setTimeout(r, 800)),
-    emptyMessage: 'Напишите текст сообщения',
+    label: 'Ответ от имени сообщества',
+    placeholder: 'Ответ от имени сообщества',
+    onSend: () => {},
     tools: (
       <>
-        <Button variant="ghost">✨ Черновик ИИ</Button>
-        <Button variant="ghost">⚡ Шаблоны</Button>
-        <Button variant="tertiary">Ответ не нужен</Button>
+        <Button variant="ghost" icon="add">
+          Черновик ИИ
+        </Button>
+        <Button variant="ghost">Ответ не нужен</Button>
       </>
     ),
+    className: 'max-w-2xl',
   },
-  decorators: [
-    (Story) => (
-      <div className="max-w-2xl">
-        <Story />
-      </div>
-    ),
-  ],
 } satisfies Meta<typeof ReplyBox>
 export default meta
 type S = StoryObj<typeof meta>
 
-/** «Сообщения»: Enter — новая строка, отправка кнопкой или Ctrl+Enter. */
-export const Обычное: S = { args: { enterToSend: false, defaultValue: 'Здравствуйте, Анна! Да, к субботе успеем.' } }
-
-/** Ответ, который уходит необратимо (DF: в ВК): с клавиатуры не уходит ничего — только кнопкой. */
-export const ТолькоКнопкой: S = { args: { enterToSend: false, sendShortcut: false, defaultValue: 'Спасибо за отзыв! Передали повару.' } }
-
-/** «ИИ» и «Чаты»: Enter отправляет, Shift+Enter — новая строка; приложен файл. */
-export const EnterОтправляет: S = {
+/** «Отправить» — главная; рядом тихие; подсказка о клавишах. */
+export const Обычное: S = {}
+export const Загрузка: S = { tags: ['state:загрузка'], args: { value: 'Да, с 9 до 21.', sending: true } }
+export const Ошибка: S = { tags: ['state:ошибка'], args: { value: 'Да, с 9 до 21.', error: 'ВК не принял ответ: нет доступа к сообществу' } }
+export const НетДоступа: S = { tags: ['state:нет доступа'], args: { disabled: 'Только просмотр: отвечает админ сообщества' } }
+/** Чат агента: кнопки в ряд, «Стоп» пока агент работает, меню «/» над полем. */
+export const Агент: S = {
   args: {
-    label: 'Вопрос ИИ',
-    placeholder: 'Спросите про проект…',
-    enterToSend: true,
-    allowEmpty: true,
-    sendLabel: 'Спросить',
-    tools: <Button variant="ghost">📎 Файл</Button>,
-    attachment: (
-      <Button variant="tertiary" size="sm" aria-label="Убрать файл отчёт.pdf">
-        📎 отчёт.pdf ✕
-      </Button>
-    ),
+    label: 'Сообщение агенту',
+    placeholder: 'Сообщение агенту',
+    value: '/re',
+    layout: 'row',
+    stop: { onStop: () => {} },
+    tools: undefined,
+    menu: <CommandMenu label="Команды и скиллы" items={commands} query="re" onPick={() => {}} />,
   },
-}
-
-export const Отправляется: S = { tags: ['state:загрузка'], args: { sending: true, defaultValue: 'Можно! Напишите, какой вкус и на сколько человек.' } }
-
-export const Ошибка: S = {
-  tags: ['state:ошибка'],
-  args: { defaultValue: 'Можно! Напишите, какой вкус и на сколько человек.', error: 'ВК не принял сообщение: клиент запретил писать сообществу.' },
-}
-
-export const Выключено: S = { tags: ['state:нет доступа'], args: { disabled: true, disabledReason: 'Нет ключа сообщества — ответить нельзя. Подключите ключ в «Рабочих страницах ВК».' } }
-
-/** Несколько полей на экране (карточки «Разбора» в «Чатах»): отправка — не главная кнопка. */
-export const Вторичное: S = { args: { emphasis: 'secondary', label: 'Ответ в беседу', sendLabel: 'Отправить в беседу', tools: undefined, defaultValue: 'Поставили задачу дизайнеру, макет будет завтра.' } }
-
-/** Чат с агентом: агент работает — «Стоп» рядом с «Отправить», новое сообщение встанет в очередь. */
-export const АгентРаботает: S = {
-  args: { label: 'Сообщение агенту', enterToSend: true, stop: { onStop: () => {} }, sendLabel: 'В очередь', tools: undefined, placeholder: 'Напишите, пока агент работает' },
 }

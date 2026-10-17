@@ -1,28 +1,22 @@
 /**
- * Шаги процесса (опись DF §11.3 п. 30; Carbon ProgressIndicator): где человек в пути из нескольких шагов и сколько
- * осталось — «Текст · Куда · Предпросмотр · Итог» в DF «Постинг» (§10.5 must 1).
- * - Шаг: пройден (галочка), текущий (`aria-current="step"`), впереди (пустой круг), ошибка (знак тона «опасно»).
- *   Состояние — словом для читалки и формой значка, не только цветом.
- * - `onStepClick` — вернуться к пройденному шагу кнопкой; шаги впереди не нажимаются (их не перескочить).
- * - Телефон (< 768): одной строкой «Шаг 2 из 4 · Куда» — полоса из четырёх подписей не помещается.
- * - `compact` — одной строкой всегда, со знаками шагов в ряд (узкая колонка, строка списка: путь работы по дорожке).
- * Шаги — не вкладки: содержимое шага рисует продукт; компонент только показывает путь.
+ * Шаги процесса: где человек в пути из нескольких шагов и сколько осталось («Текст · Куда · Предпросмотр · Итог»).
+ * Состояние шага — словарь хода: `done` — пройден, `running` — текущий (`aria-current="step"`), `idle` — впереди,
+ * `error` — знак «опасно». Словом для читалки и формой знака, не только цветом. `onStepClick` — назад к пройденному;
+ * впереди не нажимается. Телефон — одной строкой «Шаг 2 из 4 · Куда»; `compact` — одной строкой всегда.
+ * Шаги — не вкладки: содержимое шага рисует продукт.
  */
-import type { ReactNode } from 'react'
 import { cx, rule } from '../lib/cx'
-import { ToneIcon } from './StatusBadge'
-
-export type StepState = 'complete' | 'current' | 'incomplete' | 'error'
+import { FOCUS } from '../lib/anatomy'
+import { PROGRESS_WORD, type Progress } from '../lib/vocab'
+import { Icon } from './Icon'
 
 export interface StepsProps {
-  /** Подписи шагов по порядку: ['Текст', 'Куда', 'Предпросмотр', 'Итог']. */
+  /** Подписи шагов по порядку. */
   steps: string[]
   /** Текущий шаг (с нуля). */
   current: number
-  /** Шаг с ошибкой (итог с неудачами) — знак «опасно» вместо галочки. */
+  /** Шаг с ошибкой — знак «опасно» вместо галочки. */
   errorAt?: number
-  /** Вторая строка под подписью шага (необязательно): «12 сообществ», «сразу». */
-  details?: Partial<Record<number, ReactNode>>
   /** Вернуться к пройденному шагу. Без него шаги — просто путь. */
   onStepClick?: (index: number) => void
   /** Подпись для читалки: «Шаги публикации». */
@@ -32,94 +26,70 @@ export interface StepsProps {
   className?: string
 }
 
-const WORD: Record<StepState, string> = { complete: 'пройден', current: 'текущий', incomplete: 'впереди', error: 'ошибка' }
-
-export function stepState(i: number, current: number, errorAt?: number): StepState {
+export function stepProgress(i: number, current: number, errorAt?: number): Progress {
   if (errorAt === i) return 'error'
-  if (i < current) return 'complete'
-  if (i === current) return 'current'
-  return 'incomplete'
+  if (i < current) return 'done'
+  if (i === current) return 'running'
+  return 'idle'
 }
 
-function Mark({ state }: { state: StepState }) {
-  if (state === 'error') return <ToneIcon tone="error" className="text-status-error" />
-  return (
-    <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false" className="size-4 shrink-0 text-icon-primary" data-step-mark={state}>
-      {state === 'complete' && (
-        <>
-          <circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" strokeWidth="1.2" />
-          <path d="M4.9 8.2l2.1 2.1 4.1-4.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-        </>
-      )}
-      {state === 'current' && (
-        <>
-          <circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" strokeWidth="1.2" />
-          <circle cx="8" cy="8" r="3.5" fill="currentColor" />
-        </>
-      )}
-      {state === 'incomplete' && <circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" strokeWidth="1.2" />}
-    </svg>
-  )
+const WORD: Record<Progress, string> = { ...PROGRESS_WORD, done: 'пройден', running: 'текущий' }
+
+function Mark({ progress }: { progress: Progress }) {
+  if (progress === 'error') return <Icon tone="опасно" />
+  if (progress === 'done') return <Icon tone="хорошо" />
+  return progress === 'running' ? <Icon name="tone-neutral" className="text-fg" /> : <Icon tone="нейтрально" />
 }
 
-export function Steps({ steps, current, errorAt, details, onStepClick, label, compact = false, className }: StepsProps) {
-  rule(steps.length >= 2, 'Steps: шагов меньше двух — это не путь, подпись хватит словами')
+export function Steps({ steps, current, errorAt, onStepClick, label, compact = false, className }: StepsProps) {
+  rule(steps.length >= 2, 'Steps: шагов меньше двух — это не путь, хватит слов')
   rule(current >= 0 && current < steps.length, `Steps: текущий шаг ${current} вне списка из ${steps.length}`)
   const now = Math.min(Math.max(current, 0), steps.length - 1)
   return (
     <nav data-slot="steps" aria-label={label} className={cx('min-w-0', className)}>
-      <p data-slot="steps-compact" className={cx('m-0 flex min-w-0 flex-wrap items-center gap-x-2 text-body-compact-01 text-text-primary', !compact && 'md:hidden')}>
+      <p data-slot="steps-compact" className={cx('m-0 flex min-w-0 flex-wrap items-center gap-x-items text-body text-fg', !compact && 'md:hidden')}>
         {compact && (
-          <span aria-hidden="true" className="inline-flex items-center gap-px">
+          <span aria-hidden="true" className="inline-flex items-center gap-tight">
             {steps.map((_, i) => (
-              <Mark key={i} state={stepState(i, now, errorAt)} />
+              <Mark key={i} progress={stepProgress(i, now, errorAt)} />
             ))}
           </span>
         )}
-        <span className="text-text-secondary">
+        <span className="text-fg-muted">
           Шаг {now + 1} из {steps.length}
           <span aria-hidden="true"> · </span>
         </span>
         <span className="font-semibold">{steps[now]}</span>
-        {errorAt === now && <span className="text-status-error"> — ошибка</span>}
+        {errorAt === now && <span className="text-danger-fg"> — ошибка</span>}
       </p>
-      <ol className={cx('m-0 hidden list-none gap-px p-0', !compact && 'md:flex')}>
+      <ol className={cx('m-0 hidden list-none gap-items p-0', !compact && 'md:flex')}>
         {steps.map((s, i) => {
-          const st = stepState(i, now, errorAt)
+          const p = stepProgress(i, now, errorAt)
           const clickable = Boolean(onStepClick) && i < now
           const body = (
             <>
-              <Mark state={st} />
-              <span className="flex min-w-0 flex-col">
-                <span className={cx('truncate', st === 'current' ? 'font-semibold text-text-primary' : st === 'incomplete' ? 'text-text-secondary' : 'text-text-primary')}>
-                  {s}
-                  <span className="sr-only">, {WORD[st]}</span>
-                </span>
-                {details?.[i] !== undefined && <span className="truncate text-helper-text-01 text-text-helper">{details[i]}</span>}
+              <Mark progress={p} />
+              <span className={cx('truncate', p === 'running' ? 'font-semibold text-fg' : p === 'idle' ? 'text-fg-muted' : 'text-fg')}>
+                {s}
+                <span className="sr-only">, {WORD[p]}</span>
               </span>
             </>
           )
+          const cls = 'flex min-h-control w-full min-w-0 items-center gap-items rounded-control px-items text-start text-body'
           return (
             <li
               key={i}
               data-slot="step"
-              data-state={st}
-              aria-current={st === 'current' ? 'step' : undefined}
-              className={cx(
-                'min-w-0 flex-1 border-t-2',
-                st === 'error' ? 'border-status-error' : st === 'incomplete' ? 'border-border-subtle-01' : 'border-border-interactive',
-              )}
+              data-progress={p}
+              aria-current={p === 'running' ? 'step' : undefined}
+              className={cx('min-w-0 flex-1 border-t-2', p === 'error' ? 'border-danger' : p === 'idle' ? 'border-line' : 'border-fg')}
             >
               {clickable ? (
-                <button
-                  type="button"
-                  onClick={() => onStepClick!(i)}
-                  className="flex min-h-10 w-full min-w-0 cursor-pointer items-start gap-2 pt-2 pr-4 text-start text-body-compact-01 hover:bg-layer-hover-01 focus-visible:outline-2 focus-visible:outline-focus focus-visible:-outline-offset-2"
-                >
+                <button type="button" onClick={() => onStepClick!(i)} className={cx(cls, 'cursor-pointer hover:bg-hover', FOCUS)}>
                   {body}
                 </button>
               ) : (
-                <span className="flex min-h-10 min-w-0 items-start gap-2 pt-2 pr-4 text-body-compact-01">{body}</span>
+                <span className={cls}>{body}</span>
               )}
             </li>
           )

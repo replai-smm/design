@@ -1,19 +1,17 @@
 /**
- * Выбор с поиском (Carbon ComboBox; WAI-ARIA combobox со списком): поле, в котором печатают, и список под ним.
- * Печать сужает список (без учёта регистра, по любой части названия); стрелки ходят по списку, Enter выбирает,
- * Esc закрывает список (закрытый — очищает выбор, если можно очищать), Tab уходит без выбора. Фокус всегда в поле:
- * активный пункт — через aria-activedescendant. Ушли из поля, не выбрав, — поле снова показывает выбранное.
- * Список — в слое поверх страницы (Radix Popover): не обрезается панелью или таблицей, ширина — как у поля.
- * Состояния: загрузка, «ничего не найдено», ошибка, много пунктов (список прокручивается, высота ограничена).
- * Очень длинный список — `limit`: показаны первые N совпадений и строка «уточните поиск» (DF «Постинг»: не больше 60).
- * Текст поиска можно задать: `defaultInputValue` — начальный (окно выбора открывается уже с подсказкой — первым словом
- * проекта), `inputValue` + `onInputValueChange` — управляемый. Текст, равный названию выбранного, — не поиск: список полный.
+ * Выбор с поиском (WAI-ARIA combobox): поле, в котором печатают, и список под ним. Печать сужает список (без учёта
+ * регистра и «ё», по названию и второй строке); стрелки ходят, Enter выбирает, Esc закрывает (закрытое — очищает
+ * выбор), Tab уходит без выбора. Фокус всегда в поле: активный пункт — aria-activedescendant. Список — во всплывающем
+ * слое (не обрезается панелью), ширина — как у поля; выбранный пункт — «выбрано» и галочка. Состояния: загрузка,
+ * пусто (`empty`), ошибка, много (`limit` — первые N и «уточните поиск»).
  */
 import { useId, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
 import { Popover } from 'radix-ui'
+import { FOCUS } from '../lib/anatomy'
+import { useControllable } from '../lib/controllable'
 import { cx } from '../lib/cx'
-import { useControllable, useLayer } from '../lib/controllable'
-import { ErrorMark, FIELD_HEIGHT, FieldShell, fieldAria, fieldBoxClass, useFieldIds, type FieldBaseProps } from './TextField'
+import { Icon } from './Icon'
+import { FieldShell, fieldAria, fieldBox, useFieldIds, type FieldBaseProps } from './TextField'
 
 export interface ComboboxOption {
   value: string
@@ -33,87 +31,36 @@ export interface ComboboxProps extends FieldBaseProps {
   /** Пункты ещё грузятся: в списке — «загрузка». */
   loading?: boolean
   /** Слова пустого списка. */
-  emptyText?: ReactNode
-  /** Потолок показа: не больше `limit` пунктов, под ними — «уточните поиск». */
+  empty?: ReactNode
+  /** Не больше `limit` пунктов, под ними — «уточните поиск». */
   limit?: number
-  /** Строка под урезанным списком: по умолчанию «Показаны первые 60 из 312 — уточните поиск». */
-  moreText?: (shown: number, total: number) => ReactNode
-  /** Можно очистить выбор (кнопка «×» и Esc в закрытом поле). */
+  /** Можно очистить выбор (кнопка и Esc в закрытом поле). */
   clearable?: boolean
-  /** Свой поиск; по умолчанию — часть названия или второй строки без учёта регистра. */
-  filter?: (option: ComboboxOption, query: string) => boolean
-  /** Начальный текст поиска: список сразу сужен им (окно «Выберите сообщество» — первое слово проекта). */
-  defaultInputValue?: string
-  /** Управляемый текст поля. Равен названию выбранного (или пуст без выбора) — поиска нет, список полный. */
-  inputValue?: string
-  /** Текст поля изменился: печать, выбор (название пункта), очистка, уход из поля (снова название выбранного). */
-  onInputValueChange?: (text: string) => void
-  /** Открыть список сразу (истории, образцы). */
-  defaultOpen?: boolean
-  /** Подписи кнопок для читалки. */
-  clearLabel?: string
-  toggleLabel?: string
   name?: string
   id?: string
 }
 
 const norm = (s: string) => s.toLocaleLowerCase('ru').replace(/ё/g, 'е')
-export const defaultFilter = (o: ComboboxOption, q: string) => norm(o.label).includes(norm(q)) || (o.description ? norm(o.description).includes(norm(q)) : false)
+const matches = (o: ComboboxOption, q: string) => norm(o.label).includes(norm(q)) || (o.description ? norm(o.description).includes(norm(q)) : false)
 
-export function Combobox({
-  label,
-  hideLabel,
-  helperText,
-  error,
-  size = 'md',
-  className,
-  options,
-  value: valueProp,
-  defaultValue = null,
-  onChange,
-  placeholder,
-  disabled,
-  loading,
-  emptyText = 'Ничего не найдено',
-  limit,
-  moreText = (n, total) => `Показаны первые ${n} из ${total} — уточните поиск`,
-  clearable = true,
-  filter = defaultFilter,
-  defaultInputValue,
-  inputValue,
-  onInputValueChange,
-  defaultOpen = false,
-  clearLabel = 'очистить выбор',
-  toggleLabel = 'список',
-  name,
-  id,
-}: ComboboxProps) {
+export function Combobox({ label, hideLabel, helperText, error, dense, className, options, value: valueProp, defaultValue = null, onChange, placeholder, disabled, loading, empty = 'Ничего не найдено', limit, clearable = true, name, id }: ComboboxProps) {
   const ids = useFieldIds(id)
   const listId = `${ids.id}-list`
-  const layer = useLayer()
   const anchor = useRef<HTMLDivElement>(null)
   const input = useRef<HTMLInputElement>(null)
   const [value, setValue] = useControllable<string | null>(valueProp, defaultValue, onChange)
   const selected = options.find((o) => o.value === value) ?? null
   // query — текст поиска; null — поиска нет, поле показывает название выбранного
-  const [innerQuery, setInnerQuery] = useState<string | null>(defaultInputValue ? defaultInputValue : null)
-  const textControlled = inputValue !== undefined
-  const query = textControlled ? (inputValue === (selected?.label ?? '') ? null : inputValue) : innerQuery
+  const [query, setQuery] = useState<string | null>(null)
   const text = query ?? selected?.label ?? ''
-  /** Сменить текст поиска; `label` — что поле покажет при `null` (после выбора — название нового пункта). */
-  const setQuery = (q: string | null, label = selected?.label ?? '') => {
-    if (!textControlled) setInnerQuery(q)
-    const next = q ?? label
-    if (next !== text) onInputValueChange?.(next)
-  }
-  const [open, setOpenRaw] = useState(defaultOpen && !disabled)
-  const matched = useMemo(() => (query ? options.filter((o) => filter(o, query)) : options), [options, query, filter])
+  const [open, setOpenRaw] = useState(false)
+  const matched = useMemo(() => (query ? options.filter((o) => matches(o, query)) : options), [options, query])
   const shown = useMemo(() => (limit !== undefined && limit > 0 ? matched.slice(0, limit) : matched), [matched, limit])
   const firstActive = () => {
     const i = selected ? shown.indexOf(selected) : -1
     return i >= 0 ? i : shown.findIndex((o) => !o.disabled)
   }
-  const [active, setActive] = useState(() => (defaultOpen ? firstActive() : -1))
+  const [active, setActive] = useState(-1)
   const uid = useId().replace(/[^a-zA-Z0-9_-]/g, '')
   const optId = (i: number) => `${listId}-${uid}-${i}`
 
@@ -122,22 +69,21 @@ export function Combobox({
     setOpenRaw(v)
     if (v) setActive(firstActive())
   }
-  const close = (label?: string) => {
+  const close = () => {
     setOpenRaw(false)
-    setQuery(null, label)
+    setQuery(null)
     setActive(-1)
   }
   const choose = (o: ComboboxOption) => {
     if (o.disabled) return
     setValue(o.value)
-    close(o.label)
+    close()
   }
   const move = (dir: 1 | -1) => {
     if (!shown.length) return
     let i = active
     for (let n = 0; n < shown.length; n++) {
       i = (i + dir + shown.length) % shown.length
-      if (i < 0) i = shown.length - 1
       if (!shown[i]!.disabled) break
     }
     setActive(i)
@@ -161,7 +107,6 @@ export function Combobox({
       if (query) return setQuery(null)
       if (clearable && value !== null) {
         e.preventDefault()
-        setQuery(null, '')
         return setValue(null)
       }
     }
@@ -171,17 +116,18 @@ export function Combobox({
   const listOpen = open && !disabled
   const hasList = listOpen && !loading && shown.length > 0
   const showClear = clearable && !disabled && (value !== null || Boolean(query))
-  const iconBtn = cx(
-    'inline-flex w-10 shrink-0 cursor-pointer items-center justify-center text-icon-primary focus-visible:outline-2 focus-visible:outline-focus focus-visible:-outline-offset-2',
-    layer === 2 ? 'hover:bg-field-hover-02' : 'hover:bg-field-hover-01',
-    'disabled:cursor-not-allowed disabled:text-icon-disabled disabled:hover:bg-transparent',
+  const iconBtn = cx('inline-flex w-control shrink-0 cursor-pointer items-center justify-center text-fg hover:bg-hover', FOCUS, 'disabled:cursor-not-allowed disabled:text-fg-disabled disabled:hover:bg-transparent')
+  const note = (children: ReactNode, slot?: string) => (
+    <p role="status" data-slot={slot} className="m-0 px-compact py-items text-body text-fg-muted">
+      {children}
+    </p>
   )
 
   return (
     <FieldShell slot="combobox" ids={ids} label={label} hideLabel={hideLabel} helperText={helperText} error={error} disabled={disabled} className={className}>
       <Popover.Root open={listOpen} onOpenChange={(v) => (v ? setOpen(true) : close())}>
         <Popover.Anchor asChild>
-          <div ref={anchor} className={cx(fieldBoxClass({ layer, invalid: Boolean(error), disabled, within: true }), FIELD_HEIGHT[size], 'flex items-stretch')}>
+          <div ref={anchor} className={cx(fieldBox({ invalid: Boolean(error), disabled, within: true, dense }), 'flex items-stretch overflow-hidden')}>
             <input
               ref={input}
               id={ids.id}
@@ -199,40 +145,34 @@ export function Combobox({
               onChange={(e) => {
                 setQuery(e.target.value)
                 setOpenRaw(true)
-                const next = e.target.value ? options.filter((o) => filter(o, e.target.value)) : options
+                const next = e.target.value ? options.filter((o) => matches(o, e.target.value)) : options
                 setActive(next.findIndex((o) => !o.disabled))
               }}
               onClick={() => !listOpen && setOpen(true)}
               onKeyDown={onKeyDown}
-              onBlur={() => {
-                if (listOpen) close()
-                else setQuery(null)
-              }}
+              onBlur={() => (listOpen ? close() : setQuery(null))}
               {...fieldAria(ids, { helperText, error })}
-              className="min-w-0 flex-1 border-0 bg-transparent px-4 text-body-compact-01 text-inherit outline-none placeholder:text-text-placeholder disabled:cursor-not-allowed"
+              className="min-w-0 flex-1 border-0 bg-transparent px-compact text-body text-inherit outline-none placeholder:text-fg-muted disabled:cursor-not-allowed"
             />
-            {error && <ErrorMark className="mr-2 self-center" />}
             {showClear && (
               <button
                 type="button"
-                aria-label={clearLabel}
+                aria-label="очистить выбор"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => {
                   setValue(null)
-                  setQuery(null, '')
+                  setQuery(null)
                   input.current?.focus()
                 }}
                 className={iconBtn}
               >
-                <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false" className="size-4">
-                  <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                </svg>
+                <Icon name="close" />
               </button>
             )}
             <button
               type="button"
               tabIndex={-1}
-              aria-label={toggleLabel}
+              aria-label="список"
               aria-expanded={listOpen}
               disabled={disabled}
               onMouseDown={(e) => e.preventDefault()}
@@ -243,9 +183,7 @@ export function Combobox({
               }}
               className={iconBtn}
             >
-              <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false" className={cx('size-4 transition-transform duration-(--cds-duration-fast-02) ease-standard-productive', listOpen && 'rotate-180')}>
-                <path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+              <Icon name="chevron-down" className={cx('transition-transform duration-fast ease-standard', listOpen && 'rotate-180')} />
             </button>
           </div>
         </Popover.Anchor>
@@ -256,7 +194,7 @@ export function Combobox({
             data-slot="combobox-list"
             side="bottom"
             align="start"
-            sideOffset={0}
+            sideOffset={4}
             collisionPadding={8}
             onOpenAutoFocus={(e) => e.preventDefault()}
             onCloseAutoFocus={(e) => e.preventDefault()}
@@ -264,21 +202,14 @@ export function Combobox({
               if (anchor.current?.contains(e.target as Node)) e.preventDefault()
             }}
             onMouseDown={(e) => e.preventDefault()}
-            className={cx(
-              'ds-pop z-50 flex w-(--radix-popover-trigger-width) flex-col overflow-hidden bg-layer-01 text-text-primary shadow-raised',
-              'max-h-(--radix-popover-content-available-height)',
-            )}
+            className="ds-pop z-50 flex max-h-(--radix-popover-content-available-height) w-(--radix-popover-trigger-width) flex-col overflow-hidden rounded-surface border border-line bg-surface text-fg shadow-raised"
           >
             {loading ? (
-              <p role="status" className="m-0 px-4 py-3 text-body-compact-01 text-text-secondary">
-                загрузка…
-              </p>
+              note('загрузка…')
             ) : shown.length === 0 ? (
-              <p role="status" className="m-0 px-4 py-3 text-body-compact-01 text-text-secondary">
-                {emptyText}
-              </p>
+              note(empty)
             ) : (
-              <ul role="listbox" id={listId} aria-labelledby={ids.labelId} className="m-0 max-h-80 list-none overflow-y-auto p-0">
+              <ul role="listbox" id={listId} aria-labelledby={ids.labelId} className="m-0 list-none overflow-y-auto p-tight">
                 {shown.map((o, i) => {
                   const isSel = o.value === value
                   return (
@@ -292,32 +223,22 @@ export function Combobox({
                       onMouseMove={() => !o.disabled && i !== active && setActive(i)}
                       onClick={() => choose(o)}
                       className={cx(
-                        'group flex cursor-pointer px-4 text-body-compact-01 data-[active=true]:bg-layer-hover-01',
-                        isSel ? 'bg-layer-selected-01 text-text-primary' : 'text-text-secondary',
-                        o.disabled && 'cursor-not-allowed text-text-disabled',
+                        'flex min-h-touch cursor-pointer items-center gap-items rounded-control px-items text-body md:min-h-control data-[active=true]:bg-hover',
+                        isSel ? 'bg-selected text-fg' : 'text-fg',
+                        o.disabled && 'cursor-not-allowed text-fg-disabled',
                       )}
                     >
-                      <span className="flex min-h-12 min-w-0 flex-1 items-center gap-2 border-t border-border-subtle-01 group-first:border-t-0 group-data-[active=true]:border-transparent md:min-h-10">
-                        <span className="flex min-w-0 flex-1 flex-col py-2">
-                          <span className="truncate">{o.label}</span>
-                          {o.description && <span className="truncate text-helper-text-01 text-text-helper">{o.description}</span>}
-                        </span>
-                        {isSel && (
-                          <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false" className="size-4 shrink-0 text-icon-primary">
-                            <path d="M3.5 8.2l3 3 6-6.5" fill="none" stroke="currentColor" strokeWidth="1.5" />
-                          </svg>
-                        )}
+                      <span className="flex min-w-0 flex-1 flex-col py-tight">
+                        <span className="truncate">{o.label}</span>
+                        {o.description && <span className="truncate text-caption text-fg-muted">{o.description}</span>}
                       </span>
+                      {isSel && <Icon name="check" />}
                     </li>
                   )
                 })}
               </ul>
             )}
-            {!loading && matched.length > shown.length && (
-              <p role="status" data-slot="combobox-more" className="m-0 border-t border-border-subtle-01 px-4 py-3 text-helper-text-01 text-text-helper">
-                {moreText(shown.length, matched.length)}
-              </p>
-            )}
+            {!loading && matched.length > shown.length && note(`Показаны первые ${shown.length} из ${matched.length} — уточните поиск`, 'combobox-more')}
           </Popover.Content>
         </Popover.Portal>
       </Popover.Root>

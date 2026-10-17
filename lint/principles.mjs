@@ -1,26 +1,18 @@
 #!/usr/bin/env node
-// Принципы дизайн-системы — машиной, а не памятью (Саша 04.10: «чтобы другая сессия тысяча процентов тоже следовала»).
-// Правила словами — design/README.md, раздел «Правила для всех продуктов». Здесь три проверки:
+// Правила дизайн-системы для продуктов и самой ДС — машиной. Три проверки:
 //
-//   полки   — полки Storybook. ДС: `Основы/…` · `Компоненты/…` · `Паттерны/…`. Продукт: `Экраны/SCR-NN …/…` и
-//             `Части продукта/…`; ДС внутри продукта не дублируется.
-//   токены  — только токены (scan.mjs: сырые цвета и размеры, произвольные значения и палитра Tailwind).
-//   свои    — продукт не заводит свой компонент с именем компонента ДС-React (Button, Dialog, ThreeColumn, …):
-//             недостающее добавляют в ДС-React (design/react), а не строят в продукте.
+//   полки   — полка Storybook. ДС: полка = уровень компонента (react/src/registry.json → levels). Продукт: только
+//             `Экраны/SCR-NN <экран>/…` — продукт строит экраны, а компоненты берёт из ДС и не дублирует их полки.
+//   токены  — только роли и шкалы (scan.mjs: сырые цвета и размеры, произвольные значения, палитра и классы вне шкал).
+//   свои    — продукт не заводит свой компонент с именем компонента ДС: недостающее добавляют в ДС.
 //
-// Новое держит, старое — долг (храповик против базы PR, без файла чисел):
-//   - полки: новый файл историй, или файл, у которого на базе полка была верной, — красный; старый файл на старой
-//     полке — предупреждение (истории Replai переложат отдельной задачей);
-//   - токены: по файлу нарушений стало больше, чем на базе, — красный (печатаются только новые);
-//   - свои: имя компонента ДС объявлено в файле, где на базе его не было, — красный.
-// Строка с `ds-allow: <причина>` не считается (причина обязательна) — исключение видно в ревью.
+// Новое держит, старое — долг (против базы PR, без файла чисел): новый файл историй или файл, чья полка была верной, —
+// красный; нарушений «только токены» в файле стало больше — красный; новый свой компонент с именем ДС — красный.
+// Строка с `ds-allow: <причина>` не считается (причина обязательна).
 //
-//   node node_modules/@replai-smm/design/lint/principles.mjs --kind product --base origin/main frontend/src  — продукт на PR
-//   node node_modules/@replai-smm/design/lint/principles.mjs --kind arena --base origin/main web/src         — Арена (VKUI + наша тема)
-//   node node_modules/@replai-smm/design/lint/principles.mjs --kind ds --strict react/src react/.storybook   — сама ДС: держит всё, долга нет
-// Без --base и --strict — только отчёт (выход 0): на main сравнивать не с чем. Пути — от --repo (по умолчанию cwd).
-// Без --base в git-клоне смотрятся все файлы путей; с --base — только изменённые против merge-base, вместе с
-// незакоммиченными и новыми (агент может проверить себя до коммита).
+//   node node_modules/@replai-smm/design/lint/principles.mjs --kind product --base origin/main src   — продукт на PR
+//   node node_modules/@replai-smm/design/lint/principles.mjs --kind ds --strict react/src            — сама ДС: держит всё
+// Без --base и --strict — только отчёт (выход 0). Пути — от --repo (по умолчанию cwd).
 import { readFileSync, existsSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
 import { dirname, join, relative, resolve, sep } from 'node:path'
@@ -30,14 +22,13 @@ import { files as walk } from './cli.mjs'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 
+/** Уровни ДС — полки её Storybook (registry.json). */
+export const LEVELS = JSON.parse(readFileSync(join(HERE, '../react/src/registry.json'), 'utf8')).levels
 export const SHELVES = {
-  ds: { ok: /^(Основы|Компоненты|Паттерны)\/[^/\s][^]*$/, say: '`Основы/…`, `Компоненты/…` или `Паттерны/…`' },
-  product: {
-    ok: /^(Экраны\/SCR-\d+(?: [^/]+)?(?:\/[^/]+)*|Части продукта\/[^/\s][^]*)$/,
-    say: '`Экраны/SCR-NN <экран>` (истории — состояния) или `Части продукта/…`',
-  },
+  ds: { ok: new RegExp(`^(${LEVELS.join('|')})\\/[^/\\s][^]*$`), say: LEVELS.map((l) => `\`${l}/…\``).join(' · ') },
+  product: { ok: /^Экраны\/SCR-\d+(?: [^/]+)?(?:\/[^/]+)*$/, say: '`Экраны/SCR-NN <экран>` (истории — состояния и части экрана)' },
 }
-const DS_SHELF = /^(Основы|Компоненты|Паттерны|ДС|Дизайн-система|Design System|Примитивы)\//i
+const DS_SHELF = new RegExp(`^(${[...LEVELS, 'Компоненты', 'ДС', 'Дизайн-система', 'Design System', 'Примитивы'].join('|')})\\/`, 'i')
 
 const STORY = /\.stories\.(?:[jt]sx?|mdx)$/
 const CODE = /\.(?:[jt]sx?|mjs|cjs|vue|svelte)$/
@@ -105,7 +96,7 @@ export function shelfProblem(title, kind) {
   if (title === null) return `у файла историй нет title — назови полку явно: ${rule.say}`
   if (rule.ok.test(title)) return null
   if (kind !== 'ds' && DS_SHELF.test(title))
-    return `«${title}» — это полка дизайн-системы: в Storybook продукта ДС не дублируется (компонент — в ДС-React, design/react). Полка продукта — ${rule.say}`
+    return `«${title}» — это полка дизайн-системы: в Storybook продукта ДС не дублируется. Полка продукта — ${rule.say}`
   return `«${title}» — не полка: ${rule.say}`
 }
 
@@ -201,7 +192,7 @@ export function check({ repo, kind, roots, base, strict, names = dsNames() }) {
     }
 
     const ui = kind === 'ds' || !NOT_UI.test(e.path)
-    if (ui && /\.(jsx?|tsx?|mjs|cjs|css|scss|pcss|html?|vue|svelte)$/i.test(e.path) && !/(^|\/)(tokens\.(css|ts)|tailwind\.css|vkui-adapter\.css)$/.test(e.path) && !/\.min\./.test(e.path)) {
+    if (ui && /\.(jsx?|tsx?|mjs|cjs|css|scss|pcss|html?|vue|svelte)$/i.test(e.path) && !/(^|\/)(tokens\.(css|ts)|tailwind\.css)$/.test(e.path) && !/\.min\./.test(e.path)) {
       const now = scan(text, e.path)
       const fresh = mode === 'ratchet' ? (old === null ? now : added(now, scan(old, e.path))) : now
       const hard = mode === 'strict' || mode === 'ratchet'
@@ -216,7 +207,7 @@ export function check({ repo, kind, roots, base, strict, names = dsNames() }) {
       const now = ownComponents(text, names)
       const had = new Set(mode === 'ratchet' && old !== null ? ownComponents(old, names).map((c) => c.name) : [])
       for (const c of now) {
-        const where = kind === 'arena' ? 'возьми компонент VKUI (облик — переходник ДС), а не свой' : 'возьми его из ДС-React (`@replai-smm/design`); не хватает — добавь в ДС-React (design/react), а не в продукт'
+        const where = 'возьми его из ДС (`@replai-smm/design`); не хватает — добавь в ДС, а не в продукт'
         const hard = mode === 'strict' || (mode === 'ratchet' && !had.has(c.name))
         put(hard, { file: e.path, line: c.line, check: 'свои', text: `свой компонент «${c.name}» — такой есть в дизайн-системе: ${where}${hard ? '' : ' (долг: был до этого PR)'}` })
       }
@@ -237,8 +228,8 @@ function main(argv) {
   const strict = args.includes('--strict')
   const valued = new Set(['--kind', '--repo', '--base'])
   const roots = args.filter((a, i) => !a.startsWith('--') && !valued.has(args[i - 1]))
-  if (!['ds', 'product', 'arena'].includes(kind ?? '') || !roots.length) {
-    console.error('node node_modules/@replai-smm/design/lint/principles.mjs --kind ds|product|arena [--base <ref>] [--strict] [--repo <папка>] <пути…>')
+  if (!['ds', 'product'].includes(kind ?? '') || !roots.length) {
+    console.error('node node_modules/@replai-smm/design/lint/principles.mjs --kind ds|product [--base <ref>] [--strict] [--repo <папка>] <пути…>')
     return 2
   }
   let r
@@ -261,7 +252,7 @@ function main(argv) {
   const by = (l) => ['полки', 'токены', 'свои'].map((c) => `${c} ${l.filter((x) => x.check === c).length}`).join(' · ')
   console.log(
     r.block.length
-      ? `✗ дизайн-система: новое нарушение (${by(r.block)}); долг ${r.warn.length}. Правила — design/README.md, «Правила для всех продуктов»`
+      ? `✗ дизайн-система: новое нарушение (${by(r.block)}); долг ${r.warn.length}. Правила — README.md пакета @replai-smm/design`
       : `✓ дизайн-система: нового нарушения нет (файлов ${r.files}; долг ${r.warn.length}${r.warn.length ? `: ${by(r.warn)}` : ''})`,
   )
   return r.block.length ? 1 : 0

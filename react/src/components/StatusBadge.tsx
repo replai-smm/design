@@ -1,134 +1,49 @@
 /**
- * Метка статуса (шаблон «метка статуса», CONCEPT §3.4). Статус — только из закрытого списка (design/statuses.json),
- * цвет — только из палитры: `product` — четыре тона продукта, `karta` — цвета Карты (рамка, слово обычным текстом).
- * Цвет никогда не один: у тона своя форма значка (крест, треугольник, галочка, пустой круг) и слово.
- * Метка тона со своим словом (светофор, оценка поста, «не запускался»): `tone` вместо `status` и обязательный `label` —
- * тот же облик палитры `product`, тонов те же четыре; `data-status` у неё нет (слово не из закрытого списка).
+ * Метка статуса: статус из закрытого списка (statuses.json) или тон со своим словом (светофор, оценка, «не запускался»).
+ * Облик — словарь тонов: знак своей формы и слово, цвет никогда не один. Подложка-таблетка — только у того, что
+ * просит внимания («опасно», «внимание»); «хорошо», «инфо», «нейтрально» — знак и слово без подложки (норма не кричит).
  */
-import { useId } from 'react'
 import { cx, rule } from '../lib/cx'
-import { kartaKeyOf, statusOf, TONE_KEY, TONE_ORDER, toneOf, type Palette, type StatusId, type Tone, type ToneKey } from '../lib/status'
+import { statusOf, TONE, TONES, toneOf, type StatusId, type Tone } from '../lib/vocab'
+import { Icon } from './Icon'
 
-/** Знак тона на поверхности (background, layer-01, layer-02) — пара проверена контрастом ≥ 3:1. */
-export const MARK: Record<ToneKey, string> = {
-  error: 'text-status-error',
-  warning: 'text-status-warning',
-  success: 'text-status-success',
-  neutral: 'text-status-neutral',
-}
-const PILL: Record<ToneKey, string> = {
-  error: 'bg-status-error-background text-status-error-text',
-  warning: 'bg-status-warning-background text-status-warning-text',
-  success: 'bg-status-success-background text-status-success-text',
-  neutral: 'bg-status-neutral-background text-status-neutral-text',
-}
-const KARTA_BORDER = {
-  info: 'border-support-info',
-  warning: 'border-status-warning',
-  error: 'border-status-error',
-} as const
-const KARTA_MARK = {
-  info: 'text-support-info',
-  warning: 'text-status-warning',
-  error: 'text-status-error',
-} as const
-
-/** Значок тона: форма отличает тон без цвета. Маска вырезает знак внутри формы — фон под ним виден. */
-export function ToneIcon({ tone, className }: { tone: ToneKey; className?: string }) {
-  const id = 'ds-m' + useId().replace(/[^a-zA-Z0-9_-]/g, '')
-  // в маске «белое» = видно, «чёрное» = вырезано; это яркость маски, а не цвет интерфейса
-  const cut = { stroke: 'black', strokeWidth: 1.6, strokeLinecap: 'round' as const, fill: 'none' }
-  return (
-    <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false" className={cx('size-4 shrink-0', className)} data-tone-icon={tone}>
-      {tone !== 'neutral' && (
-        <mask id={id}>
-          <rect width="16" height="16" fill="white" />
-          {tone === 'error' && <path d="M5.6 5.6l4.8 4.8M10.4 5.6l-4.8 4.8" {...cut} />}
-          {tone === 'warning' && (
-            <>
-              <path d="M8 6.2v3.6" {...cut} />
-              <circle cx="8" cy="12" r="0.95" fill="black" />
-            </>
-          )}
-          {tone === 'success' && <path d="M4.9 8.2l2.1 2.1 4.1-4.5" {...cut} strokeLinejoin="round" />}
-        </mask>
-      )}
-      {tone === 'error' && <circle cx="8" cy="8" r="7" fill="currentColor" mask={`url(#${id})`} />}
-      {tone === 'warning' && <path d="M8 1.3l7 13.2H1z" fill="currentColor" mask={`url(#${id})`} />}
-      {tone === 'success' && <circle cx="8" cy="8" r="7" fill="currentColor" mask={`url(#${id})`} />}
-      {tone === 'neutral' && <circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" strokeWidth="1.6" />}
-    </svg>
-  )
-}
-
-interface BadgeCommon {
-  /** product — интерфейсы продуктов (четыре тона); karta — экраны Карты и дашборд (рамка цвета Карты). */
-  palette?: Palette
-  className?: string
-}
-interface ByStatus extends BadgeCommon {
+interface ByStatus {
   /** id из закрытого списка: work.working, work.failing, … change.adding. */
   status: StatusId
   tone?: never
-  /** Слово продукта вместо слова закона. Тон остаётся тоном статуса. */
+  /** Слово продукта вместо слова закона; тон — тон статуса. */
   label?: string
+  className?: string
 }
-interface ByTone extends BadgeCommon {
+interface ByTone {
   status?: never
-  /** Тон продукта (опасно · внимание · хорошо · нейтрально) — для слова не из закрытого списка: светофор, оценка, «не запускался». */
+  /** Тон словаря — для слова не из закрытого списка. */
   tone: Tone
-  /** Слово продукта — обязательно: цвет никогда не один. */
+  /** Слово — обязательно: цвет никогда не один. */
   label: string
+  className?: string
 }
 export type StatusBadgeProps = ByStatus | ByTone
 
 export function StatusBadge(props: StatusBadgeProps) {
-  const { palette = 'product', label, className } = props
-  if (props.tone !== undefined) {
-    rule(props.status === undefined, 'у метки статус или тон, не оба')
-    rule(TONE_ORDER.includes(props.tone), `тона «${String(props.tone)}» нет: тонов продукта четыре — ${TONE_ORDER.join(' · ')}`)
-    rule(palette === 'product', 'метка тона — только палитра product: у Карты цвет даёт закрытый список статусов')
-    rule(Boolean(label), 'у метки тона нет слова (label): цвет никогда не один')
-    const key = TONE_KEY[props.tone]
-    return (
-      <span data-slot="status-badge" data-tone={key} data-palette="product" className={cx('inline-flex min-h-6 items-center gap-1 rounded-full px-2 text-label-01', PILL[key], className)}>
-        <ToneIcon tone={key} />
-        {label}
-      </span>
-    )
+  const byTone = props.tone !== undefined
+  if (byTone) {
+    rule(TONES.includes(props.tone), `тона «${String(props.tone)}» нет: тоны — ${TONES.join(' · ')}`)
+    rule(Boolean(props.label), 'у метки тона нет слова (label): цвет никогда не один')
   }
-  const status = props.status
-  const s = statusOf(status)
-  const tone = TONE_KEY[toneOf(status)]
-  const text = label ?? s.say
-  if (palette === 'karta') {
-    const k = kartaKeyOf(status)
-    return (
-      <span
-        data-slot="status-badge"
-        data-status={status}
-        data-palette="karta"
-        className={cx(
-          'inline-flex min-h-6 items-center gap-1 rounded-full border px-2 text-label-01 text-text-primary',
-          k ? KARTA_BORDER[k] : 'border-border-subtle-01',
-          className,
-        )}
-      >
-        {k ? <ToneIcon tone={tone} className={KARTA_MARK[k]} /> : <ToneIcon tone="neutral" className="text-icon-secondary" />}
-        {text}
-      </span>
-    )
-  }
+  const tone = byTone ? props.tone : toneOf(props.status)
+  const word = props.label ?? (byTone ? '' : statusOf(props.status).say)
+  const look = TONE[tone]
   return (
     <span
       data-slot="status-badge"
-      data-status={status}
-      data-palette="product"
-      className={cx('inline-flex min-h-6 items-center gap-1 rounded-full px-2 text-label-01', PILL[tone], className)}
+      data-status={byTone ? undefined : props.status}
+      data-tone={look.key}
+      className={cx('inline-flex items-center gap-tight py-tight text-caption whitespace-nowrap', look.bg ? cx('rounded-full px-items', look.bg, look.text) : 'text-fg', props.className)}
     >
-      {/* в метке значок — цвета текста тона: пара «текст на фоне метки» проверена контрастом, «знак на фоне метки» — нет */}
-      <ToneIcon tone={tone} />
-      {text}
+      {/* на подложке знак — цвета текста тона: пара «текст на подложке» проверена контрастом */}
+      {look.bg ? <Icon name={look.icon} /> : <Icon tone={tone} />}
+      {word}
     </span>
   )
 }

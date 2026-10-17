@@ -1,50 +1,43 @@
 /**
- * Счётчик (опись DF §11.2 п. 14; Carbon Tag count): число рядом со строкой списка или кнопкой — непрочитанные
- * диалоги, неотвеченные у сообщества, «!» у пустого пула. Число — не статус: метка статуса — `StatusBadge`.
- * - Тон: `neutral` — просто число (рамка); `info` — новое, что ждёт взгляда (непрочитанное, «синий бейдж» DF);
- *   `warning`, `error` — срочное, со знаком тона (цвет никогда не один, как у счётчика `Tabs`).
- * - Больше `max` — «99+»; строка (`'!'`) — как есть.
- * - `label` — что считаем, для читалки: «непрочитанных: 3». Без него читалка слышит только число.
+ * Счётчик: число у строки, вкладки или кнопки — непрочитанные, неотвеченные, «!» у пустого пула. Число — не статус.
+ * Тон словаря: `нейтрально` — просто число в рамке; `инфо` — новое, что ждёт взгляда: инверсия (контраст, не цвет);
+ * `внимание`, `опасно` — со знаком тона. Больше 99 — «99+». `label` — что считаем, для читалки.
  */
 import { cx } from '../lib/cx'
-import { ToneIcon } from './StatusBadge'
-
-export type CountTone = 'neutral' | 'info' | 'warning' | 'error'
+import { TONE, type Tone } from '../lib/vocab'
+import { Icon } from './Icon'
 
 export interface CountBadgeProps {
   /** Число или знак («!»). */
   count: number | string
-  tone?: CountTone
-  /** Потолок показа: больше — «99+». */
-  max?: number
-  /** Что считаем — для читалки: «непрочитанных». Прочтётся как «непрочитанных: 3». */
+  tone?: Exclude<Tone, 'хорошо'>
+  /** Что считаем — для читалки: «непрочитанных» прочтётся как «непрочитанных: 3». */
   label?: string
   className?: string
 }
 
-const TONE: Record<CountTone, string> = {
-  neutral: 'border-border-subtle-01 text-text-primary',
-  info: 'border-support-info bg-notification-background-info text-text-primary',
-  warning: 'border-border-subtle-01 text-text-primary',
-  error: 'border-border-subtle-01 text-text-primary',
-}
-const MARK = { warning: 'text-status-warning', error: 'text-status-error' } as const
+const MAX = 99
 
-/** Что показать: число до потолка, «99+» — сверху, строка — как есть. */
-export function countText(count: number | string, max = 99): string {
+/** Что показать: число до 99, «99+» сверху, строка — как есть. */
+export function countText(count: number | string): string {
   if (typeof count === 'string') return count
-  return count > max ? `${max}+` : String(count)
+  return count > MAX ? `${MAX}+` : String(count)
 }
 
-export function CountBadge({ count, tone = 'neutral', max = 99, label, className }: CountBadgeProps) {
-  const text = countText(count, max)
+export function CountBadge({ count, tone = 'нейтрально', label, className }: CountBadgeProps) {
+  const text = countText(count)
+  const urgent = tone === 'опасно' || tone === 'внимание'
   return (
     <span
       data-slot="count-badge"
-      data-tone={tone}
-      className={cx('inline-flex min-h-5 shrink-0 items-center gap-1 rounded-full border px-2 text-label-01', TONE[tone], className)}
+      data-tone={TONE[tone].key}
+      className={cx(
+        'inline-flex shrink-0 items-center gap-tight rounded-full border px-items text-caption',
+        tone === 'инфо' ? 'border-inverse bg-inverse text-fg-inverse' : 'border-line text-fg',
+        className,
+      )}
     >
-      {(tone === 'warning' || tone === 'error') && <ToneIcon tone={tone} className={cx('size-3', MARK[tone])} />}
+      {urgent && <Icon tone={tone} />}
       {label ? (
         <>
           <span className="sr-only">{label}: </span>

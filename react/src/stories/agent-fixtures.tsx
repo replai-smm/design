@@ -28,10 +28,10 @@ export const commands: CommandItem[] = [
 ]
 
 export const ringNodes: DiagramNode[] = [
-  { id: 'input', label: 'Вход', kind: 'group', at: [0.22, 0.16], items: [{ id: 'input/people', label: 'люди', value: '2' }, { id: 'input/probe', label: 'датчик прода', value: '5 мин', tone: 'warning' }] },
+  { id: 'input', label: 'Вход', kind: 'group', at: [0.22, 0.16], items: [{ id: 'input/people', label: 'люди', value: '2' }, { id: 'input/probe', label: 'датчик прода', value: '5 мин', tone: 'внимание' }] },
   { id: 'event', label: 'Событие', value: '3', at: [0.7, 0.13] },
   { id: 'process', label: 'Обработка', value: '1', at: [0.86, 0.5] },
-  { id: 'execution', label: 'Исполнение', value: '4', at: [0.66, 0.85], dots: [{ id: 'n5t2vd', label: 'n5t2vd · экспорт в CSV' }, { id: 'k8w1qa', label: 'k8w1qa · фильтр по дате', tone: 'error' }] },
+  { id: 'execution', label: 'Исполнение', value: '4', at: [0.66, 0.85], dots: [{ id: 'n5t2vd', label: 'n5t2vd · экспорт в CSV' }, { id: 'k8w1qa', label: 'k8w1qa · фильтр по дате', tone: 'опасно' }] },
   { id: 'output', label: 'Выход', kind: 'group', at: [0.22, 0.76], items: [{ id: 'output/shtab', label: 'Штаб', value: '0' }, { id: 'output/chat', label: 'Чат', value: '1' }] },
   { id: 'core', label: 'replai', kind: 'core', at: [0.5, 0.47], items: [{ id: 'core/karta', label: 'Карта' }, { id: 'core/memory', label: 'Память' }] },
 ]

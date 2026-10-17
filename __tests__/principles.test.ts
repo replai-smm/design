@@ -27,16 +27,17 @@ describe('полка из файла историй', () => {
 
 describe('полки', () => {
   it('ДС: Основы · Компоненты · Паттерны', () => {
-    for (const t of ['Основы/Цвета', 'Компоненты/Кнопка и область действий', 'Паттерны/Три колонки']) expect(shelfProblem(t, 'ds')).toBeNull()
-    for (const t of ['ДС/Кнопка', 'Атомы/Кнопка', 'Кнопка', 'Экраны/SCR-01 Вход']) expect(shelfProblem(t, 'ds')).toMatch(/не полка/)
+    for (const t of ['Основы/Роли', 'Элементы/Кнопка', 'Поверхности/Карточка', 'Паттерны/Три колонки']) expect(shelfProblem(t, 'ds')).toBeNull()
+    for (const t of ['Компоненты/Кнопка', 'Атомы/Кнопка', 'Кнопка', 'Экраны/SCR-01 Вход']) expect(shelfProblem(t, 'ds')).toMatch(/не полка/)
   })
-  it('продукт: Экраны/SCR-NN … и Части продукта/…; полка ДС — «не дублируется»', () => {
-    for (const t of ['Экраны/SCR-03 Инбокс', 'Экраны/SCR-12', 'Экраны/SCR-03 Инбокс/Пусто', 'Части продукта/Строка очереди'])
+  it('продукт: только Экраны/SCR-NN …; полка ДС — «не дублируется»', () => {
+    for (const t of ['Экраны/SCR-03 Инбокс', 'Экраны/SCR-12', 'Экраны/SCR-03 Инбокс/Пусто', 'Экраны/SCR-03 Инбокс/Строка очереди'])
       expect(shelfProblem(t, 'product')).toBeNull()
     expect(shelfProblem('Инбокс/Очередь', 'product')).toMatch(/не полка/)
     expect(shelfProblem('Экраны/Инбокс', 'product')).toMatch(/не полка/)
-    expect(shelfProblem('Компоненты/Кнопка', 'product')).toMatch(/не дублируется/)
-    expect(shelfProblem('Примитивы/Вкладки', 'arena')).toMatch(/не дублируется/)
+    expect(shelfProblem('Части продукта/Шапка', 'product')).toMatch(/не полка/)
+    expect(shelfProblem('Элементы/Кнопка', 'product')).toMatch(/не дублируется/)
+    expect(shelfProblem('Компоненты/Вкладки', 'product')).toMatch(/не дублируется/)
     expect(shelfProblem(null, 'product')).toMatch(/нет title/)
   })
   it('истории самой ДС-React — все на полках', () => {
@@ -49,7 +50,7 @@ describe('свои компоненты с именами ДС', () => {
   const names = dsNames()
   it('имена — компоненты из react/src/index.ts, без типов и хуков', () => {
     for (const n of ['Button', 'Dialog', 'ThreeColumn', 'ChatThread', 'StatusBadge', 'ConfirmProvider']) expect(names.has(n)).toBe(true)
-    for (const n of ['ButtonProps', 'useToast', 'cx', 'STATUS_IDS', 'SERIES']) expect(names.has(n)).toBe(false)
+    for (const n of ['ButtonProps', 'useToast', 'cx', 'STATUS_IDS', 'SERIES', 'TONES']) expect(names.has(n)).toBe(false)
   })
   it('ловит function, const, class; не ловит импорт, вызов и строку с ds-allow', () => {
     const src = [
@@ -59,7 +60,7 @@ describe('свои компоненты с именами ДС', () => {
       `export const Card: FC = () => null`,
       `class Tooltip extends Component {}`,
       `const x = <Button>ok</Button>`,
-      `const Avatar = forwardRef(() => null) // ds-allow: ждёт переезда на ДС-React, интент I-avatar`,
+      `const Avatar = forwardRef(() => null) // ds-allow: своя картинка продукта, интент I-avatar`,
       `const DialogTitle = () => null`,
     ].join('\n')
     expect(ownComponents(src, names)).toEqual([
@@ -130,7 +131,7 @@ describe('храповик против базы PR', () => {
     expect(run('src').code).toBe(2)
 
     g('checkout', '-q', 'main')
-    put('src/fresh.stories.tsx', `export default { title: 'Части продукта/Шапка' }\n`)
+    put('src/fresh.stories.tsx', `export default { title: 'Экраны/SCR-04 Шапка' }\n`)
     put('src/fresh2.stories.tsx', `export default { title: 'Шапка' }\n`)
     const local = run('--kind', 'product', '--base', 'main', 'src')
     expect(local.code).toBe(1)

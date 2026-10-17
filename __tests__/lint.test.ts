@@ -60,13 +60,13 @@ describe('сырые размеры (ds/raw-size)', () => {
   it('CSS: отступы, размеры, текст, углы; @media — не объявление', () => {
     expect(
       rules(
-        `.a { padding: 12px 0; font-size: .8rem; border-radius: 4px; width: 100%; max-width: 45rem; max-height: 70vh; border: 1px solid var(--cds-border-subtle-01) }\n@media (min-width: 600px) { .b { gap: var(--cds-spacing-05, 16px); margin-top: 0 } }`,
+        `.a { padding: 12px 0; font-size: .8rem; border-radius: 4px; width: 100%; max-width: 45rem; max-height: 70vh; border: 1px solid var(--ds-line) }\n@media (min-width: 600px) { .b { gap: var(--ds-space-blocks, 16px); margin-top: 0 } }`,
         'a.css',
       ),
     ).toEqual(['ds/raw-size padding: 12px', 'ds/raw-size font-size: .8rem', 'ds/raw-size border-radius: 4px'])
   })
   it('атрибут style, <style> в HTML и в строке JS, style={{ }} React, el.style', () => {
-    expect(rules(`<div style="width:240px;color:var(--cds-text-primary)"></div>`, 'a.html')).toEqual(['ds/raw-size width: 240px'])
+    expect(rules(`<div style="width:240px;color:var(--ds-fg)"></div>`, 'a.html')).toEqual(['ds/raw-size width: 240px'])
     expect(rules('const h = `<style>.x{margin:8px}</style><b style="height: 2rem">`', 'app.js')).toEqual(['ds/raw-size margin: 8px', 'ds/raw-size height: 2rem'])
     expect(rules(`<div style={{ padding: 12, gap: '4px', lineHeight: 1.5, width: w, top: 0 }} />`)).toEqual(['ds/raw-size padding: 12', 'ds/raw-size gap: 4px'])
     expect(rules(`el.style.marginTop = '10px'; el.style.width = pct + '%'`, 'app.js')).toEqual(['ds/raw-size marginTop: 10px'])
@@ -76,11 +76,24 @@ describe('сырые размеры (ds/raw-size)', () => {
   })
 })
 
+describe('классы вне шкал (ds/off-scale)', () => {
+  it('приманка: числа отступов и размеров, свой текст, угол, тень, вес, длительность, толщина — все пойманы', () => {
+    const bait = readFileSync(resolve(import.meta.dirname, 'bait', 'off-scale.tsx'), 'utf8')
+    expect(rules(bait).filter((r: string) => r.startsWith('ds/off-scale')).sort()).toEqual(
+      ['pl-5', 'gap-1.5', 'h-12', 'w-40', 'md:p-3', '-mx-4', 'text-sm', 'rounded-lg', 'shadow-md', 'font-bold', 'leading-6', 'duration-300', 'border-4'].map((v) => `ds/off-scale ${v}`).sort(),
+    )
+  })
+  it('обычный текст со словами классов — не класс', () => {
+    expect(rules(`// поле p-4 когда-то
+const note = 1`)).toEqual([])
+  })
+})
+
 describe('не трогает', () => {
   it('токены, варианты Tailwind, утилиты из темы', () => {
     expect(
       rules(
-        `<div className="bg-[var(--cds-layer-01)] data-[state=open]:bg-layer-02 group-data-[collapsible=icon]/sidebar:hidden [&_svg]:size-4 aria-[expanded=true]:rotate-180 text-text-secondary bg-status-error-background p-4" style={{ color: 'var(--cds-text-primary)' }} />`,
+        `<div className="bg-[var(--ds-surface)] data-[state=open]:bg-selected group-data-[collapsible=icon]/sidebar:hidden [&_svg]:size-icon aria-[expanded=true]:rotate-180 text-fg-muted bg-danger-bg p-blocks gap-items h-control w-1/2 p-0 px-px rounded-full" style={{ color: 'var(--ds-fg)' }} />`,
       ),
     ).toEqual([])
   })
@@ -124,7 +137,7 @@ describe('командная строка и храповик', () => {
   writeFileSync(join(dir, 'src/a.tsx'), `export const A = () => <div className="w-[24rem] bg-red-500" />\n`)
   writeFileSync(join(dir, 'src/b.css'), `.b { color: #fff }\n`)
   writeFileSync(join(dir, 'src/node_modules/x.js'), `'#fff'`)
-  writeFileSync(join(dir, 'src/tokens.css'), `:root { --cds-x: #fff }`)
+  writeFileSync(join(dir, 'src/tokens.css'), `:root { --ds-x: #fff }`)
   const run = (...args: string[]) => {
     try {
       return { code: 0, out: execFileSync('node', [cli, ...args], { cwd: dir, encoding: 'utf8' }) }
@@ -152,7 +165,7 @@ describe('командная строка и храповик', () => {
     expect(grew.out).toContain('src/b.css: было 1, стало 2')
     expect(run('--baseline', 'ds-baseline.json', '--write', 'src').code).toBe(1)
 
-    writeFileSync(join(dir, 'src/b.css'), `.b { color: var(--cds-text-primary) }\n`)
+    writeFileSync(join(dir, 'src/b.css'), `.b { color: var(--ds-fg) }\n`)
     const fell = run('--baseline', 'ds-baseline.json', 'src')
     expect(fell.code).toBe(0)
     expect(fell.out).toContain('опусти храповик')

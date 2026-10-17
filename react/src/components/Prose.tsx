@@ -1,10 +1,8 @@
 /**
- * Текст ответа (Carbon: типографика длинного текста): абзацы, заголовки, списки, ссылки, `код` в строке, цитата,
- * таблица — наборами текста ДС, без своих размеров. Блок кода внутри — `CodeBlock`, не голый `<pre>`.
- * - Разметку (Markdown → элементы) делает продукт; здесь только облик. Кусок уже готового HTML — `ProseHtml`
- *   (продукт отвечает, что в нём нет чужих тегов), между кусками — компоненты (`CodeBlock`).
- * - `streaming` — текст ещё набирается: в конце мигает курсор; область для читалки «занята» (`aria-busy`).
- * - Мера строки — не шире 80 знаков: длинный ответ читается, а не скользит по экрану.
+ * Текст ответа: абзацы, заголовки, списки с маркерами, ссылки, `код`, цитата, таблица — ролью «чтение» (16/24),
+ * мера ≤ 72 знаков. Разметку (Markdown → элементы) делает продукт; блок кода — `CodeBlock`. Готовый кусок HTML —
+ * `ProseHtml` (продукт отвечает, что в нём нет чужих тегов). `streaming` — текст ещё набирается: курсор в конце,
+ * область «занята» для читалки.
  */
 import type { ReactNode } from 'react'
 import { cx } from '../lib/cx'
@@ -17,7 +15,7 @@ export interface ProseProps {
 
 export function Prose({ children, streaming = false, className }: ProseProps) {
   return (
-    <div data-slot="prose" data-streaming={streaming || undefined} aria-busy={streaming || undefined} className={cx('ds-prose min-w-0 text-body-01 text-text-primary', className)}>
+    <div data-slot="prose" data-streaming={streaming || undefined} aria-busy={streaming || undefined} className={cx('ds-prose min-w-0 text-reading text-fg', className)}>
       {children}
     </div>
   )

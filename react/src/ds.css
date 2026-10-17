@@ -1,17 +1,14 @@
 /*
- * ДС-React: то немногое, чего нет в утилитах Tailwind, — движение и сетка таблицы. Только токены (var(--cds-…)).
- * Подключение в продукте — после tokens.css и tailwind.css дизайн-системы (README.md рядом).
- *
- * Правило движения (scale.json → duration.move): раскрытие и выезд — 0,6 с, кривая move; соседи едут плавно,
- * а не прыгают (высота меняется переходом grid-template-rows, панели — сдвигом transform). При «уменьшить движение»
- * токены длительностей в tokens.css равны 0 — всё ниже срабатывает мгновенно само.
+ * ДС-React: то, чего нет в утилитах Tailwind, — движение, сетка таблицы, текст ответа. Только роли и шкалы (var(--ds-…)).
+ * Подключение в продукте — после tokens.css и tailwind.css. Раскрытие и выезд — 0,6 с (motion-move), отклик — 110 мс
+ * (motion-fast); при «уменьшить движение» обе длительности равны 0 — всё ниже срабатывает мгновенно само.
  */
 
 /* раскрытие «подробнее» и свёрнутой группы: высота от 0 до содержимого без замера в JS */
 .ds-expand {
   display: grid;
   grid-template-rows: 0fr;
-  transition: grid-template-rows var(--cds-duration-move) var(--cds-easing-move);
+  transition: grid-template-rows var(--ds-motion-move) var(--ds-ease);
 }
 .ds-expand[data-open='true'] {
   grid-template-rows: 1fr;
@@ -24,11 +21,11 @@
 /* таблица: сетка с подсеткой — колонки ровные во всех строках, свёрнутая группа раскрывается без прыжка */
 .ds-table {
   display: grid;
-  grid-template-columns: var(--ds-cols-phone);
+  grid-template-columns: var(--table-cols-phone);
 }
 @media (min-width: 48rem) {
   .ds-table {
-    grid-template-columns: var(--ds-cols);
+    grid-template-columns: var(--table-cols);
   }
 }
 .ds-table > *,
@@ -52,12 +49,7 @@
     display: none;
   }
 }
-
-/*
- * широкая таблица прокручивается вбок внутри себя ([data-slot=table-scroll]); первая колонка стоит — фон строки
- * (наведение, шапка) наследует, чтобы прокрученное уходило под неё. В свёрнутой группе обрезка — clip, а не hidden:
- * hidden делает свой контейнер прокрутки, и закрепление внутри него не работает.
- */
+/* первая колонка стоит при прокрутке вбок; в свёрнутой группе обрезка — clip (hidden ломает закрепление) */
 .ds-table .ds-row > [role='cell']:first-child,
 .ds-table .ds-row > [role='columnheader']:first-child {
   position: sticky;
@@ -69,17 +61,15 @@
   overflow: clip;
 }
 
-/* панель деталей: справа на ноутбуке, снизу на телефоне */
-@keyframes ds-in-right {
-  from {
-    transform: translateX(100%);
+/* окно: на ноутбуке главная справа */
+@media (min-width: 48rem) {
+  .ds-dialog-footer [data-slot='action-area'] {
+    flex-direction: row-reverse;
+    justify-content: flex-start;
   }
 }
-@keyframes ds-out-right {
-  to {
-    transform: translateX(100%);
-  }
-}
+
+/* выезды: шторка снизу, шторка слева, окно по центру — проявляется с подъёмом */
 @keyframes ds-in-up {
   from {
     transform: translateY(100%);
@@ -90,38 +80,26 @@
     transform: translateY(100%);
   }
 }
-@keyframes ds-fade-in {
+@keyframes ds-in-left {
   from {
-    opacity: 0;
+    transform: translateX(-100%);
   }
 }
-@keyframes ds-fade-out {
+@keyframes ds-out-left {
   to {
-    opacity: 0;
+    transform: translateX(-100%);
   }
 }
-.ds-drawer[data-state='open'] {
-  animation: ds-in-up var(--cds-duration-move) var(--cds-easing-move);
-}
-.ds-drawer[data-state='closed'] {
-  animation: ds-out-down var(--cds-duration-move) var(--cds-easing-move);
-}
-@media (min-width: 48rem) {
-  .ds-drawer[data-state='open'] {
-    animation-name: ds-in-right;
-  }
-  .ds-drawer[data-state='closed'] {
-    animation-name: ds-out-right;
+@keyframes ds-in-right {
+  from {
+    transform: translateX(100%);
   }
 }
-.ds-overlay[data-state='open'] {
-  animation: ds-fade-in var(--cds-duration-move) var(--cds-easing-move);
+@keyframes ds-out-right {
+  to {
+    transform: translateX(100%);
+  }
 }
-.ds-overlay[data-state='closed'] {
-  animation: ds-fade-out var(--cds-duration-move) var(--cds-easing-move);
-}
-
-/* окно: снизу на телефоне (выезд, как у панели), по центру на ноутбуке — проявляется с подъёмом */
 @keyframes ds-pop-in {
   from {
     opacity: 0;
@@ -134,89 +112,107 @@
     transform: translateY(4%);
   }
 }
-.ds-dialog[data-state='open'] {
-  animation: ds-in-up var(--cds-duration-move) var(--cds-easing-move);
+@keyframes ds-fade-in {
+  from {
+    opacity: 0;
+  }
 }
-.ds-dialog[data-state='closed'] {
-  animation: ds-out-down var(--cds-duration-move) var(--cds-easing-move);
+@keyframes ds-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+.ds-overlay[data-state='open'] {
+  animation: ds-fade-in var(--ds-motion-move) var(--ds-ease);
+}
+.ds-overlay[data-state='closed'] {
+  animation: ds-fade-out var(--ds-motion-move) var(--ds-ease);
+}
+.ds-dialog[data-side='bottom'][data-state='open'] {
+  animation: ds-in-up var(--ds-motion-move) var(--ds-ease);
+}
+.ds-dialog[data-side='bottom'][data-state='closed'] {
+  animation: ds-out-down var(--ds-motion-move) var(--ds-ease);
+}
+.ds-dialog[data-side='left'][data-state='open'] {
+  animation: ds-in-left var(--ds-motion-move) var(--ds-ease);
+}
+.ds-dialog[data-side='left'][data-state='closed'] {
+  animation: ds-out-left var(--ds-motion-move) var(--ds-ease);
 }
 @media (min-width: 48rem) {
-  .ds-dialog[data-state='open'] {
+  .ds-dialog[data-side='bottom'][data-state='open'] {
     animation-name: ds-pop-in;
   }
-  .ds-dialog[data-state='closed'] {
+  .ds-dialog[data-side='bottom'][data-state='closed'] {
     animation-name: ds-pop-out;
-  }
-  /* кнопки окна (Carbon Modal): во всю ширину нижней полосы, поровну, главная справа, высота 64 px */
-  .ds-dialog-footer [data-slot='action-area'] {
-    flex-direction: row-reverse;
-    flex-wrap: nowrap;
-    gap: 0;
-  }
-  .ds-dialog-footer [data-slot='action-area'] > [data-slot='button'] {
-    flex: 1 1 0;
-    min-height: var(--cds-spacing-10);
-    align-items: flex-start;
-    justify-content: flex-start;
-    padding-top: var(--cds-spacing-04);
   }
 }
 
-/* подсказка и список выбора: проявляются быстро (Carbon: fast-02), не сдвигая соседей */
+/* подсказка и список выбора: проявляются быстро, не сдвигая соседей */
 .ds-pop[data-state='delayed-open'],
 .ds-pop[data-state='instant-open'],
 .ds-pop[data-state='open'] {
-  animation: ds-fade-in var(--cds-duration-fast-02) var(--cds-easing-entrance-productive);
+  animation: ds-fade-in var(--ds-motion-fast) var(--ds-ease);
 }
 .ds-pop[data-state='closed'] {
-  animation: ds-fade-out var(--cds-duration-fast-02) var(--cds-easing-exit-productive);
+  animation: ds-fade-out var(--ds-motion-fast) var(--ds-ease);
+}
+/* меню у поля: не выше половины экрана */
+.ds-menu {
+  max-height: 50dvh;
 }
 
-/* три колонки на телефоне: колонка выезжает — вперёд справа, назад слева (ThreeColumn); на ноутбуке видны все, без выезда */
-@keyframes ds-in-left {
-  from {
-    transform: translateX(-100%);
-  }
-}
+/* три колонки на телефоне: колонка выезжает — вперёд справа, назад слева */
 @media (max-width: 63.99rem) {
   .ds-col[data-dir='forward'] {
-    animation: ds-in-right var(--cds-duration-move) var(--cds-easing-move);
+    animation: ds-in-right var(--ds-motion-move) var(--ds-ease);
   }
   .ds-col[data-dir='back'] {
-    animation: ds-in-left var(--cds-duration-move) var(--cds-easing-move);
+    animation: ds-in-left var(--ds-motion-move) var(--ds-ease);
   }
 }
 
 /* всплывашка выезжает снизу и уходит вбок по свайпу */
 .ds-toast[data-state='open'] {
-  animation: ds-in-up var(--cds-duration-move) var(--cds-easing-move);
+  animation: ds-in-up var(--ds-motion-move) var(--ds-ease);
 }
 .ds-toast[data-state='closed'] {
-  animation: ds-fade-out var(--cds-duration-moderate-02) var(--cds-easing-exit-productive);
+  animation: ds-fade-out var(--ds-motion-fast) var(--ds-ease);
 }
 .ds-toast[data-swipe='move'] {
   transform: translateX(var(--radix-toast-swipe-move-x));
 }
 .ds-toast[data-swipe='end'] {
-  animation: ds-out-right var(--cds-duration-moderate-02) var(--cds-easing-exit-productive);
+  animation: ds-out-right var(--ds-motion-fast) var(--ds-ease);
 }
 
-/* загрузка в строке: дуга вращается; «уменьшить движение» — длительность 0, дуга стоит */
+/* ход работы в строке: дуга вращается; «уменьшить движение» — дуга стоит */
 @keyframes ds-rotate {
   to {
     transform: rotate(360deg);
   }
 }
 .ds-spin {
-  animation: ds-rotate var(--cds-duration-slow-02) var(--cds-easing-standard-productive) infinite;
+  animation: ds-rotate var(--ds-motion-move) linear infinite;
 }
 
-/* текст ответа: наборы текста ДС, мера строки ≤ 80 знаков; кусок HTML не даёт своей рамки */
+/* рамка графика — в пропорции рисунка (Chart: 640 × 240) у графика, загрузки и пустого — без прыжка */
+.ds-chart-area {
+  aspect-ratio: 8 / 3;
+}
+
+/* блок кода: не выше `--lines` строк */
+.ds-code[data-lines] {
+  max-height: calc(var(--lines) * var(--ds-text-code-line) + 2 * var(--ds-space-items));
+}
+
+/* текст ответа: роль «чтение», мера ≤ 72 знаков, списки с маркерами */
 .ds-prose {
-  max-width: 80ch;
+  max-width: 72ch;
   display: flex;
   flex-direction: column;
-  gap: var(--cds-spacing-04);
+  gap: var(--ds-space-compact);
 }
 .ds-prose-run {
   display: contents;
@@ -224,45 +220,51 @@
 .ds-prose :is(p, ul, ol, blockquote, table, h1, h2, h3, h4) {
   margin: 0;
 }
-.ds-prose :is(h1, h2) {
-  font-size: var(--cds-heading-compact-02-font-size);
-  line-height: var(--cds-heading-compact-02-line-height);
-  font-weight: var(--cds-heading-compact-02-font-weight);
-}
-.ds-prose :is(h3, h4) {
-  font-size: var(--cds-heading-compact-01-font-size);
-  line-height: var(--cds-heading-compact-01-line-height);
-  font-weight: var(--cds-heading-compact-01-font-weight);
+.ds-prose :is(h1, h2, h3, h4) {
+  font-size: var(--ds-text-heading-size);
+  line-height: var(--ds-text-heading-line);
+  font-weight: var(--ds-text-heading-weight);
 }
 .ds-prose :is(ul, ol) {
-  padding-left: var(--cds-spacing-06);
+  padding-left: var(--ds-space-groups);
   display: flex;
   flex-direction: column;
-  gap: var(--cds-spacing-02);
+  gap: var(--ds-space-tight);
+}
+.ds-prose ul {
+  list-style: disc;
+}
+.ds-prose ol {
+  list-style: decimal;
+}
+.ds-prose li::marker {
+  color: var(--ds-fg-muted);
 }
 .ds-prose a {
-  color: var(--cds-link-primary);
-}
-.ds-prose a:hover {
-  color: var(--cds-link-primary-hover);
+  color: var(--ds-accent);
+  text-decoration: underline;
 }
 .ds-prose :not(pre) > code {
-  font-family: var(--cds-font-mono);
-  font-size: var(--cds-code-01-font-size);
-  background: var(--cds-layer-02);
-  padding: 0 var(--cds-spacing-02);
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-code-size);
+  background: var(--ds-canvas);
+  border: 1px solid var(--ds-line);
+  border-radius: var(--ds-radius-control);
+  padding: 0 var(--ds-space-tight);
 }
 .ds-prose blockquote {
-  border-left: 2px solid var(--cds-border-strong-01);
-  padding-left: var(--cds-spacing-05);
-  color: var(--cds-text-secondary);
+  border-left: 2px solid var(--ds-line-strong);
+  padding-left: var(--ds-space-blocks);
+  color: var(--ds-fg-muted);
 }
 .ds-prose table {
   border-collapse: collapse;
+  font-size: var(--ds-text-body-size);
+  line-height: var(--ds-text-body-line);
 }
 .ds-prose :is(th, td) {
-  border-bottom: 1px solid var(--cds-border-subtle-01);
-  padding: var(--cds-spacing-02) var(--cds-spacing-04);
+  border-bottom: 1px solid var(--ds-line);
+  padding: var(--ds-space-tight) var(--ds-space-compact);
   text-align: start;
 }
 /* курсор набора — после последнего слова */
@@ -277,38 +279,19 @@
   content: '';
   display: inline-block;
   vertical-align: text-bottom;
-  width: var(--cds-spacing-03);
-  height: var(--cds-spacing-05);
-  margin-left: var(--cds-spacing-01);
-  background: var(--cds-text-primary);
-  animation: ds-blink var(--cds-duration-slow-02) var(--cds-easing-standard-productive) infinite alternate;
+  width: var(--ds-space-items);
+  height: var(--ds-size-icon);
+  margin-left: var(--ds-space-tight);
+  background: var(--ds-fg);
+  animation: ds-blink var(--ds-motion-move) var(--ds-ease) infinite alternate;
 }
 
-/* схема: указатель агента — мягкое мерцание рамки (не бег: на месте, пока указатель стоит) */
+/* схема: указатель агента — мягкое мерцание рамки на месте */
 @keyframes ds-glow {
   to {
     opacity: 0.35;
   }
 }
 .ds-lit-ring {
-  animation: ds-glow var(--cds-duration-slow-02) var(--cds-easing-standard-productive) infinite alternate;
-}
-
-/* боковые панели раскладки на телефоне: список слева, панель снизу (ThreeColumn phone="sheets") */
-.ds-sheet[data-side='left'][data-state='open'] {
-  animation: ds-in-left var(--cds-duration-move) var(--cds-easing-move);
-}
-.ds-sheet[data-side='left'][data-state='closed'] {
-  animation: ds-out-left var(--cds-duration-move) var(--cds-easing-move);
-}
-.ds-sheet[data-side='bottom'][data-state='open'] {
-  animation: ds-in-up var(--cds-duration-move) var(--cds-easing-move);
-}
-.ds-sheet[data-side='bottom'][data-state='closed'] {
-  animation: ds-out-down var(--cds-duration-move) var(--cds-easing-move);
-}
-@keyframes ds-out-left {
-  to {
-    transform: translateX(-100%);
-  }
+  animation: ds-glow var(--ds-motion-move) var(--ds-ease) infinite alternate;
 }

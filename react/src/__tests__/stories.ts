@@ -1,4 +1,4 @@
-/** Все истории пакета — для тестов a11y, правил и образцов. Тема — глобал `theme`, как у Storybook и съёмки П7. */
+/** Все истории пакета — для тестов a11y, правил и образцов. Тема — глобал `theme`, как у Storybook и съёмки облика. */
 import { composeStories } from '@storybook/react-vite'
 
 type Mod = Record<string, any> & { default: { title: string; tags?: string[] } }
@@ -28,5 +28,5 @@ export function stories(theme: Theme = 'light'): Entry[] {
   })
 }
 
-/** Состояние истории по тегу `state:<состояние>`; без тега — «обычное» (как у задачи скриншотов П7). */
+/** Состояние истории по тегу `state:<состояние>`; без тега — «обычное» (как у съёмки облика). */
 export const stateOf = (e: Entry) => e.tags.find((t) => t.startsWith('state:'))?.slice(6) ?? 'обычное'

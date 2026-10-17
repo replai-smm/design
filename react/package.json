@@ -1,9 +1,9 @@
 {
   "name": "@replai-smm/design-react",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "ДС-React (рабочее пространство репо design): исходники — react/src, их отдаёт корневой пакет @replai-smm/design. Здесь — инструменты разработки: Storybook, тесты, типы.",
+  "description": "ДС-React (рабочее пространство репо design): исходники — react/src, их отдаёт корневой пакет @replai-smm/design. Здесь — Storybook, тесты, типы, снимки облика.",
   "engines": {
     "node": ">=22"
   },
@@ -18,7 +18,9 @@
     "storybook": "storybook dev -p 6007",
     "storybook:build": "storybook build -o storybook-static",
     "showcase": "SHOWCASE_WRITE=1 vitest run src/__tests__/showcase.test.tsx",
-    "check": "npm run typecheck && npm run lint && npm test"
+    "check": "npm run typecheck && npm run lint && npm test",
+    "visual": "node visual/run.mjs",
+    "visual:update": "node visual/run.mjs --update"
   },
   "peerDependencies": {
     "radix-ui": "^1.4.3",
@@ -26,6 +28,7 @@
     "react-dom": "^19.2.0"
   },
   "devDependencies": {
+    "@carbon/icons": "11.90.0",
     "@storybook/react-vite": "^10.5.7",
     "@tailwindcss/cli": "^4.3.0",
     "@tailwindcss/vite": "^4.3.0",
@@ -36,6 +39,9 @@
     "@vitejs/plugin-react": "^6.0.1",
     "axe-core": "^4.10.3",
     "jsdom": "^29.1.1",
+    "pixelmatch": "7.1.0",
+    "playwright": "1.63.0",
+    "pngjs": "7.0.0",
     "radix-ui": "^1.4.3",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",

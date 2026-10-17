@@ -1,12 +1,11 @@
 /**
- * dist/ — вывод из tokens.json, scale.json, statuses.json. Правка руками или забытая пересборка — красный.
- * Плюс главное, что обещает каждый вывод: две темы и системная тема в CSS, сброшенная палитра в Tailwind,
- * рабочий tokens.ts, страница образцов без сети и с нулём пар ниже нормы.
+ * dist/ и значки — вывод из tokens.json, scale.json, statuses.json и набора Carbon. Правка руками или забытая
+ * пересборка — красный. Плюс главное, что обещает каждый вывод.
  */
 import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { outputs, SHADCN } from '../lib/generate.mjs'
+import { outputs } from '../lib/generate.mjs'
 
 const design = resolve(import.meta.dirname, '..')
 const read = (p: string) => readFileSync(resolve(design, p), 'utf8')
@@ -20,53 +19,46 @@ describe('dist', () => {
     for (const [rel, content] of Object.entries<string>(out)) expect(read(rel) === content, `${rel} отстал`).toBe(true)
   })
 
-  it('tokens.css: светлая по умолчанию, тёмная по атрибуту, по классу .dark и по теме системы', () => {
+  it('tokens.css: светлая по умолчанию, тёмная по атрибуту и по теме системы; меньше движения — длительности 0', () => {
     const css = out['dist/tokens.css']
     expect(css).toMatch(/:root,\n\[data-theme="light"\] \{\n {2}color-scheme: light;/)
-    expect(css).toContain('[data-theme="dark"],\n.dark {')
+    expect(css).toContain('[data-theme="dark"] {')
     expect(css).toContain('@media (prefers-color-scheme: dark) {\n  :root:not([data-theme="light"]) {')
-    expect(css).toContain('@media (prefers-reduced-motion: reduce)')
-    expect(css).toContain(`--cds-background: ${tokens.themes['светлая'].colors.background};`)
-    expect(css).toContain(`--cds-background: ${tokens.themes['тёмная'].colors.background};`)
-    expect(css).toContain('--cds-duration-move: 600ms;')
-    expect(css).toContain("src: url('../fonts/IBMPlexSans-Regular.woff2') format('woff2');")
+    expect(css).toMatch(/@media \(prefers-reduced-motion: reduce\) \{\n {2}:root \{\n {4}--ds-motion-fast: 0ms;\n {4}--ds-motion-move: 0ms;/)
+    expect(css).toContain(`--ds-canvas: ${tokens.colors.canvas.dark};`)
+    expect(css).toContain("src: url('../fonts/IBMPlexMono-Regular.woff2') format('woff2');")
   })
 
-  it('tailwind.css: палитра и углы Tailwind сброшены, все цвета и псевдонимы shadcn ведут на токены', () => {
+  it('tailwind.css: своё Tailwind сброшено, классы — только роли и шкалы', () => {
     const tw = out['dist/tailwind.css']
-    expect(tw).toContain('--color-*: initial;')
-    expect(tw).toContain('--radius-*: initial;')
-    for (const n of Object.keys(tokens.themes['светлая'].colors)) expect(tw).toContain(`--color-${n}: var(--cds-${n});`)
-    for (const [k, n] of Object.entries(SHADCN)) expect(tw).toContain(`--color-${k}: var(--cds-${n});`)
+    for (const ns of ['color', 'spacing', 'radius', 'shadow', 'text', 'font', 'leading', 'ease']) expect(tw).toContain(`--${ns}-*: initial;`)
+    expect(tw).toContain('--spacing: initial;')
+    for (const n of Object.keys(tokens.colors)) expect(tw).toContain(`--color-${n}: var(--ds-${n});`)
+    expect(tw).toContain('--spacing-items: var(--ds-space-items);')
+    expect(tw).toContain('--text-heading--font-weight: var(--ds-text-heading-weight);')
     expect(tw).not.toMatch(/#[0-9a-f]{3,8}\b/)
   })
 
-  it('tokens.ts: темы, тоны и статусы те же, что в источнике', async () => {
+  it('tokens.ts: роли обеих тем, тоны и статусы — те же, что в источнике', async () => {
     const m = await import('../dist/tokens.ts')
-    expect(Object.keys(m.themes)).toEqual(['light', 'dark'])
-    expect(m.themes.dark.background).toBe(tokens.themes['тёмная'].colors.background)
-    expect(m.tones).toEqual(tokens.palettes.product)
-    expect(m.kartaTones).toEqual(tokens.palettes.karta)
-    expect(m.statuses.map((s: any) => s.say)).toEqual(statuses.map((s: any) => s.say))
-    expect(m.toneColors('опасно')).toEqual({
-      mark: 'var(--cds-status-error)',
-      text: 'var(--cds-status-error-text)',
-      background: 'var(--cds-status-error-background)',
-    })
-    expect(m.statusById('work.failing').tone).toBe('опасно')
-    expect(m.kartaColor('work.working')).toBe(`var(--cds-${tokens.palettes.karta['без изменений']})`)
-    expect(m.kartaColor('work.unchecked')).toBeNull()
+    expect(Object.keys(m.colors)).toEqual(['light', 'dark'])
+    expect(m.colors.dark.surface).toBe(tokens.colors.surface.dark)
+    expect(m.tones).toEqual(tokens.tones)
+    expect(m.statuses.map((s: { say: string }) => s.say)).toEqual(statuses.map((s: { say: string }) => s.say))
+    expect(m.cssVar('accent')).toBe('var(--ds-accent)')
   })
 
-  it('образцы (showcase.html): открывается без сети, показывает все статусы, пар ниже нормы — 0', () => {
+  it('showcase.html: без сети, шрифты внутри, пар ниже нормы — 0, обе ширины', () => {
     const html = out['dist/showcase.html']
     expect(html).not.toMatch(/(?:src|href)=["']https?:/)
-    expect(html).not.toMatch(/url\(['"]?https?:/)
     expect(html).toContain('data:font/woff2;base64,')
-    expect(html).toContain('<meta name="viewport" content="width=device-width, initial-scale=1">')
-    for (const s of statuses) expect(html).toContain(`</svg>${s.say}</span>`)
-    expect(html).toContain('Сейчас ниже нормы: 0.')
-    expect(html).toContain('data-set-width="390"')
-    expect(html).toContain('data-set-width="1280"')
+    expect(html).toContain('Ниже нормы сейчас: 0.')
+    for (const w of ['390', '1280']) expect(html).toContain(`data-set-width="${w}"`)
+  })
+
+  it('значки — набор Carbon, данные путей без своего цвета', () => {
+    const icons = out['react/src/lib/icons.gen.ts']
+    expect(icons).toContain('"tone-danger"')
+    expect(icons).not.toMatch(/fill":"#|#[0-9a-f]{6}/i)
   })
 })

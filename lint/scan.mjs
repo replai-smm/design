@@ -6,20 +6,25 @@
 //   ds/raw-color      — #fff, #12345678, rgb(…), rgba(…), hsl(…), hwb(…), lab(…), lch(…), oklab(…), oklch(…)
 //   ds/arbitrary      — произвольное значение Tailwind: w-[24rem], text-[15px], bg-[#fff], [mask-type:alpha]
 //   ds/palette        — класс палитры Tailwind: bg-red-500, text-slate-700, border-white (палитра сброшена)
+//   ds/off-scale      — класс Tailwind вне ролей и шкал: числовой отступ или размер (p-4, gap-1.5, h-12, w-40),
+//                       свой размер текста (text-sm), угол (rounded-lg), тень (shadow-md), вес и межстрочный (font-bold,
+//                       leading-6), длительность (duration-300), толщина рамки (border-4). Есть только роли: p-blocks,
+//                       gap-items, h-control, text-body, rounded-surface, shadow-raised, duration-move, border, border-2
 //   ds/raw-size       — сырой размер у отступа, места, размера, шрифта, угла: `padding: 12px`, `font-size: .8rem`,
 //                       `style="width:240px"`, `style={{ gap: 12 }}` — в CSS, в <style> и в атрибуте style
 //                       (у Tailwind то же ловит ds/arbitrary). 0 и 1px (волосяная линия), %, vw/vh, ch, fr — можно; max-width и
 //                       max-height — предел меры колонки, не шаг шкалы, — тоже можно;
 //                       @media и @container — не объявления, их не трогает
 // Что можно:
-//   ссылка на токен в скобках — bg-[var(--cds-layer-01)]; варианты — data-[state=open]:, aria-[x]:, [&_svg]:;
+//   ссылка на роль в скобках — bg-[var(--ds-surface)]; варианты — data-[state=open]:, aria-[x]:, [&_svg]:;
 //   строка с пометкой `ds-allow: <причина>` (причина обязательна) — исключение видно в ревью.
 
 export const RULES = {
-  'ds/raw-color': 'сырой цвет «{v}» — возьми токен: var(--cds-…) или класс Tailwind из темы дизайн-системы',
-  'ds/arbitrary': 'произвольное значение «{v}» — возьми шаг шкалы или токен (var(--cds-…))',
-  'ds/palette': 'класс палитры Tailwind «{v}» — палитры нет, есть токены Carbon (bg-layer-01, text-text-secondary, …)',
-  'ds/raw-size': 'сырой размер «{v}» — возьми токен шкалы: var(--cds-spacing-…), набор текста, или компонент ДС',
+  'ds/raw-color': 'сырой цвет «{v}» — возьми роль: var(--ds-…) или класс роли (bg-surface, text-fg-muted, …)',
+  'ds/arbitrary': 'произвольное значение «{v}» — возьми роль или шаг шкалы (var(--ds-…))',
+  'ds/palette': 'класс палитры Tailwind «{v}» — палитры нет, есть роли (bg-surface, text-fg-muted, …)',
+  'ds/off-scale': 'класс «{v}» вне шкал — возьми роль: отступ (tight · items · compact · blocks · groups · sections), высота (icon · dense · control · touch), текст (caption · body · heading · reading · code · title · page), угол (control · surface · full)',
+  'ds/raw-size': 'сырой размер «{v}» — возьми роль шкалы: var(--ds-space-…), роль текста или компонент ДС',
 }
 
 // Свойства, у которых размер берётся из шкалы ДС (отступы, места, размеры, текст, углы).
@@ -61,6 +66,23 @@ const ARBITRARY_PROP = /(?<=^|[\s"'`{])\[[a-z-]+:[^\]\s]+\](?=$|[\s"'`}])/g
 
 const ALLOW = /ds-allow:\s*\S/
 
+// классы вне шкал: числовой шаг у отступов и размеров (кроме 0 и px), свои наборы Tailwind у текста, углов, теней, веса
+const SPACING_UTIL =
+  'p|px|py|pt|pr|pb|pl|ps|pe|m|mx|my|mt|mr|mb|ml|ms|me|gap|gap-x|gap-y|space-x|space-y|inset|inset-x|inset-y|top|right|bottom|left|start|end|w|h|min-w|min-h|max-w|max-h|size|basis|translate-x|translate-y|scroll-m|scroll-p|indent'
+const OFF_SCALE = new RegExp(
+  [
+    `(?<![\\w-])(?:[a-z0-9-]+:)*-?(?:${SPACING_UTIL})-(?!0(?![\\d.])|px\\b)\\d+(?:\\.\\d+)?(?![\\w./-])`,
+    '(?<![\\w-])(?:[a-z0-9-]+:)*text-(?:xs|sm|base|lg|xl|[2-9]xl)(?![\\w-])',
+    '(?<![\\w-])(?:[a-z0-9-]+:)*rounded(?:-[trblse]{1,2})?-(?:xs|sm|md|lg|xl|[2-4]xl)(?![\\w-])',
+    '(?<![\\w-])(?:[a-z0-9-]+:)*shadow-(?:2xs|xs|sm|md|lg|xl|2xl|inner)(?![\\w-])',
+    '(?<![\\w-])(?:[a-z0-9-]+:)*font-(?:thin|extralight|light|medium|bold|extrabold|black)(?![\\w-])',
+    '(?<![\\w-])(?:[a-z0-9-]+:)*(?:leading|tracking)-[a-z0-9]+(?![\\w-])',
+    '(?<![\\w-])(?:[a-z0-9-]+:)*duration-\\d+(?![\\w-])',
+    '(?<![\\w-])(?:[a-z0-9-]+:)*border(?:-[xytrbl])?-(?:[3-9]|\\d{2,})(?![\\w-])',
+  ].join('|'),
+  'g',
+)
+
 /** Закрыть комментарии пробелами той же длины (координаты не съезжают). */
 export function maskComments(text, kind) {
   const blank = (s) => s.replace(/[^\n]/g, ' ')
@@ -83,6 +105,14 @@ function cssRegions(src, kind) {
   for (const m of src.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)) out.push([m[1], m.index + m[0].indexOf('>') + 1])
   for (const m of src.matchAll(/(?<![\w-])style\s*=\s*(["'])([^"'\n]*)\1/g)) out.push([m[1] + m[2], m.index + m[0].indexOf(m[1])])
   return out
+}
+
+/** Где пишут классы: строки JS/TS и атрибут class в HTML (и @apply в CSS) — [{ text, at }]. Так «text-sm» в обычном тексте
+ * (не в строке) не путается с классом. */
+function classText(src, kind) {
+  if (kind === 'css') return [...src.matchAll(/@apply\s+([^;]+);/g)].map((m) => ({ text: m[1], at: m.index + m[0].indexOf(m[1]) }))
+  const re = kind === 'html' ? /\bclass(?:Name)?\s*=\s*(["'])([^"']*)\1/g : /(["'`])((?:\\.|(?!\1)[^\\\n])*)\1/g
+  return [...src.matchAll(re)].map((m) => ({ text: m[2], at: m.index + m[0].indexOf(m[2]) }))
 }
 
 /** Найти нарушения в тексте файла: [{ rule, value, line, column, index }]. */
@@ -119,11 +149,12 @@ export function scan(text, file = 'x.tsx') {
   for (const m of src.matchAll(FN)) push('ds/raw-color', m[0] + '…)', m.index)
   if (kind !== 'css' || /@apply/.test(src)) {
     for (const m of src.matchAll(ARBITRARY)) {
-      if (/^var\(--cds-[a-z0-9-]+\)$/.test(m[1])) continue
+      if (/^var\(--ds-[a-z0-9-]+\)$/.test(m[1])) continue
       push('ds/arbitrary', m[0], m.index)
     }
     for (const m of src.matchAll(ARBITRARY_PROP)) push('ds/arbitrary', m[0], m.index)
     for (const m of src.matchAll(PALETTE)) push('ds/palette', m[0], m.index)
+    if (kind !== 'css' || /@apply/.test(src)) for (const m of classText(src, kind)) for (const o of m.text.matchAll(OFF_SCALE)) push('ds/off-scale', o[0], m.at + o.index)
   }
   for (const [text, at] of cssRegions(src, kind)) {
     for (const d of text.matchAll(CSS_DECL)) {

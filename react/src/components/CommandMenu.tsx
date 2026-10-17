@@ -1,18 +1,16 @@
 /**
- * Меню команд у поля ввода («/» в чате агента): команды и скиллы группами, печать сужает список.
- * Не выбор значения формы (`Combobox`): меню живёт под полем, которое печатает человек, и выбранное вставляется
- * в текст или исполняется.
- * - Фокус остаётся в поле: продукт передаёт клавиши в `ref.press(event)` — стрелки ведут по списку, Enter и Tab
- *   выбирают, Esc закрывает (`onClose`). Вернул true — клавиша взята, полю её не отдавать.
- * - Список — `role="listbox"`, активная строка — `aria-selected`, её id — `activeId()` для `aria-activedescendant` поля.
- * - Совпадение — по началу команды и по началу слова описания; группы — в порядке данных; длинный список
- *   прокручивается внутри меню. Ничего не нашлось — строка «Ничего не найдено».
+ * Меню команд у поля ввода (чат orbit, «/»): команды и скиллы группами, печать сужает список. Не выбор значения формы
+ * (`Combobox`): меню всплывает над полем, которое печатает человек, выбранное вставляется в текст или исполняется.
+ * - Фокус остаётся в поле: продукт передаёт клавиши в `ref.press(event)` — стрелки ведут, Enter и Tab выбирают,
+ *   Esc закрывает (`onClose`). Вернул true — клавиша взята.
+ * - Список — `role="listbox"`, активная строка — `aria-selected`, её id — `activeId()` для `aria-activedescendant`.
+ * - Совпадение — по началу команды и по началу слова описания. Ничего — «Ничего не найдено».
  */
 import { forwardRef, useEffect, useId, useImperativeHandle, useMemo, useState } from 'react'
 import { cx } from '../lib/cx'
 
 export interface CommandItem {
-  /** Что вставить: «/review», «/karta-build». */
+  /** Что вставить: «/review». */
   value: string
   /** Группа: «Команды», «Скиллы». */
   group: string
@@ -41,9 +39,7 @@ export interface CommandMenuHandle {
 export function matchCommands(items: CommandItem[], query: string): CommandItem[] {
   const q = query.trim().toLowerCase().replace(/^\//, '')
   if (!q) return items
-  return items.filter(
-    (i) => i.value.toLowerCase().replace(/^\//, '').startsWith(q) || (i.description ?? '').toLowerCase().split(/\s+/).some((w) => w.startsWith(q)),
-  )
+  return items.filter((i) => i.value.toLowerCase().replace(/^\//, '').startsWith(q) || (i.description ?? '').toLowerCase().split(/\s+/).some((w) => w.startsWith(q)))
 }
 
 export const CommandMenu = forwardRef<CommandMenuHandle, CommandMenuProps>(function CommandMenu({ items, query, onPick, onClose, label, className }, ref) {
@@ -78,16 +74,16 @@ export const CommandMenu = forwardRef<CommandMenuHandle, CommandMenuProps>(funct
 
   const groups = [...new Set(shown.map((i) => i.group))]
   return (
-    <div data-slot="command-menu" className={cx('flex max-h-72 min-w-0 flex-col overflow-y-auto border border-border-subtle-01 bg-layer-02 shadow-raised', className)}>
+    <div data-slot="command-menu" className={cx('ds-menu flex min-w-0 flex-col overflow-y-auto rounded-surface border border-line bg-surface p-tight shadow-raised', className)}>
       {shown.length === 0 ? (
-        <p role="status" className="m-0 px-4 py-3 text-body-compact-01 text-text-secondary">
+        <p role="status" className="m-0 px-items py-items text-body text-fg-muted">
           Ничего не найдено
         </p>
       ) : (
         <div role="listbox" aria-label={label}>
           {groups.map((g, gi) => (
             <div key={g} role="group" aria-labelledby={`${uid}-g${gi}`}>
-              <p id={`${uid}-g${gi}`} role="presentation" className="m-0 px-4 pt-2 pb-1 text-label-01 text-text-secondary">
+              <p id={`${uid}-g${gi}`} role="presentation" className="m-0 px-items pt-items pb-tight text-caption text-fg-muted">
                 {g}
               </p>
               {shown.map((it, i) =>
@@ -100,10 +96,10 @@ export const CommandMenu = forwardRef<CommandMenuHandle, CommandMenuProps>(funct
                     onMouseDown={(e) => e.preventDefault()}
                     onMouseEnter={() => setActive(i)}
                     onClick={() => onPick(it)}
-                    className={cx('flex min-h-8 cursor-pointer items-baseline gap-3 px-4 py-1 text-body-compact-01', i === active ? 'bg-layer-selected-02' : 'hover:bg-layer-hover-02')}
+                    className={cx('flex min-h-dense cursor-pointer items-baseline gap-compact rounded-control px-items py-tight text-body', i === active ? 'bg-selected' : 'hover:bg-hover')}
                   >
-                    <span className="shrink-0 font-mono text-code-01 text-text-primary">{it.value}</span>
-                    {it.description && <span className="min-w-0 truncate text-text-secondary">{it.description}</span>}
+                    <span className="shrink-0 font-mono text-code text-fg">{it.value}</span>
+                    {it.description && <span className="min-w-0 truncate text-fg-muted">{it.description}</span>}
                   </div>
                 ),
               )}

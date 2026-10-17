@@ -1,0 +1,453 @@
+{
+  "doc": "реестр компонентов",
+  "levels": [
+    "Основы",
+    "Раскладка",
+    "Элементы",
+    "Поля",
+    "Поверхности",
+    "Коллекции",
+    "Слои",
+    "Паттерны"
+  ],
+  "levelsWhy": "уровень — смысловой размер: компонент берёт только нижние уровни; полка Storybook = уровень; Экраны — только в продуктах",
+  "base": {
+    "Icon.tsx": "значок — часть каждого элемента: знак тона, кнопка-значок, стрелка",
+    "TextField.tsx": "каркас поля (подпись, подсказка, ошибка) и рамка поля — одни у всех полей",
+    "Surface.tsx": "поверхность — одна анатомия всего, что лежит слоем: остальные поверхности построены на ней"
+  },
+  "sameLevel": {
+    "ChartFrame.tsx → StateView.tsx": "пусто и ошибка графика — то же состояние, что у всех, в высоте графика"
+  },
+  "svg": {
+    "Icon.tsx": "значки набора Carbon — данные путей из icons.gen.ts",
+    "Chart.tsx": "рисунок данных",
+    "Diagram.tsx": "связи схемы",
+    "InlineLoading.tsx": "дуга «идёт» вращается — это не значок набора"
+  },
+  "pill": {
+    "StatusBadge.tsx": "метка — таблетка (решение Б2)",
+    "CountBadge.tsx": "счётчик — таблетка (решение Б2)",
+    "Avatar.tsx": "лицо — круг",
+    "Meter.tsx": "дорожка шкалы",
+    "StatTile.tsx": "точка цвета ряда",
+    "ChatThread.tsx": "точка «думает»",
+    "Diagram.tsx": "точка работы"
+  },
+  "components": {
+    "Stack": {
+      "level": "Раскладка",
+      "file": "layout.tsx",
+      "meaning": "блоки друг под другом с отступом-ролью"
+    },
+    "Inline": {
+      "level": "Раскладка",
+      "file": "layout.tsx",
+      "meaning": "элементы в строку с переносом"
+    },
+    "Grid": {
+      "level": "Раскладка",
+      "file": "layout.tsx",
+      "meaning": "сетка поверхностей: одна колонка на телефоне"
+    },
+    "Page": {
+      "level": "Раскладка",
+      "file": "layout.tsx",
+      "meaning": "страница: шапка, плашка беды, содержимое"
+    },
+    "PageHeader": {
+      "level": "Раскладка",
+      "file": "layout.tsx",
+      "meaning": "шапка страницы: заголовок и тихие действия",
+      "anatomy": {
+        "slot": "page-header",
+        "title": "page"
+      }
+    },
+    "Section": {
+      "level": "Раскладка",
+      "file": "layout.tsx",
+      "meaning": "раздел страницы с заголовком",
+      "anatomy": {
+        "slot": "section",
+        "title": "title"
+      }
+    },
+    "SurfaceProvider": {
+      "level": "Раскладка",
+      "file": "layout.tsx",
+      "meaning": "область одной главной кнопки"
+    },
+    "Icon": {
+      "level": "Элементы",
+      "file": "Icon.tsx",
+      "meaning": "значок набора или знак тона"
+    },
+    "Button": {
+      "level": "Элементы",
+      "file": "Button.tsx",
+      "meaning": "действие по нажатию",
+      "anatomy": {
+        "slot": "button",
+        "shape": "control",
+        "density": true
+      }
+    },
+    "ActionArea": {
+      "level": "Элементы",
+      "file": "Button.tsx",
+      "meaning": "группа действий с одной главной",
+      "anatomy": {
+        "slot": "action-area"
+      }
+    },
+    "StatusBadge": {
+      "level": "Элементы",
+      "file": "StatusBadge.tsx",
+      "meaning": "статус или тон словом и знаком",
+      "anatomy": {
+        "slot": "status-badge"
+      }
+    },
+    "CountBadge": {
+      "level": "Элементы",
+      "file": "CountBadge.tsx",
+      "meaning": "число у строки или вкладки",
+      "anatomy": {
+        "slot": "count-badge",
+        "shape": "pill"
+      }
+    },
+    "Avatar": {
+      "level": "Элементы",
+      "file": "Avatar.tsx",
+      "meaning": "лицо человека или сообщества",
+      "anatomy": {
+        "slot": "avatar",
+        "shape": "pill"
+      }
+    },
+    "InlineLoading": {
+      "level": "Элементы",
+      "file": "InlineLoading.tsx",
+      "meaning": "ход работы в строке"
+    },
+    "Meter": {
+      "level": "Элементы",
+      "file": "Meter.tsx",
+      "meaning": "сколько взято из предела"
+    },
+    "Steps": {
+      "level": "Элементы",
+      "file": "Steps.tsx",
+      "meaning": "путь из нескольких шагов"
+    },
+    "Tooltip": {
+      "level": "Элементы",
+      "file": "Tooltip.tsx",
+      "meaning": "подсказка у элемента при наведении и фокусе",
+      "why": "свойство одного элемента, не свой слой: её берут поля и таблица"
+    },
+    "Delta": {
+      "level": "Элементы",
+      "file": "Delta.tsx",
+      "meaning": "разница двух чисел стрелкой"
+    },
+    "Skeleton": {
+      "level": "Элементы",
+      "file": "Skeleton.tsx",
+      "meaning": "место будущего текста при загрузке"
+    },
+    "Loading": {
+      "level": "Элементы",
+      "file": "Skeleton.tsx",
+      "meaning": "загрузка области для читалки"
+    },
+    "Prose": {
+      "level": "Элементы",
+      "file": "Prose.tsx",
+      "meaning": "длинный текст ответа"
+    },
+    "ProseHtml": {
+      "level": "Элементы",
+      "file": "Prose.tsx",
+      "meaning": "готовый кусок HTML внутри текста ответа"
+    },
+    "Chart": {
+      "level": "Элементы",
+      "file": "Chart.tsx",
+      "meaning": "рисунок рядов данных",
+      "why": "рисунок без своей поверхности; рамку даёт ChartFrame"
+    },
+    "TextField": {
+      "level": "Поля",
+      "file": "TextField.tsx",
+      "meaning": "строка ввода",
+      "anatomy": {
+        "slot": "text-field",
+        "density": true
+      }
+    },
+    "TextArea": {
+      "level": "Поля",
+      "file": "TextField.tsx",
+      "meaning": "многострочный ввод"
+    },
+    "Select": {
+      "level": "Поля",
+      "file": "Select.tsx",
+      "meaning": "выбор из короткого списка системой",
+      "near": {
+        "Combobox": "родной выбор системы для коротких списков; Combobox — длинный список с поиском"
+      }
+    },
+    "NumberField": {
+      "level": "Поля",
+      "file": "NumberField.tsx",
+      "meaning": "целое число со стрелками"
+    },
+    "Checkbox": {
+      "level": "Поля",
+      "file": "Checkbox.tsx",
+      "meaning": "да или нет одной галочкой"
+    },
+    "CheckboxGroup": {
+      "level": "Поля",
+      "file": "Checkbox.tsx",
+      "meaning": "несколько галочек про одно"
+    },
+    "Combobox": {
+      "level": "Поля",
+      "file": "Combobox.tsx",
+      "meaning": "выбор из длинного списка с поиском"
+    },
+    "FileField": {
+      "level": "Поля",
+      "file": "FileField.tsx",
+      "meaning": "выбор файла",
+      "consumers": [
+        "df:statistik"
+      ]
+    },
+    "SearchField": {
+      "level": "Поля",
+      "file": "SearchField.tsx",
+      "meaning": "поиск по списку"
+    },
+    "Surface": {
+      "level": "Поверхности",
+      "file": "Surface.tsx",
+      "meaning": "слой с рамкой: основа всех поверхностей",
+      "anatomy": {
+        "slot": "surface",
+        "shape": "surface",
+        "padding": "blocks"
+      },
+      "near": {
+        "Card": "Card — заголовок, факты и «подробнее» на поверхности; Surface — пустая поверхность для своего содержимого продукта"
+      }
+    },
+    "Card": {
+      "level": "Поверхности",
+      "file": "Card.tsx",
+      "meaning": "лицо объекта: заголовок, до трёх фактов, подробнее",
+      "anatomy": {
+        "slot": "card",
+        "shape": "surface",
+        "padding": "blocks",
+        "title": "heading"
+      }
+    },
+    "StatTile": {
+      "level": "Поверхности",
+      "file": "StatTile.tsx",
+      "meaning": "одно число с подписью",
+      "anatomy": {
+        "slot": "stat-tile",
+        "shape": "surface",
+        "padding": "blocks"
+      },
+      "near": {
+        "Card": "у плитки одно число и нет «подробнее»; больше фактов — Card"
+      }
+    },
+    "Notification": {
+      "level": "Поверхности",
+      "file": "Notification.tsx",
+      "meaning": "беда или новость в потоке у её места",
+      "anatomy": {
+        "slot": "notification",
+        "shape": "surface",
+        "padding": "blocks",
+        "title": "heading",
+        "mark": true
+      },
+      "near": {
+        "StateView": "уведомление — рядом с данными; состояние — вместо данных",
+        "Toaster": "в потоке у места против всплывающего «готово»"
+      }
+    },
+    "StateView": {
+      "level": "Поверхности",
+      "file": "StateView.tsx",
+      "meaning": "что показать вместо данных",
+      "anatomy": {
+        "slot": "state-view",
+        "shape": "surface",
+        "padding": "blocks",
+        "title": "heading"
+      }
+    },
+    "CodeBlock": {
+      "level": "Поверхности",
+      "file": "CodeBlock.tsx",
+      "meaning": "код как есть с копированием",
+      "anatomy": {
+        "slot": "code-block",
+        "shape": "surface"
+      }
+    },
+    "ChartFrame": {
+      "level": "Поверхности",
+      "file": "ChartFrame.tsx",
+      "meaning": "рамка графика: заголовок, легенда, вывод словами",
+      "anatomy": {
+        "slot": "chart-frame",
+        "shape": "surface",
+        "padding": "blocks",
+        "title": "heading"
+      }
+    },
+    "DecisionCard": {
+      "level": "Поверхности",
+      "file": "DecisionCard.tsx",
+      "meaning": "вопрос человеку с ответом кнопкой",
+      "product": "chat",
+      "anatomy": {
+        "slot": "decision-card",
+        "shape": "surface",
+        "padding": "blocks",
+        "title": "heading"
+      },
+      "near": {
+        "Card": "у решения главная кнопка и ответ, у карточки — тихое действие и «подробнее»"
+      }
+    },
+    "Diagram": {
+      "level": "Поверхности",
+      "file": "Diagram.tsx",
+      "meaning": "схема узлов и связей с указателем агента",
+      "product": "chat"
+    },
+    "DataTable": {
+      "level": "Коллекции",
+      "file": "Collection.tsx",
+      "meaning": "строки с колонками",
+      "anatomy": {
+        "slot": "data-table"
+      },
+      "near": {
+        "List": "одна логика Collection; таблица — колонки и сортировка, список — строка своего вида",
+        "ProofreadGrid": "сетка — матрица строка × день с тоном клетки, таблица — записи с колонками"
+      }
+    },
+    "List": {
+      "level": "Коллекции",
+      "file": "Collection.tsx",
+      "meaning": "строки своего вида"
+    },
+    "ProofreadGrid": {
+      "level": "Коллекции",
+      "file": "ProofreadGrid.tsx",
+      "meaning": "матрица строка × колонка с тоном клетки",
+      "product": "df"
+    },
+    "GridLegend": {
+      "level": "Коллекции",
+      "file": "ProofreadGrid.tsx",
+      "meaning": "легенда тонов сетки",
+      "product": "df"
+    },
+    "WeekCalendar": {
+      "level": "Коллекции",
+      "file": "WeekCalendar.tsx",
+      "meaning": "неделя публикаций по дням",
+      "product": "df"
+    },
+    "Dialog": {
+      "level": "Слои",
+      "file": "Dialog.tsx",
+      "meaning": "окно или шторка поверх экрана",
+      "anatomy": {
+        "slot": "dialog",
+        "shape": "surface",
+        "padding": "blocks",
+        "title": "title"
+      }
+    },
+    "ConfirmProvider": {
+      "level": "Слои",
+      "file": "Dialog.tsx",
+      "meaning": "подтверждение действия вместо window.confirm"
+    },
+    "Toaster": {
+      "level": "Слои",
+      "file": "Toast.tsx",
+      "meaning": "всплывающее «готово»",
+      "anatomy": {
+        "slot": "toast",
+        "shape": "surface",
+        "padding": "blocks",
+        "title": "heading",
+        "mark": true
+      }
+    },
+    "CommandMenu": {
+      "level": "Слои",
+      "file": "CommandMenu.tsx",
+      "meaning": "меню команд у поля ввода",
+      "product": "chat",
+      "near": {
+        "Combobox": "меню вставляет команду в печатаемый текст, Combobox выбирает значение поля"
+      }
+    },
+    "Tabs": {
+      "level": "Паттерны",
+      "file": "Tabs.tsx",
+      "meaning": "панели по вкладкам",
+      "near": {
+        "FilterBar": "тот же ряд сегментов; вкладки меняют панель, фильтры сужают список и живут в адресе"
+      }
+    },
+    "FilterBar": {
+      "level": "Паттерны",
+      "file": "FilterBar.tsx",
+      "meaning": "фильтры списка в адресе страницы"
+    },
+    "ThreeColumn": {
+      "level": "Паттерны",
+      "file": "ThreeColumn.tsx",
+      "meaning": "список, лента и карточка рядом"
+    },
+    "ChatThread": {
+      "level": "Паттерны",
+      "file": "ChatThread.tsx",
+      "meaning": "лента переписки"
+    },
+    "ReplyBox": {
+      "level": "Паттерны",
+      "file": "ReplyBox.tsx",
+      "meaning": "поле ответа с отправкой"
+    },
+    "AgentStep": {
+      "level": "Паттерны",
+      "file": "AgentStep.tsx",
+      "meaning": "шаг работы агента в ленте",
+      "product": "chat",
+      "near": {
+        "Steps": "общий словарь хода; шаги — путь человека, шаг агента — строка работы в ленте",
+        "InlineLoading": "ход в строке — знак и слово; шаг агента собирает его с инструментом и результатом"
+      }
+    }
+  }
+}

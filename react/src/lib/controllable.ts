@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useState } from 'react'
+import { useCallback, useState } from 'react'
 
 /**
  * Значение «управляемое или своё»: передали `value` — компонент показывает его и зовёт `onChange`; не передали —
@@ -16,11 +16,3 @@ export function useControllable<T>(value: T | undefined, defaultValue: T, onChan
   )
   return [controlled ? (value as T) : inner, set]
 }
-
-/**
- * Слой поверхности (Carbon Layer): поле на странице — `field-01`, поле в окне или панели (они сами — слой 01) —
- * `field-02`, чтобы поле не сливалось с фоном. Окно и панель ставят слой 2 сами.
- */
-export type Layer = 1 | 2
-export const LayerContext = createContext<Layer>(1)
-export const useLayer = () => useContext(LayerContext)
