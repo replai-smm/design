@@ -2,7 +2,7 @@
 // Облик машиной: каждая история собранного Storybook × обе темы × 390 и 1280 — снимок против эталона в
 // visual/baseline/ и анатомия против реестра (anatomy.mjs). Эталоны лежат в репо; правка облика — новый эталон в том же PR.
 //   node visual/run.mjs            — сверить (разница больше допуска матрицы или нарушение анатомии — выход 1)
-//   node visual/run.mjs --update   — записать эталоны (анатомию держит всё равно)
+//   node visual/run.mjs --update   — записать эталоны: новые и ушедшие за допуск, остальные не трогать (анатомию держит всё равно)
 //   node visual/run.mjs --only <часть id>  — только истории, в id которых есть часть
 // Снимки детерминированы: закреплённые Playwright и Chromium, язык браузера, шрифты — из пакета (Plex), анимации и каретка выключены.
 import { createReadStream, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs'
@@ -92,13 +92,14 @@ async function main(argv) {
       }
       await page.close()
       const base = join(BASE, name)
-      if (update || !existsSync(base)) {
-        if (!update) failures.push({ name, what: 'нет эталона', detail: 'npm run test:visual -- --update' })
-        else writeFileSync(base, png)
+      if (!existsSync(base)) {
+        if (update) writeFileSync(base, png)
+        else failures.push({ name, what: 'нет эталона', detail: 'npm run visual:update -w react' })
         continue
       }
       const d = compare(readFileSync(base), png)
       if (d.pixels > matrix.max_diff_pixels) {
+        if (update) { writeFileSync(base, png); continue } // эталон переписан, только если облик ушёл за допуск: в диффе — ровно изменённые кадры
         failures.push({ name, what: 'облик', detail: `отличается ${d.pixels} пикселей${d.size ? ` (размер ${d.size})` : ''} — допуск ${matrix.max_diff_pixels}` })
         writeFileSync(join(OUT, name), png)
         if (d.diff) writeFileSync(join(OUT, name.replace('.png', '.diff.png')), d.diff)
