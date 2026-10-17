@@ -22,6 +22,10 @@ export const MARK = 'border-l-2'
 export const FAST = 'transition-colors duration-fast ease-standard'
 
 /** Ряд вариантов (вкладки, фильтры): сегменты на тихой подложке, выбранный — роль «выбрано». */
-export const SEGMENTS = 'inline-flex self-start max-w-full min-w-0 flex-wrap items-center gap-tight rounded-control border border-line bg-surface p-tight'
+export const SEGMENTS = 'inline-flex self-start max-w-full min-w-0 items-center gap-tight rounded-control border border-line bg-surface p-tight'
+/** Не влезает в ширину — фильтры переносятся: все варианты видны сразу. */
+export const SEGMENTS_WRAP = 'flex-wrap'
+/** Не влезает — вкладки одной строкой с прокруткой без полосы (ds.css): ряд разделов не съедает экран телефона. */
+export const SEGMENTS_SCROLL = 'ds-scroll-row overflow-x-auto'
 export const SEGMENT = `inline-flex min-h-control md:min-h-dense shrink-0 cursor-pointer items-center gap-items rounded-control px-compact text-body text-fg-muted ${FAST} hover:bg-hover hover:text-fg ${FOCUS}`
 export const SEGMENT_ON = 'data-[state=active]:bg-selected data-[state=active]:font-semibold data-[state=active]:text-fg data-[state=on]:bg-selected data-[state=on]:font-semibold data-[state=on]:text-fg'

@@ -216,6 +216,19 @@ describe('разница и график', () => {
     expect(container.innerHTML).not.toMatch(/danger|warning|success/)
   })
 
+  it('заливка под линией: цвет ряда тише до оси, только у одного ряда линий', () => {
+    const one = [{ key: 'a', label: 'А', data: [1, null, 3], series: 2 }]
+    const { container, rerender } = render(<Chart kind="line" area label="Охват" labels={['1', '2', '3']} series={one} />)
+    const area = container.querySelector('[data-slot=chart-area]')!
+    expect(area.getAttribute('class')).toBe('fill-series-3')
+    expect(Number(area.getAttribute('fill-opacity'))).toBeLessThan(1)
+    expect(area.getAttribute('d')).toMatch(/^M[\d.]+,216 L.* L[\d.]+,216 Z$/)
+    rerender(<Chart kind="line" area label="Охват" labels={['1', '2', '3']} series={[...one, { key: 'b', label: 'Б', data: [3, 2, 1] }]} />)
+    expect(container.querySelector('[data-slot=chart-area]')).toBeNull()
+    rerender(<Chart kind="line" label="Охват" labels={['1', '2', '3']} series={one} />)
+    expect(container.querySelector('[data-slot=chart-area]')).toBeNull()
+  })
+
   it('ось: круглый верх, подписи X не чаще 10; мало данных — chartHasData ложь', () => {
     expect([niceMax(0), niceMax(7), niceMax(130)]).toEqual([1, 10, 200])
     expect(ticksOf(200)).toEqual([0, 50, 100, 150, 200])

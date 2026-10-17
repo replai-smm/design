@@ -1,6 +1,6 @@
 {
   "name": "@replai-smm/design-react",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
   "description": "ДС-React (рабочее пространство репо design): исходники — react/src, их отдаёт корневой пакет @replai-smm/design. Здесь — Storybook, тесты, типы, снимки облика.",

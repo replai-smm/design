@@ -5,6 +5,8 @@ import { ActionArea, AgentStep, Button, ChatThread, CommandMenu, ConfirmProvider
 import { chat, chatFailed } from '../stories/df-fixtures'
 import { commands } from '../stories/agent-fixtures'
 import { createRef } from 'react'
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 
 afterEach(() => vi.restoreAllMocks())
 
@@ -112,6 +114,26 @@ describe('вкладки и фильтры — один ряд сегменто�
     expect(document.querySelector('[role=tab] [data-slot=count-badge]')).toBeTruthy()
     rerender(<Tabs label="Разделы" items={items()} value="a" />)
     expect(screen.getByText('вторая').closest('[role=tabpanel]')!.getAttribute('data-state')).toBe('inactive')
+  })
+
+  it('на узком: вкладки — одна строка с прокруткой без полосы, выбранная прокручена в поле зрения; фильтры переносятся', () => {
+    const at = (left: number, width: number) => () => ({ left, right: left + width, width, top: 0, bottom: 0, height: 0, x: left, y: 0, toJSON: () => ({}) })
+    const spy = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (this: HTMLElement) {
+      if (this.getAttribute('role') === 'tablist') return at(0, 300)() as DOMRect
+      return at(this.getAttribute('data-state') === 'active' ? 520 : 0, 80)() as DOMRect
+    })
+    const items = ['a', 'b', 'c'].map((v) => ({ value: v, label: v, content: <p>{v}</p> }))
+    render(<Tabs label="Разделы" items={items} defaultValue="c" />)
+    const row = screen.getByRole('tablist')
+    expect(row.className.split(/\s+/)).toEqual(expect.arrayContaining(['ds-scroll-row', 'overflow-x-auto']))
+    expect(row.className).not.toContain('flex-wrap')
+    expect(row.scrollLeft).toBe(300)
+    spy.mockRestore()
+    fireEvent.mouseDown(screen.getByRole('tab', { name: 'a' }))
+    expect(screen.getByRole('tab', { name: 'a' }).getAttribute('data-state')).toBe('active')
+    const { container } = render(<FilterBar value={{}} onChange={() => {}} filters={[{ key: 'k', label: 'КМ', options: [{ value: 'x', label: 'x' }] }]} />)
+    expect(container.querySelector('[data-slot=filter-bar] [data-part=segments]')!.className).toContain('flex-wrap')
+    expect(readFileSync(resolve(import.meta.dirname, '..', 'ds.css'), 'utf8')).toMatch(/\.ds-scroll-row \{\s*scrollbar-width: none;/)
   })
 
   it('фильтры в адресе: выбор пишет ?ключ=значение, «все» снимает; required — без «все»', () => {

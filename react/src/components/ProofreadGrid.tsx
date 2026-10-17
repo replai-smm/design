@@ -1,13 +1,16 @@
 /**
- * Сетка «строка × колонка» (DF «Вычитка»: сообщество × день; Статистика: проект × месяц) — настоящая таблица.
- * - Тон клетки — словарь тонов: подложка только у того, что просит внимания («опасно», «внимание»); «хорошо» и
- *   «нейтрально» — значение без подложки (норма не кричит); `quiet` — впереди, тихим текстом. Читалка слышит слово
- *   клетки (`word`), не только цвет; отметка «возможен перенос» — черта снизу (`note`).
+ * Сетка статуса «строка × колонка» (DF «Вычитка»: сообщество × день; Статистика: проект × месяц) — настоящая таблица.
+ * - Тон клетки — словарь тонов. Смысл клетки здесь — сам статус (план выполнен · сверх плана · недобор · пропуск),
+ *   поэтому клетка залита тоном (`FILL`: роли `tones.*.fill`) — читается с одного взгляда. Это исключение по смыслу,
+ *   названное в реестре (`registry.json → fill`): вне сетки статуса подложка — только у «опасно» и «внимание».
+ *   Без тона — значение без заливки; `quiet` — впереди, тихим текстом. Читалка слышит слово клетки (`word`), не только
+ *   цвет; отметка «возможен перенос» — черта снизу (`note`).
  * - Первая колонка и шапка стоят при прокрутке (`stickyHeader`, по умолчанию да); выходные в шапке — тише (`muted`).
  * - Колонки без тона (`plain`: итоги) — просто значение; колонка денег (`money`) — вправо, в одну строку;
  *   разница в клетке (`delta`) — `Delta` без тона; итог-строка (`totals`) — `<tfoot>`, стоит внизу.
  * - Нажатие на строку — `onSelect`, выбранная — `selectedKey` (роль «выбрано»). Много — `pageSize` и «показать ещё».
- * Легенда — `GridLegend` (те же тона и слова). Состояния: загрузка, ошибка, пусто, много.
+ * Легенда — `GridLegend` (те же заливки и слова); день развёрнутым — `StatusRow` (та же заливка строкой).
+ * Состояния: загрузка, ошибка, пусто, много.
  */
 import { useState, type ReactNode } from 'react'
 import { FOCUS } from '../lib/anatomy'
@@ -75,12 +78,19 @@ export interface ProofreadGridProps<R> {
   className?: string
 }
 
-/** Облик клетки тона: подложка и текст тона у срочного, у остального — без подложки. */
-const cellTone = (cell: GridCell) => {
-  if (cell.quiet) return 'bg-surface text-fg-muted'
-  if (!cell.tone) return 'bg-surface text-fg-muted'
-  const t = TONE[cell.tone]
-  return t.bg ? cx(t.bg, t.text) : 'bg-surface text-fg'
+/** Заливка статуса: роли `*-fill` словаря тонов (tokens.json → tones.*.fill). Только сетка статуса — этот файл. */
+export const FILL: Record<Tone, string | null> = {
+  опасно: 'bg-danger-fill',
+  внимание: 'bg-warning-fill',
+  инфо: null,
+  нейтрально: 'bg-neutral-fill',
+  хорошо: 'bg-success-fill',
+}
+
+/** Облик клетки и строки статуса: заливка тона и основной текст; без тона и впереди — без заливки, тихим текстом. */
+const toneLook = ({ tone, quiet }: { tone?: Tone; quiet?: boolean }) => {
+  if (quiet || !tone) return 'bg-surface text-fg-muted'
+  return cx(FILL[tone] ?? 'bg-surface', 'text-fg')
 }
 
 const cellBase = 'h-control min-w-control px-tight text-center align-middle text-caption tabular-nums border-l border-line'
@@ -207,7 +217,7 @@ export function ProofreadGrid<R>({
                           data-quiet={cell.quiet || undefined}
                           data-note={cell.note || undefined}
                           title={cell.hint}
-                          className={cx(cellBase, cellTone(cell), cell.note && 'border-b-2 border-b-warning', c.money && MONEY)}
+                          className={cx(cellBase, toneLook(cell), cell.note && 'border-b-2 border-b-warning', c.money && MONEY)}
                         >
                           {cell.value != null || cell.delta ? <CellValue cell={cell} /> : <span aria-hidden="true">·</span>}
                           <span className="sr-only">
@@ -266,13 +276,13 @@ export interface GridLegendProps {
   label?: string
 }
 
-/** Легенда тонов сетки: образец клетки у тонов с подложкой и слово; у спокойных — только слово (норма не кричит). */
+/** Легенда сетки статуса: образец клетки у тонов с заливкой и слово; без заливки — только слово. */
 export function GridLegend({ items, note, label = 'Легенда' }: GridLegendProps) {
   return (
     <ul aria-label={label} className="m-0 flex list-none flex-wrap gap-x-blocks gap-y-items p-0 text-caption text-fg-muted">
       {items.map((it, i) => (
         <li key={i} className="inline-flex items-center gap-items">
-          {it.tone && TONE[it.tone].bg && <span aria-hidden="true" className={cx('inline-block size-icon rounded-control border border-line', cellTone(it))} />}
+          {it.tone && FILL[it.tone] && <span aria-hidden="true" className={cx('inline-block size-icon rounded-control border border-line', toneLook(it))} />}
           {it.label}
         </li>
       ))}
@@ -283,5 +293,26 @@ export function GridLegend({ items, note, label = 'Легенда' }: GridLegend
         </li>
       )}
     </ul>
+  )
+}
+
+export interface StatusRowProps {
+  /** Статус строки — тон словаря: заливка тона, как у клетки сетки; без тона — без заливки (нет нормы). */
+  tone?: Tone
+  /** Строка статуса словами: «3-е · план выполнен · вышло 2 из 2». */
+  title: ReactNode
+  /** Что внутри: посты дня. */
+  children?: ReactNode
+  className?: string
+  [data: `data-${string}`]: string | undefined
+}
+
+/** День сетки статуса развёрнутым: строка статуса и её содержимое, залитые тоном — той же заливкой, что клетка дня. */
+export function StatusRow({ tone, title, children, className, ...rest }: StatusRowProps) {
+  return (
+    <div data-slot="status-row" data-tone={tone ? TONE[tone].key : undefined} className={cx('flex min-w-0 flex-col gap-tight rounded-surface border border-line px-compact py-items', toneLook({ tone }), className)} {...rest}>
+      <p className="m-0 text-body">{title}</p>
+      {children}
+    </div>
   )
 }

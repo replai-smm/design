@@ -15,16 +15,16 @@
 | | `StatusBadge`, `CountBadge` | статус из закрытого списка или тон со словом; число у строки и вкладки |
 | | `Avatar`, `Tooltip` | лицо 32 px; подсказка у элемента, который берёт фокус |
 | | `InlineLoading`, `Meter`, `Steps` | ход в строке, сколько взято из предела, путь из шагов — словарь хода |
-| | `Delta`, `Skeleton`/`Loading`, `Prose`/`ProseHtml`, `Chart` | разница двух чисел, загрузка той же формы, текст ответа (роль «чтение»), рисунок рядов данных |
+| | `Delta`, `Skeleton`/`Loading`, `Prose`/`ProseHtml`, `Chart` | разница двух чисел, загрузка той же формы, текст ответа (роль «чтение»), рисунок рядов данных (`area` — заливка под одной линией) |
 | Поля | `TextField`, `TextArea`, `Select`, `NumberField`, `Checkbox`/`CheckboxGroup`, `Combobox`, `FileField`, `SearchField` | одна рамка и один каркас: подпись, подсказка, ошибка знаком и словом; `dense` — 32 px |
 | Поверхности | `Surface` | слой, рамка, угол 6, поля 16; `mark` — метка тона слева; `inset` — утопленная |
 | | `Card`, `StatTile`, `Notification`, `StateView`, `CodeBlock`, `ChartFrame` | построены на `Surface`; заголовок — роль `heading` |
 | | `DecisionCard`, `Diagram` | чат orbit |
 | Коллекции | `DataTable`, `List` | строки: срочное сверху, норма свёрнута, много — «показать ещё»; `selectedKey` и `onSelect`; сортировка, подсказка у заголовка, `nowrap`, `rowMuted` у таблицы |
-| | `ProofreadGrid`, `GridLegend`, `WeekCalendar` | DF |
+| | `ProofreadGrid`, `GridLegend`, `StatusRow`, `WeekCalendar` | DF; сетка статуса — клетка и развёрнутый день (`StatusRow`) залиты тоном статуса |
 | Слои | `Dialog`, `ConfirmProvider`/`useConfirm`, `Toaster`/`useToast` | окно (шторка снизу на телефоне, `side="left"` — слева, `size`: `sm` · `md` · `full`), подтверждение, «готово» |
 | | `CommandMenu` | чат orbit |
-| Паттерны | `Tabs`, `FilterBar`/`useUrlFilters` | один ряд сегментов: панели и фильтры в адресе |
+| Паттерны | `Tabs`, `FilterBar`/`useUrlFilters` | один ряд сегментов: панели и фильтры в адресе; не влезает — вкладки одной строкой с прокруткой, фильтры переносятся |
 | | `ThreeColumn`, `ChatThread`, `ReplyBox` | список → лента → карточка; переписка; поле ответа (`send`: `enter` · `ctrl-enter` · `button`) |
 | | `AgentStep` | чат orbit |
 

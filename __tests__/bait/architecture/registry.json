@@ -6,6 +6,7 @@
   "sameLevel": {},
   "svg": {},
   "pill": {},
+  "fill": {},
   "components": {
     "Good": { "level": "Элементы", "file": "Good.tsx", "meaning": "кнопка-приманка" },
     "Twin": { "level": "Элементы", "file": "Twin.tsx", "meaning": "Кнопка приманка" },

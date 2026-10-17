@@ -41,6 +41,10 @@
         "warning-fg",
         "warning-bg",
         "success",
+        "danger-fill",
+        "warning-fill",
+        "neutral-fill",
+        "success-fill",
         "series-1",
         "series-2",
         "series-3",
@@ -113,6 +117,18 @@
           "$ref": "#/$defs/color"
         },
         "success": {
+          "$ref": "#/$defs/color"
+        },
+        "danger-fill": {
+          "$ref": "#/$defs/color"
+        },
+        "warning-fill": {
+          "$ref": "#/$defs/color"
+        },
+        "neutral-fill": {
+          "$ref": "#/$defs/color"
+        },
+        "success-fill": {
           "$ref": "#/$defs/color"
         },
         "series-1": {
@@ -217,6 +233,10 @@
         "warning-fg",
         "warning-bg",
         "success",
+        "danger-fill",
+        "warning-fill",
+        "neutral-fill",
+        "success-fill",
         "series-1",
         "series-2",
         "series-3",
@@ -252,7 +272,8 @@
         "key",
         "mark",
         "text",
-        "bg"
+        "bg",
+        "fill"
       ],
       "properties": {
         "key": {
@@ -271,6 +292,16 @@
           "$ref": "#/$defs/roleName"
         },
         "bg": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/roleName"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fill": {
           "anyOf": [
             {
               "$ref": "#/$defs/roleName"
