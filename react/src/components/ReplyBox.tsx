@@ -11,6 +11,9 @@
  * - «Отправить» — главная кнопка области (П5) через `ActionArea`; рядом — тихие (`tools`: «✨ Черновик ИИ»,
  *   «Ответ не нужен», «⚡ Шаблоны»). Если на поверхности уже есть главная (несколько полей на экране) —
  *   `emphasis="secondary"`.
+ * - Чат с агентом: `stop` — «Стоп», пока агент работает (рядом с «Отправить»: писать можно и во время работы —
+ *   сообщение встанет в очередь); `menu` — меню над полем («/» — `CommandMenu`), клавиши поля сначала получает
+ *   `onKeyDown` продукта (взял — `preventDefault`), `activeDescendant` — активная строка меню для читалки.
  * Состояния: обычное, отправляется (загрузка), ошибка, выключено с причиной.
  */
 import { forwardRef, useId, useImperativeHandle, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
@@ -53,6 +56,16 @@ export interface ReplyBoxProps {
   hint?: ReactNode | false
   emphasis?: 'primary' | 'secondary'
   rows?: number
+  /** Кнопки под полем: stack — на телефоне столбцом (П6); row — всегда в ряд, «Отправить» справа (чат агента). */
+  layout?: 'stack' | 'row'
+  /** «Стоп» — пока агент работает. */
+  stop?: { onStop: () => void; label?: ReactNode }
+  /** Меню над полем: команды «/». */
+  menu?: ReactNode
+  /** Клавиши поля — сначала продукту (меню); `preventDefault` — поле их не обрабатывает. */
+  onKeyDown?: (e: KeyboardEvent<HTMLTextAreaElement>) => void
+  /** id активной строки меню (`aria-activedescendant`). */
+  activeDescendant?: string
   className?: string
 }
 
@@ -83,6 +96,11 @@ export const ReplyBox = forwardRef<ReplyBoxHandle, ReplyBoxProps>(function Reply
     hint,
     emphasis = 'primary',
     rows = 3,
+    layout = 'stack',
+    stop,
+    menu,
+    onKeyDown: onKeyDownProp,
+    activeDescendant,
     className,
   },
   ref,
@@ -129,7 +147,8 @@ export const ReplyBox = forwardRef<ReplyBoxHandle, ReplyBoxProps>(function Reply
   }
 
   const onKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key !== 'Enter' || e.nativeEvent.isComposing) return
+    onKeyDownProp?.(e)
+    if (e.defaultPrevented || e.key !== 'Enter' || e.nativeEvent.isComposing) return
     const mod = e.ctrlKey || e.metaKey
     if ((mod && sendShortcut) || (enterToSend && !mod && !e.shiftKey && !e.altKey)) {
       e.preventDefault()
@@ -141,14 +160,21 @@ export const ReplyBox = forwardRef<ReplyBoxHandle, ReplyBoxProps>(function Reply
   const hintText = hint === false ? null : (hint ?? (enterToSend ? 'Enter — отправить, Shift+Enter — новая строка' : sendShortcut ? 'Ctrl+Enter — отправить' : null))
   const describedBy = [shownError ? `${id}-err` : null, disabled && disabledReason ? `${id}-why` : null, hintText ? `${id}-hint` : null].filter(Boolean).join(' ') || undefined
   const sendProps = { onClick: () => void send(), loading: sending, disabled: disabled, 'data-slot': 'reply-send' }
+  const stopButton = stop && (
+    <Button variant="secondary" onClick={stop.onStop} data-slot="reply-stop" icon={<svg viewBox="0 0 16 16"><rect x="4" y="4" width="8" height="8" fill="currentColor" /></svg>}>
+      {stop.label ?? 'Стоп'}
+    </Button>
+  )
 
   return (
     <div data-slot="reply-box" data-state={sending ? 'загрузка' : shownError ? 'ошибка' : undefined} className={cx('flex min-w-0 flex-col gap-2', className)}>
       <label htmlFor={`${id}-field`} className={showLabel ? 'text-label-01 text-text-secondary' : 'sr-only'}>
         {label}
       </label>
+      {menu}
       <textarea
         ref={area}
+        aria-activedescendant={activeDescendant}
         id={`${id}-field`}
         rows={rows}
         value={text}
@@ -185,7 +211,8 @@ export const ReplyBox = forwardRef<ReplyBoxHandle, ReplyBoxProps>(function Reply
       )}
       {attachment && <div className="flex flex-wrap gap-2">{attachment}</div>}
       {emphasis === 'primary' ? (
-        <ActionArea primary={{ label: sendLabel, ...sendProps }} label={`${label}: действия`}>
+        <ActionArea primary={{ label: sendLabel, ...sendProps }} label={`${label}: действия`} layout={layout}>
+          {stopButton}
           {tools}
         </ActionArea>
       ) : (
@@ -193,6 +220,7 @@ export const ReplyBox = forwardRef<ReplyBoxHandle, ReplyBoxProps>(function Reply
           <Button variant="secondary" className="max-md:min-h-12 max-md:w-full" {...sendProps}>
             {sendLabel}
           </Button>
+          {stopButton}
           {tools}
         </div>
       )}

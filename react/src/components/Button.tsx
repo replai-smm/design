@@ -98,6 +98,9 @@ export interface ActionAreaProps {
   children?: ReactNode
   /** inline — в потоке; bottom — на телефоне нижняя полоса во всю ширину (П6), на ноутбуке — в потоке слева. */
   placement?: 'inline' | 'bottom'
+  /** stack — на телефоне кнопки столбцом, главная внизу во всю ширину (П6); row — всегда в ряд, главная справа
+   *  (строка поля чата: место по высоте дороже, отправка — у правого края, как в любом мессенджере). */
+  layout?: 'stack' | 'row'
   /** Подпись группы для читалки: «Действия страницы». */
   label?: string
   className?: string
@@ -105,7 +108,7 @@ export interface ActionAreaProps {
 
 const AreaContext = createContext(false)
 
-export function ActionArea({ primary, children, placement = 'inline', label = 'Действия', className }: ActionAreaProps) {
+export function ActionArea({ primary, children, placement = 'inline', layout = 'stack', label = 'Действия', className }: ActionAreaProps) {
   const inRow = useContext(RowContext)
   const nested = useContext(AreaContext)
   const surface = useSurface()
@@ -125,6 +128,7 @@ export function ActionArea({ primary, children, placement = 'inline', label = '�
     }
   }, [primary ? 1 : 0, surface, id])
   const bottom = placement === 'bottom'
+  const row = layout === 'row'
   return (
     <AreaContext.Provider value>
       <div
@@ -132,22 +136,24 @@ export function ActionArea({ primary, children, placement = 'inline', label = '�
         aria-label={label}
         data-slot="action-area"
         data-placement={placement}
+        data-layout={layout}
         className={cx(
-          'flex flex-col-reverse gap-2 md:flex-row md:flex-wrap md:items-center',
+          row ? 'flex flex-row flex-wrap items-center gap-2' : 'flex flex-col-reverse gap-2 md:flex-row md:flex-wrap md:items-center',
           bottom && 'max-md:border-t max-md:border-border-subtle-01 max-md:bg-layer-01 max-md:px-4 max-md:py-4 max-md:-mx-4',
           className,
         )}
       >
-        {primary && <PrimaryButton {...primary} bottom={bottom} />}
+        {!row && primary && <PrimaryButton {...primary} bottom={bottom} />}
         {children}
+        {row && primary && <PrimaryButton {...primary} bottom={false} row />}
       </div>
     </AreaContext.Provider>
   )
 }
 
-function PrimaryButton({ label, bottom, size = 'md', className, ...rest }: PrimaryAction & { bottom: boolean }) {
+function PrimaryButton({ label, bottom, row = false, size = 'md', className, ...rest }: PrimaryAction & { bottom: boolean; row?: boolean }) {
   return (
-    <ButtonBase variant="primary" size={size} className={cx('max-md:min-h-12 max-md:w-full', bottom && 'md:w-auto', className)} {...rest}>
+    <ButtonBase variant="primary" size={size} className={cx(row ? 'ml-auto' : 'max-md:min-h-12 max-md:w-full', bottom && 'md:w-auto', className)} {...rest}>
       {label}
     </ButtonBase>
   )

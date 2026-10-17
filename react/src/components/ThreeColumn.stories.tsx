@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { chat } from '../stories/df-fixtures'
+import { Button } from './Button'
 import { ChatThread } from './ChatThread'
 import { ReplyBox } from './ReplyBox'
 import { StateView } from './StateView'
@@ -118,6 +119,36 @@ export const ДвеКолонки: S = {
               <StateView kind="первый запуск" title="Выберите черновик слева или создайте новый" />
             </div>
           }
+        />
+      </div>
+    )
+  },
+}
+
+/** Рабочее место: шапка во всю ширину; на телефоне — средняя колонка, список слева и панель снизу выезжают. */
+export const РабочееМесто: S = {
+  args: noArgs,
+  render: function Workplace() {
+    const [sheet, setSheet] = useState<0 | 2 | null>(null)
+    return (
+      <div className="h-screen max-h-full">
+        <ThreeColumn
+          phone="sheets"
+          sheet={sheet}
+          onSheetChange={setSheet}
+          labels={['Сессии', 'Чат', 'Панель']}
+          active={1}
+          onBack={() => {}}
+          header={
+            <div className="flex min-h-12 items-center gap-2 px-2">
+              <Button variant="ghost" onClick={() => setSheet(0)} className="lg:hidden">☰ Сессии</Button>
+              <span className="text-body-compact-01 text-text-secondary">шапка приложения</span>
+              <Button variant="ghost" onClick={() => setSheet(2)} className="ml-auto lg:hidden">Панель</Button>
+            </div>
+          }
+          first={<p className="m-0 p-4 text-body-01">Сессии</p>}
+          second={<ChatThread label="Переписка" messages={chat} />}
+          third={<p className="m-0 p-4 text-body-01">Панель</p>}
         />
       </div>
     )

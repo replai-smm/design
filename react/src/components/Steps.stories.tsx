@@ -35,3 +35,6 @@ export const Ошибка: S = { tags: ['state:ошибка'], args: { current: 
 
 /** Всё пройдено: итог без ошибок. */
 export const Готово: S = { tags: ['state:всё сделано'], args: { current: 3 } }
+
+/** Одной строкой на любой ширине: путь работы по дорожке в строке списка. */
+export const Компактно: S = { args: { steps: ['сборка', 'приёмка', 'публикация', 'прод'], current: 1, label: 'Путь изменения', compact: true } }

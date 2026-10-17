@@ -200,3 +200,115 @@
 .ds-toast[data-swipe='end'] {
   animation: ds-out-right var(--cds-duration-moderate-02) var(--cds-easing-exit-productive);
 }
+
+/* загрузка в строке: дуга вращается; «уменьшить движение» — длительность 0, дуга стоит */
+@keyframes ds-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.ds-spin {
+  animation: ds-rotate var(--cds-duration-slow-02) var(--cds-easing-standard-productive) infinite;
+}
+
+/* текст ответа: наборы текста ДС, мера строки ≤ 80 знаков; кусок HTML не даёт своей рамки */
+.ds-prose {
+  max-width: 80ch;
+  display: flex;
+  flex-direction: column;
+  gap: var(--cds-spacing-04);
+}
+.ds-prose-run {
+  display: contents;
+}
+.ds-prose :is(p, ul, ol, blockquote, table, h1, h2, h3, h4) {
+  margin: 0;
+}
+.ds-prose :is(h1, h2) {
+  font-size: var(--cds-heading-compact-02-font-size);
+  line-height: var(--cds-heading-compact-02-line-height);
+  font-weight: var(--cds-heading-compact-02-font-weight);
+}
+.ds-prose :is(h3, h4) {
+  font-size: var(--cds-heading-compact-01-font-size);
+  line-height: var(--cds-heading-compact-01-line-height);
+  font-weight: var(--cds-heading-compact-01-font-weight);
+}
+.ds-prose :is(ul, ol) {
+  padding-left: var(--cds-spacing-06);
+  display: flex;
+  flex-direction: column;
+  gap: var(--cds-spacing-02);
+}
+.ds-prose a {
+  color: var(--cds-link-primary);
+}
+.ds-prose a:hover {
+  color: var(--cds-link-primary-hover);
+}
+.ds-prose :not(pre) > code {
+  font-family: var(--cds-font-mono);
+  font-size: var(--cds-code-01-font-size);
+  background: var(--cds-layer-02);
+  padding: 0 var(--cds-spacing-02);
+}
+.ds-prose blockquote {
+  border-left: 2px solid var(--cds-border-strong-01);
+  padding-left: var(--cds-spacing-05);
+  color: var(--cds-text-secondary);
+}
+.ds-prose table {
+  border-collapse: collapse;
+}
+.ds-prose :is(th, td) {
+  border-bottom: 1px solid var(--cds-border-subtle-01);
+  padding: var(--cds-spacing-02) var(--cds-spacing-04);
+  text-align: start;
+}
+/* курсор набора — после последнего слова */
+@keyframes ds-blink {
+  to {
+    opacity: 0;
+  }
+}
+.ds-prose[data-streaming] > :last-child:not(.ds-prose-run)::after,
+.ds-prose[data-streaming] > .ds-prose-run:last-child > :last-child:not(ul, ol)::after,
+.ds-prose[data-streaming] > .ds-prose-run:last-child > :is(ul, ol):last-child > li:last-child::after {
+  content: '';
+  display: inline-block;
+  vertical-align: text-bottom;
+  width: var(--cds-spacing-03);
+  height: var(--cds-spacing-05);
+  margin-left: var(--cds-spacing-01);
+  background: var(--cds-text-primary);
+  animation: ds-blink var(--cds-duration-slow-02) var(--cds-easing-standard-productive) infinite alternate;
+}
+
+/* схема: указатель агента — мягкое мерцание рамки (не бег: на месте, пока указатель стоит) */
+@keyframes ds-glow {
+  to {
+    opacity: 0.35;
+  }
+}
+.ds-lit-ring {
+  animation: ds-glow var(--cds-duration-slow-02) var(--cds-easing-standard-productive) infinite alternate;
+}
+
+/* боковые панели раскладки на телефоне: список слева, панель снизу (ThreeColumn phone="sheets") */
+.ds-sheet[data-side='left'][data-state='open'] {
+  animation: ds-in-left var(--cds-duration-move) var(--cds-easing-move);
+}
+.ds-sheet[data-side='left'][data-state='closed'] {
+  animation: ds-out-left var(--cds-duration-move) var(--cds-easing-move);
+}
+.ds-sheet[data-side='bottom'][data-state='open'] {
+  animation: ds-in-up var(--cds-duration-move) var(--cds-easing-move);
+}
+.ds-sheet[data-side='bottom'][data-state='closed'] {
+  animation: ds-out-down var(--cds-duration-move) var(--cds-easing-move);
+}
+@keyframes ds-out-left {
+  to {
+    transform: translateX(-100%);
+  }
+}

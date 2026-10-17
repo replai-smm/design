@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { chat, chatFailed, longChat } from '../stories/df-fixtures'
+import { AgentStep } from './AgentStep'
 import { Button } from './Button'
 import { ChatThread, type ChatMessage } from './ChatThread'
+import { Prose, ProseHtml } from './Prose'
 
 const meta = {
   title: 'Паттерны/Переписка',
@@ -80,3 +82,30 @@ function LongThread() {
 export const Много: S = { tags: ['state:много'], render: () => <LongThread /> }
 
 export const ВсяПереписка: S = { args: { messages: chat, earlier: { onLoad: () => {}, done: true } } }
+
+/** Разговор с агентом: ответ во всю ширину (текст и шаги), весть со стороны — рамкой слева, наше «в очереди». */
+export const САгентом: S = {
+  args: {
+    label: 'Сессия: экспорт комментариев',
+    messages: [
+      { id: 'u1', direction: 'out', time: '14:00', text: 'Добавь экспорт комментариев в CSV.' },
+      {
+        id: 'a1',
+        direction: 'in',
+        variant: 'wide',
+        author: 'агент',
+        time: '14:01',
+        text: (
+          <>
+            <AgentStep tool="Read" target="src/export/index.ts" state="done" summary="88 строк" />
+            <Prose streaming>
+              <ProseHtml html="<p>Экспорт кладу рядом с JSON-выгрузкой: тот же запрос, другой формат.</p>" />
+            </Prose>
+          </>
+        ),
+      },
+      { id: 'n1', direction: 'in', variant: 'notice', author: 'orbit · весть', time: '14:02', text: 'Прод replai v2.41 — датчик видит новую версию, тесты зелёные.' },
+      { id: 'u2', direction: 'out', time: '14:03', text: 'И фильтр по дате тоже.', status: 'queued' },
+    ] as ChatMessage[],
+  },
+}

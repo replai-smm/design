@@ -4,7 +4,12 @@
  * - Цвет пузыря не один: у наших подпись автора «вы» (или своя) и выравнивание вправо; у ошибки — знак и слово.
  * - Лента — `role="log"`: читалка слышит новые сообщения, не перечитывая старые.
  * - Более ранние вставляются сверху без прыжка: прокрутка держит то сообщение, что было на экране.
+ * - Лента внизу и выросла сама (набор ответа, догрузилась картинка) — остаётся внизу; прокрутил вверх — не дёргаем.
  * - Аватар — слот (`avatar`): кружок даёт продукт или `Avatar` ДС; лента от него не зависит.
+ * - Вид сообщения (`variant`): `bubble` — пузырь (переписка людей); `wide` — во всю ширину без рамки (ответ агента:
+ *   текст, шаги, карточки решений); `notice` — весть со стороны (система, orbit): рамка слева и подпись автора,
+ *   глазом отличается и от собеседника, и от нас.
+ * - Наше сообщение, посланное, пока собеседник занят, — «в очереди» (`status="queued"`), пока его не взяли.
  * Состояния: загрузка (скелет пузырей той же формы), ошибка, пусто (первый запуск — «спросите первое»), много.
  */
 import { Fragment, useLayoutEffect, useRef, type ReactNode } from 'react'
@@ -30,8 +35,10 @@ export interface ChatMessage {
   text?: ReactNode
   /** Фото, файлы, «[виды вложений]» — под текстом. */
   attachments?: ReactNode
-  /** Только у наших: отправляется / ушло / не ушло. */
-  status?: 'sending' | 'sent' | 'error'
+  /** Только у наших: отправляется / в очереди (собеседник занят) / ушло / не ушло. */
+  status?: 'sending' | 'queued' | 'sent' | 'error'
+  /** bubble — пузырь; wide — во всю ширину без рамки (ответ агента); notice — весть со стороны (рамка слева). */
+  variant?: 'bubble' | 'wide' | 'notice'
   /** Почему не ушло — рядом со знаком ошибки. */
   error?: ReactNode
   onRetry?: () => void
@@ -60,24 +67,36 @@ export interface ChatThreadProps {
 const messageNode = (el: HTMLElement, id?: string) =>
   id === undefined ? undefined : [...el.querySelectorAll<HTMLElement>('[data-slot=chat-message]')].find((n) => n.dataset.id === id)
 
-const SEND_WORD = { sending: 'отправляется…', sent: 'отправлено', error: 'не отправлено' } as const
+const SEND_WORD = { sending: 'отправляется…', queued: 'в очереди', sent: 'отправлено', error: 'не отправлено' } as const
 
 function Bubble({ m, ownLabel }: { m: ChatMessage; ownLabel: string }) {
   const out = m.direction === 'out'
+  const variant = m.variant ?? 'bubble'
+  const bubble = variant === 'bubble'
   return (
-    <li data-slot="chat-message" data-id={m.id} data-direction={m.direction} data-status={m.status} className={cx('flex min-w-0 gap-2', out ? 'flex-row-reverse' : 'flex-row')}>
+    <li
+      data-slot="chat-message"
+      data-id={m.id}
+      data-direction={m.direction}
+      data-status={m.status}
+      data-variant={variant}
+      className={cx('flex min-w-0 gap-2', out ? 'flex-row-reverse' : 'flex-row')}
+    >
       {m.avatar && <span className="flex shrink-0 items-end">{m.avatar}</span>}
-      <div className={cx('flex min-w-0 max-w-4/5 flex-col gap-1 md:max-w-2/3', out ? 'items-end' : 'items-start')}>
+      <div className={cx('flex min-w-0 flex-col gap-1', bubble ? 'max-w-4/5 md:max-w-2/3' : 'flex-1', out ? 'items-end' : 'items-start')}>
         <div className={cx('flex flex-wrap items-baseline gap-2 text-label-01 text-text-secondary', out && 'flex-row-reverse')}>
           <span className="text-text-primary">{m.author ?? (out ? ownLabel : null)}</span>
           <time dateTime={m.datetime}>{m.time}</time>
         </div>
         <div
           className={cx(
-            'flex min-w-0 flex-col gap-2 px-4 py-3 text-body-01 break-words whitespace-pre-wrap text-text-primary',
-            out ? 'bg-layer-accent-01' : 'border border-border-subtle-01 bg-layer-01',
+            'flex min-w-0 flex-col gap-2 text-body-01 break-words text-text-primary',
+            bubble && 'px-4 py-3 whitespace-pre-wrap',
+            bubble && (out ? 'bg-layer-accent-01' : 'border border-border-subtle-01 bg-layer-01'),
+            variant === 'wide' && 'w-full',
+            variant === 'notice' && 'w-full border border-l-4 border-border-subtle-01 border-l-support-info bg-layer-01 px-4 py-3',
             m.status === 'error' && 'border border-support-error',
-            m.status === 'sending' && 'text-text-secondary',
+            (m.status === 'sending' || m.status === 'queued') && 'text-text-secondary',
           )}
         >
           {m.text}
@@ -125,6 +144,19 @@ export function ChatThread({ messages, label, state = 'ready', error, empty, ear
     }
     prev.current = { first, last, height: el.scrollHeight, firstTop: messageNode(el, first)?.offsetTop ?? 0, atBottom: el.scrollHeight - el.scrollTop - el.clientHeight < 48 }
   }, [first, last, messages, pending])
+
+  // лента прижата к низу, а содержимое выросло или окно ленты сжалось (набор ответа, картинка, поле ответа выше) — остаёмся внизу
+  useLayoutEffect(() => {
+    const el = scroller.current
+    const list = el?.querySelector('ol')
+    if (!el || !list || typeof ResizeObserver === 'undefined') return
+    const ro = new ResizeObserver(() => {
+      if (prev.current.atBottom) el.scrollTop = el.scrollHeight
+    })
+    ro.observe(list)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [state, messages.length === 0])
 
   const onScroll = () => {
     const el = scroller.current

@@ -48,6 +48,15 @@ const PROMISED: Record<string, string[]> = {
   'ChartFrame.stories.tsx': ['обычное', 'загрузка', 'ошибка', 'первый запуск', 'ничего не найдено'],
   'StatTile.stories.tsx': ['обычное'],
   'Steps.stories.tsx': ['обычное', 'ошибка', 'всё сделано'],
+  // чат агента (orbit)
+  'InlineLoading.stories.tsx': ['обычное'],
+  'Meter.stories.tsx': ['обычное'],
+  'CodeBlock.stories.tsx': ['обычное'],
+  'Prose.stories.tsx': ['обычное'],
+  'AgentStep.stories.tsx': ['обычное'],
+  'DecisionCard.stories.tsx': ['обычное'],
+  'CommandMenu.stories.tsx': ['обычное'],
+  'Diagram.stories.tsx': ['обычное'],
 }
 
 describe('истории на каждое состояние', () => {
@@ -107,9 +116,9 @@ describe('движение: токены, 0,6 с, без прыжка (look.noju
     expect(css).toMatch(/\.ds-drawer\[data-state='open'\] \{\s*animation: ds-in-up var\(--cds-duration-move\)/)
     const tokens = readFileSync(resolve(root, '..', 'dist', 'tokens.css'), 'utf8')
     expect(tokens).toContain('--cds-duration-move: 600ms;')
-    // анимируем только transform, opacity и высоту сетки — то, что не сдвигает соседей скачком
+    // анимируем только transform (сдвиг, поворот), opacity и высоту сетки — то, что не сдвигает соседей скачком
     const keyframes = [...css.matchAll(/@keyframes [\w-]+ \{([\s\S]*?)\n\}/g)].map((m) => m[1])
-    for (const k of keyframes) expect(k.replace(/\b(?:from|to|transform|opacity)\b|[{}:;\s\d%().-]|translate[XY]|var|--[\w-]+/g, '')).toBe('')
+    for (const k of keyframes) expect(k.replace(/\b(?:from|to|transform|opacity)\b|[{}:;\s\d%().-]|translate[XY]|rotate|deg|var|--[\w-]+/g, '')).toBe('')
   })
 
   it('свёрнутое не ловит фокус: у раскрываемого — inert, пока закрыто', () => {

@@ -5,6 +5,7 @@
  *   Состояние — словом для читалки и формой значка, не только цветом.
  * - `onStepClick` — вернуться к пройденному шагу кнопкой; шаги впереди не нажимаются (их не перескочить).
  * - Телефон (< 768): одной строкой «Шаг 2 из 4 · Куда» — полоса из четырёх подписей не помещается.
+ * - `compact` — одной строкой всегда, со знаками шагов в ряд (узкая колонка, строка списка: путь работы по дорожке).
  * Шаги — не вкладки: содержимое шага рисует продукт; компонент только показывает путь.
  */
 import type { ReactNode } from 'react'
@@ -26,6 +27,8 @@ export interface StepsProps {
   onStepClick?: (index: number) => void
   /** Подпись для читалки: «Шаги публикации». */
   label: string
+  /** Одной строкой на любой ширине: знаки шагов в ряд и «Шаг 2 из 4 · Куда». */
+  compact?: boolean
   className?: string
 }
 
@@ -59,13 +62,20 @@ function Mark({ state }: { state: StepState }) {
   )
 }
 
-export function Steps({ steps, current, errorAt, details, onStepClick, label, className }: StepsProps) {
+export function Steps({ steps, current, errorAt, details, onStepClick, label, compact = false, className }: StepsProps) {
   rule(steps.length >= 2, 'Steps: шагов меньше двух — это не путь, подпись хватит словами')
   rule(current >= 0 && current < steps.length, `Steps: текущий шаг ${current} вне списка из ${steps.length}`)
   const now = Math.min(Math.max(current, 0), steps.length - 1)
   return (
     <nav data-slot="steps" aria-label={label} className={cx('min-w-0', className)}>
-      <p data-slot="steps-compact" className="m-0 text-body-compact-01 text-text-primary md:hidden">
+      <p data-slot="steps-compact" className={cx('m-0 flex min-w-0 flex-wrap items-center gap-x-2 text-body-compact-01 text-text-primary', !compact && 'md:hidden')}>
+        {compact && (
+          <span aria-hidden="true" className="inline-flex items-center gap-px">
+            {steps.map((_, i) => (
+              <Mark key={i} state={stepState(i, now, errorAt)} />
+            ))}
+          </span>
+        )}
         <span className="text-text-secondary">
           Шаг {now + 1} из {steps.length}
           <span aria-hidden="true"> · </span>
@@ -73,7 +83,7 @@ export function Steps({ steps, current, errorAt, details, onStepClick, label, cl
         <span className="font-semibold">{steps[now]}</span>
         {errorAt === now && <span className="text-status-error"> — ошибка</span>}
       </p>
-      <ol className="m-0 hidden list-none gap-px p-0 md:flex">
+      <ol className={cx('m-0 hidden list-none gap-px p-0', !compact && 'md:flex')}>
         {steps.map((s, i) => {
           const st = stepState(i, now, errorAt)
           const clickable = Boolean(onStepClick) && i < now
