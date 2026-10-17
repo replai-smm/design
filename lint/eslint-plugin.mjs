@@ -1,7 +1,7 @@
 // Правило ESLint «ds/no-raw-values» — тот же сканер, что у cli.mjs (scan.mjs), без своего разбора AST:
 // идёт по тексту файла, комментарии закрыты. Подключение в продукте (eslint.config.js, flat config):
 //
-//   import ds from '<путь>/design/lint/eslint-plugin.mjs'
+//   import ds from '@replai-smm/design/lint/eslint-plugin'
 //   export default [{ files: ['src/**/*.{ts,tsx,js,jsx}'], plugins: { ds }, rules: { 'ds/no-raw-values': 'error' } }]
 //
 // Старые нарушения при включении — храповиком (cli.mjs --baseline), а не выключением правила.
@@ -10,7 +10,7 @@ import { scan, message } from './scan.mjs'
 const rule = {
   meta: {
     type: 'problem',
-    docs: { description: 'только токены дизайн-системы: без сырых цветов, произвольных значений и палитры Tailwind' },
+    docs: { description: 'только роли и шкалы дизайн-системы: без сырых цветов, произвольных значений, палитры и классов вне шкал' },
     schema: [],
   },
   create(context) {

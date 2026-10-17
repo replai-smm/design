@@ -22,6 +22,6 @@ export const MARK = 'border-l-2'
 export const FAST = 'transition-colors duration-fast ease-standard'
 
 /** Ряд вариантов (вкладки, фильтры): сегменты на тихой подложке, выбранный — роль «выбрано». */
-export const SEGMENTS = 'inline-flex max-w-full min-w-0 flex-wrap items-center gap-tight rounded-control border border-line bg-surface p-tight'
+export const SEGMENTS = 'inline-flex self-start max-w-full min-w-0 flex-wrap items-center gap-tight rounded-control border border-line bg-surface p-tight'
 export const SEGMENT = `inline-flex min-h-control md:min-h-dense shrink-0 cursor-pointer items-center gap-items rounded-control px-compact text-body text-fg-muted ${FAST} hover:bg-hover hover:text-fg ${FOCUS}`
 export const SEGMENT_ON = 'data-[state=active]:bg-selected data-[state=active]:font-semibold data-[state=active]:text-fg data-[state=on]:bg-selected data-[state=on]:font-semibold data-[state=on]:text-fg'

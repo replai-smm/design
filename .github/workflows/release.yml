@@ -51,8 +51,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci --prefer-offline --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
       - run: npm run check
-      - run: npm run storybook:build
       - name: коммит с dist/ и тег
         id: commit
         run: |

@@ -35,7 +35,7 @@ export interface TabsProps {
 export function Tabs({ items, label, value, defaultValue, onValueChange, className }: TabsProps) {
   return (
     <RTabs.Root data-slot="tabs" value={value} defaultValue={defaultValue ?? items[0]?.value} onValueChange={onValueChange} className={cx('flex min-w-0 flex-col gap-blocks', className)}>
-      <RTabs.List aria-label={label} data-part="segments" className={cx(SEGMENTS, 'self-start')}>
+      <RTabs.List aria-label={label} data-part="segments" className={SEGMENTS}>
         {items.map((t) => (
           <RTabs.Trigger key={t.value} value={t.value} className={cx(SEGMENT, SEGMENT_ON)}>
             {t.label}
