@@ -4,7 +4,7 @@
 //   node visual/run.mjs            — сверить (разница больше допуска матрицы или нарушение анатомии — выход 1)
 //   node visual/run.mjs --update   — записать эталоны (анатомию держит всё равно)
 //   node visual/run.mjs --only <часть id>  — только истории, в id которых есть часть
-// Снимки детерминированы: закреплённые Playwright и Chromium, шрифты — из пакета (Plex), анимации и каретка выключены.
+// Снимки детерминированы: закреплённые Playwright и Chromium, язык браузера, шрифты — из пакета (Plex), анимации и каретка выключены.
 import { createReadStream, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { createServer } from 'node:http'
 import { dirname, extname, join, normalize, sep } from 'node:path'
@@ -53,7 +53,8 @@ async function main(argv) {
   rmSync(OUT, { recursive: true, force: true })
   mkdirSync(OUT, { recursive: true })
   const srv = await serve(STATIC)
-  const browser = await chromium.launch({ args: ['--font-render-hinting=none', '--disable-font-subpixel-positioning', '--disable-lcd-text', '--force-color-profile=srgb', '--disable-gpu', '--hide-scrollbars'] })
+  // Родные поля (дата, время) рисуются языком самого браузера, а не locale страницы: язык закреплён здесь, иначе снимок — LANG машины.
+  const browser = await chromium.launch({ env: { ...process.env, LANG: 'ru_RU.UTF-8', LANGUAGE: 'ru_RU' }, args: ['--lang=ru-RU', '--font-render-hinting=none', '--disable-font-subpixel-positioning', '--disable-lcd-text', '--force-color-profile=srgb', '--disable-gpu', '--hide-scrollbars'] })
   const failures = []
   const seen = new Set()
   const jobs = stories.flatMap((s) => THEMES.flatMap((theme) => WIDTHS.map((width) => ({ s, theme, width }))))
