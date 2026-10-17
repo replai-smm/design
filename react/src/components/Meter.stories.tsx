@@ -13,7 +13,7 @@ type S = StoryObj<typeof meta>
 /** Полоса и слово; в строку — для шапки. */
 export const Обычное: S = {
   render: (args) => (
-    <div className="flex max-w-sm flex-col gap-blocks">
+    <div className="flex max-w-popup flex-col gap-blocks">
       <Meter {...args} />
       <Meter label="Неделя" value={84} valueText="84 % · сброс в пн" />
       <Meter label="Контекст" value={41} max={200} valueText="41k / 200k" inline />

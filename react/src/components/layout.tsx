@@ -98,7 +98,7 @@ export interface PageProps {
 export function Page({ header, notice, children, className }: PageProps) {
   return (
     <SurfaceProvider name="страница">
-      <div data-slot="page" className={cx('mx-auto flex w-full max-w-7xl flex-col gap-groups px-blocks pt-groups md:px-sections', className)}>
+      <div data-slot="page" className={cx('mx-auto flex w-full max-w-page flex-col gap-groups px-blocks pt-groups md:px-sections', className)}>
         {header}
         <main className="flex min-w-0 flex-col gap-groups pb-sections">
           {notice}

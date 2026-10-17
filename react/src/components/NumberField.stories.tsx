@@ -5,7 +5,7 @@ const meta = {
   title: 'Поля/Число',
   component: NumberField,
   parameters: { layout: 'padded' },
-  args: { label: 'Постов в неделю', defaultValue: 3, min: 0, max: 14, className: 'max-w-xs' },
+  args: { label: 'Постов в неделю', defaultValue: 3, min: 0, max: 14, className: 'max-w-narrow' },
 } satisfies Meta<typeof NumberField>
 export default meta
 type S = StoryObj<typeof meta>

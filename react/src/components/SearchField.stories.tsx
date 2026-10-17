@@ -4,7 +4,7 @@ import { SearchField } from './SearchField'
 
 function Demo({ initial }: { initial: string }) {
   const [v, set] = useState(initial)
-  return <SearchField label="Поиск по группам" value={v} onChange={set} className="max-w-sm" />
+  return <SearchField label="Поиск по группам" value={v} onChange={set} className="max-w-popup" />
 }
 
 const meta = {

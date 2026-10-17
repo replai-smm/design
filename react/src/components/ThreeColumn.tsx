@@ -38,8 +38,8 @@ export interface ThreeColumnProps {
   className?: string
 }
 
-const FIRST = { sm: 'lg:w-3xs', md: 'lg:w-xs' } as const
-const THIRD = { lg: 'lg:w-lg', xl: 'lg:w-xl' } as const
+const FIRST = { sm: 'lg:w-rail', md: 'lg:w-narrow' } as const
+const THIRD = { lg: 'lg:w-panel', xl: 'lg:w-wide' } as const
 const PHONE = '(max-width: 63.99rem)'
 
 function usePhone(): boolean {

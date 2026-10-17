@@ -37,10 +37,10 @@ export interface DialogProps {
   children?: ReactNode
 }
 
-const WIDTH = { sm: 'md:max-w-md', md: 'md:max-w-2xl' } as const
+const WIDTH = { sm: 'md:max-w-form', md: 'md:max-w-window' } as const
 const place = (size: DialogSize, side?: 'left') =>
   side === 'left'
-    ? 'inset-y-0 left-0 w-11/12 max-w-sm rounded-l-none'
+    ? 'inset-y-0 left-0 w-11/12 max-w-popup rounded-l-none'
     : size === 'full'
       ? 'inset-0 h-dvh rounded-none'
       : cx('inset-x-0 bottom-0 max-h-11/12 rounded-b-none md:rounded-b-surface', 'md:inset-x-auto md:top-1/2 md:bottom-auto md:left-1/2 md:max-h-10/12 md:-translate-x-1/2 md:-translate-y-1/2', WIDTH[size])

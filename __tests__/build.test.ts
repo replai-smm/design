@@ -10,6 +10,7 @@ import { outputs } from '../lib/generate.mjs'
 const design = resolve(import.meta.dirname, '..')
 const read = (p: string) => readFileSync(resolve(design, p), 'utf8')
 const tokens = JSON.parse(read('tokens.json'))
+const scale = JSON.parse(read('scale.json'))
 const { statuses } = JSON.parse(read('statuses.json'))
 
 describe('dist', () => {
@@ -31,10 +32,11 @@ describe('dist', () => {
 
   it('tailwind.css: своё Tailwind сброшено, классы — только роли и шкалы', () => {
     const tw = out['dist/tailwind.css']
-    for (const ns of ['color', 'spacing', 'radius', 'shadow', 'text', 'font', 'leading', 'ease']) expect(tw).toContain(`--${ns}-*: initial;`)
+    for (const ns of ['color', 'spacing', 'radius', 'shadow', 'text', 'font', 'leading', 'ease', 'container']) expect(tw).toContain(`--${ns}-*: initial;`)
     expect(tw).toContain('--spacing: initial;')
     for (const n of Object.keys(tokens.colors)) expect(tw).toContain(`--color-${n}: var(--ds-${n});`)
     expect(tw).toContain('--spacing-items: var(--ds-space-items);')
+    for (const [k, m] of Object.entries<{ value: string }>(scale.measure)) expect(tw).toContain(`--container-${k}: ${m.value};`)
     expect(tw).toContain('--text-heading--font-weight: var(--ds-text-heading-weight);')
     expect(tw).not.toMatch(/#[0-9a-f]{3,8}\b/)
   })

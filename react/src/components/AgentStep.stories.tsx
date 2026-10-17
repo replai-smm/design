@@ -8,7 +8,7 @@ const meta = {
   component: AgentStep,
   parameters: { layout: 'padded' },
   args: { tool: 'Bash', target: 'npm test', progress: 'done', summary: 'код 0 · 3,2 с', children: <CodeBlock code={testRun} label="вывод" /> },
-  decorators: [(Story) => <div className="flex max-w-2xl flex-col gap-items">{<Story />}</div>],
+  decorators: [(Story) => <div className="flex max-w-window flex-col gap-items">{<Story />}</div>],
 } satisfies Meta<typeof AgentStep>
 export default meta
 type S = StoryObj<typeof meta>

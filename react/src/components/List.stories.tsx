@@ -16,7 +16,7 @@ const meta = {
   title: 'Коллекции/Список',
   component: List<GroupRow>,
   parameters: { layout: 'padded' },
-  args: { label: 'Группы', rows: groups, renderRow: row, getKey: (r: GroupRow) => r.id, getStatus: (r: GroupRow) => r.status, onSelect: () => {}, className: 'max-w-xl' },
+  args: { label: 'Группы', rows: groups, renderRow: row, getKey: (r: GroupRow) => r.id, getStatus: (r: GroupRow) => r.status, onSelect: () => {}, className: 'max-w-wide' },
 } satisfies Meta<typeof List<GroupRow>>
 export default meta
 type S = StoryObj<typeof meta>

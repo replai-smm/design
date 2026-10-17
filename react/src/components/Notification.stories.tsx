@@ -15,7 +15,7 @@ type S = StoryObj<typeof meta>
 /** Тоны: метка и знак своей формы; охват — где стоит. */
 export const Обычное: S = {
   render: () => (
-    <Stack gap="items" className="max-w-2xl">
+    <Stack gap="items" className="max-w-window">
       <Notification tone="внимание" scope="list" title="Ключ сообщений не подключён у 2 сообществ" action={<Button dense>Подключить</Button>} />
       <Notification tone="инфо" scope="list" title="Только просмотр" onClose={() => {}}>
         Правит админ.

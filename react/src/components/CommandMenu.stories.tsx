@@ -6,7 +6,7 @@ const meta = {
   title: 'Слои/Меню команд',
   component: CommandMenu,
   parameters: { layout: 'padded' },
-  args: { label: 'Команды и скиллы', items: commands, query: '', onPick: () => {}, className: 'max-w-md' },
+  args: { label: 'Команды и скиллы', items: commands, query: '', onPick: () => {}, className: 'max-w-form' },
 } satisfies Meta<typeof CommandMenu>
 export default meta
 type S = StoryObj<typeof meta>

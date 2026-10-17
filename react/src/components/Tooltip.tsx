@@ -34,7 +34,7 @@ export function Tooltip({ content, children }: TooltipProps) {
             side="top"
             sideOffset={4}
             collisionPadding={8}
-            className="ds-pop z-50 max-w-2xs rounded-control bg-inverse px-compact py-tight text-body text-fg-inverse shadow-raised"
+            className="ds-pop z-50 max-w-hint rounded-control bg-inverse px-compact py-tight text-body text-fg-inverse shadow-raised"
           >
             {content}
           </RTooltip.Content>

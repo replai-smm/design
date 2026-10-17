@@ -16,7 +16,7 @@ const meta = {
   title: 'Поля/Выбор с поиском',
   component: Combobox,
   parameters: { layout: 'padded' },
-  args: { label: 'Сообщество', placeholder: 'Поиск сообщества', options: communities, defaultValue: 'c2', className: 'max-w-sm' },
+  args: { label: 'Сообщество', placeholder: 'Поиск сообщества', options: communities, defaultValue: 'c2', className: 'max-w-popup' },
 } satisfies Meta<typeof Combobox>
 export default meta
 type S = StoryObj<typeof meta>

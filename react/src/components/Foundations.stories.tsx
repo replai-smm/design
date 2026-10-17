@@ -111,7 +111,7 @@ function Icons() {
     <Sheet title="Значки">
       <ul className="m-0 flex list-none flex-wrap gap-items p-0">
         {(Object.keys(ICONS) as IconName[]).map((n) => (
-          <li key={n} className="flex min-w-3xs items-center gap-items rounded-control border border-line bg-surface px-items py-tight text-caption text-fg">
+          <li key={n} className="flex min-w-rail items-center gap-items rounded-control border border-line bg-surface px-items py-tight text-caption text-fg">
             <Icon name={n} />
             <code className="font-mono">{n}</code>
           </li>

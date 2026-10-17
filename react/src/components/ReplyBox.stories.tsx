@@ -20,7 +20,7 @@ const meta = {
         <Button variant="ghost">Ответ не нужен</Button>
       </>
     ),
-    className: 'max-w-2xl',
+    className: 'max-w-window',
   },
 } satisfies Meta<typeof ReplyBox>
 export default meta

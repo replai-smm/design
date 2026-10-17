@@ -2,12 +2,14 @@
 // Один сканер текста на всё — JS/TS/JSX, CSS, HTML, ванильный JS: ему не нужен разборщик, поэтому он же работает и правилом ESLint (eslint-plugin.mjs), и сам по себе (cli.mjs).
 //
 // Что ловит:
-//   ds/raw-color      — #fff, #12345678, rgb(…), rgba(…), hsl(…), hwb(…), lab(…), lch(…), oklab(…), oklch(…)
+//   ds/raw-color      — #fff, #12345678, rgb(…), rgba(…), hsl(…), hwb(…), lab(…), lch(…), oklab(…), oklch(…); именованный
+//                       цвет CSS у свойства цвета: `color: red`, `style={{ fill: 'tomato' }}`
 //   ds/arbitrary      — произвольное значение Tailwind: w-[24rem], text-[15px], bg-[#fff], [mask-type:alpha]
 //   ds/palette        — класс палитры Tailwind: bg-red-500, text-slate-700, border-white (палитра сброшена)
 //   ds/off-scale      — класс Tailwind вне ролей и шкал: числовой отступ или размер (p-4, gap-1.5, h-12, w-40),
-//                       свой размер текста (text-sm), угол (rounded-lg), тень (shadow-md), вес и межстрочный (font-bold,
-//                       leading-6), длительность (duration-300), толщина рамки (border-4). Есть только роли: p-blocks,
+//                       размер контейнера (max-w-md, w-sm, @md:), свой размер текста (text-sm), угол (rounded-lg), тень (shadow-md),
+//                       вес и межстрочный (font-bold, leading-6), длительность (duration-300), толщина рамки (border-4).
+//                       Есть только роли: p-blocks,
 //                       gap-items, h-control, text-body, rounded-surface, shadow-raised, duration-move, border, border-2
 //   ds/raw-size       — сырой размер у отступа, места, размера, шрифта, угла: `padding: 12px`, `font-size: .8rem`,
 //                       `style="width:240px"`, `style={{ gap: 12 }}` — в CSS, в <style> и в атрибуте style
@@ -22,7 +24,7 @@ export const RULES = {
   'ds/raw-color': 'сырой цвет «{v}» — возьми роль: var(--ds-…) или класс роли (bg-surface, text-fg-muted, …)',
   'ds/arbitrary': 'произвольное значение «{v}» — возьми роль или шаг шкалы (var(--ds-…))',
   'ds/palette': 'класс палитры Tailwind «{v}» — палитры нет, есть роли (bg-surface, text-fg-muted, …)',
-  'ds/off-scale': 'класс «{v}» вне шкал — возьми роль: отступ (tight · items · compact · blocks · groups · sections), высота (icon · dense · control · touch), текст (caption · body · heading · reading · code · title · page), угол (control · surface · full)',
+  'ds/off-scale': 'класс «{v}» вне шкал — возьми роль: отступ (tight · items · compact · blocks · groups · sections), высота (icon · dense · control · touch), ширина (rail · hint · narrow · popup · form · panel · wide · window · page), текст (caption · body · heading · reading · code · title · page), угол (control · surface · full)',
   'ds/raw-size': 'сырой размер «{v}» — возьми роль шкалы: var(--ds-space-…), роль текста или компонент ДС',
 }
 
@@ -48,6 +50,23 @@ function rawSizes(value) {
   return out
 }
 
+// именованные цвета CSS (без transparent, currentColor, inherit — это не краски): у свойства цвета значение-слово из списка
+const NAMED_COLORS = new Set(
+  'aliceblue antiquewhite aqua aquamarine azure beige bisque black blanchedalmond blue blueviolet brown burlywood cadetblue chartreuse chocolate coral cornflowerblue cornsilk crimson cyan darkblue darkcyan darkgoldenrod darkgray darkgreen darkgrey darkkhaki darkmagenta darkolivegreen darkorange darkorchid darkred darksalmon darkseagreen darkslateblue darkslategray darkslategrey darkturquoise darkviolet deeppink deepskyblue dimgray dimgrey dodgerblue firebrick floralwhite forestgreen fuchsia gainsboro ghostwhite gold goldenrod gray green greenyellow grey honeydew hotpink indianred indigo ivory khaki lavender lavenderblush lawngreen lemonchiffon lightblue lightcoral lightcyan lightgoldenrodyellow lightgray lightgreen lightgrey lightpink lightsalmon lightseagreen lightskyblue lightslategray lightslategrey lightsteelblue lightyellow lime limegreen linen magenta maroon mediumaquamarine mediumblue mediumorchid mediumpurple mediumseagreen mediumslateblue mediumspringgreen mediumturquoise mediumvioletred midnightblue mintcream mistyrose moccasin navajowhite navy oldlace olive olivedrab orange orangered orchid palegoldenrod palegreen paleturquoise palevioletred papayawhip peachpuff peru pink plum powderblue purple rebeccapurple red rosybrown royalblue saddlebrown salmon sandybrown seagreen seashell sienna silver skyblue slateblue slategray slategrey snow springgreen steelblue tan teal thistle tomato turquoise violet wheat white whitesmoke yellow yellowgreen'.split(' '),
+)
+const COLOR_PROP_CSS =
+  '(?:color|background(?:-color)?|fill|stroke|caret-color|accent-color|text-decoration-color|(?:border|outline)(?:-(?:top|right|bottom|left|block|inline)(?:-(?:start|end))?)?(?:-color)?)'
+const COLOR_DECL = new RegExp(`(?<=(?:^|[{;"'])\\s*)(${COLOR_PROP_CSS})\\s*:\\s*([^;{}"'\\n]+)`, 'gim')
+const COLOR_PROP_JS =
+  '(?:color|background(?:Color)?|fill|stroke|caretColor|accentColor|textDecorationColor|(?:border|outline)(?:Top|Right|Bottom|Left|Block|Inline)?(?:Start|End)?(?:Color)?)'
+const JS_COLOR = new RegExp(`(?<![\\w$.])(${COLOR_PROP_JS})\\s*:\\s*(['"\`])([^'"\`\\n]*)\\2`, 'g')
+
+/** Именованные цвета в тексте значения CSS: «red», «1px solid tomato» (внутри var(…) — запасное значение токена, не считается). */
+function namedColors(value) {
+  const bare = value.replace(/var\([^()]*(?:\([^()]*\)[^()]*)*\)/g, (m) => ' '.repeat(m.length))
+  return [...bare.matchAll(/(?<![\w#.-])[a-z]+(?![\w(-])/gi)].filter((m) => NAMED_COLORS.has(m[0].toLowerCase())).map((m) => ({ value: m[0], at: m.index }))
+}
+
 const HEX = /(?<![\w&#/.-])#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3,4})(?![\w-])/g
 const FN = /(?<![\w-])(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch)\(/g
 const PALETTE_NAMES =
@@ -71,6 +90,8 @@ const SPACING_UTIL =
 const OFF_SCALE = new RegExp(
   [
     `(?<![\\w-])(?:[a-z0-9-]+:)*-?(?:${SPACING_UTIL})-(?!0(?![\\d.])|px\\b)\\d+(?:\\.\\d+)?(?![\\w./-])`,
+    '(?<![\\w-])(?:[a-z0-9-]+:)*(?:(?:max-|min-)?w|basis)-(?:[23]xs|xs|sm|md|lg|xl|[2-7]xl)(?![\\w-])',
+    '(?<![\\w-])(?:[a-z0-9-]+:)*@(?:max-)?(?:[23]xs|xs|sm|md|lg|xl|[2-7]xl)(?:\\/[\\w-]+)?:',
     '(?<![\\w-])(?:[a-z0-9-]+:)*text-(?:xs|sm|base|lg|xl|[2-9]xl)(?![\\w-])',
     '(?<![\\w-])(?:[a-z0-9-]+:)*rounded(?:-[trblse]{1,2})?-(?:xs|sm|md|lg|xl|[2-4]xl)(?![\\w-])',
     '(?<![\\w-])(?:[a-z0-9-]+:)*shadow-(?:2xs|xs|sm|md|lg|xl|2xl|inner)(?![\\w-])',
@@ -82,10 +103,10 @@ const OFF_SCALE = new RegExp(
   'g',
 )
 
-/** Закрыть комментарии пробелами той же длины (координаты не съезжают). */
+/** Закрыть комментарии пробелами той же длины (координаты не съезжают). `/*` сразу после слова или знака (`image/*`) — не комментарий. */
 export function maskComments(text, kind) {
   const blank = (s) => s.replace(/[^\n]/g, ' ')
-  let out = text.replace(/\/\*[\s\S]*?\*\//g, (m) => (ALLOW.test(m) ? m : blank(m)))
+  let out = text.replace(/(?<![\w*'"`])\/\*[\s\S]*?\*\//g, (m) => (ALLOW.test(m) ? m : blank(m)))
   if (kind === 'js') out = out.replace(/(^|[^:\\'"`])\/\/[^\n]*/g, (m, p) => (ALLOW.test(m) ? m : p + blank(m.slice(p.length))))
   if (kind === 'html') out = out.replace(/<!--[\s\S]*?-->/g, blank)
   return out
@@ -160,6 +181,10 @@ export function scan(text, file = 'x.tsx') {
       const v0 = d.index + d[0].length - d[2].length
       for (const r of rawSizes(d[2])) push('ds/raw-size', `${d[1]}: ${r.value}`, at + v0 + r.at)
     }
+    for (const d of text.matchAll(COLOR_DECL)) {
+      const v0 = d.index + d[0].length - d[2].length
+      for (const c of namedColors(d[2])) push('ds/raw-color', c.value, at + v0 + c.at)
+    }
   }
   if (kind === 'js') {
     const decl = (text, at) => {
@@ -169,6 +194,10 @@ export function scan(text, file = 'x.tsx') {
           for (const r of rawSizes(d[2].slice(1, -1))) push('ds/raw-size', `${d[1]}: ${r.value}`, at + v0 + 1 + r.at)
         } else if (Number(d[2]) !== 0 && d[1] !== 'lineHeight') push('ds/raw-size', `${d[1]}: ${d[2]}`, at + v0)
       }
+      for (const d of text.matchAll(JS_COLOR)) {
+        const v0 = d.index + d[0].length - 1 - d[3].length
+        for (const c of namedColors(d[3])) push('ds/raw-color', c.value, at + v0 + c.at)
+      }
     }
     // React: style={{ … }}
     for (const m of src.matchAll(/style=\{\{([^{}]*)\}\}/g)) decl(m[1], m.index + 'style={{'.length)
@@ -176,6 +205,10 @@ export function scan(text, file = 'x.tsx') {
     for (const m of src.matchAll(new RegExp(`\\.style\\.(${SIZE_PROP_JS})\\s*=\\s*(['"\`])([^'"\`\\n]*)\\2`, 'g'))) {
       const v0 = m.index + m[0].length - 1 - m[3].length
       for (const r of rawSizes(m[3])) push('ds/raw-size', `${m[1]}: ${r.value}`, v0 + r.at)
+    }
+    for (const m of src.matchAll(new RegExp(`\\.style\\.(${COLOR_PROP_JS})\\s*=\\s*(['"\`])([^'"\`\\n]*)\\2`, 'g'))) {
+      const v0 = m.index + m[0].length - 1 - m[3].length
+      for (const c of namedColors(m[3])) push('ds/raw-color', c.value, v0 + c.at)
     }
   }
   return found.sort((a, b) => a.index - b.index)

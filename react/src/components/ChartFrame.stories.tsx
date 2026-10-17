@@ -30,7 +30,7 @@ const meta = {
         ]}
       />
     ),
-    className: 'max-w-2xl',
+    className: 'max-w-window',
   },
 } satisfies Meta<typeof ChartFrame>
 export default meta

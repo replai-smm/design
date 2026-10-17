@@ -182,7 +182,7 @@ export function ProofreadGrid<R>({
                 const selected = selectedKey != null && key === selectedKey
                 return (
                   <tr key={key} data-slot="row" data-selected={selected || undefined} className="border-t border-line">
-                    <th scope="row" className={cx('sticky left-0 z-10 max-w-3xs px-compact text-start text-body font-normal', selected ? 'bg-selected' : 'bg-surface')}>
+                    <th scope="row" className={cx('sticky left-0 z-10 max-w-rail px-compact text-start text-body font-normal', selected ? 'bg-selected' : 'bg-surface')}>
                       {onSelect ? (
                         <button type="button" aria-current={selected || undefined} onClick={() => onSelect(r)} className={cx('flex min-h-control w-full min-w-0 cursor-pointer items-center rounded-control text-start text-fg hover:underline', FOCUS)}>
                           <span className="truncate">{renderRowHeader(r)}</span>

@@ -6,7 +6,7 @@ const meta = {
   title: 'Поверхности/Схема',
   component: Diagram,
   parameters: { layout: 'padded' },
-  args: { label: 'Круг orbit', nodes: ringNodes, edges: ringEdges, ring: [0.5, 0.47], aspect: 'fit', onSelect: () => {}, className: 'max-w-xl' },
+  args: { label: 'Круг orbit', nodes: ringNodes, edges: ringEdges, ring: [0.5, 0.47], aspect: 'fit', onSelect: () => {}, className: 'max-w-wide' },
 } satisfies Meta<typeof Diagram>
 export default meta
 type S = StoryObj<typeof meta>

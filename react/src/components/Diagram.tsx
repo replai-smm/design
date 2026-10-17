@@ -68,7 +68,7 @@ export interface DiagramProps {
   className?: string
 }
 
-const ASPECT = { square: 'aspect-square', fit: 'aspect-3/4 @md:aspect-square' } as const
+const ASPECT = { square: 'aspect-square', fit: 'aspect-3/4 @form:aspect-square' } as const
 const DOT_BG: Record<DiagramTone | 'none', string> = { опасно: 'bg-danger', внимание: 'bg-warning', хорошо: 'bg-success', none: 'bg-fg-muted' }
 const WIDTH = { station: 'w-1/4', group: 'w-1/3', core: 'w-1/3' } as const
 
@@ -173,9 +173,9 @@ export function Diagram({ nodes, edges = [], label, ring, aspect = 'square', hig
                     return (
                       <li key={it.id} data-address={it.id} data-lit={self.has(it.id) || undefined} aria-current={focus === it.id ? 'location' : undefined} className={cx('relative', faded(it.id, n.id) && 'opacity-40')}>
                         <Ring on={self.has(it.id)} strong={focus === it.id} />
-                        <Row {...(onSelect ? { type: 'button' as const, onClick: pick(it.id) } : {})} className={cx('flex w-full min-w-0 flex-wrap items-center gap-x-tight border-t border-line py-tight text-start text-caption @md:flex-nowrap', press)}>
+                        <Row {...(onSelect ? { type: 'button' as const, onClick: pick(it.id) } : {})} className={cx('flex w-full min-w-0 flex-wrap items-center gap-x-tight border-t border-line py-tight text-start text-caption @form:flex-nowrap', press)}>
                           {it.tone && <Icon tone={it.tone} />}
-                          <span className="min-w-0 flex-auto break-words @md:flex-1 @md:truncate">{it.label}</span>
+                          <span className="min-w-0 flex-auto break-words @form:flex-1 @form:truncate">{it.label}</span>
                           {it.value !== undefined && <span className="ml-auto shrink-0 text-fg-muted">{it.value}</span>}
                         </Row>
                       </li>

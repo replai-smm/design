@@ -15,7 +15,7 @@ export const Загрузка: S = {
   tags: ['state:загрузка'],
   render: (args) => (
     <Loading label={args.label}>
-      <div className="flex max-w-md flex-col gap-items">
+      <div className="flex max-w-form flex-col gap-items">
         <Skeleton width="1/3" />
         <Skeleton />
         <Skeleton width="3/4" />

@@ -13,7 +13,7 @@ const meta = {
       { value: 'km', label: 'Контент-менеджер' },
       { value: 'target', label: 'Таргетолог' },
     ],
-    className: 'max-w-xs',
+    className: 'max-w-narrow',
   },
 } satisfies Meta<typeof Select>
 export default meta

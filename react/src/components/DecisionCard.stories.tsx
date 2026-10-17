@@ -16,7 +16,7 @@ const meta = {
     question: 'Разрешить?',
     primary: { label: 'Разрешить' },
     actions: <Button>Не сейчас</Button>,
-    className: 'max-w-xl',
+    className: 'max-w-wide',
   },
 } satisfies Meta<typeof DecisionCard>
 export default meta

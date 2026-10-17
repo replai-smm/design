@@ -70,7 +70,7 @@ export function Toaster({ children, initial = [] }: ToasterProps) {
             </RToast.Close>
           </RToast.Root>
         ))}
-        <RToast.Viewport className="fixed inset-x-0 bottom-0 z-50 m-0 flex list-none flex-col gap-items p-blocks md:right-0 md:left-auto md:w-sm" />
+        <RToast.Viewport className="fixed inset-x-0 bottom-0 z-50 m-0 flex list-none flex-col gap-items p-blocks md:right-0 md:left-auto md:w-popup" />
       </RToast.Provider>
     </ToastContext.Provider>
   )

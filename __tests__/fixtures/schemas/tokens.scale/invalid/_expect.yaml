@@ -3,3 +3,4 @@ move-not-600.json: { path: '/motion/move/value', keyword: const }
 space-in-px.json: { path: '/space/items/value', keyword: pattern }
 extra-text-role.json: { path: '/text', keyword: additionalProperties }
 no-motion.json: { path: '', keyword: required, missing: motion }
+measure-tailwind-name.json: { path: '/measure', keyword: required, missing: window }

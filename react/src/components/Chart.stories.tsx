@@ -18,7 +18,7 @@ const meta = {
     ],
   },
   render: (args) => (
-    <div className="ds-chart-area max-w-2xl">
+    <div className="ds-chart-area max-w-window">
       <Chart {...args} />
     </div>
   ),

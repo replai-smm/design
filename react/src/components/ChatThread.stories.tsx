@@ -16,7 +16,7 @@ const meta = {
   args: { label: 'Переписка с Анной Петровой', messages: chat },
   decorators: [
     (Story) => (
-      <div className="flex h-dvh max-w-2xl flex-col rounded-surface border border-line bg-surface">
+      <div className="flex h-dvh max-w-window flex-col rounded-surface border border-line bg-surface">
         <Story />
       </div>
     ),

@@ -406,6 +406,7 @@
         "doc",
         "space",
         "size",
+        "measure",
         "text",
         "font",
         "radius",
@@ -468,6 +469,50 @@
               "$ref": "#/$defs/space"
             },
             "touch": {
+              "$ref": "#/$defs/space"
+            }
+          }
+        },
+        "measure": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rail",
+            "hint",
+            "narrow",
+            "popup",
+            "form",
+            "panel",
+            "wide",
+            "window",
+            "page"
+          ],
+          "properties": {
+            "rail": {
+              "$ref": "#/$defs/space"
+            },
+            "hint": {
+              "$ref": "#/$defs/space"
+            },
+            "narrow": {
+              "$ref": "#/$defs/space"
+            },
+            "popup": {
+              "$ref": "#/$defs/space"
+            },
+            "form": {
+              "$ref": "#/$defs/space"
+            },
+            "panel": {
+              "$ref": "#/$defs/space"
+            },
+            "wide": {
+              "$ref": "#/$defs/space"
+            },
+            "window": {
+              "$ref": "#/$defs/space"
+            },
+            "page": {
               "$ref": "#/$defs/space"
             }
           }
