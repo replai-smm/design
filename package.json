@@ -29,6 +29,7 @@
   },
   "files": [
     "dist",
+    "!dist/showcase.html",
     "fonts",
     "licenses",
     "lint",
@@ -36,6 +37,8 @@
     "!react/src/**/__tests__",
     "!react/src/**/*.stories.tsx",
     "!react/src/stories",
+    "!react/src/showcase.css",
+    "!react/src/storybook.css",
     "tokens.json",
     "scale.json",
     "statuses.json",

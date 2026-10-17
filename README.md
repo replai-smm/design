@@ -1,6 +1,6 @@
 # Дизайн-система replai-smm
 
-Один источник облика для всех продуктов (DF, чат orbit, Replai, Арена): роли и шкалы, ДС-React по уровням, правила,
+Один источник облика для всех продуктов: роли и шкалы, ДС-React по уровням, правила,
 которые держит машина. Продукт берёт пакет по тегу и строит из него только экраны.
 
 Посмотреть: `npm ci && npm run build` → `dist/showcase.html` (обе темы, 390 и 1280, без сети) или `npm run storybook`.
@@ -16,6 +16,7 @@
 | Текст | 7 ролей: `caption` 12 · `body` 14 · `heading` 14/600 · `reading` 16 · `code` 13 моно · `title` 20 · `page` 28 | `scale.json → text` |
 | Отступ | 6 ролей: `tight` 4 · `items` 8 · `compact` 12 · `blocks` 16 · `groups` 24 · `sections` 32 — и в классах (`gap-items`, `p-blocks`), и в `Stack gap="items"` | `scale.json → space` |
 | Высота | `icon` 16 · `dense` 32 · `control` 40 · `touch` 48: контрол — 48 на телефоне и 40 на ноутбуке, плотный — 32 | `scale.json → size` |
+| Ширина | предел колонки, окна, страницы: `rail` 16rem · `hint` · `narrow` · `popup` · `form` · `panel` · `wide` · `window` · `page` 80rem — `max-w-window`, `w-rail`; размеров контейнеров Tailwind (`max-w-md`) нет | `scale.json → measure` |
 | Угол | `control` 4 · `surface` 6 · `full` — только метка, счётчик, аватар, точка | `scale.json → radius` |
 | Глубина | плоско (рамка) · всплывает (`shadow-raised`) · поверх (`shadow-overlay` и затемнение `scrim`) | `scale.json → elevation` |
 | Движение | `duration-fast` 110 мс (отклик) · `duration-move` 0,6 с (раскрытие, выезд), одна кривая; «уменьшить движение» — обе 0 | `scale.json → motion` |
@@ -35,7 +36,7 @@
 |---|---|
 | Основы | роли и шкалы (без компонентов) |
 | Раскладка | Stack, Inline, Grid, Page, PageHeader, Section, SurfaceProvider |
-| Элементы | Icon, Button, ActionArea, StatusBadge, CountBadge, Avatar, InlineLoading, Meter, Steps, Tooltip, Delta, Skeleton, Loading, Prose, Chart |
+| Элементы | Icon, Button, ActionArea, StatusBadge, CountBadge, Avatar, InlineLoading, Meter, Steps, Tooltip, Delta, Skeleton, Loading, Prose, ProseHtml, Chart |
 | Поля | TextField, TextArea, Select, NumberField, Checkbox, CheckboxGroup, Combobox, FileField, SearchField |
 | Поверхности | Surface, Card, StatTile, Notification, StateView, CodeBlock, ChartFrame; DecisionCard, Diagram — чат |
 | Коллекции | DataTable, List; ProofreadGrid, GridLegend, WeekCalendar — DF |
@@ -49,7 +50,7 @@
 
 | Правило | Чем держится | Приманка (обязана быть красной) |
 |---|---|---|
-| Только роли и шкалы: нет сырых цветов и размеров, произвольных значений, палитры Tailwind и классов вне шкал (`pl-5`, `gap-1.5`, `text-sm`, `h-12`, `rounded-lg`) | тема Tailwind (`dist/tailwind.css`) таких классов не создаёт; `lint/scan.mjs` (`ds/off-scale` и др.) — в ДС `npm run lint`, в продукте `lint/cli.mjs` и `lint/principles.mjs` | `__tests__/bait/off-scale.tsx` |
+| Только роли и шкалы: нет сырых цветов и размеров, произвольных значений, палитры Tailwind и классов вне шкал (`pl-5`, `gap-1.5`, `text-sm`, `h-12`, `rounded-lg`, `max-w-md`) | тема Tailwind (`dist/tailwind.css`) таких классов не создаёт; `lint/scan.mjs` (`ds/off-scale` и др.) — в ДС `npm run lint`, в продукте `lint/cli.mjs` и `lint/principles.mjs` | `__tests__/bait/off-scale.tsx` |
 | Устройство: у каждого экспорта — запись в реестре; уровень из списка; импорт только нижних уровней (своего — только база уровня или исключение с «почему»); один смысл — один компонент; пары-соседи — с «почему»; полка = уровень; тон и ход — только из словарей; значки — только `Icon`; таблетки и свои `<svg>` — только в названных файлах | `lib/architecture.mjs`, тест `architecture.test.ts` | `__tests__/bait/architecture/` |
 | Облик и анатомия: каждая история × светлая и тёмная × 390 и 1280 против эталона; поля, роль заголовка, угол и метка — по реестру; текст, углы и высоты контролов — только из шкал | `react/visual/run.mjs` (`npm run test:visual`), эталоны `react/visual/baseline/` | `__tests__/visual.test.ts`: кадр со сдвигом на 1 px, снимок с полями 12 вместо 16 |
 | Контраст: текст ≥ 4,5 : 1, знаки, границы контролов, фокус и ряды данных ≥ 3 : 1 — обе темы | `lib/contrast.mjs`, `contrast.test.ts` | пара светло-серого текста на белом |
@@ -87,8 +88,7 @@
 `node node_modules/@replai-smm/design/lint/principles.mjs --kind product --base origin/main src`; правило ESLint —
 `@replai-smm/design/lint/eslint-plugin` (`ds/no-raw-values`); старые нарушения — храповиком `lint/cli.mjs --baseline`.
 
-Репо закрытый: `npm ci` на раннере читает его с токеном организации (шаг `.github/actions/git-auth` из process).
-В теге лежит собранный `dist/`, скриптов установки нет. Версия растёт только тегом: Run workflow «Release».
+Репо публичное: `npm ci` ставит пакет по тегу без токена. В теге лежит собранный `dist/`, скриптов установки нет. Версия растёт только тегом: Run workflow «Release».
 
 ## Как поменять основу или компонент
 
@@ -108,4 +108,5 @@
 | `build.mjs`, `lib/` | генератор `dist/` и значков, контраст, устройство |
 | `lint/` | сторож «только роли и шкалы», полки и свои компоненты |
 | `react/` | ДС-React: компоненты, реестр, истории, тесты, облик (`react/README.md`) |
+| `react/dist/showcase-components.html` | образцы компонентов для `dist/showcase.html`: пишет `npm run showcase -w react`, тест сверяет с историями и с поясом; в коммите, в пакет не входит |
 | `dist/` | вывод `npm run build`; в ветке его нет, в тег кладёт выпуск |

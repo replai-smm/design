@@ -154,4 +154,19 @@ describe('образцы ДС-React для showcase.html', () => {
     expect(existsSync(OUT), 'нет dist/showcase-components.html — npm run showcase').toBe(true)
     expect(readFileSync(OUT, 'utf8') === html, 'dist/showcase-components.html отстал — npm run showcase, потом npm run build').toBe(true)
   })
+
+  it('не зависит от пояса: в UTC и на Кирибати тот же файл', { timeout: 120_000 }, async () => {
+    const tz = process.env.TZ
+    try {
+      const at: string[] = []
+      for (const zone of ['UTC', 'Pacific/Kiritimati']) {
+        process.env.TZ = zone
+        at.push((await fragment()).replace(/r_[0-9a-z]+_/g, 'r_')) // useId считает дальше при втором прогоне — номера не сравниваем
+      }
+      expect(at[0] === at[1], 'образцы зависят от пояса: дата в историях берётся из местного времени без закрепления').toBe(true)
+    } finally {
+      if (tz === undefined) delete process.env.TZ
+      else process.env.TZ = tz
+    }
+  })
 })

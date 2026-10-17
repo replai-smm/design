@@ -21,8 +21,8 @@ describe('пакет @replai-smm/design', () => {
     expect(packed).toContain(target.replace(/^\.\//, ''))
   })
 
-  it('в составе нет тестов, историй, генератора и dev-конфигов', () => {
-    expect(packed.filter((p) => /__tests__|\.stories\.|^react\/src\/stories\/|^lib\/|^build\.mjs|\.storybook|vite\.config|vitest\.config/.test(p))).toEqual([])
+  it('в составе нет тестов, историй, генератора, dev-конфигов и страницы образцов со стилями Storybook', () => {
+    expect(packed.filter((p) => /__tests__|\.stories\.|^react\/src\/stories\/|^lib\/|^build\.mjs|\.storybook|vite\.config|vitest\.config|^dist\/showcase\.html|\/showcase\.css|\/storybook\.css/.test(p))).toEqual([])
   })
 
   it('нет скриптов установки: продукт ставит пакет без сборки и без devDependencies (dist лежит в теге)', () => {

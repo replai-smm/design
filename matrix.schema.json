@@ -92,7 +92,7 @@
   },
   "$defs": {
     "theme": {
-      "$comment": "colour theme of the design system: Carbon g10 = светлая, g100 = тёмная",
+      "$comment": "тема облика: светлая или тёмная",
       "enum": [
         "светлая",
         "тёмная"
