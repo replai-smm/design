@@ -25,9 +25,8 @@ jobs:
     name: ДС · типы, сторож, тесты, Storybook
     runs-on: ${{ fromJSON(vars.CI_RUNNER || '"ubuntu-latest"') }}
     timeout-minutes: 15
-    # снимок showcase-components.html записан в поясе ПК (UTC+5: toISOString() в историях зависит от пояса)
     env:
-      TZ: Asia/Yekaterinburg
+      IBM_TELEMETRY_DISABLED: 'true'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -36,6 +35,9 @@ jobs:
           cache: ${{ runner.environment == 'github-hosted' && 'npm' || '' }}
       - run: $(command -v rsmm-npm-ci || echo npm ci) --prefer-offline --no-audit --no-fund
       - run: npx playwright install --with-deps chromium
+        if: runner.environment == 'github-hosted'
+      - run: npx playwright install chromium
+        if: runner.environment != 'github-hosted'
       - run: npm run check
       - uses: actions/upload-artifact@v4
         if: failure()
