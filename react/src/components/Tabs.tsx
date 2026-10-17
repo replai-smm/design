@@ -1,12 +1,14 @@
 /**
  * Вкладки — ряд сегментов (тот же ряд, что у фильтров) и панели. Вкладка называется вопросом человека (П1).
- * Выбранная — роль «выбрано». Счётчик — `CountBadge` тона словаря: у срочного — знак. На телефоне ряд переносится.
+ * Выбранная — роль «выбрано». Счётчик — `CountBadge` тона словаря: у срочного — знак. Не влезает в ширину (телефон) —
+ * ряд одной строкой с прокруткой без полосы, выбранная вкладка прокручивается в поле зрения.
  * Неактивная панель размонтируется; `keepMounted` — живёт спрятанной (вкладка-iframe хранит своё состояние).
  * Значение не из ряда — ни одна не выбрана.
  */
-import type { ReactNode } from 'react'
+import { useEffect, useRef, type ReactNode } from 'react'
 import { Tabs as RTabs } from 'radix-ui'
-import { FOCUS, SEGMENT, SEGMENT_ON, SEGMENTS } from '../lib/anatomy'
+import { FOCUS, SEGMENT, SEGMENT_ON, SEGMENTS, SEGMENTS_SCROLL } from '../lib/anatomy'
+import { useControllable } from '../lib/controllable'
 import { cx } from '../lib/cx'
 import type { Tone } from '../lib/vocab'
 import { CountBadge } from './CountBadge'
@@ -32,10 +34,23 @@ export interface TabsProps {
   className?: string
 }
 
+/** Прокрутить ряд так, чтобы выбранная вкладка была видна целиком (только ряд, страница не двигается). */
+function revealActive(row: HTMLElement | null) {
+  const on = row?.querySelector<HTMLElement>('[data-state=active]')
+  if (!row || !on) return
+  const r = row.getBoundingClientRect()
+  const t = on.getBoundingClientRect()
+  if (t.left < r.left) row.scrollLeft -= r.left - t.left
+  else if (t.right > r.right) row.scrollLeft += t.right - r.right
+}
+
 export function Tabs({ items, label, value, defaultValue, onValueChange, className }: TabsProps) {
+  const [current, setCurrent] = useControllable(value, defaultValue ?? items[0]?.value ?? '', onValueChange)
+  const row = useRef<HTMLDivElement>(null)
+  useEffect(() => revealActive(row.current), [current])
   return (
-    <RTabs.Root data-slot="tabs" value={value} defaultValue={defaultValue ?? items[0]?.value} onValueChange={onValueChange} className={cx('flex min-w-0 flex-col gap-blocks', className)}>
-      <RTabs.List aria-label={label} data-part="segments" className={SEGMENTS}>
+    <RTabs.Root data-slot="tabs" value={current} onValueChange={setCurrent} className={cx('flex min-w-0 flex-col gap-blocks', className)}>
+      <RTabs.List ref={row} aria-label={label} data-part="segments" className={cx(SEGMENTS, SEGMENTS_SCROLL)}>
         {items.map((t) => (
           <RTabs.Trigger key={t.value} value={t.value} className={cx(SEGMENT, SEGMENT_ON)}>
             {t.label}

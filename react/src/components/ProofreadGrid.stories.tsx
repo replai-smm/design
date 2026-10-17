@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { communities, manyCommunities, monthColumns, proofCell, type Community } from '../stories/df-fixtures'
-import { GridLegend, ProofreadGrid, type GridColumn } from './ProofreadGrid'
+import { GridLegend, ProofreadGrid, StatusRow, type GridColumn } from './ProofreadGrid'
 
 const legend = (
   <GridLegend
@@ -34,7 +34,7 @@ const meta = {
 export default meta
 type S = StoryObj<typeof meta>
 
-/** Подложка — только у пропуска и недобора; норма — значение без цвета. */
+/** Сетка статуса: клетка залита тоном статуса — читается с одного взгляда; слово — для читалки. */
 export const Обычное: S = { args: { selectedKey: 'c2' } }
 export const Загрузка: S = { tags: ['state:загрузка'], args: { state: 'loading' } }
 export const Ошибка: S = { tags: ['state:ошибка'], args: { state: 'error', error: { title: 'Сверка не загрузилась', onRetry: () => {} } } }
@@ -66,5 +66,23 @@ export const Деньги: S = {
       }}
       totals={{ label: 'Итого', getCell: (c) => ({ value: rub(projects.reduce((n, p) => n + p.money[months.indexOf(c)]!, 0)) }) }}
     />
+  ),
+}
+
+/** День сетки развёрнутым (DF «Вычитка», посты по дням): строка залита тем же тоном, что клетка дня. */
+export const СтрокиСтатуса: S = {
+  render: () => (
+    <div className="flex max-w-page flex-col gap-items">
+      <StatusRow tone="хорошо" title={<><b>1-е</b> · план выполнен · вышло 2 из 2</>}>
+        <p className="m-0 pl-blocks text-body">12:00 · Акция · Пост 1</p>
+        <p className="m-0 pl-blocks text-body">
+          18:30 · <span className="text-caption text-fg-muted">рубрика не распознана</span>
+        </p>
+      </StatusRow>
+      <StatusRow tone="опасно" title={<><b>2-е</b> · пропуск - постов не было · вышло 0 из 2</>} />
+      <StatusRow tone="внимание" title={<><b>3-е</b> · недобор · вышло 1 из 2 · возможен перенос</>} />
+      <StatusRow tone="нейтрально" title={<><b>5-е</b> · сверх плана · вышло 3 из 2</>} />
+      <StatusRow title={<><b>4-е</b> · нет нормы в плане</>} />
+    </div>
   ),
 }

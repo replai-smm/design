@@ -47,6 +47,11 @@ describe('словарь тонов', () => {
     expect(Object.entries<any>(tokens.tones).filter(([, x]) => x.bg).map(([t]) => t)).toEqual(['опасно', 'внимание'])
   })
 
+  it('заливка статуса (сетка статуса) — роль `<тон>-fill` у всех тонов, кроме «инфо»', () => {
+    for (const [t, x] of Object.entries<any>(tokens.tones)) expect(x.fill, t).toBe(t === 'инфо' ? null : `${x.key}-fill`)
+    for (const [t, x] of Object.entries<any>(tokens.tones)) if (x.fill) expect(tokens.colors[x.fill], `${t}: ${x.fill}`).toBeDefined()
+  })
+
   it('«хорошо» — зелёный знак без подложки (норма не кричит)', () => {
     const t = tokens.tones['хорошо']
     expect(t.bg).toBeNull()

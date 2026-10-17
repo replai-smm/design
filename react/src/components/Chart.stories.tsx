@@ -28,6 +28,8 @@ type S = StoryObj<typeof meta>
 
 /** Ряды данных — свои роли, не цвета беды; вид линии — как в легенде. */
 export const Линии: S = {}
+/** Одна величина во времени — заливка под линией цветом ряда. */
+export const Заливка: S = { args: { area: true, label: 'Просмотры по дням', series: [{ key: 'v', label: 'просмотры', data: reach, series: 1 }] } }
 /** Столбцы с подписями значений. */
 export const Столбцы: S = { args: { kind: 'bar', label: 'Постов в день', values: true, series: [{ key: 'p', label: 'посты', data: postsPerDay, series: 5 }] } }
 /** Шесть рядов данных. */

@@ -44,6 +44,7 @@ function Tones() {
             <StatusBadge tone={t} label={t} />
             <span className="text-caption text-fg-muted">
               знак {tones[t].mark} · текст {tones[t].text} · {tones[t].bg ? `подложка ${tones[t].bg}` : 'без подложки'}
+              {tones[t].fill ? ` · сетка статуса ${tones[t].fill}` : ''}
             </span>
           </li>
         ))}

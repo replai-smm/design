@@ -40,7 +40,7 @@ export { Diagram, edgePath, litSet, type DiagramProps, type DiagramNode, type Di
 
 // Коллекции
 export { DataTable, List, compareSortValues, type Column, type SortDirection, type SortState, type DataTableProps, type ListProps, type CollectionProps } from './components/Collection'
-export { ProofreadGrid, GridLegend, type ProofreadGridProps, type GridColumn, type GridCell, type GridLegendProps } from './components/ProofreadGrid'
+export { ProofreadGrid, GridLegend, StatusRow, type ProofreadGridProps, type GridColumn, type GridCell, type GridLegendProps, type StatusRowProps } from './components/ProofreadGrid'
 export { WeekCalendar, mondayOf, addWeeks, weekTitle, type WeekCalendarProps } from './components/WeekCalendar'
 
 // Слои

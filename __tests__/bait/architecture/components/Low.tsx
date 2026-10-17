@@ -7,5 +7,6 @@ export const Low = ({ tone }: { tone: LowTone }) => (
     ◀ <svg viewBox="0 0 16 16" />
     <High />
     <Good />
+    <p className="rounded-surface bg-success-fill">план выполнен</p>
   </span>
 )

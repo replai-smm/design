@@ -1,7 +1,7 @@
 /**
  * Сторожа пакета: истории на каждое обещанное состояние (П12), теги состояний — только из матрицы облика; только роли
  * и шкалы в исходниках и историях; движение — токенами, раскрытие и выезд — 0,6 с без прыжка; классы тонов — те же
- * роли, что в словаре тонов tokens.json.
+ * роли, что в словаре тонов tokens.json (и заливка сетки статуса).
  */
 import { describe, it, expect } from 'vitest'
 import { readFileSync, readdirSync } from 'node:fs'
@@ -9,6 +9,7 @@ import { resolve, join } from 'node:path'
 import { scan } from '../../../lint/scan.mjs'
 import { tones } from '../../../dist/tokens.ts'
 import { TONE, TONES } from '../lib/vocab'
+import { FILL } from '../components/ProofreadGrid'
 import { stories, stateOf, STORY_FILES } from './stories'
 
 const root = resolve(import.meta.dirname, '..', '..')
@@ -58,7 +59,7 @@ const PROMISED: Record<string, string[]> = {
   'Dialog.stories.tsx': ['обычное', 'загрузка', 'ошибка'],
   'Toast.stories.tsx': ['обычное'],
   'CommandMenu.stories.tsx': ['обычное', 'ничего не найдено', 'много'],
-  'Tabs.stories.tsx': ['обычное'],
+  'Tabs.stories.tsx': ['обычное', 'много'],
   'FilterBar.stories.tsx': ['обычное'],
   'ThreeColumn.stories.tsx': ['обычное', 'первый запуск'],
   'ChatThread.stories.tsx': ['обычное', 'загрузка', 'ошибка', 'первый запуск', 'много'],
@@ -111,6 +112,10 @@ describe('только роли и шкалы', () => {
       const x = tones[t]
       expect(TONE[t], t).toMatchObject({ key: x.key, mark: `text-${x.mark}`, text: `text-${x.text}`, bg: x.bg ? `bg-${x.bg}` : null, icon: `tone-${x.key}` })
     }
+  })
+
+  it('заливка сетки статуса — те же роли, что tokens.json → tones.*.fill', () => {
+    for (const t of TONES) expect(FILL[t], t).toBe(tones[t].fill ? `bg-${tones[t].fill}` : null)
   })
 })
 

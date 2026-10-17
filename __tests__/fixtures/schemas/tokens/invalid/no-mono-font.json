@@ -111,6 +111,26 @@
       "dark": "#42be65",
       "role": "знак тона «хорошо»; подложки нет — норма не кричит"
     },
+    "danger-fill": {
+      "light": "#ffd7d9",
+      "dark": "#5a1d22",
+      "role": "заливка статуса «опасно» (пропуск): только сетка статуса"
+    },
+    "warning-fill": {
+      "light": "#fcf4d6",
+      "dark": "#433609",
+      "role": "заливка статуса «внимание» (недобор): только сетка статуса"
+    },
+    "neutral-fill": {
+      "light": "#e0e0e0",
+      "dark": "#35353b",
+      "role": "заливка статуса «нейтрально» (сверх плана): только сетка статуса"
+    },
+    "success-fill": {
+      "light": "#a7f0ba",
+      "dark": "#133e23",
+      "role": "заливка статуса «хорошо» (план выполнен): только сетка статуса"
+    },
     "series-1": {
       "light": "#6929c4",
       "dark": "#a56eff",
@@ -147,31 +167,36 @@
       "key": "danger",
       "mark": "danger",
       "text": "danger-fg",
-      "bg": "danger-bg"
+      "bg": "danger-bg",
+      "fill": "danger-fill"
     },
     "внимание": {
       "key": "warning",
       "mark": "warning",
       "text": "warning-fg",
-      "bg": "warning-bg"
+      "bg": "warning-bg",
+      "fill": "warning-fill"
     },
     "инфо": {
       "key": "info",
       "mark": "fg",
       "text": "fg",
-      "bg": null
+      "bg": null,
+      "fill": null
     },
     "нейтрально": {
       "key": "neutral",
       "mark": "fg-muted",
       "text": "fg",
-      "bg": null
+      "bg": null,
+      "fill": "neutral-fill"
     },
     "хорошо": {
       "key": "success",
       "mark": "success",
       "text": "fg",
-      "bg": null
+      "bg": null,
+      "fill": "success-fill"
     }
   },
   "font": {

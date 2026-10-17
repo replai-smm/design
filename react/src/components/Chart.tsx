@@ -2,8 +2,9 @@
  * График линий и столбцов на SVG — рисунок данных без своей поверхности: рамку, легенду и состояния даёт `ChartFrame`.
  * Цвета рядов — роли рядов данных 1–6 (не цвета тонов: линия не выглядит бедой). Вид линии (сплошная, пунктир,
  * точки) — тот же, что в легенде: цвет никогда не один. Ось Y с нуля короткими числами, подписи X не чаще 10, точки
- * при ≤ 45 значениях, подсказка — `<title>`. `values` — подписи значений над точками и столбцами. Меньше двух точек
- * у линии — `chartHasData()` ложь, продукт показывает `empty` рамки.
+ * при ≤ 45 значениях, подсказка — `<title>`. `values` — подписи значений над точками и столбцами. `area` — заливка под
+ * одной линией (одна величина во времени: просмотры, расход) цветом её ряда, тише; у нескольких рядов заливки нет —
+ * они легли бы друг на друга. Меньше двух точек у линии — `chartHasData()` ложь, продукт показывает `empty` рамки.
  */
 
 /** Ряды данных 1–6 по порядку; больше шести — по кругу (различает вид линии). */
@@ -36,6 +37,8 @@ export interface ChartProps {
   label: string
   /** Подписи значений над точками и столбцами. */
   values?: boolean
+  /** Заливка под линией — только у одного ряда линий. */
+  area?: boolean
   /** Как писать значение в подписи и подсказке (по умолчанию «12 345,6»). */
   format?: (v: number) => string
 }
@@ -48,6 +51,8 @@ const PAD_R = 8
 const PAD_B = 24
 const PW = W - PAD_L - PAD_R
 const INSET = 16
+/** Заливка под линией — цвет ряда тише: рисунок данных, не текст и не поверхность (как у Carbon Charts). */
+const AREA_OPACITY = 0.15
 
 const compact = new Intl.NumberFormat('ru-RU', { notation: 'compact' })
 const full = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 1 })
@@ -81,7 +86,7 @@ export function chartHasData(kind: ChartProps['kind'], series: ChartSeries[]): b
   return kind === 'line' ? most >= 2 : most >= 1
 }
 
-export function Chart({ kind, labels, series, label, values, format = (v) => full.format(v) }: ChartProps) {
+export function Chart({ kind, labels, series, label, values, area, format = (v) => full.format(v) }: ChartProps) {
   const padT = values ? 20 : 8
   const ph = H - padT - PAD_B
   const n = Math.max(labels.length, ...series.map((s) => s.data.length))
@@ -90,6 +95,8 @@ export function Chart({ kind, labels, series, label, values, format = (v) => ful
   const band = n ? PW / n : PW
   const x = (i: number) => (kind === 'bar' ? PAD_L + band * i + band / 2 : PAD_L + INSET + (n > 1 ? ((PW - 2 * INSET) * i) / (n - 1) : PW / 2 - INSET))
   const dots = n <= 45
+  const base = padT + ph
+  const filled = area && kind === 'line' && series.length === 1
   const tip = (i: number, s: ChartSeries, v: number) => `${labels[i] ?? ''} · ${s.label}: ${format(v)}`
   const valueText = (key: string, cx: number, cy: number, v: number) => (
     <text key={key} x={cx} y={cy - 6} textAnchor="middle" data-slot="chart-value" className="fill-fg text-caption">
@@ -123,7 +130,7 @@ export function Chart({ kind, labels, series, label, values, format = (v) => ful
                   const bx = x(i) - (band * 0.8) / 2 + w * si
                   return (
                     <g key={i}>
-                      <rect x={bx} y={y(v)} width={w} height={Math.max(0, padT + ph - y(v))} className={SERIES.fill[c]}>
+                      <rect x={bx} y={y(v)} width={w} height={Math.max(0, base - y(v))} className={SERIES.fill[c]}>
                         <title>{tip(i, s, v)}</title>
                       </rect>
                       {values && valueText(`v${i}`, bx + w / 2, y(v), v)}
@@ -138,6 +145,14 @@ export function Chart({ kind, labels, series, label, values, format = (v) => ful
             const pts = s.data.flatMap((v, i) => (v == null ? [] : [{ i, v, px: x(i), py: y(v) }]))
             return (
               <g key={s.key} data-series={c} data-line={s.line ?? 'solid'}>
+                {filled && pts.length > 1 && (
+                  <path
+                    data-slot="chart-area"
+                    d={`M${pts[0]!.px.toFixed(1)},${base} ${pts.map((p) => `L${p.px.toFixed(1)},${p.py.toFixed(1)}`).join(' ')} L${pts[pts.length - 1]!.px.toFixed(1)},${base} Z`}
+                    className={SERIES.fill[c]}
+                    fillOpacity={AREA_OPACITY}
+                  />
+                )}
                 <polyline points={pts.map((p) => `${p.px.toFixed(1)},${p.py.toFixed(1)}`).join(' ')} fill="none" className={SERIES.stroke[c]} strokeWidth={2} strokeDasharray={DASH[s.line ?? 'solid']} strokeLinejoin="round" />
                 {dots &&
                   pts.map((p) => (

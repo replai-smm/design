@@ -3,7 +3,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent, within, act, waitFor } from '@testing-library/react'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { addWeeks, compareSortValues, DataTable, GridLegend, List, mondayOf, ProofreadGrid, weekTitle, WeekCalendar, type Column, type SortState } from '../index'
+import { addWeeks, compareSortValues, DataTable, GridLegend, List, mondayOf, ProofreadGrid, StatusRow, weekTitle, WeekCalendar, type Column, type SortState } from '../index'
 import { TONE_ORDER, toneOf } from '../lib/vocab'
 import { cabinets, groups, many, type CabinetRow, type GroupRow } from '../stories/fixtures'
 import { communities, manyCommunities, monthColumns, posts, proofCell, today, weekStart, type Post } from '../stories/df-fixtures'
@@ -119,13 +119,13 @@ describe('таблица: сортировка — выбор человека, 
 describe('сетка сверки (DF)', () => {
   const props = { label: 'Посты по дням', rowHeader: 'Сообщество', columns: monthColumns, rows: communities, getKey: (r: (typeof communities)[number]) => r.id, renderRowHeader: (r: (typeof communities)[number]) => r.name, getCell: proofCell }
 
-  it('настоящая таблица; клетка — значение и слово для читалки; подложка только у срочного, впереди — тихо', () => {
+  it('настоящая таблица; клетка — значение и слово для читалки; залита тоном статуса, впереди — тихо', () => {
     const { container } = render(<ProofreadGrid {...props} />)
     expect(screen.getByRole('table', { name: 'Посты по дням' })).toBeTruthy()
     const danger = container.querySelector('td[data-tone=danger]')!
-    expect(danger.className).toContain('bg-danger-bg')
+    expect(danger.className).toContain('bg-danger-fill')
     expect(danger.textContent).toContain('пропуск')
-    expect(container.querySelector('td[data-tone=success]')!.className).not.toMatch(/bg-(?:danger|warning)/)
+    expect(container.querySelector('td[data-tone=success]')!.className).toContain('bg-success-fill')
     expect(container.querySelector('td[data-quiet]')!.className).toContain('text-fg-muted')
     expect(container.querySelector('td[data-note]')!.className).toContain('border-b-warning')
   })
@@ -139,10 +139,27 @@ describe('сетка сверки (DF)', () => {
     expect(screen.getByRole('button', { name: /показать ещё · 20/ })).toBeTruthy()
   })
 
-  it('легенда: образец только у тонов с подложкой, слово — у всех', () => {
-    const { container } = render(<GridLegend items={[{ tone: 'опасно', label: 'пропуск' }, { tone: 'хорошо', label: 'в норме' }]} />)
-    expect(container.querySelectorAll('li span[aria-hidden]')).toHaveLength(1)
-    expect(container.textContent).toBe('пропускв норме')
+  it('легенда: образец у тонов с заливкой, слово — у всех', () => {
+    const { container } = render(<GridLegend items={[{ tone: 'опасно', label: 'пропуск' }, { tone: 'хорошо', label: 'в норме' }, { label: 'нет нормы' }]} />)
+    expect([...container.querySelectorAll('li span[aria-hidden]')].map((x) => x.className.split(' ').find((c) => c.endsWith('-fill')))).toEqual(['bg-danger-fill', 'bg-success-fill'])
+    expect(container.textContent).toBe('пропускв норменет нормы')
+  })
+
+  it('строка статуса: заливка того же тона, что у клетки; без тона — без заливки; свои data-атрибуты продукта', () => {
+    const { container } = render(
+      <>
+        <StatusRow tone="хорошо" title="1-е · план выполнен" data-day="1">
+          <p>12:00 Пост 1</p>
+        </StatusRow>
+        <StatusRow title="4-е · нет нормы в плане" />
+      </>,
+    )
+    const [ok, none] = container.querySelectorAll('[data-slot=status-row]')
+    expect(ok.className).toContain('bg-success-fill')
+    expect(ok.getAttribute('data-tone')).toBe('success')
+    expect(ok.getAttribute('data-day')).toBe('1')
+    expect(ok.textContent).toBe('1-е · план выполнен12:00 Пост 1')
+    expect(none.className).not.toMatch(/-fill\b/)
   })
 })
 

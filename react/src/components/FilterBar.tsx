@@ -1,11 +1,12 @@
 /**
  * Фильтры в адресе страницы (`?статус=падает&q=…`): ссылку можно переслать, «назад» возвращает прежний вид.
- * Фильтр — ряд сегментов (тот же ряд, что у вкладок), выбранный — «выбрано»; «все» — сброс; `required` — выбор
- * обязателен (режим «30 дней / 90 дней»). Поиск по ключу `q` — `SearchField`. `useUrlFilters` — один на экран.
+ * Фильтр — ряд сегментов (тот же ряд, что у вкладок; на узком переносится — видны все варианты), выбранный —
+ * «выбрано»; «все» — сброс; `required` — выбор обязателен (режим «30 дней / 90 дней»). Поиск по ключу `q` —
+ * `SearchField`. `useUrlFilters` — один на экран.
  */
 import { useCallback, useEffect, useId, useState, type ReactNode } from 'react'
 import { ToggleGroup } from 'radix-ui'
-import { SEGMENT, SEGMENT_ON, SEGMENTS } from '../lib/anatomy'
+import { SEGMENT, SEGMENT_ON, SEGMENTS, SEGMENTS_WRAP } from '../lib/anatomy'
 import { cx } from '../lib/cx'
 import { SearchField } from './SearchField'
 
@@ -85,7 +86,7 @@ export function FilterBar({ filters, value, onChange, search, allLabel = 'все
               if (f.required && !v) return
               onChange({ ...value, [f.key]: v === ALL ? '' : v })
             }}
-            className={SEGMENTS}
+            className={cx(SEGMENTS, SEGMENTS_WRAP)}
           >
             {[...(f.required ? [] : [{ value: ALL, label: allLabel } as FilterOption]), ...f.options].map((o) => (
               <ToggleGroup.Item key={o.value} value={o.value} className={cx(SEGMENT, SEGMENT_ON)}>
