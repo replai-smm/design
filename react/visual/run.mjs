@@ -74,14 +74,22 @@ async function main(argv) {
       await page.goto(`${srv.url}/iframe.html?id=${encodeURIComponent(s.id)}&viewMode=story&globals=theme:${theme}`, { waitUntil: 'networkidle' })
       await page.addStyleTag({ content: STILL })
       await page.evaluate(() => document.fonts.ready)
-      await page.waitForTimeout(150)
+      // История показана: Storybook ставит sb-show-main (окна рисуются вне корня — по корню не узнать); под нагрузкой иначе снимается заставка.
+      await page.waitForFunction(() => document.body.classList.contains('sb-show-main') || document.body.classList.contains('sb-show-errordisplay'), null, { timeout: 60_000 })
+      // Кадр — когда два снимка подряд совпали: пауза фиксированной длины под нагрузкой машины снимает недорисованное.
+      let png = await page.screenshot({ fullPage: true })
+      for (let i = 0; i < 20; i++) {
+        await page.waitForTimeout(100)
+        const next = await page.screenshot({ fullPage: true })
+        if (next.equals(png)) break
+        png = next
+      }
       const name = shotName(s.id, theme, width)
       if (errors.length) failures.push({ name, what: 'ошибка страницы', detail: errors[0] })
       for (const p of anatomyProblems(await page.evaluate(snapshotInPage), registry)) {
         const k = `${s.id} ${p.rule} ${p.text}`
         if (!seen.has(k)) (seen.add(k), failures.push({ name, what: p.rule, detail: p.text }))
       }
-      const png = await page.screenshot({ fullPage: true })
       await page.close()
       const base = join(BASE, name)
       if (update || !existsSync(base)) {

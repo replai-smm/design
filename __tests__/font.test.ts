@@ -13,11 +13,14 @@ const files: string[] = [...tokens.font.sans.files, ...tokens.font.mono.files]
 const walk = (dir: string): string[] => readdirSync(dir, { withFileTypes: true }).flatMap((d) => (d.name === '__tests__' ? [] : d.isDirectory() ? walk(join(dir, d.name)) : [join(dir, d.name)]))
 /** Знаки вне ASCII в коде, который рисуется (комментарии и тесты не в счёт), не покрытые хоть одним шрифтом пакета: { файл: знаки }. */
 function uncovered(sources: string[]): Record<string, string[]> {
+  const chars = new Map(sources.map((f) => [f, new Set([...maskComments(readFileSync(f, 'utf8'), kindOf(f))].filter((ch) => ch.codePointAt(0)! > 127))]))
+  // каждый шрифт распаковывается один раз на все знаки сразу, а не на каждый файл
+  const all = [...new Set([...chars.values()].flatMap((s) => [...s]))].join('')
+  const missing = new Set(files.flatMap((font) => covers(resolve(design, font), all).missing))
   const out: Record<string, string[]> = {}
-  for (const f of sources) {
-    const text = [...new Set([...maskComments(readFileSync(f, 'utf8'), kindOf(f))].filter((ch) => ch.codePointAt(0)! > 127))].join('')
-    const missing = [...new Set(files.flatMap((font) => covers(resolve(design, font), text).missing))]
-    if (missing.length) out[f] = missing
+  for (const [f, set] of chars) {
+    const own = [...set].filter((ch) => missing.has(ch))
+    if (own.length) out[f] = own
   }
   return out
 }
