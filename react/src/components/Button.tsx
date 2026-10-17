@@ -116,7 +116,7 @@ export function ActionArea({ primary, children, layout = 'stack', label = 'Де�
   rule(!nested, 'область действий внутри другой области: у области одна главная кнопка')
   if (primary) {
     const danger = Children.toArray(children).some((c) => isValidElement<ButtonProps>(c) && c.props.tone === 'опасно')
-    rule(!danger, 'опасное действие рядом с главным (П10): унесите его в «⋯» или в окно подтверждения')
+    rule(!danger, 'опасное действие рядом с главным (П10): унесите его в меню «…» или в окно подтверждения')
   }
   useLayoutEffect(() => {
     if (!primary || !surface) return

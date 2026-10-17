@@ -61,4 +61,4 @@ export const shellOutput = `> replai@2.41.0 test
 
  ✓ src/export/csv.test.ts (6)
  ✓ src/comments/list.test.ts (14)
- ⠋ src/inbox/filter.test.ts`
+ • src/inbox/filter.test.ts`
