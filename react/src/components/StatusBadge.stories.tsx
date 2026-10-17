@@ -1,10 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { STATUS_IDS } from '../lib/status'
+import { STATUS_IDS } from '../lib/vocab'
 import { StatusBadge } from './StatusBadge'
-import { Inline, Stack } from './layout'
 
 const meta = {
-  title: 'Компоненты/Метка статуса',
+  title: 'Элементы/Метка статуса',
   component: StatusBadge,
   parameters: { layout: 'padded' },
   args: { status: 'work.failing' },
@@ -12,50 +11,26 @@ const meta = {
 export default meta
 type S = StoryObj<typeof meta>
 
-/** Палитра продукта: четыре тона, у каждого своя форма значка и слово. */
-export const Продукт: S = {
+/** Закрытый список: слово закона, знак тона. Подложка — только у «опасно» и «внимание». */
+export const Статусы: S = {
   render: () => (
-    <Inline gap="03">
+    <div className="flex flex-wrap gap-items">
       {STATUS_IDS.map((id) => (
         <StatusBadge key={id} status={id} />
       ))}
-    </Inline>
+    </div>
   ),
 }
 
-/** Палитра Карты: цвет — у рамки, слово обычным текстом; серый — не цвет состояния. */
-export const Карта: S = {
-  render: () => (
-    <Inline gap="03">
-      {STATUS_IDS.map((id) => (
-        <StatusBadge key={id} status={id} palette="karta" />
-      ))}
-    </Inline>
-  ),
-}
-
-/** Слово продукта вместо слова закона: тон тот же. */
-export const СловоПродукта: S = {
-  render: () => (
-    <Stack gap="03">
-      <Inline gap="03">
-        <StatusBadge status="work.failing" label="не отвечает" />
-        <StatusBadge status="work.working" label="отвечает" />
-        <StatusBadge status="work.off" label="на паузе" />
-      </Inline>
-    </Stack>
-  ),
-}
-
-/** Тон со своим словом (светофор «Таргета», оценка поста, «не запускался»): те же четыре тона и формы значка, слово — продукта. */
+/** Тон со своим словом: светофор, оценка поста. */
 export const Тон: S = {
   render: () => (
-    <Inline gap="03">
-      <StatusBadge tone="опасно" label="встало" />
-      <StatusBadge tone="внимание" label="хватит на 3 дня" />
-      <StatusBadge tone="хорошо" label="крутится" />
+    <div className="flex flex-wrap gap-items">
+      <StatusBadge tone="опасно" label="горит" />
+      <StatusBadge tone="внимание" label="ниже среднего" />
+      <StatusBadge tone="инфо" label="лёгкий режим" />
       <StatusBadge tone="нейтрально" label="не запускался" />
-      <StatusBadge tone="хорошо" label="A+" />
-    </Inline>
+      <StatusBadge tone="хорошо" label="ключ работает" />
+    </div>
   ),
 }

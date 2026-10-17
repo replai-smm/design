@@ -1,8 +1,7 @@
 /**
- * Схемы токенов, шкал и матрицы облика (перенесены из process `schema/defs/{tokens,matrix}.json`, ход 4, replai-smm/process#356).
- * Форма живых файлов (`tokens.json`, `scale.json`, `matrix.yaml`) и примеры: ≥ 2 правильных и ≥ 3 неправильных на схему,
- * у каждой неправильной названа ошибка, ради которой она написана (`invalid/_expect.yaml`: путь, правило, недостающее поле).
- * Контраст и пары (G46) — `contrast.test.ts`; состояния и клетки матрицы (G47) читает process (`ci/shots/lib/plan.mjs`).
+ * Схемы ролей, шкал и матрицы облика: живые файлы (`tokens.json`, `scale.json`, `matrix.yaml`) и примеры — ≥ 2
+ * правильных и ≥ 3 неправильных на схему, у каждой неправильной названа ошибка, ради которой она написана
+ * (`invalid/_expect.yaml`). Контраст — `contrast.test.ts`.
  */
 import { describe, it, expect } from 'vitest'
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
@@ -16,8 +15,7 @@ const read = (p: string) => (p.endsWith('.json') ? JSON.parse(readFileSync(p, 'u
 
 const compile = (file: string, def?: string) => {
   const schema = read(resolve(design, file))
-  // allowMatchingProperties: обязательные «sans», «move» объявлены и в properties, и подходят под шаблон имён шкалы
-  const ajv = new Ajv2020({ allErrors: true, strict: true, allowUnionTypes: true, allowMatchingProperties: true })
+  const ajv = new Ajv2020({ allErrors: true, strict: true, allowUnionTypes: true })
   ajv.addSchema(schema)
   const v = ajv.getSchema(schema.$id + (def ? `#/$defs/${def}` : ''))
   if (!v) throw new Error(`нет схемы ${file}${def ? '#' + def : ''}`)
@@ -60,11 +58,9 @@ describe('примеры к схемам', () => {
 })
 
 describe('живые файлы проходят свои схемы', () => {
-  it('tokens.json — форма 3.1 (две палитры, без старых шкал)', () => {
+  it('tokens.json — tokens.schema.json', () => {
     const v = compile('tokens.schema.json')
-    const tokens = read(resolve(design, 'tokens.json'))
-    expect(v(tokens), JSON.stringify(v.errors?.slice(0, 3))).toBe(true)
-    expect(Object.keys(tokens).filter((k) => ['status', 'spacing', 'type', 'motion', 'radius'].includes(k))).toEqual([])
+    expect(v(read(resolve(design, 'tokens.json'))), JSON.stringify(v.errors?.slice(0, 3))).toBe(true)
   })
 
   it('scale.json — tokens.schema.json → $defs/scale', () => {
@@ -75,17 +71,5 @@ describe('живые файлы проходят свои схемы', () => {
   it('matrix.yaml — matrix.schema.json', () => {
     const v = compile('matrix.schema.json')
     expect(v(read(resolve(design, 'matrix.yaml'))), JSON.stringify(v.errors?.slice(0, 3))).toBe(true)
-  })
-
-  it('схема шкал ловит неправильное: отступ в em, длительность в секундах, нет «move»', () => {
-    const v = compile('tokens.schema.json', 'scale')
-    const scale = read(resolve(design, 'scale.json'))
-    const bad1 = structuredClone(scale)
-    bad1.spacing['05'].$value = '1em'
-    const bad2 = structuredClone(scale)
-    bad2.duration['fast-01'].$value = '0.07s'
-    const bad3 = structuredClone(scale)
-    delete bad3.duration.move
-    for (const bad of [bad1, bad2, bad3]) expect(v(bad)).toBe(false)
   })
 })

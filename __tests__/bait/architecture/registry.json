@@ -1,0 +1,22 @@
+{
+  "doc": "приманка: каждое правило устройства обязано сработать (architecture.test.ts)",
+  "levels": ["Основы", "Раскладка", "Элементы", "Поля", "Поверхности", "Коллекции", "Слои", "Паттерны"],
+  "products": ["df", "chat"],
+  "base": {},
+  "sameLevel": {},
+  "svg": {},
+  "pill": {},
+  "components": {
+    "Good": { "level": "Элементы", "file": "Good.tsx", "meaning": "кнопка-приманка" },
+    "Twin": { "level": "Элементы", "file": "Twin.tsx", "meaning": "Кнопка приманка" },
+    "Ghost": { "level": "Элементы", "file": "Good.tsx", "meaning": "призрак без экспорта" },
+    "Low": { "level": "Элементы", "file": "Low.tsx", "meaning": "берёт верхний уровень" },
+    "High": { "level": "Поверхности", "file": "High.tsx", "meaning": "поверхность-приманка", "near": { "Nobody": "пара без второго" } },
+    "Mixed": { "level": "Поля", "file": "Good.tsx", "meaning": "второй уровень в том же файле" },
+    "Ext": { "level": "Элементы", "file": "Ext.tsx", "meaning": "берёт верхний уровень с расширением" },
+    "Rel": { "level": "Элементы", "file": "Rel.tsx", "meaning": "берёт верхний уровень через ../components" },
+    "Dyn": { "level": "Элементы", "file": "Dyn.tsx", "meaning": "берёт верхний уровень через import()" },
+    "Weird": { "level": "Атомы", "file": "Weird.tsx", "meaning": "уровень не из списка" },
+    "Prod": { "level": "Элементы", "file": "Prod.tsx", "meaning": "продукт не из списка", "product": "replai" }
+  }
+}

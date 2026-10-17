@@ -1,31 +1,60 @@
-// ДС-React — компоненты дизайн-системы (CONCEPT §3.4, слой «ДС-React»). Импорт: `@replai-smm/design` (README.md).
+// ДС-React: компоненты по уровням (registry.json). Импорт: `@replai-smm/design`.
+
+// Раскладка
 export { Stack, Inline, Grid, Page, PageHeader, Section, SurfaceProvider, type Space, type StackProps, type InlineProps, type GridProps, type PageProps, type PageHeaderProps, type SectionProps } from './components/layout'
-export { Button, ActionArea, RowContext, type ButtonProps, type ButtonVariant, type ButtonSize, type ActionAreaProps, type PrimaryAction } from './components/Button'
-export { StatusBadge, ToneIcon, type StatusBadgeProps } from './components/StatusBadge'
-export { StateView, Skeleton, Loading, type StateKind, type StateViewProps } from './components/StateView'
-export { DataTable, List, compareSortValues, type Column, type SortDirection, type SortState, type DataTableProps, type ListProps, type CollectionProps } from './components/Collection'
-export { FilterBar, SearchField, useUrlFilters, type FilterDef, type FilterOption, type FilterValue, type FilterBarProps, type SearchFieldProps } from './components/FilterBar'
-export { Tabs, type TabItem, type TabsProps } from './components/Tabs'
-export { Card, type CardProps } from './components/Card'
-export { Drawer, type DrawerProps } from './components/Drawer'
-export { Notification, Toaster, useToast, type NotificationProps, type NotificationTone, type ToasterProps } from './components/Notification'
-export { Dialog, ConfirmDialog, ConfirmProvider, useConfirm, type DialogProps, type DialogSize, type ConfirmDialogProps, type ConfirmOptions } from './components/Dialog'
-export { TextField, TextArea, type TextFieldProps, type TextAreaProps, type FieldBaseProps, type FieldSize } from './components/TextField'
-export { Select, type SelectProps, type SelectOption } from './components/Select'
-export { Checkbox, CheckboxGroup, type CheckboxProps, type CheckboxGroupProps, type CheckedState } from './components/Checkbox'
-export { NumberField, type NumberFieldProps } from './components/NumberField'
-export { FileField, fileSizeText, acceptText, fileMatches, type FileFieldProps, type FileFieldHandle } from './components/FileField'
-export { Combobox, type ComboboxProps, type ComboboxOption } from './components/Combobox'
-export { Avatar, type AvatarProps, type AvatarSize } from './components/Avatar'
-export { CountBadge, countText, type CountBadgeProps, type CountTone } from './components/CountBadge'
+
+// Элементы
+export { Icon, type IconName } from './components/Icon'
+export { Button, ActionArea, type ButtonProps, type ButtonVariant, type ActionAreaProps, type PrimaryAction } from './components/Button'
+export { StatusBadge, type StatusBadgeProps } from './components/StatusBadge'
+export { CountBadge, countText, type CountBadgeProps } from './components/CountBadge'
+export { Avatar, type AvatarProps } from './components/Avatar'
+export { InlineLoading, type InlineLoadingProps } from './components/InlineLoading'
+export { Meter, meterTone, type MeterProps } from './components/Meter'
+export { Steps, stepProgress, type StepsProps } from './components/Steps'
 export { Tooltip, type TooltipProps } from './components/Tooltip'
-export { STATUS_IDS, TONE_ORDER, statusOf, toneOf, type StatusId, type Palette, type Tone } from './lib/status'
+export { Delta, deltaText, type DeltaProps, type DeltaUnit } from './components/Delta'
+export { Skeleton, Loading } from './components/Skeleton'
+export { Prose, ProseHtml, type ProseProps } from './components/Prose'
+export { Chart, chartHasData, niceMax, ticksOf, tickIndexes, SERIES, type ChartProps, type ChartSeries, type SeriesLine } from './components/Chart'
+
+// Поля
+export { TextField, TextArea, type TextFieldProps, type TextAreaProps, type FieldBaseProps } from './components/TextField'
+export { Select, type SelectProps, type SelectOption } from './components/Select'
+export { NumberField, type NumberFieldProps } from './components/NumberField'
+export { Checkbox, CheckboxGroup, type CheckboxProps, type CheckboxGroupProps, type CheckedState } from './components/Checkbox'
+export { Combobox, type ComboboxProps, type ComboboxOption } from './components/Combobox'
+export { FileField, fileSizeText, acceptText, fileMatches, type FileFieldProps, type FileFieldHandle } from './components/FileField'
+export { SearchField, type SearchFieldProps } from './components/SearchField'
+
+// Поверхности
+export { Surface, type SurfaceProps } from './components/Surface'
+export { Card, type CardProps } from './components/Card'
+export { StatTile, type StatTileProps, type StatTileCompare } from './components/StatTile'
+export { Notification, type NotificationProps, type NotificationTone } from './components/Notification'
+export { StateView, type StateViewProps } from './components/StateView'
+export { CodeBlock, type CodeBlockProps } from './components/CodeBlock'
+export { ChartFrame, type ChartFrameProps, type LegendItem } from './components/ChartFrame'
+export { DecisionCard, type DecisionCardProps, type DecisionAnswer } from './components/DecisionCard'
+export { Diagram, edgePath, litSet, type DiagramProps, type DiagramNode, type DiagramItem, type DiagramDot, type DiagramEdge } from './components/Diagram'
+
+// Коллекции
+export { DataTable, List, compareSortValues, type Column, type SortDirection, type SortState, type DataTableProps, type ListProps, type CollectionProps } from './components/Collection'
+export { ProofreadGrid, GridLegend, type ProofreadGridProps, type GridColumn, type GridCell, type GridLegendProps } from './components/ProofreadGrid'
+export { WeekCalendar, mondayOf, addWeeks, weekTitle, type WeekCalendarProps } from './components/WeekCalendar'
+
+// Слои
+export { Dialog, ConfirmProvider, useConfirm, type DialogProps, type DialogSize, type ConfirmOptions } from './components/Dialog'
+export { Toaster, useToast, type ToasterProps } from './components/Toast'
+export { CommandMenu, matchCommands, type CommandMenuProps, type CommandMenuHandle, type CommandItem } from './components/CommandMenu'
+
+// Паттерны
+export { Tabs, type TabItem, type TabsProps } from './components/Tabs'
+export { FilterBar, useUrlFilters, type FilterDef, type FilterOption, type FilterValue, type FilterBarProps } from './components/FilterBar'
+export { ThreeColumn, type ThreeColumnProps, type ColumnIndex } from './components/ThreeColumn'
 export { ChatThread, type ChatMessage, type ChatThreadProps } from './components/ChatThread'
 export { ReplyBox, type ReplyBoxProps, type ReplyBoxHandle } from './components/ReplyBox'
-export { ThreeColumn, type ThreeColumnProps, type ColumnIndex } from './components/ThreeColumn'
-export { WeekCalendar, mondayOf, addWeeks, weekTitle, type WeekCalendarProps } from './components/WeekCalendar'
-export { ProofreadGrid, GridLegend, GRID_TONE, GRID_TONE_LABEL, type ProofreadGridProps, type GridColumn, type GridCell, type GridTone, type GridLegendProps } from './components/ProofreadGrid'
-export { StatTile, Delta, deltaText, type StatTileProps, type StatTileCompare, type DeltaProps, type DeltaUnit } from './components/StatTile'
-export { Chart, chartHasData, niceMax, ticksOf, tickIndexes, type ChartProps, type ChartSeries } from './components/Chart'
-export { ChartFrame, SERIES, SERIES_BG, seriesVar, resolveSeriesColors, useSeriesColors, type ChartFrameProps, type LegendItem, type SeriesLine } from './components/ChartFrame'
-export { Steps, stepState, type StepsProps, type StepState } from './components/Steps'
+export { AgentStep, type AgentStepProps } from './components/AgentStep'
+
+// Словари
+export { TONES, TONE_ORDER, STATUS_IDS, statusOf, toneOf, type Tone, type Progress, type StateKind, type StatusId, type DataState, type EmptyView, type ErrorView } from './lib/vocab'

@@ -1,104 +1,192 @@
 {
-  "schema": 3,
-  "doc": "токены",
-  "source": {
-    "name": "carbon",
-    "version": "11.62.0",
-    "license": "Apache-2.0"
-  },
-  "themes": {
-    "светлая": {
-      "carbon": "g10",
-      "colors": {
-        "background": "rgb(244,244,244)",
-        "layer-01": "#ffffff",
-        "text-primary": "#161616",
-        "text-secondary": "#525252",
-        "border-subtle-01": "#c6c6c6",
-        "interactive": "#0f62fe",
-        "focus": "#0f62fe",
-        "link-primary": "#0f62fe",
-        "support-error": "#da1e28",
-        "support-warning": "#f1c21b",
-        "support-success": "#24a148",
-        "support-info": "#0043ce"
-      }
+  "doc": "роли цвета",
+  "colors": {
+    "canvas": {
+      "light": "#f4f4f4",
+      "dark": "#0f0f11",
+      "role": "холст страницы; утопленное на поверхности (код, выходной день)"
     },
-    "тёмная": {
-      "carbon": "g100",
-      "colors": {
-        "background": "#161616",
-        "layer-01": "#262626",
-        "text-primary": "#f4f4f4",
-        "text-secondary": "#c6c6c6",
-        "border-subtle-01": "#393939",
-        "interactive": "#4589ff",
-        "focus": "#ffffff",
-        "link-primary": "#78a9ff",
-        "support-error": "#fa4d56",
-        "support-warning": "#f1c21b",
-        "support-success": "#42be65",
-        "support-info": "#4589ff"
-      }
+    "surface": {
+      "light": "#ffffff",
+      "dark": "#17171a",
+      "role": "поверхность: карточка, колонка, поле, окно"
+    },
+    "inverse": {
+      "light": "#161616",
+      "dark": "#ececec",
+      "role": "главное действие и подсказка: инверсия, не цвет"
+    },
+    "inverse-hover": {
+      "light": "#393939",
+      "dark": "#c6c6c6",
+      "role": "главное действие под указателем"
+    },
+    "fg": {
+      "light": "rgb(22 22 22)",
+      "dark": "#ececec",
+      "role": "текст и значки"
+    },
+    "fg-muted": {
+      "light": "#525252",
+      "dark": "#a1a1aa",
+      "role": "второй текст: подпись, подсказка, плейсхолдер"
+    },
+    "fg-disabled": {
+      "light": "#a8a8a8",
+      "dark": "#5a5a60",
+      "role": "выключенное"
+    },
+    "fg-inverse": {
+      "light": "#ffffff",
+      "dark": "#0f0f11",
+      "role": "текст на инверсии"
+    },
+    "line": {
+      "light": "#e0e0e0",
+      "dark": "#2a2a2f",
+      "role": "тихая рамка: край поверхности, разделитель, скелет"
+    },
+    "line-strong": {
+      "light": "#8d8d8d",
+      "dark": "#6f6f76",
+      "role": "граница того, что нажимают и заполняют: поле, тихая кнопка, галочка"
+    },
+    "hover": {
+      "light": "#8d8d8d1f",
+      "dark": "#8d8d8d29",
+      "role": "под указателем — поверх любой поверхности"
+    },
+    "selected": {
+      "light": "#8d8d8d33",
+      "dark": "#8d8d8d3d",
+      "role": "выбрано: вкладка, фильтр, открытая строка, пункт списка"
+    },
+    "accent": {
+      "light": "#0f62fe",
+      "dark": "#78a9ff",
+      "role": "единственный синий: ссылка и фокус"
+    },
+    "scrim": {
+      "light": "#16161680",
+      "dark": "#000000b3",
+      "role": "затемнение под окном"
+    },
+    "shadow": {
+      "light": "#0000002e",
+      "dark": "#000000a6",
+      "role": "тень всплывающего и окна"
+    },
+    "danger": {
+      "light": "#da1e28",
+      "dark": "#fa4d56",
+      "role": "знак тона «опасно»"
+    },
+    "danger-fg": {
+      "light": "#a2191f",
+      "dark": "#ffb3b8",
+      "role": "текст тона «опасно»: ошибка поля, «не отправлено»"
+    },
+    "danger-bg": {
+      "light": "#fff1f1",
+      "dark": "#331417",
+      "role": "подложка тона «опасно»: метка, клетка сетки"
+    },
+    "warning": {
+      "light": "#b28600",
+      "dark": "#f1c21b",
+      "role": "знак тона «внимание»"
+    },
+    "warning-fg": {
+      "light": "#684e00",
+      "dark": "#fddc69",
+      "role": "текст тона «внимание» на его подложке"
+    },
+    "warning-bg": {
+      "light": "#fcf4d6",
+      "dark": "#2e2608",
+      "role": "подложка тона «внимание»"
+    },
+    "success": {
+      "light": "#198038",
+      "dark": "#42be65",
+      "role": "знак тона «хорошо»; подложки нет — норма не кричит"
+    },
+    "series-1": {
+      "light": "#6929c4",
+      "dark": "#a56eff",
+      "role": "ряд данных 1"
+    },
+    "series-2": {
+      "light": "#1192e8",
+      "dark": "#33b1ff",
+      "role": "ряд данных 2"
+    },
+    "series-3": {
+      "light": "#005d5d",
+      "dark": "#08bdba",
+      "role": "ряд данных 3"
+    },
+    "series-4": {
+      "light": "#9f1853",
+      "dark": "#ff7eb6",
+      "role": "ряд данных 4"
+    },
+    "series-5": {
+      "light": "#8a3800",
+      "dark": "#ba4e00",
+      "role": "ряд данных 5"
+    },
+    "series-6": {
+      "light": "#6f6f6f",
+      "dark": "#8d8d8d",
+      "role": "ряд данных 6: прочее"
     }
   },
-  "status": {
-    "опасно": "support-error",
-    "внимание": "support-warning",
-    "хорошо": "support-success",
-    "нейтрально": null
-  },
-  "spacing": {
-    "spacing-01": 2,
-    "spacing-02": 4,
-    "spacing-03": 8,
-    "spacing-04": 12,
-    "spacing-05": 16,
-    "spacing-06": 24,
-    "spacing-07": 32
-  },
-  "type": {
-    "body-01": {
-      "size": 14,
-      "line": 20,
-      "weight": 400
+  "tones": {
+    "опасно": {
+      "key": "danger",
+      "mark": "danger",
+      "text": "danger-fg",
+      "bg": "danger-bg"
     },
-    "body-02": {
-      "size": 16,
-      "line": 24,
-      "weight": 400
+    "внимание": {
+      "key": "warning",
+      "mark": "warning",
+      "text": "warning-fg",
+      "bg": "warning-bg"
     },
-    "label-01": {
-      "size": 12,
-      "line": 16,
-      "weight": 400
+    "инфо": {
+      "key": "info",
+      "mark": "fg",
+      "text": "fg",
+      "bg": null
     },
-    "heading-02": {
-      "size": 16,
-      "line": 22,
-      "weight": 600
+    "нейтрально": {
+      "key": "neutral",
+      "mark": "fg-muted",
+      "text": "fg",
+      "bg": null
+    },
+    "хорошо": {
+      "key": "success",
+      "mark": "success",
+      "text": "fg",
+      "bg": null
     }
-  },
-  "motion": {
-    "move": {
-      "ms": 600,
-      "easing": "cubic-bezier(0.2, 0, 0.38, 0.9)"
-    },
-    "fast-02": {
-      "ms": 110,
-      "easing": "cubic-bezier(0.2, 0, 0.38, 0.9)"
-    }
-  },
-  "radius": {
-    "none": 0,
-    "radius-01": 2,
-    "radius-02": 4
   },
   "font": {
-    "family": "IBM Plex Sans",
-    "files": [
-      "fonts/IBMPlexSans-Regular.woff2",
-      "fonts/IBMPlexSans-SemiBold.woff2"
-    ]
+    "sans": {
+      "family": "IBM Plex Sans",
+      "files": [
+        "fonts/IBMPlexSans-Regular.woff2",
+        "fonts/IBMPlexSans-SemiBold.woff2"
+      ]
+    },
+    "mono": {
+      "family": "IBM Plex Mono",
+      "files": [
+        "fonts/IBMPlexMono-Regular.woff2"
+      ]
+    }
   }
 }

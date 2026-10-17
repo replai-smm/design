@@ -1,44 +1,63 @@
 /**
- * Три колонки «список → лента → карточка» (DF: «Контент», «Сообщения», «Комментарии», «ИИ», «Чаты»; DF-PORT решение 1:
- * на ноутбуке три колонки остаются). С 1024 px видны все три, каждая прокручивается сама. Уже 1024 px — по очереди:
- * видна одна колонка (`active`), во второй и третьей сверху «← назад» к предыдущей.
- * - Переход на телефоне — выезд 0,6 с (ds.css → .ds-col), вперёд справа, назад слева; «уменьшить движение» — сразу.
- * - Фокус после перехода на телефоне — на колонку, читалка слышит её название.
- * - Колонки — области с подписью (`labels`); главная кнопка — у содержимого колонки, раскладка своих кнопок не держит.
- * - Две колонки «список → карточка» (DF «Постинг → Черновики», «Мои сообщества»): без `third` и с двумя подписями —
- *   вторая занимает остальное, на телефоне так же по одной.
+ * Три колонки «список → лента → карточка» (DF: «Контент», «Сообщения»; чат orbit). С 1024 px видны все, каждая
+ * прокручивается сама; уже — по одной (`active`), во второй и третьей сверху «← назад» к предыдущей, переход — выезд
+ * 0,6 с, фокус — на колонку. Без `third` — две колонки «список → карточка». `header` — полоса над колонками.
+ * `phone="sheets"` — рабочее место: на телефоне видна лента, первая колонка — шторкой слева, третья — снизу
+ * (`sheet`, `onSheetChange`); шторка — то же окно ДС (`Dialog`), что и везде.
  */
-import { useLayoutEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
+import { FOCUS } from '../lib/anatomy'
 import { cx } from '../lib/cx'
 import { Button } from './Button'
+import { Dialog } from './Dialog'
 
 export type ColumnIndex = 0 | 1 | 2
 
 export interface ThreeColumnProps {
-  /** Первая колонка: сообщества, проекты, фильтры. */
   first: ReactNode
-  /** Вторая: посты, диалоги, чаты. */
   second: ReactNode
-  /** Третья: карточка, переписка. Пусто — подсказка «Выберите …» от продукта. Нет — раскладка в две колонки. */
+  /** Нет — раскладка в две колонки. */
   third?: ReactNode
-  /** Названия колонок — подписи областей и слова «← назад»: ['Сообщества', 'Посты', 'Пост'] (две — ['Черновики', 'Пост']). */
+  /** Названия колонок — подписи областей и слова «← назад». */
   labels: [string, string, string] | [string, string]
-  /** Какая колонка видна на телефоне. На ноутбуке видны все. */
+  /** Какая колонка видна на телефоне. */
   active: ColumnIndex
-  /** «← назад» на телефоне: перейти к колонке `to`. */
+  /** «← назад» на телефоне: к колонке `to`. */
   onBack: (to: ColumnIndex) => void
   /** Ширина первой колонки на ноутбуке. */
   firstWidth?: 'sm' | 'md'
-  /** Ширина третьей колонки на ноутбуке. Вторая занимает остальное. */
-  thirdWidth?: 'md' | 'lg' | 'xl'
+  /** Ширина третьей колонки на ноутбуке; вторая — остальное. */
+  thirdWidth?: 'lg' | 'xl'
+  /** Полоса над колонками во всю ширину. */
+  header?: ReactNode
+  /** Телефон: stack — по одной с «← назад»; sheets — лента, первая и третья — шторками. */
+  phone?: 'stack' | 'sheets'
+  /** sheets: какая шторка открыта (0 — слева, 2 — снизу). */
+  sheet?: 0 | 2 | null
+  onSheetChange?: (sheet: 0 | 2 | null) => void
   className?: string
 }
 
-const FIRST = { sm: 'lg:w-64', md: 'lg:w-80' } as const
-const THIRD = { md: 'lg:w-md', lg: 'lg:w-lg', xl: 'lg:w-xl' } as const
+const FIRST = { sm: 'lg:w-rail', md: 'lg:w-narrow' } as const
+const THIRD = { lg: 'lg:w-panel', xl: 'lg:w-wide' } as const
 const PHONE = '(max-width: 63.99rem)'
 
-export function ThreeColumn({ first, second, third, labels, active, onBack, firstWidth = 'sm', thirdWidth = 'lg', className }: ThreeColumnProps) {
+function usePhone(): boolean {
+  const [phone, setPhone] = useState(() => typeof window !== 'undefined' && Boolean(window.matchMedia?.(PHONE).matches))
+  useEffect(() => {
+    const mq = window.matchMedia?.(PHONE)
+    if (!mq) return
+    const on = () => setPhone(mq.matches)
+    on()
+    mq.addEventListener('change', on)
+    return () => mq.removeEventListener('change', on)
+  }, [])
+  return phone
+}
+
+export function ThreeColumn({ first, second, third, labels, active, onBack, firstWidth = 'sm', thirdWidth = 'lg', header, phone: phoneMode = 'stack', sheet = null, onSheetChange, className }: ThreeColumnProps) {
+  const phone = usePhone()
+  const sheets = phoneMode === 'sheets' && phone
   const two = third === undefined
   const cols = two ? [first, second] : [first, second, third]
   const refs = useRef<Array<HTMLElement | null>>([])
@@ -53,40 +72,54 @@ export function ThreeColumn({ first, second, third, labels, active, onBack, firs
   }, [active])
 
   return (
-    <div data-slot="three-column" data-columns={cols.length} data-active={active} className={cx('flex h-full min-h-0 min-w-0 overflow-hidden bg-background', className)}>
-      {cols.map((content, i) => {
-        const on = i === active
-        return (
-          <section
-            key={i}
-            ref={(el) => {
-              refs.current[i] = el
-            }}
-            tabIndex={-1}
-            aria-label={labels[i]}
-            data-column={i}
-            data-active={on}
-            data-dir={on ? dir : undefined}
-            className={cx(
-              'ds-col min-h-0 min-w-0 flex-col overflow-y-auto bg-layer-01 focus-visible:outline-2 focus-visible:outline-focus focus-visible:-outline-offset-2',
-              on ? 'flex w-full' : 'hidden',
-              'lg:flex',
-              i === 0 && cx('lg:shrink-0', FIRST[firstWidth]),
-              i === 1 && cx('lg:w-auto lg:flex-1 lg:border-border-subtle-01', two ? 'lg:border-l' : 'lg:border-x'),
-              i === 2 && cx('lg:shrink-0', THIRD[thirdWidth]),
-            )}
-          >
-            {i > 0 && (
-              <div className="border-b border-border-subtle-01 px-2 py-1 lg:hidden">
-                <Button variant="ghost" size="sm" onClick={() => onBack((i - 1) as ColumnIndex)} data-slot="column-back">
-                  <span aria-hidden="true">←</span> {labels[i - 1]}
-                </Button>
-              </div>
-            )}
-            {content}
-          </section>
-        )
-      })}
+    <div data-slot="three-column" data-columns={cols.length} data-active={active} data-phone={phoneMode} className={cx('flex h-full min-h-0 min-w-0 flex-col overflow-hidden bg-canvas', className)}>
+      {header && (
+        <div data-part="header" className="shrink-0 border-b border-line bg-surface">
+          {header}
+        </div>
+      )}
+      <div className="flex min-h-0 min-w-0 flex-1">
+        {cols.map((content, i) => {
+          if (sheets && i !== 1)
+            return (
+              <Dialog key={i} side={i === 0 ? 'left' : undefined} title={labels[i]} open={sheet === i} onOpenChange={(o) => !o && onSheetChange?.(null)}>
+                {content}
+              </Dialog>
+            )
+          const on = sheets || i === active
+          return (
+            <section
+              key={i}
+              ref={(el) => {
+                refs.current[i] = el
+              }}
+              tabIndex={-1}
+              aria-label={labels[i]}
+              data-column={i}
+              data-active={on}
+              data-dir={on ? dir : undefined}
+              className={cx(
+                'ds-col min-h-0 min-w-0 flex-col overflow-y-auto bg-surface',
+                FOCUS,
+                on ? 'flex w-full' : 'hidden',
+                'lg:flex',
+                i === 0 && cx('lg:shrink-0', FIRST[firstWidth]),
+                i === 1 && cx('lg:w-auto lg:flex-1 lg:border-line', two ? 'lg:border-l' : 'lg:border-x'),
+                i === 2 && cx('lg:shrink-0', THIRD[thirdWidth]),
+              )}
+            >
+              {i > 0 && phoneMode === 'stack' && (
+                <div className="border-b border-line px-items py-tight lg:hidden">
+                  <Button variant="ghost" dense icon="arrow-left" onClick={() => onBack((i - 1) as ColumnIndex)} data-part="column-back">
+                    {labels[i - 1]}
+                  </Button>
+                </div>
+              )}
+              {content}
+            </section>
+          )
+        })}
+      </div>
     </div>
   )
 }

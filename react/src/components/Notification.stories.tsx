@@ -1,64 +1,28 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Button } from './Button'
-import { Notification, Toaster, useToast } from './Notification'
+import { Notification } from './Notification'
 import { Stack } from './layout'
 
 const meta = {
-  title: 'Компоненты/Уведомление',
+  title: 'Поверхности/Уведомление',
   component: Notification,
   parameters: { layout: 'padded' },
-  args: { tone: 'error', title: 'VK не отвечает', children: 'Ответы на отзывы стоят с 14:20.' },
+  args: { tone: 'опасно', scope: 'page', title: 'VK не отвечает', children: 'Ответы стоят у всех клиентов с 14:20.', action: <Button dense>Повторить</Button> },
 } satisfies Meta<typeof Notification>
 export default meta
 type S = StoryObj<typeof meta>
 
-/** Четыре тона; место — по охвату: страница, список, строка. */
+/** Тоны: метка и знак своей формы; охват — где стоит. */
 export const Обычное: S = {
   render: () => (
-    <Stack gap="03">
-      <Notification
-        tone="error"
-        scope="page"
-        title="VK не отвечает"
-        action={
-          <Button variant="ghost" size="sm">
-            Подробнее
-          </Button>
-        }
-      >
-        Ответы на отзывы стоят с 14:20.
+    <Stack gap="items" className="max-w-window">
+      <Notification tone="внимание" scope="list" title="Ключ сообщений не подключён у 2 сообществ" action={<Button dense>Подключить</Button>} />
+      <Notification tone="инфо" scope="list" title="Только просмотр" onClose={() => {}}>
+        Правит админ.
       </Notification>
-      <Notification tone="warning" scope="list" title="2 группы без ключа">
-        Обновите ключи, иначе ответы остановятся завтра.
-      </Notification>
-      <Notification tone="success" title="Ключ обновлён" onClose={() => {}} />
-      <Notification tone="info" scope="row" title="Проверяем группу" />
+      <Notification tone="хорошо" scope="row" title="Ключ работает" />
     </Stack>
   ),
 }
 
-export const Ошибка: S = {
-  tags: ['state:ошибка'],
-  args: {
-    scope: 'page',
-    action: (
-      <Button variant="ghost" size="sm">
-        Повторить
-      </Button>
-    ),
-  },
-}
-
-function ToastDemo() {
-  const toast = useToast()
-  return <Button onClick={() => toast.show({ title: 'Готово', description: 'Ключ обновлён.' })}>Показать всплывашку</Button>
-}
-
-/** «Готово» — всплывашка (П11). В истории открыта сразу. */
-export const Всплывашка: S = {
-  render: () => (
-    <Toaster initial={[{ tone: 'success', title: 'Готово', description: 'Ключ обновлён.', action: { label: 'Отменить', onClick: () => {} } }]}>
-      <ToastDemo />
-    </Toaster>
-  ),
-}
+export const Ошибка: S = { tags: ['state:ошибка'] }

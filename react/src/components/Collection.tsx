@@ -1,25 +1,26 @@
 /**
- * Страница списка (шаблон CONCEPT §3.4): таблица `DataTable` и список `List` — одна логика, разный вид.
- * - Группы по статусу, срочное сверху (П2): опасно → внимание → нейтрально → хорошо; внутри — порядок данных.
+ * Коллекция строк: таблица `DataTable` и список `List` — одна логика, разный вид.
+ * - Группы по статусу, срочное сверху (П2): опасно → внимание → инфо → нейтрально → хорошо; внутри — порядок данных.
  * - Норма не пишется (П3): группа «хорошо» свёрнута внизу, раскрывается за 0,6 с без прыжка.
- * - Состояния (П12): загрузка — скелет той же высоты строк (П13), ошибка, пусто (первый запуск, всё сделано,
- *   ничего не найдено, нет доступа), много — первые `pageSize` строк и «показать ещё».
- * - В строке главной кнопки нет (П5): действие строки — тихая кнопка или нажатие на строку (открыть панель деталей).
- * - На телефоне в таблице видны только колонки лица (`face`), остальные — в панели деталей.
- * - Широкая таблица (11–13 колонок денег) не ужимается до переноса чисел: колонка не уже самого длинного слова,
- *   `minWidth` — не уже шага шкалы и значение в одну строку; не влезает — таблица прокручивается по горизонтали внутри
- *   себя, первая колонка (и слово группы) стоит на месте.
- * - Сортировка по заголовку (`DataTable`, колонка с `sortValue`) — выбор человека, а не порядок продукта: без неё
- *   порядок данных; с ней строки переставляются внутри группы тона, группы срочного остаются сверху (П2 не ломается).
+ * - Состояния (П12): загрузка — скелет той же высоты строк, ошибка с «Повторить», пусто (`empty`), много — первые
+ *   `pageSize` и «показать ещё».
+ * - В строке главной кнопки нет (П5): действие строки — ghost-кнопка или нажатие на строку (`onSelect`).
+ * - Выбранная строка (`selectedKey`) — роль «выбрано» и `aria-current`; одно «выбрано» на всю ДС.
+ * - Таблица: на телефоне видны колонки лица (`face`); широкая не ужимается — колонка не уже самого длинного слова,
+ *   `nowrap` — значение в одну строку (деньги); не влезает — прокрутка вбок внутри таблицы, первая колонка стоит.
+ *   Сортировка по заголовку (`sortValue`) — выбор человека: строки переставляются внутри группы тона, срочное сверху.
  */
-import { Fragment, useId, useMemo, useState, type CSSProperties, type ReactElement, type ReactNode } from 'react'
+import { useId, useMemo, useState, type CSSProperties, type ReactElement, type ReactNode } from 'react'
+import { FOCUS } from '../lib/anatomy'
 import { useControllable } from '../lib/controllable'
 import { cx } from '../lib/cx'
-import { rankOf, toneOf, type StatusId } from '../lib/status'
+import { rankOf, toneOf, type DataState, type EmptyView, type ErrorView, type StatusId } from '../lib/vocab'
 import { Button, RowContext } from './Button'
+import { Icon } from './Icon'
+import { Skeleton } from './Skeleton'
+import { StateView } from './StateView'
 import { StatusBadge } from './StatusBadge'
 import { Tooltip } from './Tooltip'
-import { Skeleton, StateView, type StateKind } from './StateView'
 
 export interface CollectionProps<T> {
   rows: T[]
@@ -28,18 +29,16 @@ export interface CollectionProps<T> {
   getStatus?: (row: T) => StatusId
   /** Слова групп — слова продукта вместо слов закона (тон остаётся). */
   statusLabel?: (id: StatusId) => string | undefined
-  /** ready — данные; loading — скелет; error — ошибка с «Повторить». */
-  state?: 'ready' | 'loading' | 'error'
-  error?: { title: ReactNode; description?: ReactNode; onRetry?: () => void }
-  /** Что показать, когда строк нет. */
-  empty?: { kind: Exclude<StateKind, 'ошибка'>; title: ReactNode; description?: ReactNode; action?: ReactNode }
+  state?: DataState
+  error?: ErrorView
+  empty?: EmptyView
   /** Сколько строк показать до «показать ещё». */
   pageSize?: number
-  /** Свернуть группу «хорошо» (П3). */
-  collapseHealthy?: boolean
-  /** Нажатие на строку — обычно открыть `<Drawer>` с деталями. */
-  onRowClick?: (row: T) => void
-  /** Тихие кнопки строки (ghost, tertiary). */
+  /** Нажатие на строку: открыть её карточку рядом или окно. */
+  onSelect?: (row: T) => void
+  /** Ключ выбранной строки (её карточка видна рядом). */
+  selectedKey?: string | null
+  /** Тихие кнопки строки (ghost). */
   rowAction?: (row: T) => ReactNode
   /** Подпись таблицы или списка для читалки. */
   label: string
@@ -61,17 +60,15 @@ function useGroups<T>(rows: T[], getStatus?: (r: T) => StatusId): Group<T>[] {
       if (!by.has(s)) by.set(s, [])
       by.get(s)!.push(r)
     }
-    return [...by.entries()]
-      .sort(([a], [b]) => rankOf(a) - rankOf(b))
-      .map(([status, rs]) => ({ status, rows: rs, healthy: toneOf(status) === 'хорошо' }))
+    return [...by.entries()].sort(([a], [b]) => rankOf(a) - rankOf(b)).map(([status, rs]) => ({ status, rows: rs, healthy: toneOf(status) === 'хорошо' }))
   }, [rows, getStatus])
 }
 
 /** Сколько строк каждой группы показать при лимите `limit` (свёрнутая норма в лимит не входит). */
-function budget<T>(groups: Group<T>[], limit: number, collapse: boolean): number[] {
+function budget<T>(groups: Group<T>[], limit: number): number[] {
   let left = limit
   return groups.map((g) => {
-    if (collapse && g.healthy) return g.rows.length
+    if (g.healthy) return g.rows.length
     const n = Math.min(g.rows.length, Math.max(left, 0))
     left -= n
     return n
@@ -80,22 +77,14 @@ function budget<T>(groups: Group<T>[], limit: number, collapse: boolean): number
 
 function CollectionState<T>({ state, error, empty, rows }: Pick<CollectionProps<T>, 'state' | 'error' | 'empty' | 'rows'>) {
   if (state === 'error')
-    return (
-      <StateView
-        kind="ошибка"
-        title={error?.title ?? 'Не загрузилось'}
-        description={error?.description}
-        action={error?.onRetry && <Button variant="tertiary" onClick={error.onRetry}>Повторить</Button>}
-      />
-    )
-  if (state !== 'loading' && rows.length === 0)
-    return <StateView kind={empty?.kind ?? 'ничего не найдено'} title={empty?.title ?? 'Пусто'} description={empty?.description} action={empty?.action} />
+    return <StateView kind="ошибка" title={error?.title ?? 'Не загрузилось'} description={error?.description} action={error?.onRetry && <Button onClick={error.onRetry}>Повторить</Button>} />
+  if (state !== 'loading' && rows.length === 0) return <StateView kind={empty?.kind ?? 'ничего не найдено'} title={empty?.title ?? 'Пусто'} description={empty?.description} action={empty?.action} />
   return null
 }
 
 function MoreButton({ hidden, onMore }: { hidden: number; onMore: () => void }) {
   return (
-    <div className="flex justify-start pt-2">
+    <div className="flex justify-start pt-items">
       <Button variant="ghost" onClick={onMore} data-slot="show-more">
         показать ещё · {hidden}
       </Button>
@@ -107,22 +96,14 @@ function GroupHead({ status, count, label, toggle }: { status: StatusId; count: 
   const inner = (
     <>
       <StatusBadge status={status} label={label} />
-      <span className="text-label-01 text-text-secondary">{count}</span>
+      <span className="text-caption text-fg-muted">{count}</span>
     </>
   )
-  if (!toggle) return <span className="inline-flex items-center gap-2">{inner}</span>
+  if (!toggle) return <span className="inline-flex items-center gap-items">{inner}</span>
   return (
-    <button
-      type="button"
-      aria-expanded={toggle.open}
-      aria-controls={toggle.controls}
-      onClick={toggle.onClick}
-      className="inline-flex min-h-10 cursor-pointer items-center gap-2 px-1 hover:bg-layer-hover-01 focus-visible:outline-2 focus-visible:outline-focus"
-    >
+    <button type="button" aria-expanded={toggle.open} aria-controls={toggle.controls} onClick={toggle.onClick} className={cx('inline-flex min-h-dense cursor-pointer items-center gap-items rounded-control px-tight hover:bg-hover', FOCUS)}>
       {inner}
-      <svg viewBox="0 0 16 16" aria-hidden="true" className={cx('size-4 text-icon-primary transition-transform duration-move ease-move', toggle.open && 'rotate-180')}>
-        <path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.5" />
-      </svg>
+      <Icon name="chevron-down" className={cx('transition-transform duration-move ease-standard', toggle.open && 'rotate-180')} />
     </button>
   )
 }
@@ -138,29 +119,15 @@ export interface Column<T> {
   /** Доля ширины (fr). По умолчанию 1; 0 — по содержимому. */
   grow?: number
   align?: 'start' | 'end'
-  /**
-   * Значение для сортировки — колонку можно сортировать нажатием на заголовок. Числа сравниваются как числа, строки —
-   * по-русски (с числами внутри); `null`/`undefined` — всегда внизу, в любую сторону.
-   */
+  /** Значение в одну строку: деньги «12 000 ₽», даты. Колонка не уже значения; не влезает — таблица прокручивается вбок. */
+  nowrap?: boolean
+  /** Значение для сортировки — заголовок становится кнопкой. Пустое — внизу в обе стороны. */
   sortValue?: (row: T) => number | string | null | undefined
-  /** Первое нажатие сортирует в эту сторону (по умолчанию по возрастанию); повторное — в обратную. */
+  /** Первое нажатие сортирует в эту сторону (по умолчанию по возрастанию). */
   sortFirst?: SortDirection
-  /**
-   * Подсказка заголовка — что значит колонка («Факт минус план с даты пополнения до вчера»). Заголовок подчёркнут
-   * пунктиром (Carbon DefinitionTooltip) и берёт фокус; подсказка — `Tooltip` ДС при наведении и фокусе, читалка слышит
-   * её как описание заголовка. У сортируемой колонки подсказка — у той же кнопки сортировки (второй остановки Tab нет).
-   */
+  /** Что значит колонка: заголовок с пунктиром, подсказка при наведении и фокусе; читалка — как описание. */
   hint?: ReactNode
-  /**
-   * Не уже шага шкалы отступов (`09` 48 px · `10` 64 · `11` 80 · `12` 96 · `13` 160) и значение в одну строку — деньги
-   * «12 000 ₽», даты. Сумма колонок не влезает — таблица прокручивается по горизонтали, первая колонка стоит.
-   */
-  minWidth?: ColumnMinWidth
 }
-
-/** Шаги шкалы отступов (scale.json → spacing) для `Column.minWidth`. */
-export type ColumnMinWidth = '09' | '10' | '11' | '12' | '13'
-const MIN_W: Record<ColumnMinWidth, string> = { '09': 'min-w-12', '10': 'min-w-16', '11': 'min-w-20', '12': 'min-w-24', '13': 'min-w-40' }
 
 /** Направление — те же слова, что у `aria-sort`. */
 export type SortDirection = 'ascending' | 'descending'
@@ -171,15 +138,11 @@ export interface SortState {
 
 export interface DataTableProps<T> extends CollectionProps<T> {
   columns: Column<T>[]
-  /** Управляемая сортировка (`null` — порядок продукта). Без неё таблица держит сортировку сама с `defaultSort`. */
+  /** Управляемая сортировка (`null` — порядок данных); без неё таблица держит сортировку сама. */
   sort?: SortState | null
   defaultSort?: SortState | null
   onSortChange?: (sort: SortState | null) => void
-  /**
-   * Приглушённая строка — неактивное, что всё же показываем (кабинет не крутится 10+ дней, не запускался): текст строки
-   * вторым цветом (`text-secondary`, контраст ≥ 4,5:1 на слое и при наведении — тест токенов), фон и порядок те же.
-   * Причину пишут словом в строке (статус) — цвет её не заменяет; спрятать такие строки — фильтр продукта.
-   */
+  /** Приглушённая строка — неактивное, что всё же показываем: текст вторым цветом, причина — словом в строке. */
   rowMuted?: (row: T) => boolean
 }
 
@@ -200,7 +163,6 @@ export function compareSortValues(a: SortValue, b: SortValue, direction: SortDir
   return collator.compare(String(a), String(b)) * sign
 }
 
-/** Строки по сортировке; порядок равных — как в данных (сортировка устойчивая). */
 function sortRows<T>(rows: T[], columns: Column<T>[], sort: SortState | null): T[] {
   const get = sort ? columns.find((c) => c.key === sort.key)?.sortValue : undefined
   if (!sort || !get) return rows
@@ -210,25 +172,11 @@ function sortRows<T>(rows: T[], columns: Column<T>[], sort: SortState | null): T
     .map((x) => x.r)
 }
 
-function SortIcon({ direction }: { direction?: SortDirection }) {
-  return (
-    <svg viewBox="0 0 16 16" aria-hidden="true" data-slot="sort-icon" className={cx('size-4 shrink-0', direction ? 'text-icon-primary' : 'text-icon-secondary')}>
-      {direction === 'ascending' ? (
-        <path d="M8 13V3M4 7l4-4 4 4" fill="none" stroke="currentColor" strokeWidth="1.5" />
-      ) : direction === 'descending' ? (
-        <path d="M8 3v10M4 9l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.5" />
-      ) : (
-        <path d="M5 13V2M2.5 4.5 5 2l2.5 2.5M11 3v11M8.5 11.5 11 14l2.5-2.5" fill="none" stroke="currentColor" strokeWidth="1.25" />
-      )}
-    </svg>
-  )
-}
-
-// колонка не уже самого длинного слова (min-content): не влезает — прокрутка, а не наезд текста и не колонка в ноль
+// колонка не уже самого длинного слова (min-content): не влезает — прокрутка, а не наезд текста
 const track = (grow = 1) => (grow === 0 ? 'max-content' : `minmax(min-content, ${grow}fr)`)
 
 export function DataTable<T>(props: DataTableProps<T>) {
-  const { rows: dataRows, columns, getKey, getStatus, statusLabel, state = 'ready', pageSize = 50, collapseHealthy = true, onRowClick, rowAction, rowMuted, label, className } = props
+  const { rows: dataRows, columns, getKey, getStatus, statusLabel, state = 'ready', pageSize = 50, onSelect, selectedKey, rowAction, rowMuted, label, className } = props
   const [sort, setSort] = useControllable<SortState | null>(props.sort, props.defaultSort ?? null, props.onSortChange)
   // сортируем до групп: группы срочного стоят на месте (П2), внутри группы — порядок, выбранный человеком
   const rows = useMemo(() => sortRows(dataRows, columns, sort), [dataRows, columns, sort])
@@ -239,43 +187,40 @@ export function DataTable<T>(props: DataTableProps<T>) {
   const withAction = Boolean(rowAction)
   const cols = [...columns.map((c) => track(c.grow)), ...(withAction ? ['max-content'] : [])]
   const phoneCols = [...columns.filter((c) => c.face).map((c) => track(c.grow)), ...(withAction ? ['max-content'] : [])]
-  const vars = { '--ds-cols': cols.join(' '), '--ds-cols-phone': (phoneCols.length ? phoneCols : cols.slice(0, 1)).join(' ') } as CSSProperties
+  const vars = { '--table-cols': cols.join(' '), '--table-cols-phone': (phoneCols.length ? phoneCols : cols.slice(0, 1)).join(' ') } as CSSProperties
 
   const stateView = <CollectionState state={state} error={props.error} empty={props.empty} rows={rows} />
   if (state === 'error' || (state === 'ready' && rows.length === 0)) return <div className={className}>{stateView}</div>
 
-  const shown = budget(groups, limit, collapseHealthy)
-  const hidden = groups.reduce((n, g, i) => n + (collapseHealthy && g.healthy ? 0 : g.rows.length - shown[i]), 0)
-  const cellCls = (c: Column<T>, body = false) =>
-    cx(
-      'flex min-h-12 items-center px-4 py-2 text-body-compact-01',
-      c.minWidth ? MIN_W[c.minWidth] : 'min-w-0',
-      body && c.minWidth && 'whitespace-nowrap',
-      c.align === 'end' && 'justify-end text-end',
-      !c.face && 'ds-cell-more',
-    )
+  const shown = budget(groups, limit)
+  const hidden = groups.reduce((n, g, i) => n + (g.healthy ? 0 : g.rows.length - shown[i]), 0)
+  const cellCls = (c: Column<T>) => cx('flex min-h-touch items-center px-compact py-items text-body md:min-h-control', c.nowrap ? 'whitespace-nowrap' : 'min-w-0', c.align === 'end' && 'justify-end text-end', !c.face && 'ds-cell-more')
 
   const row = (r: T) => {
+    const key = getKey(r)
     const muted = rowMuted?.(r) ?? false
+    const selected = selectedKey != null && key === selectedKey
     return (
       <div
-        key={getKey(r)}
+        key={key}
         role="row"
         data-slot="row"
         data-muted={muted || undefined}
-        className={cx('ds-row border-b border-border-subtle-01 bg-layer-01', muted && 'text-text-secondary', onRowClick && 'cursor-pointer hover:bg-layer-hover-01')}
-        onClick={onRowClick ? () => onRowClick(r) : undefined}
+        data-selected={selected || undefined}
+        className={cx('ds-row border-b border-line', selected ? 'bg-selected' : 'bg-surface', muted && 'text-fg-muted', onSelect && 'cursor-pointer hover:bg-hover')}
+        onClick={onSelect ? () => onSelect(r) : undefined}
       >
         {columns.map((c, i) => (
-          <div key={c.key} role="cell" className={cellCls(c, true)}>
-            {i === 0 && onRowClick ? (
+          <div key={c.key} role="cell" className={cellCls(c)}>
+            {i === 0 && onSelect ? (
               <button
                 type="button"
+                aria-current={selected || undefined}
                 onClick={(e) => {
                   e.stopPropagation()
-                  onRowClick(r)
+                  onSelect(r)
                 }}
-                className={cx('min-w-0 cursor-pointer text-start hover:underline focus-visible:outline-2 focus-visible:outline-focus', muted ? 'text-text-secondary' : 'text-text-primary')}
+                className={cx('min-w-0 cursor-pointer rounded-control text-start hover:underline', FOCUS, muted ? 'text-fg-muted' : 'text-fg')}
               >
                 {c.cell(r)}
               </button>
@@ -285,7 +230,7 @@ export function DataTable<T>(props: DataTableProps<T>) {
           </div>
         ))}
         {withAction && (
-          <div role="cell" className="flex min-h-12 items-center justify-end gap-1 px-2" onClick={(e) => e.stopPropagation()}>
+          <div role="cell" className="flex min-h-touch items-center justify-end gap-tight px-items md:min-h-control" onClick={(e) => e.stopPropagation()}>
             <RowContext.Provider value>{rowAction!(r)}</RowContext.Provider>
           </div>
         )}
@@ -295,10 +240,10 @@ export function DataTable<T>(props: DataTableProps<T>) {
 
   return (
     <div data-slot="data-table" className={cx('flex min-w-0 flex-col', className)}>
-      <div data-slot="table-scroll" className="relative min-w-0 overflow-x-auto">
-        <div role="table" aria-label={label} aria-busy={state === 'loading' || undefined} aria-rowcount={state === 'loading' ? undefined : rows.length + 1} className="ds-table min-w-min border-t border-border-subtle-01" style={vars}>
+      <div data-part="scroll" className="relative min-w-0 overflow-x-auto rounded-surface border border-line">
+        <div role="table" aria-label={label} aria-busy={state === 'loading' || undefined} aria-rowcount={state === 'loading' ? undefined : rows.length + 1} className="ds-table min-w-min" style={vars}>
           <div role="rowgroup" className="ds-rowgroup">
-            <div role="row" className="ds-row bg-layer-accent-01">
+            <div role="row" className="ds-row border-b border-line bg-canvas">
               {columns.map((c) => {
                 const active = c.sortValue && sort?.key === c.key ? sort.direction : undefined
                 const hintId = c.hint ? `${uid}-hint-${c.key}` : undefined
@@ -315,31 +260,23 @@ export function DataTable<T>(props: DataTableProps<T>) {
                     trigger
                   )
                 return (
-                  <div key={c.key} role="columnheader" aria-sort={active} className={cx(cellCls(c), 'text-heading-compact-01 text-text-primary', c.sortValue && 'px-0 py-0')}>
+                  <div key={c.key} role="columnheader" aria-sort={active} className={cx(cellCls(c), 'text-heading text-fg', c.sortValue && 'p-0')}>
                     {c.sortValue ? (
                       withHint(
                         <button
                           type="button"
-                          data-slot="sort"
+                          data-part="sort"
                           aria-describedby={hintId}
                           onClick={() => setSort({ key: c.key, direction: active ? (active === 'ascending' ? 'descending' : 'ascending') : (c.sortFirst ?? 'ascending') })}
-                          className={cx(
-                            'flex min-h-12 w-full min-w-0 cursor-pointer items-center gap-2 px-4 py-2 text-heading-compact-01 text-text-primary hover:bg-layer-accent-hover-01 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus',
-                            c.align === 'end' ? 'justify-end text-end' : 'text-start',
-                          )}
+                          className={cx('flex min-h-touch w-full min-w-0 cursor-pointer items-center gap-items px-compact py-items text-heading text-fg hover:bg-hover md:min-h-control', FOCUS, c.align === 'end' ? 'justify-end text-end' : 'text-start')}
                         >
                           {title}
-                          <SortIcon direction={active} />
+                          <Icon name={active === 'ascending' ? 'arrow-up' : active === 'descending' ? 'arrow-down' : 'sort'} className={active ? 'text-fg' : 'text-fg-muted'} />
                         </button>,
                       )
                     ) : c.hint ? (
                       withHint(
-                        <button
-                          type="button"
-                          data-slot="column-hint"
-                          aria-describedby={hintId}
-                          className={cx('min-w-0 cursor-help text-heading-compact-01 text-text-primary focus-visible:outline-2 focus-visible:outline-focus', c.align === 'end' ? 'text-end' : 'text-start')}
-                        >
+                        <button type="button" data-part="hint" aria-describedby={hintId} className={cx('min-w-0 cursor-help rounded-control text-heading text-fg', FOCUS, c.align === 'end' ? 'text-end' : 'text-start')}>
                           {title}
                         </button>,
                       )
@@ -350,7 +287,7 @@ export function DataTable<T>(props: DataTableProps<T>) {
                 )
               })}
               {withAction && (
-                <div role="columnheader" className="flex min-h-12 items-center px-2">
+                <div role="columnheader" className="flex items-center px-items">
                   <span className="sr-only">действия</span>
                 </div>
               )}
@@ -359,34 +296,34 @@ export function DataTable<T>(props: DataTableProps<T>) {
           {state === 'loading' ? (
             <div role="rowgroup" className="ds-rowgroup" data-state="загрузка">
               {Array.from({ length: 5 }, (_, i) => (
-                <div key={i} role="row" className="ds-row border-b border-border-subtle-01 bg-layer-01">
+                <div key={i} role="row" className="ds-row border-b border-line bg-surface">
                   {columns.map((c) => (
                     <div key={c.key} role="cell" className={cellCls(c)}>
                       <Skeleton width={c.face ? '3/4' : '1/2'} />
                     </div>
                   ))}
-                  {withAction && <div role="cell" className="min-h-12" />}
+                  {withAction && <div role="cell" />}
                 </div>
               ))}
             </div>
           ) : (
             groups.map((g, gi) => {
               const head = g.status && (
-                <div role="row" className="ds-row bg-layer-01">
-                  <div role="rowheader" className="flex min-h-12 items-center px-4 pt-4" style={{ gridColumn: '1 / -1' }}>
+                <div role="row" className="ds-row bg-surface">
+                  <div role="rowheader" className="flex items-center px-compact pt-blocks pb-tight" style={{ gridColumn: '1 / -1' }}>
                     {/* слово группы стоит при прокрутке вбок, как первая колонка */}
-                    <div className="sticky left-4">
+                    <div className="sticky left-compact">
                       <GroupHead
                         status={g.status}
                         count={g.rows.length}
                         label={statusLabel?.(g.status)}
-                        toggle={collapseHealthy && g.healthy ? { open: healthyOpen, onClick: () => setHealthyOpen(!healthyOpen), controls: `${uid}-ok` } : undefined}
+                        toggle={g.healthy ? { open: healthyOpen, onClick: () => setHealthyOpen(!healthyOpen), controls: `${uid}-ok` } : undefined}
                       />
                     </div>
                   </div>
                 </div>
               )
-              if (collapseHealthy && g.healthy)
+              if (g.healthy)
                 return (
                   <div key={g.status ?? gi} role="rowgroup" className="ds-rowgroup" data-group={g.status}>
                     {head}
@@ -415,12 +352,10 @@ export function DataTable<T>(props: DataTableProps<T>) {
 
 export interface ListProps<T> extends CollectionProps<T> {
   renderRow: (row: T) => ReactNode
-  /** Ключ открытой строки (её карточка видна рядом — «Сообщения», «Контент» DF): фон выбора и `aria-current`. */
-  activeKey?: string | null
 }
 
 export function List<T>(props: ListProps<T>) {
-  const { rows, renderRow, getKey, getStatus, statusLabel, state = 'ready', pageSize = 50, collapseHealthy = true, onRowClick, rowAction, label, className, activeKey } = props
+  const { rows, renderRow, getKey, getStatus, statusLabel, state = 'ready', pageSize = 50, onSelect, selectedKey, rowAction, label, className } = props
   const groups = useGroups(rows, getStatus)
   const [limit, setLimit] = useState(pageSize)
   const [healthyOpen, setHealthyOpen] = useState(false)
@@ -431,77 +366,70 @@ export function List<T>(props: ListProps<T>) {
 
   const item = (r: T) => {
     const key = getKey(r)
-    const active = activeKey != null && key === activeKey
+    const selected = selectedKey != null && key === selectedKey
     return (
-      <li key={key} data-slot="row" data-active={active || undefined} className={cx('flex min-h-12 items-center gap-2 border-b border-border-subtle-01', active ? 'bg-layer-selected-01' : 'bg-layer-01')}>
-        {onRowClick ? (
+      <li key={key} data-slot="row" data-selected={selected || undefined} className={cx('flex min-h-touch items-center gap-items border-b border-line last:border-b-0 md:min-h-control', selected ? 'bg-selected' : 'bg-surface')}>
+        {onSelect ? (
           <button
             type="button"
-            aria-current={active || undefined}
-            onClick={() => onRowClick(r)}
-            className={cx(
-              'flex min-h-12 min-w-0 flex-1 cursor-pointer items-center px-4 py-2 text-start text-body-01 text-text-primary focus-visible:outline-2 focus-visible:outline-focus focus-visible:-outline-offset-2',
-              active ? 'hover:bg-layer-selected-hover-01' : 'hover:bg-layer-hover-01',
-            )}
+            aria-current={selected || undefined}
+            onClick={() => onSelect(r)}
+            className={cx('flex min-h-touch min-w-0 flex-1 cursor-pointer items-center px-compact py-items text-start text-body text-fg hover:bg-hover md:min-h-control', FOCUS)}
           >
             {renderRow(r)}
           </button>
         ) : (
-          <div className="min-w-0 flex-1 px-4 py-2 text-body-01">{renderRow(r)}</div>
+          <div className="min-w-0 flex-1 px-compact py-items text-body">{renderRow(r)}</div>
         )}
         {rowAction && (
-          <div className="flex shrink-0 items-center gap-1 pr-2">
+          <div className="flex shrink-0 items-center gap-tight pr-items">
             <RowContext.Provider value>{rowAction(r)}</RowContext.Provider>
           </div>
         )}
       </li>
     )
   }
+  const ul = (children: ReactNode) => <ul className="m-0 list-none overflow-hidden rounded-surface border border-line p-0">{children}</ul>
 
   if (state === 'loading')
     return (
       <div data-slot="list" data-state="загрузка" role="status" aria-busy="true" aria-label={label} className={className}>
         <span className="sr-only">загрузка</span>
-        <ul className="m-0 list-none border-t border-border-subtle-01 p-0">
-          {Array.from({ length: 5 }, (_, i) => (
-            <li key={i} className="flex min-h-12 items-center border-b border-border-subtle-01 bg-layer-01 px-4 py-2">
+        {ul(
+          Array.from({ length: 5 }, (_, i) => (
+            <li key={i} className="flex min-h-touch items-center border-b border-line bg-surface px-compact py-items last:border-b-0 md:min-h-control">
               <Skeleton width={i % 2 ? '1/2' : '3/4'} />
             </li>
-          ))}
-        </ul>
+          )),
+        )}
       </div>
     )
 
-  const shown = budget(groups, limit, collapseHealthy)
-  const hidden = groups.reduce((n, g, i) => n + (collapseHealthy && g.healthy ? 0 : g.rows.length - shown[i]), 0)
+  const shown = budget(groups, limit)
+  const hidden = groups.reduce((n, g, i) => n + (g.healthy ? 0 : g.rows.length - shown[i]), 0)
   return (
-    <div data-slot="list" className={cx('flex min-w-0 flex-col gap-2', className)}>
-      <div role="group" aria-label={label} className="flex flex-col gap-2">
+    <div data-slot="list" className={cx('flex min-w-0 flex-col gap-items', className)}>
+      <div role="group" aria-label={label} className="flex flex-col gap-blocks">
         {groups.map((g, gi) => {
-          const healthy = collapseHealthy && g.healthy
-          if (!healthy && shown[gi] === 0) return null
+          if (!g.healthy && shown[gi] === 0) return null
           return (
-            <Fragment key={g.status ?? gi}>
-              <section data-group={g.status ?? undefined} aria-label={g.status ? (statusLabel?.(g.status) ?? undefined) : undefined} className="flex flex-col gap-1">
-                {g.status && (
-                  <GroupHead
-                    status={g.status}
-                    count={g.rows.length}
-                    label={statusLabel?.(g.status)}
-                    toggle={healthy ? { open: healthyOpen, onClick: () => setHealthyOpen(!healthyOpen), controls: `${uid}-ok` } : undefined}
-                  />
-                )}
-                {healthy ? (
-                  <div id={`${uid}-ok`} className="ds-expand" data-open={healthyOpen} inert={!healthyOpen}>
-                    <div>
-                      <ul className="m-0 list-none border-t border-border-subtle-01 p-0">{g.rows.map(item)}</ul>
-                    </div>
-                  </div>
-                ) : (
-                  <ul className="m-0 list-none border-t border-border-subtle-01 p-0">{g.rows.slice(0, shown[gi]).map(item)}</ul>
-                )}
-              </section>
-            </Fragment>
+            <section key={g.status ?? gi} data-group={g.status ?? undefined} aria-label={g.status ? statusLabel?.(g.status) : undefined} className="flex flex-col gap-items">
+              {g.status && (
+                <GroupHead
+                  status={g.status}
+                  count={g.rows.length}
+                  label={statusLabel?.(g.status)}
+                  toggle={g.healthy ? { open: healthyOpen, onClick: () => setHealthyOpen(!healthyOpen), controls: `${uid}-ok` } : undefined}
+                />
+              )}
+              {g.healthy ? (
+                <div id={`${uid}-ok`} className="ds-expand" data-open={healthyOpen} inert={!healthyOpen}>
+                  <div>{ul(g.rows.map(item))}</div>
+                </div>
+              ) : (
+                ul(g.rows.slice(0, shown[gi]).map(item))
+              )}
+            </section>
           )
         })}
       </div>

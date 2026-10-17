@@ -1,36 +1,25 @@
 /**
- * Выбор файла (Carbon File uploader): подпись над полем, кнопка «Выбрать файл», под ней — выбранные файлы с «убрать»,
- * подсказка с ограничениями (тип, размер) и ошибка словами вместо подсказки — тем же каркасом, что у полей (`FieldShell`).
- * Свой `<input type="file">` в продукте не нужен: он спрятан здесь, видна только кнопка ДС.
- * Файл не того типа или больше `maxSize` не принимается: ошибка называет файл и что не так («можно: PDF, PNG»,
- * «больше 10 МБ»). Управляемый (`value` + `onChange`) и свой (`defaultValue`).
+ * Выбор файла: подпись, тихая кнопка «Выбрать файл», выбранные файлы с размером и «убрать», ограничения словами в
+ * подсказке («Можно: PDF, картинки · до 10 МБ»). Не тот тип или больше `maxSize` — файл не взят, ошибка называет файл
+ * и причину. Свой `<input type="file">` в продукте не нужен. `showFiles={false}` — список показывает продукт
+ * (вложение в поле ответа); `ref.open()` — открыть выбор из другого места.
  */
-import { forwardRef, useImperativeHandle, useRef, useState, type ReactNode } from 'react'
+import { forwardRef, useImperativeHandle, useRef, useState } from 'react'
 import { useControllable } from '../lib/controllable'
 import { cx } from '../lib/cx'
-import { Button, type ButtonVariant, type ButtonSize } from './Button'
+import { Button } from './Button'
 import { FieldShell, fieldAria, useFieldIds, type FieldBaseProps } from './TextField'
 
-export interface FileFieldProps extends Omit<FieldBaseProps, 'size'> {
-  /** Типы, как у `<input accept>`: `.pdf,.docx`, `image/*`, `application/pdf`. Нет — любой. */
+export interface FileFieldProps extends Omit<FieldBaseProps, 'dense'> {
+  /** Типы, как у `<input accept>`: `.pdf,.docx`, `image/*`. Нет — любой. */
   accept?: string
-  /** Слова для типов в подсказке и ошибке («фото», «PDF или Word»). Нет — из `accept`: «PDF, DOCX», «картинки». */
-  acceptLabel?: string
   /** Наибольший размер одного файла, байты. */
   maxSize?: number
-  /** Несколько файлов. */
   multiple?: boolean
-  /** Сколько файлов можно выбрать всего (с `multiple`). */
-  maxFiles?: number
   value?: File[]
   defaultValue?: File[]
   onChange?: (files: File[]) => void
-  /** Слово кнопки. */
-  buttonLabel?: ReactNode
-  /** Вид кнопки — тихие варианты (по умолчанию tertiary, как у Carbon). Главная кнопка здесь не бывает. */
-  buttonVariant?: Exclude<ButtonVariant, 'danger'>
-  size?: ButtonSize
-  /** Показать выбранные файлы под кнопкой (по умолчанию да). Нет — продукт показывает их сам (вложение в поле ответа). */
+  /** Показать выбранные файлы под кнопкой (по умолчанию да). */
   showFiles?: boolean
   disabled?: boolean
   id?: string
@@ -38,7 +27,6 @@ export interface FileFieldProps extends Omit<FieldBaseProps, 'size'> {
 }
 
 export interface FileFieldHandle {
-  /** Открыть выбор файла (например, по кнопке в другом месте). */
   open: () => void
 }
 
@@ -77,29 +65,10 @@ export function fileMatches(file: File, accept?: string): boolean {
     .some((t) => (t.startsWith('.') ? name.endsWith(t) : t.endsWith('/*') ? type.startsWith(t.slice(0, -1)) : type === t))
 }
 
+const cap = (s: string) => s[0]!.toUpperCase() + s.slice(1)
+
 export const FileField = forwardRef<FileFieldHandle, FileFieldProps>(function FileField(
-  {
-    label,
-    hideLabel,
-    helperText,
-    error,
-    className,
-    accept,
-    acceptLabel,
-    maxSize,
-    multiple,
-    maxFiles,
-    value,
-    defaultValue,
-    onChange,
-    buttonLabel,
-    buttonVariant = 'tertiary',
-    size = 'md',
-    showFiles = true,
-    disabled,
-    id,
-    name,
-  },
+  { label, hideLabel, helperText, error, className, accept, maxSize, multiple, value, defaultValue, onChange, showFiles = true, disabled, id, name },
   ref,
 ) {
   const ids = useFieldIds(id)
@@ -108,9 +77,9 @@ export const FileField = forwardRef<FileFieldHandle, FileFieldProps>(function Fi
   const [rejected, setRejected] = useState<string | null>(null)
   useImperativeHandle(ref, () => ({ open: () => input.current?.click() }), [])
 
-  const types = accept ? (acceptLabel ?? acceptText(accept)) : null
-  const limits = [types && `можно: ${types}`, maxSize && `до ${fileSizeText(maxSize)}`, multiple && maxFiles && `не больше ${maxFiles}`].filter(Boolean).join(' · ')
-  const help = helperText ?? (limits ? limits[0].toUpperCase() + limits.slice(1) : undefined)
+  const types = accept ? acceptText(accept) : null
+  const limits = [types && `можно: ${types}`, maxSize && `до ${fileSizeText(maxSize)}`].filter(Boolean).join(' · ')
+  const help = helperText ?? (limits ? cap(limits) : undefined)
   const shownError = error ?? rejected
 
   const pick = (list: FileList | null) => {
@@ -122,13 +91,8 @@ export const FileField = forwardRef<FileFieldHandle, FileFieldProps>(function Fi
       if (maxSize && f.size > maxSize) return problems.push(`«${f.name}» больше ${fileSizeText(maxSize)} (${fileSizeText(f.size)})`), false
       return true
     })
-    let next = multiple ? [...files, ...ok] : ok.slice(0, 1)
-    if (multiple && maxFiles && next.length > maxFiles) {
-      problems.push(`файлов больше ${maxFiles} — лишние не взяты`)
-      next = next.slice(0, maxFiles)
-    }
-    setRejected(problems.length ? problems.map((p, i) => (i === 0 ? p[0].toUpperCase() + p.slice(1) : p)).join('; ') : null)
-    if (ok.length) setFiles(next)
+    setRejected(problems.length ? cap(problems.join('; ')) : null)
+    if (ok.length) setFiles(multiple ? [...files, ...ok] : ok.slice(0, 1))
     // тот же файл можно выбрать снова (после «убрать»)
     if (input.current) input.current.value = ''
   }
@@ -141,46 +105,26 @@ export const FileField = forwardRef<FileFieldHandle, FileFieldProps>(function Fi
   const btnTextId = `${ids.id}-btn`
   return (
     <FieldShell slot="file-field" ids={ids} label={label} hideLabel={hideLabel} helperText={help} error={shownError} disabled={disabled} className={className}>
-      <input
-        ref={input}
-        id={ids.id}
-        name={name}
-        type="file"
-        hidden
-        accept={accept}
-        multiple={multiple}
-        disabled={disabled}
-        onChange={(e) => pick(e.target.files)}
-      />
+      <input ref={input} id={ids.id} name={name} type="file" hidden accept={accept} multiple={multiple} disabled={disabled} onChange={(e) => pick(e.target.files)} />
       <div className="flex">
         <Button
-          variant={buttonVariant}
-          size={size}
+          icon="upload"
           disabled={disabled}
           onClick={() => input.current?.click()}
           aria-labelledby={`${ids.labelId} ${btnTextId}`}
           aria-describedby={fieldAria(ids, { helperText: help, error: shownError })['aria-describedby']}
-          icon={
-            <svg viewBox="0 0 16 16" focusable="false" className="size-4">
-              <path d="M8 11V2.5M4.5 6 8 2.5 11.5 6M2.5 10.5v3h11v-3" fill="none" stroke="currentColor" strokeWidth="1.5" />
-            </svg>
-          }
         >
-          <span id={btnTextId}>{buttonLabel ?? (multiple ? 'Выбрать файлы' : 'Выбрать файл')}</span>
+          <span id={btnTextId}>{multiple ? 'Выбрать файлы' : 'Выбрать файл'}</span>
         </Button>
       </div>
       {showFiles && files.length > 0 && (
-        <ul aria-label="Выбранные файлы" className="m-0 mt-2 flex list-none flex-col gap-1 p-0">
+        <ul aria-label="Выбранные файлы" className="m-0 flex list-none flex-col gap-tight p-0">
           {files.map((f, i) => (
-            <li key={`${f.name}-${i}`} className={cx('flex min-h-8 items-center justify-between gap-2 bg-layer-01 pl-4 text-body-compact-01', disabled ? 'text-text-disabled' : 'text-text-primary')}>
+            <li key={`${f.name}-${i}`} className={cx('flex min-h-dense items-center justify-between gap-items rounded-control border border-line bg-surface pl-compact text-body', disabled ? 'text-fg-disabled' : 'text-fg')}>
               <span className="min-w-0 truncate">{f.name}</span>
-              <span className="flex shrink-0 items-center gap-1">
-                <span className="text-label-01 text-text-secondary">{fileSizeText(f.size)}</span>
-                <Button variant="ghost" size="sm" disabled={disabled} aria-label={`Убрать «${f.name}»`} onClick={() => remove(i)}>
-                  <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false" className="size-4">
-                    <path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" strokeWidth="1.5" />
-                  </svg>
-                </Button>
+              <span className="flex shrink-0 items-center gap-tight">
+                <span className="text-caption text-fg-muted">{fileSizeText(f.size)}</span>
+                <Button variant="ghost" dense icon="close" disabled={disabled} aria-label={`Убрать «${f.name}»`} onClick={() => remove(i)} />
               </span>
             </li>
           ))}

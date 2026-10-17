@@ -1,12 +1,12 @@
 /** Данные историй для компонентов DF (переписка, неделя, сетка сверки, графики). Даты зашиты — кадры не плывут. */
 import type { ChatMessage } from '../components/ChatThread'
-import type { GridCell, GridColumn, GridTone } from '../components/ProofreadGrid'
+import type { GridCell, GridColumn } from '../components/ProofreadGrid'
 
 export const chat: ChatMessage[] = [
   { id: 'm1', direction: 'in', author: 'Анна Петрова', time: '10:02', datetime: '2026-10-03T10:02', day: '3 октября', text: 'Здравствуйте! Вы работаете в воскресенье?' },
   { id: 'm2', direction: 'out', author: 'Кофейня «Зерно»', time: '10:15', datetime: '2026-10-03T10:15', day: '3 октября', text: 'Здравствуйте, Анна! Да, с 9 до 21.' },
-  { id: 'm3', direction: 'in', author: 'Анна Петрова', time: '09:40', datetime: '2026-10-04T09:40', day: 'сегодня', text: 'А можно заказать торт к субботе?', attachments: <span className="text-label-01 text-text-secondary">[фото]</span> },
-  { id: 'm4', direction: 'out', author: 'Кофейня «Зерно»', time: '09:52', datetime: '2026-10-04T09:52', day: 'сегодня', text: 'Можно! Напишите, какой вкус и на сколько человек.', status: 'sending' },
+  { id: 'm3', direction: 'in', author: 'Анна Петрова', time: '09:40', datetime: '2026-10-04T09:40', day: 'сегодня', text: 'А можно заказать торт к субботе?', attachments: <span className="text-caption text-fg-muted">фото: торт.jpg</span> },
+  { id: 'm4', direction: 'out', author: 'Кофейня «Зерно»', time: '09:52', datetime: '2026-10-04T09:52', day: 'сегодня', text: 'Можно! Напишите, какой вкус и на сколько человек.', status: 'running' },
 ]
 
 export const chatFailed: ChatMessage[] = [
@@ -80,13 +80,13 @@ export const communities: Community[] = [
 ]
 export const manyCommunities: Community[] = Array.from({ length: 70 }, (_, i) => ({ id: `mc${i}`, name: `Сообщество ${i + 1}`, norm: 2, out: pattern(i) }))
 
-/** Клетка сверки, как в DF: вышло/норма, тон по статусу, будущие дни тихие. */
+/** Клетка сверки, как в DF: вышло/норма, тон по плану, будущие дни тихие. */
 export function proofCell(c: Community, col: GridColumn): GridCell {
   const day = Number(col.key)
-  if (day > 4) return { tone: 'future', value: '' }
+  if (day > 4) return { quiet: true, word: 'впереди' }
   const n = c.out[day - 1]
-  const tone: GridTone = n === 0 ? 'error' : n < c.norm ? 'warning' : n > c.norm ? 'neutral' : 'success'
-  return { tone, value: `${n}/${c.norm}`, note: c.id === 'c2' && day === 2, hint: `${day} октября: вышло ${n} из ${c.norm}` }
+  const [tone, word] = n === 0 ? (['опасно', 'пропуск'] as const) : n < c.norm ? (['внимание', 'недобор'] as const) : n > c.norm ? (['нейтрально', 'сверх плана'] as const) : (['хорошо', 'в норме'] as const)
+  return { tone, word, value: `${n}/${c.norm}`, note: c.id === 'c2' && day === 2, hint: `${day} октября: вышло ${n} из ${c.norm}` }
 }
 
 /** Ряды для графика историй: охват и посты по дням. */

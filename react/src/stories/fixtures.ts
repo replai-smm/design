@@ -1,5 +1,5 @@
 /** Данные историй: группы VK у клиента — как в Replai («Все группы»), без настоящих имён и номеров. */
-import type { StatusId } from '../lib/status'
+import type { StatusId } from '../lib/vocab'
 
 export interface GroupRow {
   id: string

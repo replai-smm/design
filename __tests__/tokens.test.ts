@@ -1,89 +1,78 @@
 /**
- * Токены — форма и единый набор имён (G46, CONCEPT §3.4).
- * Схема формы tokens.json и scale.json — tokens.schema.json (тест — schemas.test.ts, с примерами); G46 — contrast.test.ts.
- * Слова статусов против закона Карты сверяет process (scripts/__tests__/design-contract.test.ts).
+ * Основа — один язык: роли цвета (закрытый список, обе темы), словарь тонов из ролей, шкалы, шрифты в пакете.
+ * Форма — tokens.schema.json (schemas.test.ts), контраст — contrast.test.ts.
  */
 import { describe, it, expect } from 'vitest'
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import Ajv2020 from 'ajv/dist/2020.js'
 
 const design = resolve(import.meta.dirname, '..')
-const json = (p: string) => JSON.parse(readFileSync(p, 'utf8'))
-const tokens = json(resolve(design, 'tokens.json'))
+const json = (p: string) => JSON.parse(readFileSync(resolve(design, p), 'utf8'))
+const tokens = json('tokens.json')
+const scale = json('scale.json')
 
-const validate = (schema: object, data: unknown) => {
-  // allowMatchingProperties: обязательные «sans», «move» объявлены и в properties, и подходят под шаблон имён шкалы
-  const ajv = new Ajv2020({ allErrors: true, strict: true, allowUnionTypes: true, allowMatchingProperties: true })
-  const ok = ajv.validate(schema, data)
-  return ok ? [] : (ajv.errors ?? []).map((e) => `${e.instancePath} ${e.message}`)
-}
-
-describe('tokens.json', () => {
-  it('форма 3.1: без старых шкал в корне (форму держит tokens.schema.json)', () => {
-    expect(Object.keys(tokens).filter((k) => ['status', 'spacing', 'type', 'motion', 'radius'].includes(k))).toEqual([])
-  })
-
-  it('источник — Carbon под Apache-2.0, светлая = g10, тёмная = g100', () => {
-    expect(tokens.source).toMatchObject({ name: 'carbon', license: 'Apache-2.0' })
-    expect(tokens.themes['светлая'].carbon).toBe('g10')
-    expect(tokens.themes['тёмная'].carbon).toBe('g100')
-    expect(existsSync(resolve(design, 'licenses/carbon-LICENSE.txt'))).toBe(true)
-  })
-
-  it('у обеих тем один набор имён, значения — #rrggbb или #rrggbbaa строчными', () => {
-    const light = Object.keys(tokens.themes['светлая'].colors).sort()
-    const dark = Object.keys(tokens.themes['тёмная'].colors).sort()
-    expect(dark).toEqual(light)
-    for (const t of Object.values<any>(tokens.themes)) {
-      for (const [k, v] of Object.entries(t.colors)) expect(v, k).toMatch(/^#[0-9a-f]{6}(?:[0-9a-f]{2})?$/)
+describe('роли цвета', () => {
+  it('у каждой роли — значение обеих тем (#rrggbb или #rrggbbaa строчными) и «зачем»', () => {
+    for (const [k, v] of Object.entries<any>(tokens.colors)) {
+      expect(Object.keys(v).sort(), k).toEqual(['dark', 'light', 'role'])
+      for (const t of ['light', 'dark']) expect(v[t], `${k}.${t}`).toMatch(/^#[0-9a-f]{6}(?:[0-9a-f]{2})?$/)
+      expect(v.role.length, k).toBeGreaterThan(3)
     }
   })
 
-  it('палитра Карты — три цвета C-SCR-3: синий «без изменений», жёлтый «хотят изменить», красный «падает»', () => {
-    // оттенок светлой и тёмной темы: синий 200–260°, жёлтый 35–60°, красный 340–10°
-    const hue = (hex: string) => {
-      const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255)
-      const max = Math.max(r, g, b)
-      const d = max - Math.min(r, g, b)
-      const h = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4
-      return (h * 60 + 360) % 360
-    }
-    const want: Record<string, (h: number) => boolean> = {
-      'без изменений': (h) => h >= 200 && h <= 260,
-      'хотят изменить': (h) => h >= 35 && h <= 60,
-      'падает': (h) => h >= 340 || h <= 10,
-    }
-    expect(Object.keys(tokens.palettes.karta)).toEqual(Object.keys(want))
-    for (const [state, t] of Object.entries<string>(tokens.palettes.karta)) {
-      for (const [theme, { colors }] of Object.entries<any>(tokens.themes)) {
-        expect(want[state](hue(colors[t])), `${theme}: ${state} = ${t} ${colors[t]}`).toBe(true)
-      }
-    }
+  it('ролей не больше 32: поверхности, текст, рамки, взаимодействие, тоны, ряды данных', () => {
+    expect(Object.keys(tokens.colors).length).toBeLessThanOrEqual(32)
   })
 
-  it('палитра продуктов — четыре тона; у каждого есть знак, -text и -background в обеих темах', () => {
-    expect(Object.keys(tokens.palettes.product)).toEqual(['опасно', 'внимание', 'хорошо', 'нейтрально'])
-    for (const t of Object.values<string>(tokens.palettes.product)) {
-      for (const theme of Object.values<any>(tokens.themes)) {
-        for (const name of [t, `${t}-text`, `${t}-background`]) expect(theme.colors[name], name).toBeDefined()
-      }
+  it('синий — только ссылка и фокус: одна роль accent; главное действие — инверсия', () => {
+    const blue = (hex: string) => {
+      const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16))
+      return b > 180 && b - r > 60 && b - g > 30
     }
+    const blues = Object.entries<any>(tokens.colors).filter(([k, v]) => !k.startsWith('series-') && (blue(v.light) || blue(v.dark))).map(([k]) => k)
+    expect(blues).toEqual(['accent'])
+    expect(tokens.colors.inverse.light).toBe(tokens.colors.fg.light)
   })
 
-  it('шрифт IBM Plex Sans: файлы лежат в репозитории, лицензия OFL рядом', () => {
-    expect(tokens.font.family).toBe('IBM Plex Sans')
-    for (const f of tokens.font.files) expect(existsSync(resolve(design, f)), f).toBe(true)
-    expect(readFileSync(resolve(design, 'fonts/OFL.txt'), 'utf8')).toMatch(/SIL Open Font License, Version 1\.1/)
+  it('ряды данных 1–6 — не цвета тонов: линия графика не выглядит бедой', () => {
+    const tones = new Set(['danger', 'warning', 'success'].flatMap((r) => [tokens.colors[r].light, tokens.colors[r].dark]))
+    for (let i = 1; i <= 6; i++) for (const t of ['light', 'dark']) expect(tones.has(tokens.colors[`series-${i}`][t]), `series-${i}`).toBe(false)
   })
 })
 
-describe('scale.json и statuses.json (форма scale.json — договор process)', () => {
-  it('правило 0,6 с: duration-move = 600ms', () => {
-    expect(json(resolve(design, 'scale.json')).duration.move.$value).toBe('600ms')
+describe('словарь тонов', () => {
+  it('пять тонов; знак, текст и подложка — роли; подложка — только у «опасно» и «внимание»', () => {
+    expect(Object.keys(tokens.tones)).toEqual(['опасно', 'внимание', 'инфо', 'нейтрально', 'хорошо'])
+    for (const [t, x] of Object.entries<any>(tokens.tones)) for (const r of [x.mark, x.text, x.bg].filter(Boolean)) expect(tokens.colors[r], `${t}: ${r}`).toBeDefined()
+    expect(Object.entries<any>(tokens.tones).filter(([, x]) => x.bg).map(([t]) => t)).toEqual(['опасно', 'внимание'])
   })
 
-  it('statuses.json проходит statuses.schema.json', () => {
-    expect(validate(json(resolve(design, 'statuses.schema.json')), json(resolve(design, 'statuses.json')))).toEqual([])
+  it('«хорошо» — зелёный знак без подложки (норма не кричит)', () => {
+    const t = tokens.tones['хорошо']
+    expect(t.bg).toBeNull()
+    const [r, g, b] = [1, 3, 5].map((i) => parseInt(tokens.colors[t.mark].light.slice(i, i + 2), 16))
+    expect(g > r && g > b).toBe(true)
+  })
+})
+
+describe('шкалы', () => {
+  it('отступы — шесть ролей кратно 4 px; высоты контролов — 32 · 40 · 48', () => {
+    const px = (v: string) => parseFloat(v) * 16
+    expect(Object.values<any>(scale.space).map((s) => px(s.value))).toEqual([4, 8, 12, 16, 24, 32])
+    expect(['dense', 'control', 'touch'].map((k) => px(scale.size[k].value))).toEqual([32, 40, 48])
+  })
+
+  it('семь ролей текста; углы — контрол 4, поверхность 6; три глубины; движение — 110 мс и 0,6 с', () => {
+    expect(Object.keys(scale.text)).toHaveLength(7)
+    expect([scale.radius.control.value, scale.radius.surface.value]).toEqual(['4px', '6px'])
+    expect(Object.keys(scale.elevation)).toEqual(['flat', 'raised', 'overlay'])
+    expect([scale.motion.fast.value, scale.motion.move.value]).toEqual(['110ms', '600ms'])
+  })
+
+  it('шрифты — в пакете: Plex Sans 400 и 600, Plex Mono 400; лицензия OFL рядом', () => {
+    expect([tokens.font.sans.family, tokens.font.mono.family]).toEqual(['IBM Plex Sans', 'IBM Plex Mono'])
+    for (const f of [...tokens.font.sans.files, ...tokens.font.mono.files]) expect(existsSync(resolve(design, f)), f).toBe(true)
+    expect(readFileSync(resolve(design, 'fonts/OFL.txt'), 'utf8')).toMatch(/SIL Open Font License, Version 1\.1/)
+    expect(scale.font.mono.value[0]).toBe('IBM Plex Mono')
   })
 })

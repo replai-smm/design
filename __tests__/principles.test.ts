@@ -1,13 +1,13 @@
 /**
- * Принципы дизайн-системы машиной (design/lint/principles.mjs; README «Правила для всех продуктов»): полки Storybook,
- * только токены, свои компоненты с именами ДС. Новое держит, старое — долг (храповик против базы PR).
+ * Принципы дизайн-системы машиной (design/lint/principles.mjs; README «Правила — держит машина»): полки Storybook,
+ * только токены, свои компоненты с именами ДС, глубокий импорт. Новое держит, старое — долг (храповик против базы PR).
  */
 import { describe, it, expect, afterAll } from 'vitest'
 import { execFileSync } from 'node:child_process'
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
-import { storyTitle, shelfProblem, ownComponents, dsNames, check } from '../lint/principles.mjs'
+import { storyTitle, shelfProblem, ownComponents, dsNames, deepImports, check } from '../lint/principles.mjs'
 
 const design = resolve(import.meta.dirname, '..')
 const cli = resolve(design, 'lint/principles.mjs')
@@ -27,16 +27,17 @@ describe('полка из файла историй', () => {
 
 describe('полки', () => {
   it('ДС: Основы · Компоненты · Паттерны', () => {
-    for (const t of ['Основы/Цвета', 'Компоненты/Кнопка и область действий', 'Паттерны/Три колонки']) expect(shelfProblem(t, 'ds')).toBeNull()
-    for (const t of ['ДС/Кнопка', 'Атомы/Кнопка', 'Кнопка', 'Экраны/SCR-01 Вход']) expect(shelfProblem(t, 'ds')).toMatch(/не полка/)
+    for (const t of ['Основы/Роли', 'Элементы/Кнопка', 'Поверхности/Карточка', 'Паттерны/Три колонки']) expect(shelfProblem(t, 'ds')).toBeNull()
+    for (const t of ['Компоненты/Кнопка', 'Атомы/Кнопка', 'Кнопка', 'Экраны/SCR-01 Вход']) expect(shelfProblem(t, 'ds')).toMatch(/не полка/)
   })
-  it('продукт: Экраны/SCR-NN … и Части продукта/…; полка ДС — «не дублируется»', () => {
-    for (const t of ['Экраны/SCR-03 Инбокс', 'Экраны/SCR-12', 'Экраны/SCR-03 Инбокс/Пусто', 'Части продукта/Строка очереди'])
+  it('продукт: только Экраны/SCR-NN …; полка ДС — «не дублируется»', () => {
+    for (const t of ['Экраны/SCR-03 Инбокс', 'Экраны/SCR-12', 'Экраны/SCR-03 Инбокс/Пусто', 'Экраны/SCR-03 Инбокс/Строка очереди'])
       expect(shelfProblem(t, 'product')).toBeNull()
     expect(shelfProblem('Инбокс/Очередь', 'product')).toMatch(/не полка/)
     expect(shelfProblem('Экраны/Инбокс', 'product')).toMatch(/не полка/)
-    expect(shelfProblem('Компоненты/Кнопка', 'product')).toMatch(/не дублируется/)
-    expect(shelfProblem('Примитивы/Вкладки', 'arena')).toMatch(/не дублируется/)
+    expect(shelfProblem('Части продукта/Шапка', 'product')).toMatch(/не полка/)
+    expect(shelfProblem('Элементы/Кнопка', 'product')).toMatch(/не дублируется/)
+    expect(shelfProblem('Компоненты/Вкладки', 'product')).toMatch(/не дублируется/)
     expect(shelfProblem(null, 'product')).toMatch(/нет title/)
   })
   it('истории самой ДС-React — все на полках', () => {
@@ -49,7 +50,7 @@ describe('свои компоненты с именами ДС', () => {
   const names = dsNames()
   it('имена — компоненты из react/src/index.ts, без типов и хуков', () => {
     for (const n of ['Button', 'Dialog', 'ThreeColumn', 'ChatThread', 'StatusBadge', 'ConfirmProvider']) expect(names.has(n)).toBe(true)
-    for (const n of ['ButtonProps', 'useToast', 'cx', 'STATUS_IDS', 'SERIES']) expect(names.has(n)).toBe(false)
+    for (const n of ['ButtonProps', 'useToast', 'cx', 'STATUS_IDS', 'SERIES', 'TONES']) expect(names.has(n)).toBe(false)
   })
   it('ловит function, const, class; не ловит импорт, вызов и строку с ds-allow', () => {
     const src = [
@@ -59,7 +60,7 @@ describe('свои компоненты с именами ДС', () => {
       `export const Card: FC = () => null`,
       `class Tooltip extends Component {}`,
       `const x = <Button>ok</Button>`,
-      `const Avatar = forwardRef(() => null) // ds-allow: ждёт переезда на ДС-React, интент I-avatar`,
+      `const Avatar = forwardRef(() => null) // ds-allow: своя картинка продукта, интент I-avatar`,
       `const DialogTitle = () => null`,
     ].join('\n')
     expect(ownComponents(src, names)).toEqual([
@@ -68,6 +69,42 @@ describe('свои компоненты с именами ДС', () => {
       { name: 'Card', line: 4 },
       { name: 'Tooltip', line: 5 },
     ])
+  })
+})
+
+describe('глубокий импорт (ds/deep-import)', () => {
+  const specs = (text: string) => deepImports(text).map((d: { spec: string; line: number }) => `${d.line} ${d.spec}`)
+  it('приманка: путь мимо exports — красный (from, import(), require, import без имён)', () => {
+    expect(
+      specs(
+        [
+          `import { Button } from '@replai-smm/design/react/src/components/Button'`,
+          `const m = await import("@replai-smm/design/react/src/index")`,
+          `const r = require('@replai-smm/design/lib/architecture.mjs')`,
+          `import '@replai-smm/design/react/src/ds.css'`,
+        ].join('\n'),
+      ),
+    ).toEqual([
+      '1 @replai-smm/design/react/src/components/Button',
+      '2 @replai-smm/design/react/src/index',
+      '3 @replai-smm/design/lib/architecture.mjs',
+      '4 @replai-smm/design/react/src/ds.css',
+    ])
+  })
+  it('не трогает: корень, пути из exports, комментарий, строку с ds-allow', () => {
+    expect(
+      specs(
+        [
+          `import { Button, Page } from '@replai-smm/design'`,
+          `import { TONES } from '@replai-smm/design/tokens'`,
+          `import scale from '@replai-smm/design/scale.json'`,
+          `import { scan } from '@replai-smm/design/lint/scan'`,
+          `import '@replai-smm/design/fonts/IBMPlexSans-Regular.woff2'`,
+          `// было: from '@replai-smm/design/react/src/components/Button'`,
+          `import { x } from '@replai-smm/design/react/src/x' // ds-allow: мост до выпуска v1.1, интент I-bridge`,
+        ].join('\n'),
+      ),
+    ).toEqual([])
   })
 })
 
@@ -85,6 +122,7 @@ describe('храповик против базы PR', () => {
   put('src/good.stories.tsx', `export default { title: 'Экраны/SCR-03 Инбокс' }\n`)
   put('src/ui/button.tsx', `export function Button() { return null }\n`)
   put('src/a.css', `.a { color: #fff; padding: 12px }\n`)
+  put('src/legacy.ts', `import { Button } from '@replai-smm/design/react/src/components/Button'\n`)
   put('src/__tests__/x.test.tsx', `const Dialog = () => null; expect(c).toBe('#fff')\n`)
   g('add', '.')
   g('commit', '-qm', 'база')
@@ -95,6 +133,8 @@ describe('храповик против базы PR', () => {
   put('src/ui/button.tsx', `export function Button() { return null }\nexport const x = 1\n`)
   put('src/a.css', `.a { color: #fff; padding: 12px; margin: 8px }\n`)
   put('src/dialog.tsx', `export function Dialog() { return <div style={{ padding: 12 }} /> }\n`)
+  put('src/legacy.ts', `import { Button } from '@replai-smm/design/react/src/components/Button'\nexport const x = 1\n`)
+  put('src/deep.ts', `import { Card } from '@replai-smm/design/react/src/components/Card'\n`)
   put('src/__tests__/x.test.tsx', `const Dialog = () => null; expect(c).toBe('#000')\n`)
   g('add', '.')
   g('commit', '-qm', 'PR')
@@ -104,6 +144,7 @@ describe('храповик против базы PR', () => {
     const r = check({ repo: dir, kind: 'product', roots: ['src'], base: 'main' })
     const k = (l: any[]) => l.map((x) => `${x.check} ${x.file}`).sort()
     expect(k(r.block)).toEqual([
+      'импорт src/deep.ts', // новый глубокий импорт
       'полки src/good.stories.tsx', // была верной — сломать нельзя
       'полки src/new.stories.tsx', // новый файл — сразу на полку
       'свои src/dialog.tsx',
@@ -111,7 +152,7 @@ describe('храповик против базы PR', () => {
       'токены src/dialog.tsx',
     ])
     expect(r.block.find((x) => x.file === 'src/a.css').text).toContain('margin: 8px')
-    expect(k(r.warn)).toEqual(['полки src/old.stories.tsx', 'свои src/ui/button.tsx', 'токены src/a.css'])
+    expect(k(r.warn)).toEqual(['импорт src/legacy.ts', 'полки src/old.stories.tsx', 'свои src/ui/button.tsx', 'токены src/a.css'])
   })
 
   it('командная строка: новое — выход 1; без базы — отчёт, выход 0; незакоммиченное тоже смотрит', () => {
@@ -130,7 +171,7 @@ describe('храповик против базы PR', () => {
     expect(run('src').code).toBe(2)
 
     g('checkout', '-q', 'main')
-    put('src/fresh.stories.tsx', `export default { title: 'Части продукта/Шапка' }\n`)
+    put('src/fresh.stories.tsx', `export default { title: 'Экраны/SCR-04 Шапка' }\n`)
     put('src/fresh2.stories.tsx', `export default { title: 'Шапка' }\n`)
     const local = run('--kind', 'product', '--base', 'main', 'src')
     expect(local.code).toBe(1)

@@ -2,14 +2,14 @@ import type { Decorator, Preview } from '@storybook/react-vite'
 import '../src/storybook.css'
 
 /**
- * Тема — атрибут data-theme на корне (как в tokens.css), глобал `theme` — тот же, что ставит задача скриншотов П7
+ * Тема — атрибут data-theme на корне (как в tokens.css), глобал `theme` — тот же, что ставит съёмка
  * (`?globals=theme:light|dark`). Ставим в теле декоратора, до отрисовки кадра, чтобы не мигала старая тема.
- * Ширины 390 и 1280 — клетки матрицы облика (design/matrix.yaml); их задаёт окно съёмки, здесь — для глаза.
+ * Ширины 390 и 1280 — клетки матрицы облика (matrix.yaml); их задаёт окно съёмки, здесь — для глаза.
  */
 const withTheme: Decorator = (Story, context) => {
   const theme = context.globals.theme === 'dark' ? 'dark' : 'light'
   document.documentElement.setAttribute('data-theme', theme)
-  document.body.style.background = 'var(--cds-background)'
+  document.body.style.background = 'var(--ds-canvas)'
   return <Story />
 }
 

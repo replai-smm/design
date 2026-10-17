@@ -1,5 +1,5 @@
 /**
- * Склеить классы. Без tailwind-merge нарочно: он не знает наборов текста Carbon (text-body-01) и молча выкидывает
+ * Склеить классы. Без tailwind-merge нарочно: он не знает ролей текста (text-body, text-heading) и молча выкидывает
  * цвет текста рядом с ними. Классы компонентов не спорят друг с другом — склеиваем как есть.
  */
 export function cx(...parts: Array<string | false | null | undefined>): string {

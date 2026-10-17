@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Сторож «только токены» из командной строки — для любого продукта, с ESLint или без (CSS, HTML, ванильный JS).
+// Сторож «только роли и шкалы» из командной строки — для любого продукта, с ESLint или без (CSS, HTML, ванильный JS).
 //
 //   node node_modules/@replai-smm/design/lint/cli.mjs <папки или файлы…>                       — все нарушения; есть — выход 1
 //   node node_modules/@replai-smm/design/lint/cli.mjs --baseline ds-baseline.json <папки…>      — храповик: по файлу нарушений не больше,

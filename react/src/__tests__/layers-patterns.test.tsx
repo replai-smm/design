@@ -1,0 +1,330 @@
+/** Слои и паттерны: окно и шторка, подтверждение, всплывашка, меню команд; вкладки, фильтры, три колонки, переписка, поле ответа, шаг агента, текст ответа. */
+import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
+import { render, screen, fireEvent, within, act, waitFor } from '@testing-library/react'
+import { ActionArea, AgentStep, Button, ChatThread, CommandMenu, ConfirmProvider, Dialog, FilterBar, matchCommands, Prose, ReplyBox, Tabs, TextField, ThreeColumn, Toaster, useConfirm, useToast, useUrlFilters, type CommandMenuHandle } from '../index'
+import { chat, chatFailed } from '../stories/df-fixtures'
+import { commands } from '../stories/agent-fixtures'
+import { createRef } from 'react'
+
+afterEach(() => vi.restoreAllMocks())
+
+describe('окно', () => {
+  it('фокус — на первом поле; Esc закрывает; «закрыть» — одна кнопка ДС', async () => {
+    const onOpenChange = vi.fn()
+    render(
+      <Dialog open title="Новая сессия" onOpenChange={onOpenChange}>
+        <TextField label="Папка" />
+      </Dialog>,
+    )
+    await waitFor(() => expect(document.activeElement).toBe(screen.getByLabelText('Папка')))
+    expect(screen.getByRole('button', { name: 'закрыть' }).dataset.slot).toBe('button')
+    fireEvent.keyDown(document.activeElement!, { key: 'Escape' })
+    expect(onOpenChange).toHaveBeenCalledWith(false)
+  })
+
+  it('шторка снизу на телефоне, слева — side="left"; во весь экран — full', () => {
+    const { rerender } = render(<Dialog open title="О" />)
+    expect(screen.getByRole('dialog').getAttribute('data-side')).toBe('bottom')
+    rerender(<Dialog open title="О" side="left" />)
+    expect(screen.getByRole('dialog').getAttribute('data-side')).toBe('left')
+    rerender(<Dialog open title="О" size="full" />)
+    expect(screen.getByRole('dialog').className).toContain('h-dvh')
+  })
+
+  it('две главные в окне — ошибка', () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    expect(() =>
+      render(
+        <Dialog open title="О" actions={<ActionArea primary={{ label: 'А' }} />}>
+          <ActionArea primary={{ label: 'Б' }} />
+        </Dialog>,
+      ),
+    ).toThrow(/вторая главная/)
+  })
+})
+
+describe('подтверждение', () => {
+  function Ask({ danger, onAnswer }: { danger?: boolean; onAnswer: (v: boolean) => void }) {
+    const confirm = useConfirm()
+    return <Button onClick={async () => onAnswer(await confirm({ title: 'Удалить пост?', danger }))}>спросить</Button>
+  }
+
+  it('опасное: кнопка тона «опасно» без главной, фокус на «Отмена»; «да» — true', async () => {
+    const onAnswer = vi.fn()
+    render(
+      <ConfirmProvider>
+        <Ask danger onAnswer={onAnswer} />
+      </ConfirmProvider>,
+    )
+    fireEvent.click(screen.getByRole('button', { name: 'спросить' }))
+    const del = await screen.findByRole('button', { name: 'Удалить' })
+    expect(del.dataset.tone).toBe('danger')
+    expect(document.querySelector('[data-variant=primary]')).toBeNull()
+    await waitFor(() => expect(document.activeElement?.textContent).toBe('Отмена'))
+    await act(async () => fireEvent.click(del))
+    expect(onAnswer).toHaveBeenCalledWith(true)
+  })
+
+  it('вне поставщика — понятная ошибка', () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    expect(() => render(<Ask onAnswer={() => {}} />)).toThrow(/ConfirmProvider/)
+  })
+})
+
+describe('всплывашка и меню команд', () => {
+  it('useToast().show — «готово» всплывает с меткой тона', async () => {
+    function Demo() {
+      const t = useToast()
+      return <Button onClick={() => t.show({ title: 'Готово' })}>Сделать</Button>
+    }
+    render(
+      <Toaster>
+        <Demo />
+      </Toaster>,
+    )
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Сделать' })))
+    const toast = document.querySelector('[data-slot=toast]')!
+    expect(toast.textContent).toContain('Готово')
+    expect(toast.className).toContain('border-l-success')
+  })
+
+  it('меню: сужение по началу команды и слову описания; клавиши из поля', () => {
+    expect(matchCommands(commands, '/re').map((c) => c.value)).toEqual(['/review'])
+    expect(matchCommands(commands, 'модель').map((c) => c.value)).toEqual(['/model'])
+    const onPick = vi.fn()
+    const ref = createRef<CommandMenuHandle>()
+    render(<CommandMenu ref={ref} label="Команды" items={commands} query="" onPick={onPick} />)
+    act(() => void ref.current!.press({ key: 'ArrowDown' }))
+    act(() => void ref.current!.press({ key: 'Enter' }))
+    expect(onPick).toHaveBeenCalledWith(commands[1])
+    expect(ref.current!.press({ key: 'x' })).toBe(false)
+  })
+})
+
+describe('вкладки и фильтры — один ряд сегментов', () => {
+  it('вкладки: выбранная — «выбрано», keepMounted живёт спрятанной; счётчик — CountBadge', () => {
+    const items = () => [
+      { value: 'a', label: 'Первая', count: 3, tone: 'опасно' as const, content: <p>первая</p> },
+      { value: 'b', label: 'Вторая', content: <p>вторая</p>, keepMounted: true },
+    ]
+    const { rerender } = render(<Tabs label="Разделы" items={items()} value="b" />)
+    expect(screen.getByRole('tab', { name: /Вторая/ }).className).toContain('data-[state=active]:bg-selected')
+    expect(document.querySelector('[role=tab] [data-slot=count-badge]')).toBeTruthy()
+    rerender(<Tabs label="Разделы" items={items()} value="a" />)
+    expect(screen.getByText('вторая').closest('[role=tabpanel]')!.getAttribute('data-state')).toBe('inactive')
+  })
+
+  it('фильтры в адресе: выбор пишет ?ключ=значение, «все» снимает; required — без «все»', () => {
+    window.history.replaceState(null, '', '/groups?статус=падает')
+    function Demo() {
+      const [v, set] = useUrlFilters(['статус', 'период'])
+      return (
+        <FilterBar
+          value={v}
+          onChange={set}
+          filters={[
+            { key: 'статус', label: 'Статус', options: [{ value: 'падает', label: 'падает' }, { value: 'работает', label: 'работает' }] },
+            { key: 'период', label: 'Период', required: true, options: [{ value: '30', label: '30 дней' }, { value: '90', label: '90 дней' }] },
+          ]}
+        />
+      )
+    }
+    render(<Demo />)
+    expect(screen.getByRole('radio', { name: 'падает' }).getAttribute('aria-checked')).toBe('true')
+    fireEvent.click(screen.getByRole('radio', { name: 'работает' }))
+    expect(new URLSearchParams(window.location.search).get('статус')).toBe('работает')
+    fireEvent.click(screen.getAllByRole('radio', { name: 'все' })[0])
+    expect(new URLSearchParams(window.location.search).get('статус')).toBeNull()
+    expect(screen.getAllByRole('radio', { name: 'все' })).toHaveLength(1)
+    expect(screen.getByRole('radio', { name: '30 дней' }).getAttribute('aria-checked')).toBe('true')
+  })
+})
+
+describe('три колонки', () => {
+  const cols = { labels: ['Сообщества', 'Диалоги', 'Переписка'] as [string, string, string], first: <p>1</p>, second: <p>2</p>, third: <p>3</p> }
+
+  it('три области с подписями; на телефоне видна активная; «← назад» называет предыдущую', () => {
+    const onBack = vi.fn()
+    render(<ThreeColumn {...cols} active={1} onBack={onBack} />)
+    const regions = screen.getAllByRole('region')
+    expect(regions.map((r) => r.getAttribute('aria-label'))).toEqual(cols.labels)
+    expect(regions[0].className).toContain('hidden')
+    fireEvent.click(within(regions[1]).getByRole('button', { name: /Сообщества/ }))
+    expect(onBack).toHaveBeenCalledWith(0)
+  })
+
+  it('sheets на телефоне: первая — шторка слева, третья — снизу; закрытие зовёт onSheetChange(null)', async () => {
+    const mm = window.matchMedia
+    window.matchMedia = ((q: string) => ({ ...mm(q), matches: true, addEventListener() {}, removeEventListener() {} })) as typeof window.matchMedia
+    try {
+      const onSheetChange = vi.fn()
+      const { rerender } = render(<ThreeColumn {...cols} active={1} onBack={() => {}} phone="sheets" sheet={0} onSheetChange={onSheetChange} />)
+      expect(screen.getByRole('dialog', { name: 'Сообщества' }).getAttribute('data-side')).toBe('left')
+      rerender(<ThreeColumn {...cols} active={1} onBack={() => {}} phone="sheets" sheet={2} onSheetChange={onSheetChange} />)
+      expect(screen.getByRole('dialog', { name: 'Переписка' }).getAttribute('data-side')).toBe('bottom')
+      fireEvent.click(screen.getByRole('button', { name: 'закрыть' }))
+      expect(onSheetChange).toHaveBeenCalledWith(null)
+    } finally {
+      window.matchMedia = mm
+    }
+  })
+})
+
+describe('переписка', () => {
+  it('входящие и наши, время машинно, разделитель дня, лента — log; наше — словарь хода', () => {
+    render(<ChatThread label="Переписка с Анной" messages={chat} />)
+    const log = screen.getByRole('log', { name: 'Переписка с Анной' })
+    const msgs = log.querySelectorAll('[data-part=message]')
+    expect([...msgs].map((m) => (m as HTMLElement).dataset.direction)).toEqual(['in', 'out', 'in', 'out'])
+    expect(log.querySelector('time[datetime="2026-10-03T10:02"]')?.textContent).toBe('10:02')
+    expect([...log.querySelectorAll('[data-part=day]')].map((d) => d.textContent)).toEqual(['3 октября', 'сегодня'])
+    expect(within(msgs[3] as HTMLElement).getByText('отправляется…')).toBeTruthy()
+  })
+
+  it('не ушло: знак, слово с причиной, «Повторить»; весть — поверхность с меткой; в очереди — словом', () => {
+    const retry = vi.fn()
+    const { rerender } = render(<ChatThread label="п" messages={chatFailed.map((m) => (m.status === 'error' ? { ...m, onRetry: retry } : m))} />)
+    expect(screen.getByRole('alert').textContent).toContain('не отправлено: ВК не ответил')
+    fireEvent.click(screen.getByRole('button', { name: 'Повторить' }))
+    expect(retry).toHaveBeenCalledOnce()
+    rerender(
+      <ChatThread
+        label="п"
+        messages={[
+          { id: 'n', direction: 'in', variant: 'notice', author: 'orbit', time: '14:02', text: 'весть' },
+          { id: 'q', direction: 'out', time: '14:03', text: 'ещё', status: 'idle' },
+        ]}
+      />,
+    )
+    expect(screen.getByText('весть').closest('[data-slot=surface]')?.getAttribute('data-mark')).toBe('info')
+    expect(screen.getByText('в очереди')).toBeTruthy()
+  })
+
+  describe('лента держится внизу', () => {
+    let observers: Array<() => void> = []
+    beforeEach(() => {
+      observers = []
+      vi.stubGlobal(
+        'ResizeObserver',
+        class {
+          constructor(cb: () => void) {
+            observers.push(cb)
+          }
+          observe() {}
+          unobserve() {}
+          disconnect() {}
+        },
+      )
+    })
+    afterEach(() => vi.unstubAllGlobals())
+    const thread = () => {
+      const { container } = render(<ChatThread label="С" messages={[{ id: 'a', direction: 'in', time: '14:00', text: 'ответ' }]} />)
+      const el = container.querySelector('[data-slot=chat-thread]') as HTMLElement
+      let height = 500
+      Object.defineProperty(el, 'scrollHeight', { configurable: true, get: () => height })
+      Object.defineProperty(el, 'clientHeight', { configurable: true, get: () => 100 })
+      return { el, grow: (to: number) => ((height = to), observers.forEach((cb) => cb())) }
+    }
+    it('внизу и выросла — остаётся внизу; прокрутили вверх — не дёргает', () => {
+      const a = thread()
+      a.el.scrollTop = 400
+      fireEvent.scroll(a.el)
+      a.grow(700)
+      expect(a.el.scrollTop).toBe(700)
+      const b = thread()
+      b.el.scrollTop = 100
+      fireEvent.scroll(b.el)
+      b.grow(900)
+      expect(b.el.scrollTop).toBe(100)
+    })
+  })
+})
+
+describe('поле ответа', () => {
+  const field = () => screen.getByRole('textbox')
+
+  it('send="enter": Enter отправляет и очищает, Shift+Enter — нет', () => {
+    const onSend = vi.fn()
+    render(<ReplyBox label="Ответ" onSend={onSend} />)
+    fireEvent.change(field(), { target: { value: 'привет' } })
+    fireEvent.keyDown(field(), { key: 'Enter', shiftKey: true })
+    expect(onSend).not.toHaveBeenCalled()
+    fireEvent.keyDown(field(), { key: 'Enter' })
+    expect(onSend).toHaveBeenCalledWith('привет')
+    expect((field() as HTMLTextAreaElement).value).toBe('')
+  })
+
+  it('send="ctrl-enter": Enter — новая строка, Ctrl+Enter — отправка; send="button" — только кнопкой', () => {
+    const onSend = vi.fn()
+    const { rerender } = render(<ReplyBox label="Ответ" send="ctrl-enter" onSend={onSend} />)
+    fireEvent.change(field(), { target: { value: 'а' } })
+    fireEvent.keyDown(field(), { key: 'Enter' })
+    expect(onSend).not.toHaveBeenCalled()
+    fireEvent.keyDown(field(), { key: 'Enter', ctrlKey: true })
+    expect(onSend).toHaveBeenCalledTimes(1)
+    rerender(<ReplyBox label="Ответ" send="button" onSend={onSend} />)
+    fireEvent.change(field(), { target: { value: 'б' } })
+    fireEvent.keyDown(field(), { key: 'Enter', ctrlKey: true })
+    expect(onSend).toHaveBeenCalledTimes(1)
+    expect(screen.queryByText(/Enter — отправить/)).toBeNull()
+  })
+
+  it('неудача не теряет текст; пустое — слово ошибки; disabled — словами, почему', async () => {
+    const onSend = vi.fn().mockRejectedValue(new Error('нет'))
+    const { rerender } = render(<ReplyBox label="Ответ" onSend={onSend} emptyMessage="Напишите текст" />)
+    fireEvent.keyDown(field(), { key: 'Enter' })
+    expect(screen.getByRole('alert').textContent).toContain('Напишите текст')
+    fireEvent.change(field(), { target: { value: 'текст' } })
+    await act(async () => fireEvent.keyDown(field(), { key: 'Enter' }))
+    expect((field() as HTMLTextAreaElement).value).toBe('текст')
+    rerender(<ReplyBox label="Ответ" onSend={onSend} disabled="Только просмотр" />)
+    expect((field() as HTMLTextAreaElement).disabled).toBe(true)
+    expect(screen.getByText('Только просмотр')).toBeTruthy()
+  })
+
+  it('чат агента: onKeyDown продукта берёт клавишу; «Стоп» рядом с главной; меню над полем', () => {
+    const onSend = vi.fn()
+    const onStop = vi.fn()
+    render(<ReplyBox label="Сообщение" onSend={onSend} layout="row" stop={{ onStop }} menu={<div data-testid="menu" />} activeDescendant="opt-1" onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()} />)
+    fireEvent.change(field(), { target: { value: '/re' } })
+    fireEvent.keyDown(field(), { key: 'Enter' })
+    expect(onSend).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByRole('button', { name: 'Стоп' }))
+    expect(onStop).toHaveBeenCalled()
+    expect(field().getAttribute('aria-activedescendant')).toBe('opt-1')
+    expect(screen.getByTestId('menu').compareDocumentPosition(field()) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+})
+
+describe('шаг агента и текст ответа', () => {
+  it('ошибка раскрыта сразу и видна словом; готово — свёрнуто и не берёт фокус; без результата не нажимается', () => {
+    const a = render(<AgentStep tool="Bash" target="npm test" progress="error"><p>вывод</p></AgentStep>)
+    expect(screen.getByRole('button', { expanded: true }).textContent).toContain('ошибка')
+    a.unmount()
+    const b = render(<AgentStep tool="Bash" target="npm test" progress="done"><p>вывод</p></AgentStep>)
+    expect(b.container.querySelector('.ds-expand')!.hasAttribute('inert')).toBe(true)
+    b.unmount()
+    render(<AgentStep tool="Read" target="a.ts" progress="done" />)
+    expect(screen.queryByRole('button')).toBeNull()
+  })
+
+  it('shell: поверхность с меткой «инфо», вывод раскрыт, «Стоп» рядом со строкой, пока идёт; note — под строкой', () => {
+    const onStop = vi.fn()
+    const { container } = render(<AgentStep tool="Команда" target="npm test" variant="shell" progress="running" note="песочница" stop={{ onStop }}><p>вывод</p></AgentStep>)
+    const step = container.querySelector('[data-slot=agent-step]')!
+    expect(step.getAttribute('data-mark')).toBe('info')
+    expect(screen.getByRole('button', { name: /Команда/ }).getAttribute('aria-expanded')).toBe('true')
+    fireEvent.click(screen.getByRole('button', { name: 'Стоп' }))
+    expect(onStop).toHaveBeenCalled()
+    expect(screen.getByText('песочница')).toBeTruthy()
+  })
+
+  it('текст ответа: роль «чтение»; набор — aria-busy', () => {
+    const { container, rerender } = render(<Prose streaming><p>идёт</p></Prose>)
+    const p = container.querySelector('[data-slot=prose]')!
+    expect(p.className).toContain('text-reading')
+    expect(p.getAttribute('aria-busy')).toBe('true')
+    rerender(<Prose><p>готово</p></Prose>)
+    expect(p.hasAttribute('aria-busy')).toBe(false)
+  })
+})

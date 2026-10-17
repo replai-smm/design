@@ -1,25 +1,24 @@
 /**
- * Плитка с цифрой (опись DF §11.3 п. 26, Carbon Tile / ClickableTile): число и подпись, по желанию — сравнение
- * двух периодов с разницей ▲▼ в процентах и переход по нажатию. DF «Дашборд агентства» (пульс, ключевые показатели,
- * плитки по таргетологам), Вычитка; Replai — сводки периода.
- * - `compact` — число и подпись в строку (плитки-переходы пульса); `metric` — подпись сверху, число крупно.
- * - Сравнение: строки «А» и «Б» помечены квадратом цвета ряда графика (те же `SERIES`, что у `ChartFrame`), разница —
- *   стрелкой и словом для читалки («больше на 12,5 %»), не только цветом.
- * - Беда рядом с числом (`alert`) — знак тона и слово («⚠ 2 без доступа», «лёгкий режим»).
- * - Переход: `onClick` — вся плитка кнопка, `href` — ссылка. Без них плитка не нажимается (плитка здоровья DF).
- * Лицо плитки — одно число и одна строка; больше фактов — `Card`.
+ * Плитка с цифрой: одно число и подпись — поверхность. `compact` — число и подпись в строку (плитки-переходы);
+ * `metric` — подпись сверху, число крупно, по желанию сравнение двух периодов (метка цвета ряда графика и `Delta`).
+ * Беда рядом с числом (`alert`) — знак тона и слово. Вся плитка — кнопка (`onClick`), без него не нажимается.
+ * Больше одного числа — `Card`.
  */
 import type { ReactNode } from 'react'
+import { FOCUS } from '../lib/anatomy'
 import { cx } from '../lib/cx'
-import { SERIES_BG } from './ChartFrame'
-import { MARK, ToneIcon } from './StatusBadge'
+import type { Tone } from '../lib/vocab'
+import { SERIES } from './Chart'
+import { Delta } from './Delta'
+import { Icon } from './Icon'
+import { Surface } from './Surface'
 
 export interface StatTileCompare {
   /** Число периода Б. */
   value: ReactNode
-  /** Разница А к Б в процентах (знак — направление); null — не с чем сравнить (Б = 0). */
+  /** Разница А к Б в процентах; null — не с чем сравнить. */
   delta?: number | null
-  /** Подписи строк сравнения для читалки и на экране. */
+  /** Подписи строк сравнения для читалки. */
   labels?: [string, string]
 }
 
@@ -28,135 +27,77 @@ export interface StatTileProps {
   value: ReactNode
   /** Что это за число: «сообществ», «Ср. просмотры». */
   label: ReactNode
-  /** Продолжение подписи мелко: «· не ведём 2», «· 3,1 ч». */
+  /** Продолжение подписи мелко: «· не ведём 2». */
   detail?: ReactNode
   /** Беда рядом с числом: знак тона и слово. */
-  alert?: { tone: 'error' | 'warning'; text: ReactNode }
+  alert?: { tone: Extract<Tone, 'опасно' | 'внимание'>; text: ReactNode }
   variant?: 'compact' | 'metric'
   /** Сравнение двух периодов (только `metric`). */
   compare?: StatTileCompare
-  /** Рост — хорошо (по умолчанию) или плохо (расход, ошибки): от этого тон стрелки. */
+  /** Рост — хорошо (по умолчанию) или плохо (расход, ошибки). */
   higherIsBetter?: boolean
   onClick?: () => void
-  href?: string
   className?: string
 }
 
-const PCT = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 1, minimumFractionDigits: 1 })
-const RUB = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 })
-
-/** Единица разницы: проценты (сравнение периодов) или рубли («Переходящая»: факт − план). */
-export type DeltaUnit = '%' | '₽'
-
-/** Модуль разницы словами с единицей: «12,5%», «1 234 ₽». */
-export function deltaText(value: number, unit: DeltaUnit = '%'): string {
-  return unit === '₽' ? `${RUB.format(Math.abs(Math.round(value)))} ₽` : `${PCT.format(Math.abs(value))}%`
-}
-
-export interface DeltaProps {
-  /** Разница со знаком: рост — больше нуля. */
-  value: number
-  /** Рост — хорошо (по умолчанию) или плохо (расход, перерасход): от этого тон стрелки. */
-  higherIsBetter?: boolean
-  /** `%` (по умолчанию) или `₽`. */
-  unit?: DeltaUnit
-  /** Стрелка тоном (по умолчанию). `false` — без тона: в широкой таблице, где тон отвлекает от чисел. */
-  tone?: boolean
-}
-
-/**
- * Разница ▲▼: стрелка цвета тона (знак, контраст 3:1), число — цвета текста, слово — для читалки («больше на 12,5%»,
- * «меньше на 1 234 ₽»). Ноль — без стрелки и тона («без изменений»).
- */
-export function Delta({ value, higherIsBetter = true, unit = '%', tone = true }: DeltaProps) {
-  const zero = unit === '₽' ? Math.round(value) === 0 : value === 0
-  const up = value > 0
-  const good = up === higherIsBetter
-  return (
-    <span data-slot="delta" data-direction={zero ? 'none' : up ? 'up' : 'down'} data-unit={unit} className="inline-flex items-center gap-1 text-label-01 text-text-secondary whitespace-nowrap">
-      {zero ? (
-        <span className="sr-only">без изменений,</span>
-      ) : (
-        <>
-          <span aria-hidden="true" className={tone ? (good ? MARK.success : MARK.error) : undefined}>
-            {up ? '▲' : '▼'}
-          </span>
-          <span className="sr-only">{up ? 'больше на' : 'меньше на'}</span>
-        </>
-      )}
-      {deltaText(value, unit)}
-    </span>
-  )
-}
-
 function Mark({ series }: { series: number }) {
-  return <span aria-hidden="true" data-series={series} className={cx('inline-block size-2 shrink-0', SERIES_BG[series])} />
+  return <span aria-hidden="true" data-series={series} className={cx('inline-block size-items shrink-0 rounded-full', SERIES.bg[series])} />
 }
 
-export function StatTile({ value, label, detail, alert, variant = 'compact', compare, higherIsBetter = true, onClick, href, className }: StatTileProps) {
+export function StatTile({ value, label, detail, alert, variant = 'compact', compare, higherIsBetter = true, onClick, className }: StatTileProps) {
   const [la, lb] = compare?.labels ?? ['период А', 'период Б']
   const alertView = alert && (
-    <span data-slot="stat-alert" data-tone={alert.tone} className="inline-flex items-center gap-1 text-label-01 text-text-primary">
-      <ToneIcon tone={alert.tone} className={MARK[alert.tone]} />
+    <span data-part="alert" data-tone={alert.tone} className="inline-flex items-center gap-tight text-caption text-fg">
+      <Icon tone={alert.tone} />
       {alert.text}
+    </span>
+  )
+  const num = (
+    <span data-part="value" className="text-title text-fg">
+      {value}
     </span>
   )
   const body =
     variant === 'compact' ? (
-      <span className="inline-flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
-        <span data-slot="stat-value" className="text-heading-03 text-text-primary">
-          {value}
-        </span>
-        <span className="text-label-01 text-text-secondary">
+      <span className="inline-flex min-w-0 flex-wrap items-baseline gap-x-items gap-y-tight">
+        {num}
+        <span className="text-caption text-fg-muted">
           {label}
           {detail && <> {detail}</>}
         </span>
         {alertView}
       </span>
     ) : (
-      <span className="flex min-w-0 flex-col items-center gap-1 text-center">
-        <span className="text-label-01 text-text-secondary">{label}</span>
-        <span className="inline-flex flex-wrap items-center justify-center gap-2">
+      <span className="flex min-w-0 flex-col items-start gap-tight">
+        <span data-part="title" className="text-caption text-fg-muted">
+          {label}
+        </span>
+        <span className="inline-flex flex-wrap items-center gap-items">
           {compare && <Mark series={0} />}
           {compare && <span className="sr-only">{la}:</span>}
-          <span data-slot="stat-value" className="text-heading-03 text-text-primary">
-            {value}
-          </span>
-          {compare && compare.delta !== undefined && compare.delta !== null && <Delta value={compare.delta} higherIsBetter={higherIsBetter} />}
+          {num}
+          {compare && compare.delta != null && <Delta value={compare.delta} higherIsBetter={higherIsBetter} />}
         </span>
         {compare && (
-          <span data-slot="stat-compare" className="inline-flex items-center gap-2 text-body-compact-01 text-text-secondary">
+          <span data-part="compare" className="inline-flex items-center gap-items text-body text-fg-muted">
             <Mark series={1} />
             <span className="sr-only">{lb}:</span>
             {compare.value}
           </span>
         )}
-        {detail && <span className="text-label-01 text-text-secondary">{detail}</span>}
+        {detail && <span className="text-caption text-fg-muted">{detail}</span>}
         {alertView}
       </span>
     )
-
-  const cls = cx(
-    'inline-flex min-w-0 border border-border-subtle-01 bg-layer-01 px-4 py-2 text-start',
-    variant === 'metric' && 'min-w-28 flex-col justify-center',
-    (onClick || href) && 'cursor-pointer hover:bg-layer-hover-01 focus-visible:outline-2 focus-visible:outline-focus focus-visible:-outline-offset-2',
-    className,
-  )
-  if (href)
-    return (
-      <a data-slot="stat-tile" data-variant={variant} href={href} className={cx(cls, 'text-text-primary no-underline')}>
-        {body}
-      </a>
-    )
-  if (onClick)
-    return (
-      <button data-slot="stat-tile" data-variant={variant} type="button" onClick={onClick} className={cls}>
-        {body}
-      </button>
-    )
   return (
-    <div data-slot="stat-tile" data-variant={variant} className={cls}>
+    <Surface
+      as={onClick ? 'button' : 'div'}
+      {...(onClick ? { type: 'button' as const, onClick } : {})}
+      data-slot="stat-tile"
+      data-variant={variant}
+      className={cx('text-start', onClick && cx('cursor-pointer hover:bg-hover', FOCUS), className)}
+    >
       {body}
-    </div>
+    </Surface>
   )
 }

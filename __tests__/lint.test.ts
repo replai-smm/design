@@ -8,6 +8,7 @@ import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync } from 'nod
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { scan } from '../lint/scan.mjs'
+import { PAGE_CSS } from '../lib/showcase.mjs'
 import plugin from '../lint/eslint-plugin.mjs'
 import { lint, ratchet } from '../lint/cli.mjs'
 
@@ -50,7 +51,25 @@ describe('ловит', () => {
     expect(rules(`.card { @apply w-[24rem] bg-red-500; }`, 'a.css')).toEqual(['ds/arbitrary w-[24rem]', 'ds/palette bg-red-500'])
   })
 
-  it('ванильный JS и HTML DF-Agency', () => {
+  it('именованные цвета CSS у свойств цвета: CSS, style={{ }}, атрибут style, el.style', () => {
+    expect(rules(`.a { color: red; border-color: tomato; background: navy url(x.png); border: 1px solid gold }`, 'a.css')).toEqual([
+      'ds/raw-color red',
+      'ds/raw-color tomato',
+      'ds/raw-color navy',
+      'ds/raw-color gold',
+    ])
+    expect(rules(`<i style={{ color: 'red', fill: "tomato", borderBottomColor: 'Teal', background: 'var(--ds-surface)' }} />`)).toEqual(['ds/raw-color red', 'ds/raw-color tomato', 'ds/raw-color Teal'])
+    expect(rules(`<b style="color:white">x</b>`, 'a.html')).toEqual(['ds/raw-color white'])
+    expect(rules(`el.style.backgroundColor = 'silver'`, 'app.js')).toEqual(['ds/raw-color silver'])
+  })
+  it('роли, transparent, currentColor и слова вне свойств цвета — не краска', () => {
+    expect(
+      rules(`.a { color: var(--ds-fg, red); background: transparent; fill: currentColor; border: 1px solid var(--ds-line); content: "red"; font-family: tan; --x: red }\nconst c = { color: 'red' }`, 'a.css'),
+    ).toEqual([])
+    expect(rules(`const c = { color: 'red', fill: 'tomato' }; <i style={{ color: 'var(--ds-fg)', fill: 'none' }} />`)).toEqual([])
+  })
+
+  it('ванильный JS и HTML', () => {
     expect(rules(`el.style.color = '#ff0000'`, 'app.js')).toEqual(['ds/raw-color #ff0000'])
     expect(rules(`<span style="color:#333">x</span>`, 'index.html')).toEqual(['ds/raw-color #333'])
   })
@@ -60,13 +79,13 @@ describe('сырые размеры (ds/raw-size)', () => {
   it('CSS: отступы, размеры, текст, углы; @media — не объявление', () => {
     expect(
       rules(
-        `.a { padding: 12px 0; font-size: .8rem; border-radius: 4px; width: 100%; max-width: 45rem; max-height: 70vh; border: 1px solid var(--cds-border-subtle-01) }\n@media (min-width: 600px) { .b { gap: var(--cds-spacing-05, 16px); margin-top: 0 } }`,
+        `.a { padding: 12px 0; font-size: .8rem; border-radius: 4px; width: 100%; max-width: 45rem; max-height: 70vh; border: 1px solid var(--ds-line) }\n@media (min-width: 600px) { .b { gap: var(--ds-space-blocks, 16px); margin-top: 0 } }`,
         'a.css',
       ),
     ).toEqual(['ds/raw-size padding: 12px', 'ds/raw-size font-size: .8rem', 'ds/raw-size border-radius: 4px'])
   })
   it('атрибут style, <style> в HTML и в строке JS, style={{ }} React, el.style', () => {
-    expect(rules(`<div style="width:240px;color:var(--cds-text-primary)"></div>`, 'a.html')).toEqual(['ds/raw-size width: 240px'])
+    expect(rules(`<div style="width:240px;color:var(--ds-fg)"></div>`, 'a.html')).toEqual(['ds/raw-size width: 240px'])
     expect(rules('const h = `<style>.x{margin:8px}</style><b style="height: 2rem">`', 'app.js')).toEqual(['ds/raw-size margin: 8px', 'ds/raw-size height: 2rem'])
     expect(rules(`<div style={{ padding: 12, gap: '4px', lineHeight: 1.5, width: w, top: 0 }} />`)).toEqual(['ds/raw-size padding: 12', 'ds/raw-size gap: 4px'])
     expect(rules(`el.style.marginTop = '10px'; el.style.width = pct + '%'`, 'app.js')).toEqual(['ds/raw-size marginTop: 10px'])
@@ -76,11 +95,35 @@ describe('сырые размеры (ds/raw-size)', () => {
   })
 })
 
+describe('страница образцов', () => {
+  it('CSS страницы (lib/showcase.mjs) лежит в строке JS, сторож его не видит сам — читаем как CSS: сырых цветов и размеров нет', () => {
+    expect(rules(PAGE_CSS, 'page.css')).toEqual([])
+    expect(rules(PAGE_CSS.replace('.mover{width:calc(var(--ds-size-touch) * 2)', '.mover{width:96px'), 'page.css')).toEqual(['ds/raw-size width: 96px'])
+  })
+})
+
+describe('классы вне шкал (ds/off-scale)', () => {
+  it('приманка: числа отступов и размеров, размеры контейнеров, свой текст, угол, тень, вес, длительность, толщина — все пойманы', () => {
+    const bait = readFileSync(resolve(import.meta.dirname, 'bait', 'off-scale.tsx'), 'utf8')
+    expect(rules(bait).filter((r: string) => r.startsWith('ds/off-scale')).sort()).toEqual(
+      ['pl-5', 'gap-1.5', 'h-12', 'w-40', 'md:p-3', '-mx-4', 'text-sm', 'rounded-lg', 'shadow-md', 'font-bold', 'leading-6', 'duration-300', 'border-4', 'max-w-md', 'w-sm', 'min-w-lg', 'md:basis-xl', '@md:', '@max-lg/side:'].map((v) => `ds/off-scale ${v}`).sort(),
+    )
+  })
+  it('строка с `image/*` не прячет классы за собой (`/*` в слове — не комментарий)', () => {
+    expect(rules(`const a = { accept: '.pdf,image/*', className: 'max-w-md' }\nconst b = 'src/**/*.ts'`)).toEqual(['ds/off-scale max-w-md'])
+    expect(rules(`/* max-w-md */ const a = 1 /* w-sm */`)).toEqual([])
+  })
+  it('обычный текст со словами классов — не класс', () => {
+    expect(rules(`// поле p-4 когда-то
+const note = 1`)).toEqual([])
+  })
+})
+
 describe('не трогает', () => {
   it('токены, варианты Tailwind, утилиты из темы', () => {
     expect(
       rules(
-        `<div className="bg-[var(--cds-layer-01)] data-[state=open]:bg-layer-02 group-data-[collapsible=icon]/sidebar:hidden [&_svg]:size-4 aria-[expanded=true]:rotate-180 text-text-secondary bg-status-error-background p-4" style={{ color: 'var(--cds-text-primary)' }} />`,
+        `<div className="bg-[var(--ds-surface)] data-[state=open]:bg-selected group-data-[collapsible=icon]/sidebar:hidden [&_svg]:size-icon aria-[expanded=true]:rotate-180 text-fg-muted bg-danger-bg p-blocks gap-items h-control w-1/2 p-0 px-px rounded-full" style={{ color: 'var(--ds-fg)' }} />`,
       ),
     ).toEqual([])
   })
@@ -124,7 +167,7 @@ describe('командная строка и храповик', () => {
   writeFileSync(join(dir, 'src/a.tsx'), `export const A = () => <div className="w-[24rem] bg-red-500" />\n`)
   writeFileSync(join(dir, 'src/b.css'), `.b { color: #fff }\n`)
   writeFileSync(join(dir, 'src/node_modules/x.js'), `'#fff'`)
-  writeFileSync(join(dir, 'src/tokens.css'), `:root { --cds-x: #fff }`)
+  writeFileSync(join(dir, 'src/tokens.css'), `:root { --ds-x: #fff }`)
   const run = (...args: string[]) => {
     try {
       return { code: 0, out: execFileSync('node', [cli, ...args], { cwd: dir, encoding: 'utf8' }) }
@@ -152,7 +195,7 @@ describe('командная строка и храповик', () => {
     expect(grew.out).toContain('src/b.css: было 1, стало 2')
     expect(run('--baseline', 'ds-baseline.json', '--write', 'src').code).toBe(1)
 
-    writeFileSync(join(dir, 'src/b.css'), `.b { color: var(--cds-text-primary) }\n`)
+    writeFileSync(join(dir, 'src/b.css'), `.b { color: var(--ds-fg) }\n`)
     const fell = run('--baseline', 'ds-baseline.json', 'src')
     expect(fell.code).toBe(0)
     expect(fell.out).toContain('опусти храповик')

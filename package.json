@@ -1,9 +1,9 @@
 {
   "name": "@replai-smm/design",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Дизайн-система replai-smm: токены Carbon, ДС-React, линт «только через ДС». Продукты ставят по тегу: github:replai-smm/design#vX.Y.Z (в теге лежит собранный dist/, сборки при установке нет).",
+  "description": "Дизайн-система replai-smm: роли и шкалы, ДС-React по уровням, правила машиной. Продукты ставят по тегу: github:replai-smm/design#vX.Y.Z (в теге лежит собранный dist/).",
   "engines": {
     "node": ">=22"
   },
@@ -13,12 +13,9 @@
   "exports": {
     ".": "./react/src/index.ts",
     "./styles.css": "./react/src/ds.css",
-    "./react/src/*": "./react/src/*",
     "./tokens.css": "./dist/tokens.css",
     "./tailwind.css": "./dist/tailwind.css",
     "./tokens": "./dist/tokens.ts",
-    "./vkui-adapter.css": "./dist/vkui-adapter.css",
-    "./vkui-adapter": "./dist/vkui-adapter.ts",
     "./tokens.json": "./tokens.json",
     "./scale.json": "./scale.json",
     "./statuses.json": "./statuses.json",
@@ -32,6 +29,7 @@
   },
   "files": [
     "dist",
+    "!dist/showcase.html",
     "fonts",
     "licenses",
     "lint",
@@ -39,6 +37,8 @@
     "!react/src/**/__tests__",
     "!react/src/**/*.stories.tsx",
     "!react/src/stories",
+    "!react/src/showcase.css",
+    "!react/src/storybook.css",
     "tokens.json",
     "scale.json",
     "statuses.json",
@@ -54,11 +54,17 @@
     "pretest": "node build.mjs",
     "test": "npm run test:design && npm test -w react",
     "test:design": "vitest run -c vitest.config.ts",
+    "test:visual": "npm run storybook:build && npm run visual -w react",
     "typecheck": "npm run typecheck -w react",
     "lint": "npm run lint -w react",
     "storybook": "npm run storybook -w react",
     "storybook:build": "npm run storybook:build -w react",
-    "check": "node build.mjs && npm run typecheck && npm run lint && npm test"
+    "check": "node build.mjs && npm run typecheck && npm run lint && npm test && npm run test:visual"
+  },
+  "peerDependencies": {
+    "radix-ui": "^1.4.3",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
   },
   "devDependencies": {
     "ajv": "^8.20.0",

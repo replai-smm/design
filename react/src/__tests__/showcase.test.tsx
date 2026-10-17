@@ -1,10 +1,9 @@
 /**
- * Образцы ДС-React для страницы образцов основы (design/dist/showcase.html): истории, отрисованные в статичный HTML,
- * и скомпилированный CSS. Файл dist/showcase-components.html — вывод, руками не правят:
- *   SHOWCASE_WRITE=1 npx vitest run src/__tests__/showcase.test.tsx   — записать (npm run showcase), потом npm run build
- *   npx vitest run                                                     — сверить: отстал — красный
- * Страница образцов (lib/showcase.mjs) вставляет его в рамку iframe: у рамки своё окно, поэтому вид телефона (390)
- * и ноутбука (1280) включается переключателем ширины так же, как на настоящем экране.
+ * Образцы ДС-React для страницы образцов (dist/showcase.html): истории, отрисованные в статичный HTML, и
+ * скомпилированный CSS. Файл react/dist/showcase-components.html — вывод, руками не правят:
+ *   npm run showcase   — записать, потом npm run build
+ *   npm test           — сверить: отстал — красный
+ * Страница образцов вставляет его в рамку iframe: вид телефона (390) и ноутбука (1280) — переключателем ширины рамки.
  */
 import { describe, it, expect } from 'vitest'
 import { act } from 'react'
@@ -18,189 +17,78 @@ import { stories, type Entry } from './stories'
 const root = resolve(import.meta.dirname, '..', '..')
 const OUT = resolve(root, 'dist', 'showcase-components.html')
 
-/** Что показать: раздел → истории [файл, имя, рамка]. Рамка `fixed` — для панели и всплывашки (у них position: fixed). */
+/** Что показать: уровень → истории [файл, имя, рамка]. Рамка `fixed` — для окна и всплывашки (position: fixed). */
 const SECTIONS: Array<{ title: string; note: string; items: Array<[string, string, ('fixed' | 'toast')?]> }> = [
   {
-    title: 'Кнопки и область действий',
-    note: 'Главная кнопка — только в области действий, одна на область и на экран; опасное — не рядом с главной. На телефоне главная страницы — внизу во всю ширину.',
+    title: 'Элементы',
+    note: 'Главная — инверсия и только в области действий; тихие — рамкой или без; опасное — тоном. Метка — знак и слово, подложка только у срочного.',
     items: [
-      ['Button.stories.tsx', 'Варианты'],
-      ['Button.stories.tsx', 'Загрузка'],
+      ['Button.stories.tsx', 'Виды'],
+      ['StatusBadge.stories.tsx', 'Статусы'],
+      ['CountBadge.stories.tsx', 'Обычное'],
+      ['Steps.stories.tsx', 'Обычное'],
+      ['Meter.stories.tsx', 'Обычное'],
+      ['InlineLoading.stories.tsx', 'Обычное'],
     ],
   },
   {
-    title: 'Метка статуса',
-    note: 'Закрытый список статусов. Палитра продукта — четыре тона; палитра Карты — цвет у рамки, слово обычным текстом.',
-    items: [
-      ['StatusBadge.stories.tsx', 'Продукт'],
-      ['StatusBadge.stories.tsx', 'Карта'],
-      ['StatusBadge.stories.tsx', 'Тон'],
-    ],
-  },
-  {
-    title: 'Страница списка',
-    note: 'Шапка, фильтры в адресе, таблица: срочное сверху, «работает» свёрнуто внизу; нажатие на строку открывает панель деталей.',
-    items: [
-      ['Page.stories.tsx', 'Обычное'],
-      ['Page.stories.tsx', 'БедаСистемы'],
-      ['Page.stories.tsx', 'Загрузка'],
-    ],
-  },
-  {
-    title: 'Таблица: состояния',
-    note: 'Каждое состояние — своя история и своя клетка скриншота.',
-    items: [
-      ['DataTable.stories.tsx', 'Ошибка'],
-      ['DataTable.stories.tsx', 'ПервыйЗапуск'],
-      ['DataTable.stories.tsx', 'ВсёСделано'],
-      ['DataTable.stories.tsx', 'НичегоНеНайдено'],
-      ['DataTable.stories.tsx', 'НетДоступа'],
-    ],
-  },
-  {
-    title: 'Таблица: сортировка',
-    note: 'Сортировка по заголовку — выбор человека: суммы — от больших, повторное нажатие — обратно, пустое внизу. С группами тона строки переставляются внутри группы, срочное остаётся сверху.',
-    items: [
-      ['DataTable.stories.tsx', 'Сортировка'],
-      ['DataTable.stories.tsx', 'СортировкаВГруппах'],
-    ],
-  },
-  {
-    title: 'Таблица: приглушённые строки',
-    note: 'Неактивное (кабинет не крутится, не запускался) — текст вторым цветом, читается; причина — словом в строке.',
-    items: [['DataTable.stories.tsx', 'ПриглушённыеСтроки']],
-  },
-  {
-    title: 'Таблица: подсказка у заголовка',
-    note: 'Заголовок с пунктиром — у колонки есть подсказка: наведение или Tab. У сортируемой колонки подсказка — у той же кнопки.',
-    items: [['DataTable.stories.tsx', 'ПодсказкаУЗаголовка']],
-  },
-  {
-    title: 'Таблица: широкая',
-    note: '13 колонок денег: колонка не уже шага шкалы, деньги в одну строку; не влезает — таблица прокручивается вбок, первая колонка стоит.',
-    items: [['DataTable.stories.tsx', 'ШирокаяТаблица']],
-  },
-  {
-    title: 'Список',
-    note: 'Та же логика, что у таблицы, для строк своего вида (очереди, диалоги). Слова групп — слова продукта.',
-    items: [['List.stories.tsx', 'Обычное']],
-  },
-  { title: 'Фильтры и поиск', note: 'Фильтры живут в адресе страницы: ссылку можно переслать.', items: [['FilterBar.stories.tsx', 'ВыбранФильтр']] },
-  { title: 'Вкладки со счётчиками', note: 'Вкладка — вопрос человека; у срочного счётчика — знак тона.', items: [['Tabs.stories.tsx', 'Обычное']] },
-  {
-    title: 'Карточка (матрёшка)',
-    note: 'Лицо: не больше трёх фактов и одного действия; «подробнее» раскрывается за 0,6 с, не глубже двух уровней.',
-    items: [
-      ['Card.stories.tsx', 'ЦветаКарты'],
-      ['Card.stories.tsx', 'Матрёшка'],
-    ],
-  },
-  {
-    title: 'Панель деталей',
-    note: 'Справа на ноутбуке, снизу на телефоне. Открытая панель — отдельное состояние со своей главной кнопкой.',
-    items: [['Drawer.stories.tsx', 'Обычное', 'fixed']],
-  },
-  {
-    title: 'Уведомления',
-    note: 'По охвату: беда системы — плашка вверху, беда списка — над списком, беда объекта — в строке, «готово» — всплывашка.',
-    items: [
-      ['Notification.stories.tsx', 'Обычное'],
-      ['Notification.stories.tsx', 'Всплывашка', 'toast'],
-    ],
-  },
-  {
-    title: 'Окно и подтверждение',
-    note: 'Окно — своё состояние со своей главной кнопкой; на ноутбуке по центру, на телефоне снизу. Удаление — красной кнопкой без главной рядом, фокус сначала на «Отмена»: вместо window.confirm.',
-    items: [
-      ['Dialog.stories.tsx', 'Обычное', 'fixed'],
-      ['Dialog.stories.tsx', 'Удаление', 'fixed'],
-      ['Dialog.stories.tsx', 'ВоВесьЭкран', 'fixed'],
-    ],
-  },
-  {
-    title: 'Поля формы',
-    note: 'Подпись над полем, подсказка под ним; ошибка заменяет подсказку — обводка, значок и текст, который читалка слышит вместе с полем. На телефоне поле — 48 px.',
+    title: 'Поля',
+    note: 'Подпись над полем, подсказка под ним, ошибка — знаком и словом вместо подсказки. Высота 48 на телефоне, 40 на ноутбуке, плотное — 32.',
     items: [
       ['TextField.stories.tsx', 'Обычное'],
       ['TextField.stories.tsx', 'Ошибка'],
-      ['TextField.stories.tsx', 'Многострочное'],
-      ['Select.stories.tsx', 'Обычное'],
-      ['NumberField.stories.tsx', 'Обычное'],
-      ['NumberField.stories.tsx', 'ВнеГраниц'],
-      ['Checkbox.stories.tsx', 'Группа'],
-      ['Checkbox.stories.tsx', 'Ошибка'],
-      ['FileField.stories.tsx', 'Обычное'],
-      ['FileField.stories.tsx', 'Ошибка'],
+      ['Checkbox.stories.tsx', 'Обычное'],
     ],
   },
   {
-    title: 'Выбор с поиском',
-    note: 'Печать сужает список, стрелки ходят, Enter выбирает, Esc закрывает. Открытый список — в Storybook (здесь он не раскладывается без окна браузера).',
+    title: 'Поверхности',
+    note: 'Одна поверхность: слой, тихая рамка, угол 6, поля 16, заголовок одной роли; метка слева — знак тона одной ширины.',
     items: [
-      ['Combobox.stories.tsx', 'Обычное'],
-      ['Combobox.stories.tsx', 'Ошибка'],
-    ],
-  },
-  { title: 'Шаги', note: 'Путь из нескольких шагов: пройден — галочка, текущий — точка, ошибка — знак «опасно»; на телефоне — «Шаг 2 из 4».', items: [['Steps.stories.tsx', 'Обычное'], ['Steps.stories.tsx', 'Ошибка']] },
-  { title: 'Счётчик', note: 'Число у строки или кнопки; «99+» сверху потолка. Новое — тоном info, срочное — знаком тона, не только цветом.', items: [['CountBadge.stories.tsx', 'Обычное']] },
-  { title: 'Аватар', note: 'Картинка; нет или не загрузилась — буквы имени; нет и имени — значок человека.', items: [['Avatar.stories.tsx', 'Обычное']] },
-  {
-    title: 'Три колонки',
-    note: 'Ноутбук: список, лента и карточка рядом, каждая прокручивается сама. Телефон: по одной колонке, «← назад» — к предыдущей; выезд 0,6 с.',
-    items: [['ThreeColumn.stories.tsx', 'Обычное', 'fixed']],
-  },
-  {
-    title: 'Переписка и поле ответа',
-    note: 'Входящие слева, наши справа, разделитель дня; «⇡ показать более ранние» без прыжка. Поле: Enter или Ctrl+Enter, отправка не теряет текст при ошибке.',
-    items: [
-      ['ChatThread.stories.tsx', 'Обычное'],
-      ['ChatThread.stories.tsx', 'НеОтправлено'],
-      ['ReplyBox.stories.tsx', 'Обычное'],
-      ['ReplyBox.stories.tsx', 'Ошибка'],
-    ],
-  },
-  {
-    title: 'Неделя публикаций',
-    note: 'Семь дней с понедельника: на ноутбуке — колонки, на телефоне — дни друг под другом. Выходные со своей шапкой, «+» в дне.',
-    items: [['WeekCalendar.stories.tsx', 'Обычное']],
-  },
-  {
-    title: 'Сетка сверки',
-    note: 'Строка × день: значение в клетке, тон — токен статуса, жёлтая черта — «возможен перенос». Первая колонка стоит при прокрутке вбок.',
-    items: [['ProofreadGrid.stories.tsx', 'Обычное']],
-  },
-  {
-    title: 'Рамка графика',
-    note: 'Заголовок, легенда со словом и видом линии, вывод словами для читалки; цвета рядов — токены. Пусто и загрузка — той же высоты.',
-    items: [
-      ['ChartFrame.stories.tsx', 'Обычное'],
-      ['ChartFrame.stories.tsx', 'НетДанных'],
-      ['Chart.stories.tsx', 'Обычное'],
-      ['Chart.stories.tsx', 'Столбцы'],
-      ['ProofreadGrid.stories.tsx', 'Матрица'],
-    ],
-  },
-  {
-    title: 'Плитка с цифрой',
-    note: 'Число и подпись; сравнение периодов — метка цвета ряда и разница ▲▼ со словом для читалки; беда — знаком и словом. Плитка-переход — вся кнопка.',
-    items: [
+      ['Surface.stories.tsx', 'Обычное'],
+      ['Card.stories.tsx', 'Сетка'],
       ['StatTile.stories.tsx', 'Обычное'],
-      ['StatTile.stories.tsx', 'Сравнение'],
-      ['StatTile.stories.tsx', 'Разница'],
+      ['Notification.stories.tsx', 'Обычное'],
+      ['StateView.stories.tsx', 'Ошибка'],
+      ['CodeBlock.stories.tsx', 'Обычное'],
+    ],
+  },
+  {
+    title: 'Коллекции',
+    note: 'Срочное сверху, норма свёрнута; выбранная строка — роль «выбрано»; сортировка — выбор человека.',
+    items: [
+      ['DataTable.stories.tsx', 'Обычное'],
+      ['List.stories.tsx', 'Выбрана'],
+    ],
+  },
+  {
+    title: 'Слои',
+    note: 'Окно — по центру на ноутбуке, шторкой снизу на телефоне; «готово» — всплывашкой.',
+    items: [
+      ['Dialog.stories.tsx', 'Обычное', 'fixed'],
+      ['Toast.stories.tsx', 'Обычное', 'toast'],
+    ],
+  },
+  {
+    title: 'Паттерны',
+    note: 'Вкладки и фильтры — один ряд сегментов; страница списка собрана из уровней ниже.',
+    items: [
+      ['Tabs.stories.tsx', 'Обычное'],
+      ['FilterBar.stories.tsx', 'Обычное'],
+      ['ListPage.stories.tsx', 'Обычное'],
     ],
   },
 ]
 
-/** Рамки образцов — только токены. */
+/** Рамки образцов — только роли и шкалы. */
 const DEMO_CSS = `
-body{margin:0;background:var(--cds-background);color:var(--cds-text-primary);font-family:var(--cds-font-sans)}
-.dsr{display:flex;flex-direction:column;gap:var(--cds-spacing-07);padding:var(--cds-spacing-05)}
-.dsr-sec{display:flex;flex-direction:column;gap:var(--cds-spacing-04)}
-.dsr-sec>h2{margin:0;font-size:var(--cds-heading-03-font-size);line-height:var(--cds-heading-03-line-height);font-weight:400}
-.dsr-sec>p{margin:0;color:var(--cds-text-secondary);font-size:var(--cds-body-01-font-size);line-height:var(--cds-body-01-line-height);max-width:70ch}
-.dsr-item{display:flex;flex-direction:column;gap:var(--cds-spacing-02)}
-.dsr-item>small{color:var(--cds-text-helper);font-size:var(--cds-label-01-font-size);letter-spacing:var(--cds-label-01-letter-spacing)}
-.dsr-box{border:1px dashed var(--cds-border-subtle-01);padding:var(--cds-spacing-05);background:var(--cds-background);min-width:0;overflow-x:auto}
+body{margin:0;background:var(--ds-canvas);color:var(--ds-fg);font-family:var(--ds-font-sans)}
+.dsr{display:flex;flex-direction:column;gap:var(--ds-space-sections);padding:var(--ds-space-blocks)}
+.dsr-sec{display:flex;flex-direction:column;gap:var(--ds-space-compact)}
+.dsr-sec>h2{margin:0;font-size:var(--ds-text-title-size);line-height:var(--ds-text-title-line);font-weight:400}
+.dsr-sec>p{margin:0;color:var(--ds-fg-muted);font-size:var(--ds-text-body-size);line-height:var(--ds-text-body-line);max-width:72ch}
+.dsr-item{display:flex;flex-direction:column;gap:var(--ds-space-tight)}
+.dsr-item>small{color:var(--ds-fg-muted);font-size:var(--ds-text-caption-size)}
+.dsr-box{border:1px dashed var(--ds-line);padding:var(--ds-space-blocks);background:var(--ds-canvas);min-width:0;overflow-x:auto}
 .dsr-box[data-frame=fixed],.dsr-box[data-frame=toast]{position:relative;transform:translateZ(0);overflow:hidden;padding:0}
 .dsr-box[data-frame=fixed]{height:30rem}
 .dsr-box[data-frame=toast]{height:12rem}
@@ -250,7 +138,7 @@ async function fragment(): Promise<string> {
     stdio: ['ignore', 'pipe', 'ignore'],
   })
   return (
-    `<!-- Сгенерировано design/react (src/__tests__/showcase.test.tsx) из историй ДС-React. Руками не править: npm run showcase. -->\n` +
+    `<!-- Сгенерировано react/src/__tests__/showcase.test.tsx из историй ДС-React. Руками не править: npm run showcase. -->\n` +
     `<style>${css.trim()}\n${DEMO_CSS.trim()}</style>\n<div class="dsr">${parts.join('\n')}</div>\n`
   )
 }
@@ -264,6 +152,21 @@ describe('образцы ДС-React для showcase.html', () => {
       writeFileSync(OUT, html)
     }
     expect(existsSync(OUT), 'нет dist/showcase-components.html — npm run showcase').toBe(true)
-    expect(readFileSync(OUT, 'utf8') === html, 'dist/showcase-components.html отстал — npm run showcase, потом node design/build.mjs').toBe(true)
+    expect(readFileSync(OUT, 'utf8') === html, 'dist/showcase-components.html отстал — npm run showcase, потом npm run build').toBe(true)
+  })
+
+  it('не зависит от пояса: в UTC и на Кирибати тот же файл', { timeout: 120_000 }, async () => {
+    const tz = process.env.TZ
+    try {
+      const at: string[] = []
+      for (const zone of ['UTC', 'Pacific/Kiritimati']) {
+        process.env.TZ = zone
+        at.push((await fragment()).replace(/r_[0-9a-z]+_/g, 'r_')) // useId считает дальше при втором прогоне — номера не сравниваем
+      }
+      expect(at[0] === at[1], 'образцы зависят от пояса: дата в историях берётся из местного времени без закрепления').toBe(true)
+    } finally {
+      if (tz === undefined) delete process.env.TZ
+      else process.env.TZ = tz
+    }
   })
 })

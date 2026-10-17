@@ -1,58 +1,58 @@
 /**
- * Поле ответа с «Отправить» (DF: «Сообщения», «Комментарии», «✨ ИИ», «Чаты»; опись DF §6.2 ReplyComposer).
- * - Клавиши: `enterToSend` — Enter отправляет, Shift+Enter — новая строка (ИИ, Чаты). Без него Enter — новая строка
- *   (Сообщения: «Enter не отправляет»). Ctrl/⌘+Enter отправляет, пока `sendShortcut` не выключен (по умолчанию включён).
- *   `sendShortcut={false}` и без `enterToSend` — с клавиатуры не уходит ничего, только кнопкой: там, где отправка
- *   необратима и раньше горячей клавиши не было (DF: ответ в ВК — комментарий, личка, беседа заказчика).
- *   Набор через IME Enter не перехватывает.
- * - Отправка идёт — кнопка «занята», поле только для чтения, второй раз не уходит (двойной клик и Enter).
- * - Неудача не теряет текст: `onSend` вернул отклонённое обещание — текст остаётся, ошибка видна под полем (`error`).
- *   Удача — поле очищается (если продукт не держит значение сам).
- * - «Отправить» — главная кнопка области (П5) через `ActionArea`; рядом — тихие (`tools`: «✨ Черновик ИИ»,
- *   «Ответ не нужен», «⚡ Шаблоны»). Если на поверхности уже есть главная (несколько полей на экране) —
- *   `emphasis="secondary"`.
- * Состояния: обычное, отправляется (загрузка), ошибка, выключено с причиной.
+ * Поле ответа с «Отправить» (DF: «Сообщения», «Комментарии», «ИИ», «Чаты»; чат orbit).
+ * - Клавиши (`send`): `enter` — Enter отправляет, Shift+Enter — новая строка; `ctrl-enter` — Enter — новая строка,
+ *   Ctrl/⌘+Enter отправляет; `button` — только кнопкой (отправка необратима: ответ в ВК). Набор через IME не трогаем.
+ * - Отправка идёт — кнопка «занята», поле только для чтения, второй раз не уходит. Неудача не теряет текст:
+ *   `onSend` вернул отклонённое обещание — текст остаётся, ошибку показывает `error`.
+ * - «Отправить» — главная области (П5) через `ActionArea`; рядом — тихие (`tools`). Уже есть главная на поверхности —
+ *   `emphasis="secondary"`. `disabled` — словами, почему нельзя.
+ * - Чат агента: `stop` — «Стоп», пока агент работает; `menu` — меню над полем (`CommandMenu`), клавиши поля сначала
+ *   получает `onKeyDown` продукта (взял — `preventDefault`), `activeDescendant` — активная строка меню для читалки;
+ *   `layout="row"` — кнопки в ряд, «Отправить» справа.
  */
 import { forwardRef, useId, useImperativeHandle, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
 import { cx } from '../lib/cx'
 import { ActionArea, Button } from './Button'
-import { ToneIcon } from './StatusBadge'
+import { Icon } from './Icon'
+import { fieldBox } from './TextField'
 
 export interface ReplyBoxProps {
-  /** Подпись поля для читалки и над полем: «Ответ клиенту». */
+  /** Подпись поля для читалки: «Ответ клиенту». */
   label: string
-  /** Показать подпись над полем (по умолчанию только для читалки). */
-  showLabel?: boolean
   value?: string
-  defaultValue?: string
   onChange?: (value: string) => void
   /** Отправить. Вернул обещание — пока оно идёт, кнопка занята; отклонено — текст остаётся. */
   onSend: (text: string) => void | Promise<unknown>
   placeholder?: string
   sendLabel?: ReactNode
-  /** Enter отправляет, Shift+Enter — новая строка. Иначе Enter — новая строка, отправка — Ctrl/⌘+Enter. */
-  enterToSend?: boolean
-  /** Ctrl/⌘+Enter отправляет (по умолчанию да). `false` — горячей клавиши отправки нет: только кнопка (и Enter, если `enterToSend`). */
-  sendShortcut?: boolean
+  /** Как отправлять с клавиатуры (по умолчанию `enter`). */
+  send?: 'enter' | 'ctrl-enter' | 'button'
   /** Отправка идёт (если продукт ведёт её сам). */
   sending?: boolean
-  disabled?: boolean
-  /** Почему выключено — видно под полем. */
-  disabledReason?: ReactNode
-  /** Ошибка отправки или проверки — под полем, знак и слово. */
+  /** Нельзя писать: `true` или слова, почему (видны под полем). */
+  disabled?: ReactNode
+  /** Ошибка отправки — под полем, знак и слово. */
   error?: ReactNode
-  /** Что сказать при попытке отправить пустое: «Напишите текст сообщения». Без него пустое молча не уходит. */
+  /** Что сказать при попытке отправить пустое. Без него пустое молча не уходит. */
   emptyMessage?: ReactNode
   /** Можно отправить без текста (приложен файл). */
   allowEmpty?: boolean
   /** Тихие кнопки рядом с «Отправить». */
   tools?: ReactNode
-  /** Чип вложения над кнопками: «📎 отчёт.pdf ✕». */
+  /** Вложение над кнопками. */
   attachment?: ReactNode
-  /** Подсказка о клавишах под полем. По умолчанию — по `enterToSend`; false — без подсказки. */
+  /** Подсказка о клавишах под полем; по умолчанию — по `send`; false — без подсказки. */
   hint?: ReactNode | false
   emphasis?: 'primary' | 'secondary'
   rows?: number
+  layout?: 'stack' | 'row'
+  /** «Стоп» — пока агент работает. */
+  stop?: { onStop: () => void; label?: ReactNode }
+  /** Меню над полем: команды «/». */
+  menu?: ReactNode
+  onKeyDown?: (e: KeyboardEvent<HTMLTextAreaElement>) => void
+  /** id активной строки меню (`aria-activedescendant`). */
+  activeDescendant?: string
   className?: string
 }
 
@@ -60,43 +60,24 @@ export interface ReplyBoxHandle {
   focus: () => void
 }
 
+const HINT = { enter: 'Enter — отправить, Shift+Enter — новая строка', 'ctrl-enter': 'Ctrl+Enter — отправить', button: null } as const
+
 export const ReplyBox = forwardRef<ReplyBoxHandle, ReplyBoxProps>(function ReplyBox(
-  {
-    label,
-    showLabel = false,
-    value,
-    defaultValue = '',
-    onChange,
-    onSend,
-    placeholder,
-    sendLabel = 'Отправить',
-    enterToSend = true,
-    sendShortcut = true,
-    sending: sendingProp,
-    disabled,
-    disabledReason,
-    error,
-    emptyMessage,
-    allowEmpty = false,
-    tools,
-    attachment,
-    hint,
-    emphasis = 'primary',
-    rows = 3,
-    className,
-  },
+  { label, value, onChange, onSend, placeholder, sendLabel = 'Отправить', send: mode = 'enter', sending: sendingProp, disabled, error, emptyMessage, allowEmpty = false, tools, attachment, hint, emphasis = 'primary', rows = 3, layout = 'stack', stop, menu, onKeyDown: onKeyDownProp, activeDescendant, className },
   ref,
 ) {
   const id = useId()
   const area = useRef<HTMLTextAreaElement>(null)
   useImperativeHandle(ref, () => ({ focus: () => area.current?.focus() }), [])
-  const [own, setOwn] = useState(defaultValue)
+  const [own, setOwn] = useState('')
   const [busy, setBusy] = useState(false)
   const [emptyShown, setEmptyShown] = useState(false)
   const busyRef = useRef(false)
   const controlled = value !== undefined
   const text = controlled ? value : own
   const sending = Boolean(sendingProp) || busy
+  const off = Boolean(disabled)
+  const reason = typeof disabled === 'boolean' ? null : disabled
 
   const set = (v: string) => {
     if (!controlled) setOwn(v)
@@ -104,8 +85,8 @@ export const ReplyBox = forwardRef<ReplyBoxHandle, ReplyBoxProps>(function Reply
     onChange?.(v)
   }
 
-  const send = async () => {
-    if (disabled || sending || busyRef.current) return
+  const doSend = async () => {
+    if (off || sending || busyRef.current) return
     if (!text.trim() && !allowEmpty) {
       if (emptyMessage) setEmptyShown(true)
       return
@@ -129,70 +110,75 @@ export const ReplyBox = forwardRef<ReplyBoxHandle, ReplyBoxProps>(function Reply
   }
 
   const onKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key !== 'Enter' || e.nativeEvent.isComposing) return
+    onKeyDownProp?.(e)
+    if (e.defaultPrevented || e.key !== 'Enter' || e.nativeEvent.isComposing) return
     const mod = e.ctrlKey || e.metaKey
-    if ((mod && sendShortcut) || (enterToSend && !mod && !e.shiftKey && !e.altKey)) {
+    if ((mode === 'ctrl-enter' && mod) || (mode === 'enter' && (mod || (!e.shiftKey && !e.altKey)))) {
       e.preventDefault()
-      void send()
+      void doSend()
     }
   }
 
   const shownError = error ?? (emptyShown ? emptyMessage : null)
-  const hintText = hint === false ? null : (hint ?? (enterToSend ? 'Enter — отправить, Shift+Enter — новая строка' : sendShortcut ? 'Ctrl+Enter — отправить' : null))
-  const describedBy = [shownError ? `${id}-err` : null, disabled && disabledReason ? `${id}-why` : null, hintText ? `${id}-hint` : null].filter(Boolean).join(' ') || undefined
-  const sendProps = { onClick: () => void send(), loading: sending, disabled: disabled, 'data-slot': 'reply-send' }
+  const hintText = hint === false ? null : (hint ?? HINT[mode])
+  const describedBy = [shownError ? `${id}-err` : null, reason ? `${id}-why` : null, hintText ? `${id}-hint` : null].filter(Boolean).join(' ') || undefined
+  const sendProps = { onClick: () => void doSend(), loading: sending, disabled: off, 'data-part': 'send' }
+  const stopButton = stop && (
+    <Button onClick={stop.onStop} icon="stop" data-part="stop">
+      {stop.label ?? 'Стоп'}
+    </Button>
+  )
 
   return (
-    <div data-slot="reply-box" data-state={sending ? 'загрузка' : shownError ? 'ошибка' : undefined} className={cx('flex min-w-0 flex-col gap-2', className)}>
-      <label htmlFor={`${id}-field`} className={showLabel ? 'text-label-01 text-text-secondary' : 'sr-only'}>
+    <div data-slot="reply-box" data-state={sending ? 'загрузка' : shownError ? 'ошибка' : undefined} className={cx('flex min-w-0 flex-col gap-items', className)}>
+      <label htmlFor={`${id}-field`} className="sr-only">
         {label}
       </label>
+      {menu}
       <textarea
         ref={area}
+        aria-activedescendant={activeDescendant}
         id={`${id}-field`}
         rows={rows}
         value={text}
         placeholder={placeholder}
         onChange={(e) => set(e.target.value)}
         onKeyDown={onKeyDown}
-        disabled={disabled}
+        disabled={off}
         readOnly={sending}
         aria-busy={sending || undefined}
         aria-invalid={shownError ? true : undefined}
         aria-describedby={describedBy}
-        className={cx(
-          'block w-full min-w-0 resize-y border-0 border-b bg-field-01 px-4 py-3 text-body-01 text-text-primary placeholder:text-text-placeholder',
-          'focus-visible:outline-2 focus-visible:outline-focus focus-visible:-outline-offset-2',
-          'disabled:cursor-not-allowed disabled:border-transparent disabled:text-text-disabled',
-          shownError ? 'border-support-error outline-2 -outline-offset-2 outline-support-error' : 'border-border-strong-01',
-        )}
+        className={cx(fieldBox({ invalid: Boolean(shownError), disabled: off }), 'block resize-y px-compact py-items')}
       />
       {shownError && (
-        <p id={`${id}-err`} role="alert" className="m-0 flex items-start gap-2 text-helper-text-01 text-text-error">
-          <ToneIcon tone="error" className="mt-px size-4 text-status-error" />
+        <p id={`${id}-err`} role="alert" className="m-0 flex items-start gap-tight text-caption text-danger-fg">
+          <Icon tone="опасно" />
           <span>{shownError}</span>
         </p>
       )}
-      {disabled && disabledReason && (
-        <p id={`${id}-why`} className="m-0 text-helper-text-01 text-text-helper">
-          {disabledReason}
+      {reason && (
+        <p id={`${id}-why`} className="m-0 text-caption text-fg-muted">
+          {reason}
         </p>
       )}
-      {hintText && !disabled && (
-        <p id={`${id}-hint`} className="m-0 text-helper-text-01 text-text-helper max-md:hidden">
+      {hintText && !off && (
+        <p id={`${id}-hint`} className="m-0 text-caption text-fg-muted max-md:hidden">
           {hintText}
         </p>
       )}
-      {attachment && <div className="flex flex-wrap gap-2">{attachment}</div>}
+      {attachment && <div className="flex flex-wrap gap-items">{attachment}</div>}
       {emphasis === 'primary' ? (
-        <ActionArea primary={{ label: sendLabel, ...sendProps }} label={`${label}: действия`}>
+        <ActionArea primary={{ label: sendLabel, ...sendProps }} label={`${label}: действия`} layout={layout}>
+          {stopButton}
           {tools}
         </ActionArea>
       ) : (
-        <div role="group" aria-label={`${label}: действия`} className="flex flex-col-reverse gap-2 md:flex-row md:flex-wrap md:items-center">
-          <Button variant="secondary" className="max-md:min-h-12 max-md:w-full" {...sendProps}>
+        <div role="group" aria-label={`${label}: действия`} className="flex flex-col-reverse gap-items md:flex-row md:flex-wrap md:items-center">
+          <Button className="max-md:w-full" {...sendProps}>
             {sendLabel}
           </Button>
+          {stopButton}
           {tools}
         </div>
       )}
