@@ -23,6 +23,8 @@ concurrency:
 jobs:
   check:
     name: ДС · типы, сторож, тесты, Storybook
+    # репо публичное, а раннер — пул ПК: PR из форка здесь не исполняется никогда (чужой код на ПК)
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ${{ fromJSON(vars.CI_RUNNER || '"ubuntu-latest"') }}
     timeout-minutes: 15
     env:
