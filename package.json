@@ -13,7 +13,6 @@
   "exports": {
     ".": "./react/src/index.ts",
     "./styles.css": "./react/src/ds.css",
-    "./react/src/*": "./react/src/*",
     "./tokens.css": "./dist/tokens.css",
     "./tailwind.css": "./dist/tailwind.css",
     "./tokens": "./dist/tokens.ts",
@@ -58,6 +57,11 @@
     "storybook": "npm run storybook -w react",
     "storybook:build": "npm run storybook:build -w react",
     "check": "node build.mjs && npm run typecheck && npm run lint && npm test && npm run test:visual"
+  },
+  "peerDependencies": {
+    "radix-ui": "^1.4.3",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
   },
   "devDependencies": {
     "ajv": "^8.20.0",

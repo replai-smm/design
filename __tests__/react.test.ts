@@ -1,6 +1,6 @@
 /**
- * ДС-React со стороны пакета (без React): исходники — только роли и шкалы, зависимостей у продукта нет кроме React и
- * Radix, образцы компонентов вошли в страницу образцов.
+ * ДС-React со стороны пакета (без React): исходники — только роли и шкалы, рабочее пространство не повторяет пакет,
+ * образцы компонентов вошли в страницу образцов.
  */
 import { describe, it, expect } from 'vitest'
 import { readFileSync, readdirSync, existsSync } from 'node:fs'
@@ -19,11 +19,11 @@ describe('ДС-React', () => {
     expect(found).toEqual([])
   })
 
-  it('продукту нужны только React и Radix: значки — данные в пакете, Carbon React не ставим', () => {
-    const pkg = JSON.parse(readFileSync(join(react, 'package.json'), 'utf8'))
-    expect(Object.keys(pkg.peerDependencies).sort()).toEqual(['radix-ui', 'react', 'react-dom'])
-    expect(Object.keys({ ...pkg.dependencies })).toEqual([])
-    expect(Object.keys(pkg.devDependencies).filter((d) => d.startsWith('@carbon/'))).toEqual(['@carbon/icons'])
+  it('рабочее пространство react не повторяет пакет: peerDependencies только у корня; значки — данные в пакете, Carbon React не ставим', () => {
+    const workspace = JSON.parse(readFileSync(join(react, 'package.json'), 'utf8'))
+    expect(workspace.peerDependencies).toBeUndefined()
+    expect(Object.keys(workspace.dependencies ?? {})).toEqual([])
+    expect(Object.keys(workspace.devDependencies).filter((d) => d.startsWith('@carbon/'))).toEqual(['@carbon/icons'])
     expect(existsSync(join(react, '..', 'package-lock.json'))).toBe(true)
   })
 

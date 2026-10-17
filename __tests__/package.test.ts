@@ -29,7 +29,8 @@ describe('пакет @replai-smm/design', () => {
     for (const k of ['preinstall', 'install', 'postinstall', 'prepare', 'prepack']) expect(pkg.scripts?.[k], k).toBeUndefined()
   })
 
-  it('у пакета нет своих dependencies: React и Radix приходят из продукта', () => {
+  it('у пакета нет своих dependencies: React и Radix приходят из продукта как peerDependencies', () => {
     expect(Object.keys(pkg.dependencies ?? {})).toEqual([])
+    expect(Object.keys(pkg.peerDependencies ?? {}).sort()).toEqual(['radix-ui', 'react', 'react-dom'])
   })
 })

@@ -22,11 +22,6 @@
     "visual": "node visual/run.mjs",
     "visual:update": "node visual/run.mjs --update"
   },
-  "peerDependencies": {
-    "radix-ui": "^1.4.3",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0"
-  },
   "devDependencies": {
     "@carbon/icons": "11.90.0",
     "@storybook/react-vite": "^10.5.7",

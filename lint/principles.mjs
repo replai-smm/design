@@ -1,13 +1,16 @@
 #!/usr/bin/env node
-// Правила дизайн-системы для продуктов и самой ДС — машиной. Три проверки:
+// Правила дизайн-системы для продуктов и самой ДС — машиной. Четыре проверки:
 //
 //   полки   — полка Storybook. ДС: полка = уровень компонента (react/src/registry.json → levels). Продукт: только
 //             `Экраны/SCR-NN <экран>/…` — продукт строит экраны, а компоненты берёт из ДС и не дублирует их полки.
 //   токены  — только роли и шкалы (scan.mjs: сырые цвета и размеры, произвольные значения, палитра и классы вне шкал).
 //   свои    — продукт не заводит свой компонент с именем компонента ДС: недостающее добавляют в ДС.
+//   импорт  — продукт берёт из ДС только то, что названо в `exports` её package.json: `@replai-smm/design/react/src/…`
+//             мимо index.ts и реестра — глубокий импорт (ds/deep-import).
 //
 // Новое держит, старое — долг (против базы PR, без файла чисел): новый файл историй или файл, чья полка была верной, —
-// красный; нарушений «только токены» в файле стало больше — красный; новый свой компонент с именем ДС — красный.
+// красный; нарушений «только токены» в файле стало больше — красный; новый свой компонент с именем ДС и новый
+// глубокий импорт — красные.
 // Строка с `ds-allow: <причина>` не считается (причина обязательна).
 //
 //   node node_modules/@replai-smm/design/lint/principles.mjs --kind product --base origin/main src   — продукт на PR
@@ -17,7 +20,7 @@ import { readFileSync, existsSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
 import { dirname, join, relative, resolve, sep } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
-import { scan, message } from './scan.mjs'
+import { scan, message, maskComments } from './scan.mjs'
 import { files as walk } from './cli.mjs'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
@@ -32,8 +35,8 @@ const DS_SHELF = new RegExp(`^(${[...LEVELS, 'Компоненты', 'ДС', 'Д
 
 const STORY = /\.stories\.(?:[jt]sx?|mdx)$/
 const CODE = /\.(?:[jt]sx?|mjs|cjs|vue|svelte)$/
-// не код экранов: тесты, фикстуры, чужое и копия дизайн-системы, которую /update кладёт в продукт
-const NOT_UI = /(^|\/)(__tests__|__mocks__|tests?|e2e|fixtures|vendor|node_modules|dist|build|storybook-static|\.process|\.storybook)\/|\.(test|spec)\.[^/]+$|(^|\/)design\/(dist|react|lint|lib|fonts|licenses)\//
+// не код экранов: тесты, фикстуры и чужое
+const NOT_UI = /(^|\/)(__tests__|__mocks__|tests?|e2e|fixtures|vendor|node_modules|dist|build|storybook-static|\.process|\.storybook)\/|\.(test|spec)\.[^/]+$/
 const ALLOW = /ds-allow:\s*\S/
 
 /** Имена компонентов ДС-React (с большой буквы, не типы) — из react/src/index.ts. */
@@ -49,6 +52,25 @@ export function dsNames(index = join(HERE, '../react/src/index.ts')) {
     }
   }
   for (const m of src.matchAll(/export\s+(?:function|const|class)\s+([A-Z][A-Za-z0-9]*)/g)) out.add(m[1])
+  return out
+}
+
+const PACKAGE = '@replai-smm/design'
+/** Пути пакета, которые продукт может импортировать: ключи `exports` его package.json (`./fonts/*` — любой файл папки). */
+export function publicPaths(pkg = join(HERE, '../package.json')) {
+  return Object.keys(JSON.parse(readFileSync(pkg, 'utf8')).exports).map((k) => new RegExp(`^${k.slice(2).replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace('*', '.+')}$`))
+}
+
+/** Импорты из пакета ДС не по `exports`: [{ spec, line }]. Глубокий путь — мимо index.ts и реестра (ds/deep-import). */
+export function deepImports(text, paths = publicPaths()) {
+  const out = []
+  const re = new RegExp(`(?:\\bfrom\\s*|\\bimport\\s*\\(?\\s*|\\brequire\\s*\\(\\s*)(["'\`])${PACKAGE}/([^"'\`]+)\\1`, 'g')
+  const code = maskComments(text, 'js')
+  const lines = text.split('\n')
+  for (const m of code.matchAll(re)) {
+    const line = code.slice(0, m.index).split('\n').length
+    if (!paths.some((r) => r.test(m[2])) && !ALLOW.test(lines[line - 1])) out.push({ spec: `${PACKAGE}/${m[2]}`, line })
+  }
   return out
 }
 
@@ -163,7 +185,7 @@ function added(now, before) {
  * Проверить: { block: [], warn: [] } — элемент { file, line, check, text }.
  * mode: 'strict' — всё держит; 'ratchet' — новое держит, старое — предупреждение; 'report' — всё предупреждение.
  */
-export function check({ repo, kind, roots, base, strict, names = dsNames() }) {
+export function check({ repo, kind, roots, base, strict, names = dsNames(), paths = publicPaths() }) {
   const mode = strict ? 'strict' : base ? 'ratchet' : 'report'
   const block = []
   const warn = []
@@ -212,6 +234,14 @@ export function check({ repo, kind, roots, base, strict, names = dsNames() }) {
         put(hard, { file: e.path, line: c.line, check: 'свои', text: `свой компонент «${c.name}» — такой есть в дизайн-системе: ${where}${hard ? '' : ' (долг: был до этого PR)'}` })
       }
     }
+
+    if (kind !== 'ds' && ui && CODE.test(e.path)) {
+      const had = new Set(mode === 'ratchet' && old !== null ? deepImports(old, paths).map((d) => d.spec) : [])
+      for (const d of deepImports(text, paths)) {
+        const hard = mode === 'strict' || (mode === 'ratchet' && !had.has(d.spec))
+        put(hard, { file: e.path, line: d.line, check: 'импорт', text: `ds/deep-import: «${d.spec}» мимо index.ts и реестра — бери из '${PACKAGE}'; не хватает — добавь в ДС${hard ? '' : ' (долг: был до этого PR)'}` })
+      }
+    }
   }
   return { mode, block, warn, files: entries.length }
 }
@@ -249,7 +279,7 @@ function main(argv) {
   r.block.forEach((x) => say('error', x))
   if (r.warn.length) console.log(r.mode === 'report' ? 'Нарушения (отчёт, без базы PR не держит):' : 'Долг (не держит):')
   r.warn.forEach((x) => say('warning', x))
-  const by = (l) => ['полки', 'токены', 'свои'].map((c) => `${c} ${l.filter((x) => x.check === c).length}`).join(' · ')
+  const by = (l) => ['полки', 'токены', 'свои', 'импорт'].map((c) => `${c} ${l.filter((x) => x.check === c).length}`).join(' · ')
   console.log(
     r.block.length
       ? `✗ дизайн-система: новое нарушение (${by(r.block)}); долг ${r.warn.length}. Правила — README.md пакета @replai-smm/design`
