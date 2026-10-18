@@ -57,7 +57,7 @@
 | Форма ролей, шкал и матрицы облика — закрытые списки | `tokens.schema.json`, `matrix.schema.json`, `schemas.test.ts` | `__tests__/fixtures/schemas/*/invalid` |
 | Одна главная кнопка на область и поверхность; опасное не рядом с главной; в строке списка — только ghost; на лице карточки ≤ 3 фактов, раскрытие ≤ 2 уровней | сами компоненты (`rule()` бросает в разработке), тесты `react/src/__tests__` | — |
 | История на каждое обещанное состояние, теги состояний — из `matrix.yaml`; a11y axe в обеих темах | `rules.test.tsx`, `a11y.test.tsx` | — |
-| Продукт: экраны только на полке `Экраны/SCR-NN …`; своего компонента с именем компонента ДС нет; новое нарушение «только роли» — красное, старое — долг | `lint/principles.mjs --kind product --base origin/main` в CI продукта | `principles.test.ts` |
+| Продукт: экраны только на полке `Экраны/SCR-NN …`; своего компонента с именем компонента ДС нет; новое нарушение «только роли» — красное, старое — долг | `lint/principles.mjs --kind product --base origin/main` в `check` продукта | `principles.test.ts` |
 
 ## Правила словами (машина не держит)
 
@@ -84,7 +84,7 @@
 
 Компоненты — `import { Button, Page } from '@replai-smm/design'` (исходники TypeScript, сборщик продукта транспилирует их
 сам; `resolve.dedupe: ['react', 'react-dom', 'radix-ui']`). Пакету нужны только React и Radix из продукта. Вокруг
-приложения — `<Toaster>` и `<ConfirmProvider>` один раз. Сторож в CI продукта:
+приложения — `<Toaster>` и `<ConfirmProvider>` один раз. Сторож в `check` продукта (`orbit.yaml`):
 `node node_modules/@replai-smm/design/lint/principles.mjs --kind product --base origin/main src`; правило ESLint —
 `@replai-smm/design/lint/eslint-plugin` (`ds/no-raw-values`); старые нарушения — храповиком `lint/cli.mjs --baseline`.
 

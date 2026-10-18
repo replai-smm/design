@@ -2,7 +2,7 @@
  * Облик машиной (react/visual): сверка снимков и анатомия на собранном Storybook. Здесь — что сторож ловит, без
  * браузера: эталон и тот же кадр со сдвигом на 1 px — разница больше допуска матрицы; снимок страницы с полями 12 вместо
  * 16, заголовком не той роли, меткой 4 px, текстом 15 px, углом 10 px и кнопкой 36 px — каждое нарушение названо.
- * Сам прогон всех историй × тем × ширин — `npm run test:visual` (в `npm run check` и CI).
+ * Сам прогон всех историй × тем × ширин — `npm run test:visual` (в `npm run check`).
  */
 import { describe, it, expect } from 'vitest'
 import { readdirSync, readFileSync } from 'node:fs'

@@ -267,18 +267,14 @@ function main(argv) {
     r = check({ repo, kind, roots, base, strict })
   } catch (e) {
     const why = String(e.stderr || e.message).trim().split('\n')[0]
-    console.error(`✗ дизайн-система не проверена: ${why}${base ? ` (нужна история git до базы ${base}: fetch-depth: 0 и git fetch origin <база>)` : ''}`)
+    console.error(`✗ дизайн-система не проверена: ${why}${base ? ` (нужна история git до базы ${base}: git fetch origin <база>)` : ''}`)
     return 2
   }
-  const gh = !!process.env.GITHUB_ACTIONS
-  const say = (level, x) => {
-    console.log(`${x.file}:${x.line}  ${x.check}  ${x.text}`)
-    if (gh) console.log(`::${level} file=${x.file},line=${x.line},title=дизайн-система · ${x.check}::${x.text.replace(/\n/g, ' ')}`)
-  }
+  const say = (x) => console.log(`${x.file}:${x.line}  ${x.check}  ${x.text}`)
   if (r.block.length) console.log('Держит (новое):')
-  r.block.forEach((x) => say('error', x))
-  if (r.warn.length) console.log(r.mode === 'report' ? 'Нарушения (отчёт, без базы PR не держит):' : 'Долг (не держит):')
-  r.warn.forEach((x) => say('warning', x))
+  r.block.forEach(say)
+  if (r.warn.length) console.log(r.mode === 'report' ? 'Нарушения (отчёт, без базы правку не держит):' : 'Долг (не держит):')
+  r.warn.forEach(say)
   const by = (l) => ['полки', 'токены', 'свои', 'импорт'].map((c) => `${c} ${l.filter((x) => x.check === c).length}`).join(' · ')
   console.log(
     r.block.length
