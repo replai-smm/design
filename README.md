@@ -72,6 +72,16 @@
 "dependencies": { "@replai-smm/design": "github:replai-smm/design#v1.1.0" }
 ```
 
+Второй вид ссылки — архив тега через https (codeload):
+
+```json
+"dependencies": { "@replai-smm/design": "https://codeload.github.com/replai-smm/design/tar.gz/refs/tags/v1.1.0" }
+```
+
+Общий вид: `https://codeload.github.com/<org>/<repo>/tar.gz/refs/tags/<тег>`. Прежний вид `github:<org>/<repo>#<тег>` берите
+по умолчанию; архив через https — там, где git-ссылка не проходит (среда без git или ssh, только https). Пакет и тег
+в обоих видах одни и те же.
+
 Главный CSS:
 
 ```css
