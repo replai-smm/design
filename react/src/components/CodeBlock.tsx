@@ -45,7 +45,7 @@ export function CodeBlock({ code, label, copy = true, maxLines = 12, className }
         data-part="body"
         data-lines={maxLines || undefined}
         style={maxLines ? ({ '--lines': maxLines } as CSSProperties) : undefined}
-        className={cx('ds-code m-0 overflow-auto px-compact py-items font-mono text-code text-fg', FOCUS)}
+        className={cx('ds-code relative m-0 overflow-auto px-compact py-items font-mono text-code text-fg', FOCUS)}
       >
         <code>{code}</code>
       </pre>

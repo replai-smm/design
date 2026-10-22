@@ -99,7 +99,7 @@ export function ThreeColumn({ first, second, third, labels, active, onBack, firs
               data-active={on}
               data-dir={on ? dir : undefined}
               className={cx(
-                'ds-col min-h-0 min-w-0 flex-col overflow-y-auto bg-surface',
+                'ds-col relative min-h-0 min-w-0 flex-col overflow-y-auto bg-surface',
                 FOCUS,
                 on ? 'flex w-full' : 'hidden',
                 'lg:flex',

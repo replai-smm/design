@@ -41,10 +41,14 @@
         "warning-fg",
         "warning-bg",
         "success",
+        "decision",
+        "decision-fg",
+        "decision-bg",
         "danger-fill",
         "warning-fill",
         "neutral-fill",
         "success-fill",
+        "decision-fill",
         "series-1",
         "series-2",
         "series-3",
@@ -119,6 +123,15 @@
         "success": {
           "$ref": "#/$defs/color"
         },
+        "decision": {
+          "$ref": "#/$defs/color"
+        },
+        "decision-fg": {
+          "$ref": "#/$defs/color"
+        },
+        "decision-bg": {
+          "$ref": "#/$defs/color"
+        },
         "danger-fill": {
           "$ref": "#/$defs/color"
         },
@@ -129,6 +142,9 @@
           "$ref": "#/$defs/color"
         },
         "success-fill": {
+          "$ref": "#/$defs/color"
+        },
+        "decision-fill": {
           "$ref": "#/$defs/color"
         },
         "series-1": {
@@ -156,6 +172,7 @@
       "additionalProperties": false,
       "required": [
         "опасно",
+        "решение",
         "внимание",
         "инфо",
         "нейтрально",
@@ -163,6 +180,9 @@
       ],
       "properties": {
         "опасно": {
+          "$ref": "#/$defs/tone"
+        },
+        "решение": {
           "$ref": "#/$defs/tone"
         },
         "внимание": {
@@ -233,10 +253,14 @@
         "warning-fg",
         "warning-bg",
         "success",
+        "decision",
+        "decision-fg",
+        "decision-bg",
         "danger-fill",
         "warning-fill",
         "neutral-fill",
         "success-fill",
+        "decision-fill",
         "series-1",
         "series-2",
         "series-3",
@@ -279,6 +303,7 @@
         "key": {
           "enum": [
             "danger",
+            "decision",
             "warning",
             "info",
             "neutral",

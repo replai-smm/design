@@ -190,7 +190,7 @@ export function ChatThread({ messages, label, state = 'ready', error, empty, ear
     )
 
   return (
-    <div data-slot="chat-thread" ref={scroller} onScroll={onScroll} style={{ overflowAnchor: 'none' }} className={cx('flex min-h-0 flex-col overflow-y-auto', className)}>
+    <div data-slot="chat-thread" ref={scroller} onScroll={onScroll} style={{ overflowAnchor: 'none' }} className={cx('relative flex min-h-0 flex-col overflow-y-auto', className)}>
       {earlier && (
         <div className="flex justify-center px-blocks pt-blocks">
           {earlier.done ? (

@@ -1,7 +1,7 @@
 /**
  * Счётчик: число у строки, вкладки или кнопки — непрочитанные, неотвеченные, «!» у пустого пула. Число — не статус.
  * Тон словаря: `нейтрально` — просто число в рамке; `инфо` — новое, что ждёт взгляда: инверсия (контраст, не цвет);
- * `внимание`, `опасно` — со знаком тона. Больше 99 — «99+». `label` — что считаем, для читалки.
+ * `внимание`, `решение`, `опасно` (тоны с подложкой) — со знаком тона. Больше 99 — «99+». `label` — что считаем, для читалки.
  */
 import { cx } from '../lib/cx'
 import { TONE, type Tone } from '../lib/vocab'
@@ -26,7 +26,7 @@ export function countText(count: number | string): string {
 
 export function CountBadge({ count, tone = 'нейтрально', label, className }: CountBadgeProps) {
   const text = countText(count)
-  const urgent = tone === 'опасно' || tone === 'внимание'
+  const urgent = TONE[tone].bg !== null
   return (
     <span
       data-slot="count-badge"

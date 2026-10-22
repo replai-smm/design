@@ -4,8 +4,8 @@
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { ActionArea, Button, Chart, chartHasData, CountBadge, countText, DataTable, Delta, deltaText, Dialog, Icon, InlineLoading, Meter, meterTone, niceMax, Page, PageHeader, StatusBadge, Steps, stepProgress, tickIndexes, ticksOf } from '../index'
-import { STATUS_IDS, TONE, statusOf, toneOf } from '../lib/vocab'
+import { ActionArea, Button, Chart, chartHasData, CountBadge, countText, DataTable, Delta, deltaText, Dialog, Icon, InlineLoading, Meter, meterTone, niceMax, Notification, Page, PageHeader, StatusBadge, Steps, stepProgress, tickIndexes, ticksOf } from '../index'
+import { STATUS_IDS, TONE, TONE_ORDER, statusOf, toneOf } from '../lib/vocab'
 import { groups, type GroupRow } from '../stories/fixtures'
 import statusesJson from '../../../statuses.json'
 
@@ -116,6 +116,28 @@ describe('метка статуса и словарь тонов', () => {
     expect(() => render(<StatusBadge tone="опасно" />)).toThrow(/нет слова/)
     // @ts-expect-error — тона «синий» нет
     expect(() => render(<StatusBadge tone="синий" label="x" />)).toThrow(/тона «синий» нет/)
+  })
+
+  it('«решение» — фиолетовый тон с подложкой: метка, счётчик со знаком, значок, уведомление; в порядке внимания — сразу за «опасно»', () => {
+    const { container } = render(
+      <>
+        <StatusBadge tone="решение" label="ждёт решения" />
+        <CountBadge count={2} tone="решение" />
+        <Icon tone="решение" />
+        <Notification tone="решение" title="Нужно решение" />
+      </>,
+    )
+    const badge = container.querySelector('[data-slot=status-badge]')!
+    expect(badge.getAttribute('data-tone')).toBe('decision')
+    expect(badge.className).toContain('bg-decision-bg')
+    expect(badge.className).toContain('text-decision-fg')
+    expect(container.querySelector('[data-slot=count-badge] svg[data-icon=tone-decision]')).toBeTruthy()
+    expect(container.querySelector(':scope > svg[data-icon=tone-decision]')?.getAttribute('class')).toContain('text-decision')
+    const note = container.querySelector('[data-slot=notification]')!
+    expect(note.getAttribute('data-mark')).toBe('decision')
+    expect(note.className).toContain('border-l-decision')
+    expect(note.getAttribute('role')).toBe('status')
+    expect(TONE_ORDER.slice(0, 3)).toEqual(['опасно', 'решение', 'внимание'])
   })
 })
 

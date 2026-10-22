@@ -20,14 +20,15 @@ describe('роли цвета', () => {
     }
   })
 
-  it('ролей не больше 32: поверхности, текст, рамки, взаимодействие, тоны, ряды данных', () => {
-    expect(Object.keys(tokens.colors).length).toBeLessThanOrEqual(32)
+  it('ролей не больше 36: поверхности, текст, рамки, взаимодействие, тоны, ряды данных', () => {
+    expect(Object.keys(tokens.colors).length).toBeLessThanOrEqual(36)
   })
 
   it('синий — только ссылка и фокус: одна роль accent; главное действие — инверсия', () => {
+    // фиолетовый («решение») — не синий: красного в нём больше, чем зелёного
     const blue = (hex: string) => {
       const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16))
-      return b > 180 && b - r > 60 && b - g > 30
+      return b > 180 && b - r > 60 && b - g > 30 && g >= r
     }
     const blues = Object.entries<any>(tokens.colors).filter(([k, v]) => !k.startsWith('series-') && (blue(v.light) || blue(v.dark))).map(([k]) => k)
     expect(blues).toEqual(['accent'])
@@ -41,10 +42,10 @@ describe('роли цвета', () => {
 })
 
 describe('словарь тонов', () => {
-  it('пять тонов; знак, текст и подложка — роли; подложка — только у «опасно» и «внимание»', () => {
-    expect(Object.keys(tokens.tones)).toEqual(['опасно', 'внимание', 'инфо', 'нейтрально', 'хорошо'])
+  it('шесть тонов; знак, текст и подложка — роли; подложка — только у «опасно», «решение» и «внимание»', () => {
+    expect(Object.keys(tokens.tones)).toEqual(['опасно', 'решение', 'внимание', 'инфо', 'нейтрально', 'хорошо'])
     for (const [t, x] of Object.entries<any>(tokens.tones)) for (const r of [x.mark, x.text, x.bg].filter(Boolean)) expect(tokens.colors[r], `${t}: ${r}`).toBeDefined()
-    expect(Object.entries<any>(tokens.tones).filter(([, x]) => x.bg).map(([t]) => t)).toEqual(['опасно', 'внимание'])
+    expect(Object.entries<any>(tokens.tones).filter(([, x]) => x.bg).map(([t]) => t)).toEqual(['опасно', 'решение', 'внимание'])
   })
 
   it('заливка статуса (сетка статуса) — роль `<тон>-fill` у всех тонов, кроме «инфо»', () => {

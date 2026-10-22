@@ -209,7 +209,7 @@ export function Combobox({ label, hideLabel, helperText, error, dense, className
             ) : shown.length === 0 ? (
               note(empty)
             ) : (
-              <ul role="listbox" id={listId} aria-labelledby={ids.labelId} className="m-0 list-none overflow-y-auto p-tight">
+              <ul role="listbox" id={listId} aria-labelledby={ids.labelId} className="relative m-0 list-none overflow-y-auto p-tight">
                 {shown.map((o, i) => {
                   const isSel = o.value === value
                   return (

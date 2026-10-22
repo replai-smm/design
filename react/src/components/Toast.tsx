@@ -29,7 +29,7 @@ export function useToast(): ToastApi {
   return api
 }
 
-const STRIPE: Record<NotificationTone, string> = { опасно: 'border-l-danger', внимание: 'border-l-warning', инфо: 'border-l-fg', хорошо: 'border-l-success' }
+const STRIPE: Record<NotificationTone, string> = { опасно: 'border-l-danger', решение: 'border-l-decision', внимание: 'border-l-warning', инфо: 'border-l-fg', хорошо: 'border-l-success' }
 let nextId = 1
 
 export interface ToasterProps {

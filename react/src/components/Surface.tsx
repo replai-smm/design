@@ -11,6 +11,7 @@ import { TONE, type Tone } from '../lib/vocab'
 
 const MARK_COLOR: Record<Tone, string> = {
   опасно: 'border-l-danger',
+  решение: 'border-l-decision',
   внимание: 'border-l-warning',
   инфо: 'border-l-fg',
   нейтрально: 'border-l-line-strong',

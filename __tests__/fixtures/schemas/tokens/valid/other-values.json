@@ -131,6 +131,26 @@
       "dark": "#133e23",
       "role": "заливка статуса «хорошо» (план выполнен): только сетка статуса"
     },
+    "decision": {
+      "light": "#8a3ffc",
+      "dark": "#8a3ffc",
+      "role": "знак тона «решение»"
+    },
+    "decision-fg": {
+      "light": "#6929c4",
+      "dark": "#6929c4",
+      "role": "текст тона «решение» на его подложке"
+    },
+    "decision-bg": {
+      "light": "#f6f2ff",
+      "dark": "#f6f2ff",
+      "role": "подложка тона «решение»"
+    },
+    "decision-fill": {
+      "light": "#f6f2ff",
+      "dark": "#f6f2ff",
+      "role": "заливка статуса «решение»: только сетка статуса"
+    },
     "series-1": {
       "light": "#6929c4",
       "dark": "#6929c4",
@@ -169,6 +189,13 @@
       "text": "danger-fg",
       "bg": "danger-bg",
       "fill": "danger-fill"
+    },
+    "решение": {
+      "key": "decision",
+      "mark": "decision",
+      "text": "decision-fg",
+      "bg": "decision-bg",
+      "fill": "decision-fill"
     },
     "внимание": {
       "key": "warning",

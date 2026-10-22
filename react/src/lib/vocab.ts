@@ -8,11 +8,11 @@ import type { IconName } from './icons.gen'
 
 export type { StatusId, Tone }
 
-/** Тон: опасно · внимание · инфо · нейтрально · хорошо (tokens.json → tones). */
+/** Тон: опасно · решение · внимание · инфо · нейтрально · хорошо (tokens.json → tones). */
 export const TONES = Object.keys(tones) as Tone[]
 
-/** Порядок внимания: срочное сверху, норма — внизу (П2, П3). */
-export const TONE_ORDER: readonly Tone[] = ['опасно', 'внимание', 'инфо', 'нейтрально', 'хорошо']
+/** Порядок внимания: срочное сверху, норма — внизу (П2, П3); «решение» — сразу за бедой: ждёт человека. */
+export const TONE_ORDER: readonly Tone[] = ['опасно', 'решение', 'внимание', 'инфо', 'нейтрально', 'хорошо']
 
 /** Облик тона: классы ролей знака, текста и подложки (у спокойных тонов подложки нет) и форма значка. Классы — словами
  * целиком (Tailwind видит только целые имена); что они те же, что в tokens.json → tones, сверяет тест словарей. */
@@ -25,6 +25,7 @@ export interface ToneLook {
 }
 export const TONE: Record<Tone, ToneLook> = {
   опасно: { key: 'danger', mark: 'text-danger', text: 'text-danger-fg', bg: 'bg-danger-bg', icon: 'tone-danger' },
+  решение: { key: 'decision', mark: 'text-decision', text: 'text-decision-fg', bg: 'bg-decision-bg', icon: 'tone-decision' },
   внимание: { key: 'warning', mark: 'text-warning', text: 'text-warning-fg', bg: 'bg-warning-bg', icon: 'tone-warning' },
   инфо: { key: 'info', mark: 'text-fg', text: 'text-fg', bg: null, icon: 'tone-info' },
   нейтрально: { key: 'neutral', mark: 'text-fg-muted', text: 'text-fg', bg: null, icon: 'tone-neutral' },

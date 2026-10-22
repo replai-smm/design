@@ -81,6 +81,7 @@ export interface ProofreadGridProps<R> {
 /** Заливка статуса: роли `*-fill` словаря тонов (tokens.json → tones.*.fill). Только сетка статуса — этот файл. */
 export const FILL: Record<Tone, string | null> = {
   опасно: 'bg-danger-fill',
+  решение: 'bg-decision-fill',
   внимание: 'bg-warning-fill',
   инфо: null,
   нейтрально: 'bg-neutral-fill',

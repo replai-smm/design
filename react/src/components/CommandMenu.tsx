@@ -74,7 +74,7 @@ export const CommandMenu = forwardRef<CommandMenuHandle, CommandMenuProps>(funct
 
   const groups = [...new Set(shown.map((i) => i.group))]
   return (
-    <div data-slot="command-menu" className={cx('ds-menu flex min-w-0 flex-col overflow-y-auto rounded-surface border border-line bg-surface p-tight shadow-raised', className)}>
+    <div data-slot="command-menu" className={cx('ds-menu relative flex min-w-0 flex-col overflow-y-auto rounded-surface border border-line bg-surface p-tight shadow-raised', className)}>
       {shown.length === 0 ? (
         <p role="status" className="m-0 px-items py-items text-body text-fg-muted">
           Ничего не найдено

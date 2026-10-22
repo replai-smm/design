@@ -10,8 +10,8 @@
 
 | Шкала | Что есть | Источник |
 |---|---|---|
-| Цвет | 32 роли: поверхности (`canvas`, `surface`, `inverse`), текст (`fg`, `fg-muted`, `fg-disabled`, `fg-inverse`), рамки (`line`, `line-strong`), взаимодействие (`hover`, `selected`, `accent`), глубина (`scrim`, `shadow`), тоны (`danger`, `warning`, `success` + текст и подложка у срочных), заливки статуса (`*-fill`, только сетка статуса), ряды данных `series-1…6` | `tokens.json → colors` |
-| Тон | один словарь на все компоненты: опасно · внимание · инфо · нейтрально · хорошо. Подложка — только у «опасно» и «внимание»; «хорошо» — зелёный знак без подложки. Исключение по смыслу — сетка статуса (клетка и строка дня, чей смысл — сам статус): там заливка у каждого тона (`tones.*.fill`), только в `ProofreadGrid.tsx` (`registry.json → fill`) | `tokens.json → tones`, `react/src/lib/vocab.ts` |
+| Цвет | 36 ролей: поверхности (`canvas`, `surface`, `inverse`), текст (`fg`, `fg-muted`, `fg-disabled`, `fg-inverse`), рамки (`line`, `line-strong`), взаимодействие (`hover`, `selected`, `accent`), глубина (`scrim`, `shadow`), тоны (`danger`, `decision`, `warning`, `success` + текст и подложка у срочных), заливки статуса (`*-fill`, только сетка статуса), ряды данных `series-1…6` | `tokens.json → colors` |
+| Тон | один словарь на все компоненты: опасно · решение · внимание · инфо · нейтрально · хорошо. Подложка — только у «опасно», «решение» (ждёт решения человека, фиолетовый) и «внимание»; «хорошо» — зелёный знак без подложки. Исключение по смыслу — сетка статуса (клетка и строка дня, чей смысл — сам статус): там заливка у каждого тона (`tones.*.fill`), только в `ProofreadGrid.tsx` (`registry.json → fill`) | `tokens.json → tones`, `react/src/lib/vocab.ts` |
 | Ход работы | один словарь: `idle` впереди · `running` идёт · `done` готово · `error` ошибка — у шагов, шага агента, хода в строке, отправки сообщения | `vocab.ts → Progress` |
 | Текст | 7 ролей: `caption` 12 · `body` 14 · `heading` 14/600 · `reading` 16 · `code` 13 моно · `title` 20 · `page` 28 | `scale.json → text` |
 | Отступ | 6 ролей: `tight` 4 · `items` 8 · `compact` 12 · `blocks` 16 · `groups` 24 · `sections` 32 — и в классах (`gap-items`, `p-blocks`), и в `Stack gap="items"` | `scale.json → space` |
@@ -51,7 +51,7 @@
 | Правило | Чем держится | Приманка (обязана быть красной) |
 |---|---|---|
 | Только роли и шкалы: нет сырых цветов и размеров, произвольных значений, палитры Tailwind и классов вне шкал (`pl-5`, `gap-1.5`, `text-sm`, `h-12`, `rounded-lg`, `max-w-md`) | тема Tailwind (`dist/tailwind.css`) таких классов не создаёт; `lint/scan.mjs` (`ds/off-scale` и др.) — в ДС `npm run lint`, в продукте `lint/cli.mjs` и `lint/principles.mjs` | `__tests__/bait/off-scale.tsx` |
-| Устройство: у каждого экспорта — запись в реестре; уровень из списка; импорт только нижних уровней (своего — только база уровня или исключение с «почему»); один смысл — один компонент; пары-соседи — с «почему»; полка = уровень; тон и ход — только из словарей; значки — только `Icon`; таблетки, свои `<svg>` и заливка статуса (`*-fill`) — только в названных файлах | `lib/architecture.mjs`, тест `architecture.test.ts` | `__tests__/bait/architecture/` |
+| Устройство: у каждого экспорта — запись в реестре; уровень из списка; импорт только нижних уровней (своего — только база уровня или исключение с «почему»); один смысл — один компонент; пары-соседи — с «почему»; полка = уровень; тон и ход — только из словарей; значки — только `Icon`; таблетки, свои `<svg>` и заливка статуса (`*-fill`) — только в названных файлах; контейнер прокрутки (`overflow-auto`, `overflow-y-auto`) — с `relative` | `lib/architecture.mjs`, тест `architecture.test.ts` | `__tests__/bait/architecture/` |
 | Облик и анатомия: каждая история × светлая и тёмная × 390 и 1280 против эталона; поля, роль заголовка, угол и метка — по реестру; текст, углы и высоты контролов — только из шкал | `react/visual/run.mjs` (`npm run test:visual`), эталоны `react/visual/baseline/` | `__tests__/visual.test.ts`: кадр со сдвигом на 1 px, снимок с полями 12 вместо 16 |
 | Контраст: текст ≥ 4,5 : 1 (и на заливке статуса), знаки, границы контролов, фокус и ряды данных ≥ 3 : 1 — обе темы | `lib/contrast.mjs`, `contrast.test.ts` | пара светло-серого текста на белом |
 | Форма ролей, шкал и матрицы облика — закрытые списки | `tokens.schema.json`, `matrix.schema.json`, `schemas.test.ts` | `__tests__/fixtures/schemas/*/invalid` |
@@ -69,13 +69,13 @@
 ## Как продукт берёт ДС
 
 ```json
-"dependencies": { "@replai-smm/design": "github:replai-smm/design#v1.1.0" }
+"dependencies": { "@replai-smm/design": "github:replai-smm/design#v1.2.0" }
 ```
 
 Второй вид ссылки — архив тега через https (codeload):
 
 ```json
-"dependencies": { "@replai-smm/design": "https://codeload.github.com/replai-smm/design/tar.gz/refs/tags/v1.1.0" }
+"dependencies": { "@replai-smm/design": "https://codeload.github.com/replai-smm/design/tar.gz/refs/tags/v1.2.0" }
 ```
 
 Общий вид: `https://codeload.github.com/<org>/<repo>/tar.gz/refs/tags/<тег>`. Прежний вид `github:<org>/<repo>#<тег>` берите

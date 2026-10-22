@@ -9,7 +9,7 @@ import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { checkArchitecture, importsOf, readmeProblems, readTree } from '../lib/architecture.mjs'
 
-const RULES = ['anatomy/missing', 'anatomy/index', 'level/unknown', 'level/file', 'level/import', 'meaning/duplicate', 'near/unknown', 'shelf/level', 'product/unknown', 'vocab/own', 'glyph/unicode', 'svg/own', 'shape/pill', 'tone/fill']
+const RULES = ['anatomy/missing', 'anatomy/index', 'level/unknown', 'level/file', 'level/import', 'meaning/duplicate', 'near/unknown', 'shelf/level', 'product/unknown', 'vocab/own', 'glyph/unicode', 'svg/own', 'shape/pill', 'tone/fill', 'scroll/relative']
 
 describe('устройство ДС', () => {
   it('настоящая ДС-React: нарушений нет', () => {
@@ -38,6 +38,15 @@ describe('устройство ДС', () => {
   it('приманка: заливка «хорошо» строки вне сетки статуса — красная (подложка вне сетки — только у «опасно» и «внимание»)', () => {
     const texts = checkArchitecture(readTree(resolve(import.meta.dirname, 'bait', 'architecture'))).map((p: { rule: string; file?: string; text: string }) => `${p.rule} ${p.file} ${p.text}`)
     expect(texts.some((t: string) => t.startsWith('tone/fill Low.tsx заливка статуса «bg-success-fill»'))).toBe(true)
+  })
+
+  it('приманка: контейнер прокрутки (overflow-auto, overflow-y-auto) без relative — красный, с relative в том же className — нет', () => {
+    const texts = checkArchitecture(readTree(resolve(import.meta.dirname, 'bait', 'architecture')))
+      .filter((p: { rule: string }) => p.rule === 'scroll/relative')
+      .map((p: { text: string }) => p.text)
+    expect(texts).toHaveLength(2)
+    expect(texts.some((t: string) => t.includes('"flex min-h-0 overflow-y-auto"'))).toBe(true)
+    expect(texts.some((t: string) => t.includes("wide && 'overflow-auto'"))).toBe(true)
   })
 
   it('importsOf видит все формы пути к компоненту и не видит комментарии и lib', () => {

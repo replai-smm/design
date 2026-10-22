@@ -82,7 +82,7 @@ export function Dialog({ open, onOpenChange, trigger, title, description, size =
                 <Button variant="ghost" icon="close" aria-label="закрыть" className="shrink-0" />
               </RDialog.Close>
             </div>
-            <div data-part="body" className="flex min-h-0 flex-1 flex-col gap-blocks overflow-y-auto p-blocks">
+            <div data-part="body" className="relative flex min-h-0 flex-1 flex-col gap-blocks overflow-y-auto p-blocks">
               {description ? <RDialog.Description className="m-0 text-body text-fg">{description}</RDialog.Description> : null}
               {children}
             </div>
