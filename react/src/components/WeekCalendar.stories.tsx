@@ -14,7 +14,7 @@ const item = (p: Post) => (
 )
 
 const meta = {
-  title: 'Коллекции/Неделя',
+  title: 'Компоненты/Коллекции/Неделя',
   component: WeekCalendar<Post>,
   parameters: { layout: 'padded' },
   args: {

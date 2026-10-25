@@ -8,9 +8,10 @@
  *   вывод раскрыт и растёт; «Стоп» — рядом со строкой (`stop`). `note` — пометка под строкой.
  * - Раскрытие — 0,6 с без прыжка; свёрнутое не берёт фокус (`inert`). Без `children` строка не нажимается.
  */
-import { useId, useState, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { FOCUS } from '../lib/anatomy'
 import { cx } from '../lib/cx'
+import { Expand, useDisclosure } from '../lib/disclosure'
 import { PROGRESS_WORD, type Progress } from '../lib/vocab'
 import { Button } from './Button'
 import { Icon } from './Icon'
@@ -38,15 +39,14 @@ export interface AgentStepProps {
 }
 
 export function AgentStep({ tool, target, progress, summary, last, note, stop, children, variant = 'tool', className }: AgentStepProps) {
-  const [open, setOpen] = useState(progress === 'error' || variant === 'shell')
-  const id = useId()
+  const fold = useDisclosure(progress === 'error' || variant === 'shell')
   const can = children !== undefined && children !== null
   const head = (
     <>
       <span className="inline-flex size-icon shrink-0 items-center justify-center">
         {progress === 'running' && <InlineLoading progress="running" label={PROGRESS_WORD.running} hideLabel />}
         {progress === 'error' && <Icon tone="опасно" />}
-        {progress === 'done' && can && <Icon name="chevron-right" className={cx('text-fg-muted transition-transform duration-move ease-standard', open && 'rotate-90')} />}
+        {progress === 'done' && can && <Icon name="chevron-right" className={cx('text-fg-muted transition-transform duration-move ease-standard', fold.open && 'rotate-90')} />}
       </span>
       <span className="shrink-0 font-semibold text-fg">{tool}</span>
       {target && (
@@ -71,7 +71,7 @@ export function AgentStep({ tool, target, progress, summary, last, note, stop, c
     <>
       <div className="flex min-w-0 items-center">
         {can ? (
-          <button type="button" aria-expanded={open} aria-controls={`${id}-r`} onClick={() => setOpen(!open)} className={cx(rowCls, 'cursor-pointer hover:bg-hover', FOCUS)}>
+          <button type="button" {...fold.trigger} className={cx(rowCls, 'cursor-pointer hover:bg-hover', FOCUS)}>
             {head}
           </button>
         ) : (
@@ -86,11 +86,9 @@ export function AgentStep({ tool, target, progress, summary, last, note, stop, c
       {note && <p className="m-0 truncate pr-items pl-sections text-caption text-fg-muted">{note}</p>}
       {last && <p className="m-0 truncate pr-items pl-sections text-caption text-fg-muted">{last}</p>}
       {can && (
-        <div id={`${id}-r`} className="ds-expand" data-open={open} inert={!open}>
-          <div>
-            <div className="flex min-w-0 flex-col gap-tight pt-tight pb-items pl-sections">{children}</div>
-          </div>
-        </div>
+        <Expand id={fold.id} open={fold.open}>
+          <div className="flex min-w-0 flex-col gap-tight pt-tight pb-items pl-sections">{children}</div>
+        </Expand>
       )}
     </>
   )

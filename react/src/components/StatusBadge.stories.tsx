@@ -3,7 +3,7 @@ import { STATUS_IDS } from '../lib/vocab'
 import { StatusBadge } from './StatusBadge'
 
 const meta = {
-  title: 'Элементы/Метка статуса',
+  title: 'Компоненты/Элементы/Метка статуса',
   component: StatusBadge,
   parameters: { layout: 'padded' },
   args: { status: 'work.failing' },

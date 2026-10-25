@@ -18,7 +18,7 @@ function Demo() {
 }
 
 const meta = {
-  title: 'Паттерны/Фильтры',
+  title: 'Компоненты/Составные/Фильтры',
   component: Demo,
   parameters: { layout: 'padded' },
 } satisfies Meta<typeof Demo>

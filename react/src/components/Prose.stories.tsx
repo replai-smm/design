@@ -4,7 +4,7 @@ import { Prose, ProseHtml } from './Prose'
 import { csvCode } from '../stories/agent-fixtures'
 
 const meta = {
-  title: 'Элементы/Текст ответа',
+  title: 'Компоненты/Элементы/Текст ответа',
   component: Prose,
   parameters: { layout: 'padded' },
 } satisfies Meta<typeof Prose>

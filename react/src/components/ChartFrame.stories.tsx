@@ -7,7 +7,7 @@ import { reach } from '../stories/df-fixtures'
 const labels = reach.map((_, i) => `${i + 1}.10`)
 
 const meta = {
-  title: 'Поверхности/Рамка графика',
+  title: 'Компоненты/Поверхности/Рамка графика',
   component: ChartFrame,
   parameters: { layout: 'padded' },
   args: {

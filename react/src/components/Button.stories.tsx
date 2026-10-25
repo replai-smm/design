@@ -3,7 +3,7 @@ import { ActionArea, Button } from './Button'
 import { Stack } from './layout'
 
 const meta = {
-  title: 'Элементы/Кнопка',
+  title: 'Компоненты/Элементы/Кнопка',
   component: ActionArea,
   parameters: { layout: 'padded' },
 } satisfies Meta<typeof ActionArea>

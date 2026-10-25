@@ -3,7 +3,7 @@
  * Состояние шага — словарь хода: `done` — пройден, `running` — текущий (`aria-current="step"`), `idle` — впереди,
  * `error` — знак «опасно». Словом для читалки и формой знака, не только цветом. `onStepClick` — назад к пройденному;
  * впереди не нажимается. Телефон — одной строкой «Шаг 2 из 4 · Куда»; `compact` — одной строкой всегда.
- * Шаги — не вкладки: содержимое шага рисует продукт.
+ * Шаги — не вкладки: содержимое шага рисует продукт. Шагов — от трёх (Carbon: Progress indicator); два — одна форма.
  */
 import { cx, rule } from '../lib/cx'
 import { FOCUS } from '../lib/anatomy'
@@ -42,7 +42,7 @@ function Mark({ progress }: { progress: Progress }) {
 }
 
 export function Steps({ steps, current, errorAt, onStepClick, label, compact = false, className }: StepsProps) {
-  rule(steps.length >= 2, 'Steps: шагов меньше двух — это не путь, хватит слов')
+  rule(steps.length >= 3, 'Steps: шагов меньше трёх — это не путь (Carbon: шаги — от трёх), хватит одной формы')
   rule(current >= 0 && current < steps.length, `Steps: текущий шаг ${current} вне списка из ${steps.length}`)
   const now = Math.min(Math.max(current, 0), steps.length - 1)
   return (

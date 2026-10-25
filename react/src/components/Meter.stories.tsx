@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Meter } from './Meter'
 
 const meta = {
-  title: 'Элементы/Шкала',
+  title: 'Компоненты/Элементы/Шкала',
   component: Meter,
   parameters: { layout: 'padded' },
   args: { label: '5 ч', value: 62, valueText: '62 % · сброс 18:40' },

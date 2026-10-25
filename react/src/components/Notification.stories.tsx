@@ -4,7 +4,7 @@ import { Notification } from './Notification'
 import { Stack } from './layout'
 
 const meta = {
-  title: 'Поверхности/Уведомление',
+  title: 'Компоненты/Поверхности/Уведомление',
   component: Notification,
   parameters: { layout: 'padded' },
   args: { tone: 'опасно', scope: 'page', title: 'VK не отвечает', children: 'Ответы стоят у всех клиентов с 14:20.', action: <Button dense>Повторить</Button> },

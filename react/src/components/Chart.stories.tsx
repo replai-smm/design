@@ -5,7 +5,7 @@ import { postsPerDay, reach } from '../stories/df-fixtures'
 const days = reach.map((_, i) => `${i + 1}.10`)
 
 const meta = {
-  title: 'Элементы/График',
+  title: 'Компоненты/Элементы/График',
   component: Chart,
   parameters: { layout: 'padded' },
   args: {

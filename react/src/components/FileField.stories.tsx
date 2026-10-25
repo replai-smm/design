@@ -8,7 +8,7 @@ const file = (name: string, size: number) => {
 }
 
 const meta = {
-  title: 'Поля/Выбор файла',
+  title: 'Компоненты/Поля/Выбор файла',
   component: FileField,
   parameters: { layout: 'padded' },
   args: { label: 'КП клиента', accept: '.pdf,image/*', maxSize: 10 * 1024 * 1024, multiple: true, defaultValue: [file('кп-зерно.pdf', 850 * 1024)], className: 'max-w-form' },

@@ -4,7 +4,7 @@ import { Loading, Skeleton } from './Skeleton'
 import { StateView } from './StateView'
 
 const meta = {
-  title: 'Поверхности/Состояние',
+  title: 'Компоненты/Поверхности/Состояние',
   component: StateView,
   parameters: { layout: 'padded' },
   args: { kind: 'первый запуск', title: 'Групп пока нет', description: 'Подключите первую группу — ответы начнут приходить сюда.' },

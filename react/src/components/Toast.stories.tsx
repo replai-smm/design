@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Toaster } from './Toast'
 
 const meta = {
-  title: 'Слои/Всплывашка',
+  title: 'Компоненты/Слои/Всплывашка',
   component: Toaster,
   parameters: { layout: 'fullscreen' },
   args: {

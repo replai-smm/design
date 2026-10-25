@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Checkbox, CheckboxGroup } from './Checkbox'
 
 const meta = {
-  title: 'Поля/Галочка',
+  title: 'Компоненты/Поля/Галочка',
   component: CheckboxGroup,
   parameters: { layout: 'padded' },
   args: { legend: 'Разделы сотрудника', children: null },

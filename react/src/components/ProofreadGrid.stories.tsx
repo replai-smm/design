@@ -16,7 +16,7 @@ const legend = (
 )
 
 const meta = {
-  title: 'Коллекции/Сетка сверки',
+  title: 'Компоненты/Коллекции/Сетка сверки',
   component: ProofreadGrid<Community>,
   parameters: { layout: 'padded' },
   args: {

@@ -1,29 +1,25 @@
 #!/usr/bin/env node
-// Выпуск ДС — одно место (orbit.yaml: deploy · watch · version · rollback). Прод ДС — теги vX.Y.Z на GitHub: тег — коммит-потомок
-// коммита main с собранным dist/ (продукт ставит пакет по архиву тега без сборки и без devDependencies; в main dist/ нет).
-// Команды идут из корня клона orbit; ORBIT_SHA — выпускаемый коммит main, ORBIT_DEPLOY_KEY — путь к ключу выкатки (деплой-ключ
-// репо: он умеет только создать тег — правила репо на GitHub, orbit infra/github). Теги читаются с origin клона.
-//   node release.mjs deploy    выпуск ORBIT_SHA: dist/ собран из его дерева, коммит поверх него, тег → GitHub ключом; ORBIT_SHA уже
-//                              выпущен последним тегом — ничего (повтор после перезапуска не выпускает второй раз)
-//   node release.mjs watch     последний тег на origin — выпуск ORBIT_SHA, и архив тега ставится как пакет: каждый путь exports есть
-//   node release.mjs version   коммит main последнего выпуска (родитель последнего тега)
-//   node release.mjs rollback  последний выпуск — ORBIT_SHA: заново выпустить origin/main следующим номером; нет — ничего
+// Выпуск ДС — одно место, как у пакета karta: `npm run release` из клона, под своей учёткой GitHub (gh или ssh), без ключа
+// выкатки. Прод ДС — теги vX.Y.Z на GitHub: тег — коммит-потомок коммита main с собранным dist/ (продукт ставит пакет по
+// архиву тега без сборки и без devDependencies; в main dist/ нет).
+//   node release.mjs deploy [sha]    выпуск sha (по умолчанию origin/main): dist/ собран из его дерева, коммит поверх него,
+//                                    тег → origin обычным git push; sha уже выпущен последним тегом — ничего
+//   node release.mjs watch [sha]     последний тег на origin — выпуск sha, и архив тега ставится как пакет: каждый путь exports есть
+//   node release.mjs version         коммит main последнего выпуска (родитель последнего тега)
+//   node release.mjs rollback [sha]  последний выпуск — sha: заново выпустить origin/main следующим номером; нет — ничего
 // Флаги — для тестов: --push <url> (куда тег), --archive <шаблон с {tag}> (откуда архив тега).
 //
-// Номер — одно правило (next): patch после последнего тега; minor или major Изменение ставит само — version в package.json выше
-// последнего тега (X.Y.0, X.0.0), тогда номер — он. Номер выводится из кода и тегов, его проверяет тест; поле Изменения deploy не видит.
-// Тег не двигается и не удаляется (правило репо): выпуск не отзывается. Откат — новый выпуск содержимого main следующим номером, номер
-// отката сгорает; так последний тег всегда выпуск main (main = прод), а номера только растут.
+// Номер — одно правило (next): patch после последнего тега; minor или major изменение ставит само — version в package.json выше
+// последнего тега (X.Y.0, X.0.0), тогда номер — он. Номер выводится из кода и тегов, его проверяет тест.
+// Тег не двигается и не удаляется (правило репо «теги»): выпуск не отзывается. Откат — новый выпуск содержимого main следующим
+// номером, номер отката сгорает; так последний тег всегда выпуск main (main = прод), а номера только растут.
 import { execFileSync } from 'node:child_process'
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, symlinkSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join, relative } from 'node:path'
 import { pathToFileURL } from 'node:url'
 
-const PUSH = 'git@github.com:replai-smm/design.git'
 const ARCHIVE = 'https://codeload.github.com/replai-smm/design/tar.gz/refs/tags/{tag}'
-// ключ хоста GitHub (api.github.com/meta, ssh_keys): ssh выкатки не верит первому встречному
-const GITHUB_HOST = 'github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl\n'
 const SEMVER = /^(\d+)\.(\d+)\.(\d+)$/
 
 /** parse — X.Y.Z → [X, Y, Z]; не номер — ошибка. */
@@ -45,7 +41,6 @@ export function next(version, released) {
 }
 
 const git = (args, opts = {}) => execFileSync('git', args, { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'], ...opts }).trim()
-const need = (name) => process.env[name] || fail(`нет ${name}: команду зовёт orbit`)
 const short = (sha) => sha.slice(0, 7)
 function fail(why) { console.error(`release: ${why}`); process.exit(1) }
 
@@ -77,25 +72,19 @@ function cut(sha, v) {
     lock.version = v
     lock.packages[''].version = v
     add('package-lock.json', JSON.stringify(lock, null, 2) + '\n')
-    const who = { GIT_AUTHOR_NAME: 'orbit', GIT_AUTHOR_EMAIL: 'orbit@replai-smm.invalid', GIT_COMMITTER_NAME: 'orbit', GIT_COMMITTER_EMAIL: 'orbit@replai-smm.invalid' }
-    return git(['commit-tree', git(['write-tree'], { env }), '-p', sha, '-m', `Выпуск v${v}: dist/ собран из main ${short(sha)}`], { env: { ...process.env, ...who } })
+    return git(['commit-tree', git(['write-tree'], { env }), '-p', sha, '-m', `Выпуск v${v}: dist/ собран из main ${short(sha)}`])
   } finally { rmSync(tmp, { recursive: true, force: true }) }
 }
 
-/** ship — коммит выпуска тегом v<v> на GitHub ключом выкатки; тег не перезаписывается (push без силы). */
-function ship(commit, v, key, url) {
-  const tmp = mkdtempSync(join(tmpdir(), 'ds-ship-')), hosts = join(tmp, 'known_hosts')
-  try {
-    writeFileSync(hosts, GITHUB_HOST)
-    const ssh = `ssh -i '${key}' -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile='${hosts}'`
-    git(['push', '-q', url, `${commit}:refs/tags/v${v}`], { env: { ...process.env, GIT_SSH_COMMAND: ssh }, stdio: ['ignore', 'pipe', 'inherit'] })
-  } finally { rmSync(tmp, { recursive: true, force: true }) }
+/** ship — коммит выпуска тегом v<v> на origin обычным git push (учётка того, кто выпускает); тег не перезаписывается. */
+function ship(commit, v, url) {
+  git(['push', '-q', url, `${commit}:refs/tags/v${v}`], { stdio: ['ignore', 'pipe', 'inherit'] })
 }
 
 /** release — выпуск коммита main `sha` следующим номером → номер. */
-function release(sha, all, key, url) {
+function release(sha, all, url) {
   const v = next(JSON.parse(git(['show', `${sha}:package.json`])).version, all.map((r) => r.v))
-  ship(cut(sha, v), v, key, url)
+  ship(cut(sha, v), v, url)
   return v
 }
 
@@ -114,27 +103,27 @@ function installs(v, archive) {
 
 function main([verb, ...argv]) {
   const flag = (name, def) => { const i = argv.indexOf(name); return i >= 0 ? argv[i + 1] : def }
-  const url = flag('--push', PUSH), archive = flag('--archive', ARCHIVE)
+  const url = flag('--push', 'origin'), archive = flag('--archive', ARCHIVE)
+  const arg = argv.find((a, i) => !a.startsWith('--') && !argv[i - 1]?.startsWith('--'))
   if (verb === 'version') {
     const last = releases().at(-1)
     return last ? console.log(last.parent) : fail('выпусков нет')
   }
-  if (!['deploy', 'watch', 'rollback'].includes(verb)) fail('release.mjs deploy | watch | version | rollback')
-  const sha = need('ORBIT_SHA'), all = releases(), last = all.at(-1)
+  if (!['deploy', 'watch', 'rollback'].includes(verb)) fail('release.mjs deploy | watch | version | rollback [sha]')
+  git(['fetch', '-q', 'origin', 'main'])
+  const main = git(['rev-parse', 'origin/main'])
+  const sha = arg ? git(['rev-parse', `${arg}^{commit}`]) : main, all = releases(), last = all.at(-1)
   if (verb === 'watch') {
     if (last?.parent !== sha) fail(`последний тег ${last ? 'v' + last.v : '—'} — не выпуск ${short(sha)}`)
     const bad = installs(last.v, archive)
     return bad ? fail(bad) : console.log(`v${last.v} = main ${short(sha)}: тег на origin, архив ставится`)
   }
-  const key = need('ORBIT_DEPLOY_KEY')
   if (verb === 'deploy') {
     if (last?.parent === sha) return console.log(`v${last.v} — уже выпуск ${short(sha)}`)
-    return console.log(`v${release(sha, all, key, url)} = main ${short(sha)}`)
+    return console.log(`v${release(sha, all, url)} = main ${short(sha)}`)
   }
   if (last?.parent !== sha) return console.log(`откатывать нечего: последний выпуск ${last ? 'v' + last.v + ' = main ' + short(last.parent) : '—'}, не ${short(sha)}`)
-  git(['fetch', '-q', 'origin', 'main'])
-  const main = git(['rev-parse', 'origin/main'])
-  console.log(`откат: v${release(main, all, key, url)} = main ${short(main)}; v${last.v} не отозван, его номер сгорел`)
+  console.log(`откат: v${release(main, all, url)} = main ${short(main)}; v${last.v} не отозван, его номер сгорел`)
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) main(process.argv.slice(2))

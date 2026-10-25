@@ -4,7 +4,7 @@
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { ActionArea, Button, Chart, chartHasData, CountBadge, countText, DataTable, Delta, deltaText, Dialog, Icon, InlineLoading, Meter, meterTone, niceMax, Notification, Page, PageHeader, StatusBadge, Steps, stepProgress, tickIndexes, ticksOf } from '../index'
+import { Accordion, ActionArea, BottomBar, Button, Chart, chartHasData, CountBadge, countText, DataTable, Delta, deltaText, Dialog, Icon, InlineLoading, Meter, meterTone, niceMax, Notification, Page, PageHeader, StatusBadge, Steps, stepProgress, tickIndexes, ticksOf } from '../index'
 import { STATUS_IDS, TONE, TONE_ORDER, statusOf, toneOf } from '../lib/vocab'
 import { groups, type GroupRow } from '../stories/fixtures'
 import statusesJson from '../../../statuses.json'
@@ -196,7 +196,7 @@ describe('ход работы — один словарь', () => {
     fireEvent.click(btns[0])
     expect(seen).toEqual([0])
     quiet()
-    expect(() => render(<Steps label="Шаги" steps={['А']} current={0} />)).toThrow(/шагов меньше двух/)
+    expect(() => render(<Steps label="Шаги" steps={['А', 'Б']} current={0} />)).toThrow(/шагов меньше трёх/)
   })
 
   it('ход в строке: идёт — role=status со словом; ошибка — слово цвета «опасно»', () => {
@@ -257,5 +257,35 @@ describe('разница и график', () => {
     expect(tickIndexes(30)).toEqual([0, 3, 6, 9, 12, 15, 18, 21, 24, 27])
     expect(chartHasData('line', [{ key: 'a', label: 'a', data: [1, null] }])).toBe(false)
     expect(chartHasData('bar', [{ key: 'a', label: 'a', data: [1] }])).toBe(true)
+  })
+})
+
+describe('раскладка и раскрытие (1.3)', () => {
+  it('шапка: строка «о чём экран» под заголовком', () => {
+    render(<PageHeader title="Условия начисления" description="За что участник получает баллы." />)
+    expect(screen.getByRole('heading', { level: 1, name: 'Условия начисления' }).nextSibling?.textContent).toBe('За что участник получает баллы.')
+  })
+  it('липкая полоса низа — одна на страницу: вторая — ошибка в разработке', () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    expect(() =>
+      render(
+        <Page header={<PageHeader title="x" />}>
+          <BottomBar />
+          <BottomBar />
+        </Page>,
+      ),
+    ).toThrow(/вторая липкая полоса/)
+    expect(() => render(<Page header={<PageHeader title="y" />}><BottomBar /></Page>)).not.toThrow()
+  })
+  it('раскрытие: кнопка во всю строку, aria-expanded и aria-controls, закрытое — inert', () => {
+    render(<Accordion title="Как это работает">Баллы приходят за минуту.</Accordion>)
+    const btn = screen.getByRole('button', { name: 'Как это работает' })
+    const panel = document.getElementById(btn.getAttribute('aria-controls')!)!
+    expect(btn.getAttribute('aria-expanded')).toBe('false')
+    expect(panel.hasAttribute('inert')).toBe(true)
+    fireEvent.click(btn)
+    expect(btn.getAttribute('aria-expanded')).toBe('true')
+    expect(panel.hasAttribute('inert')).toBe(false)
+    expect(panel.textContent).toBe('Баллы приходят за минуту.')
   })
 })

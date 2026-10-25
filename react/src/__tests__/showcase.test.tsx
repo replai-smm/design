@@ -69,12 +69,11 @@ const SECTIONS: Array<{ title: string; note: string; items: Array<[string, strin
     ],
   },
   {
-    title: 'Паттерны',
-    note: 'Вкладки и фильтры — один ряд сегментов; страница списка собрана из уровней ниже.',
+    title: 'Составные',
+    note: 'Вкладки и фильтры — один ряд сегментов. Правила сборки страниц — полка «Паттерны» в Storybook и patterns/*.md.',
     items: [
       ['Tabs.stories.tsx', 'Обычное'],
       ['FilterBar.stories.tsx', 'Обычное'],
-      ['ListPage.stories.tsx', 'Обычное'],
     ],
   },
 ]

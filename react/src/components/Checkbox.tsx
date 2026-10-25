@@ -6,8 +6,9 @@
 import { forwardRef, type ReactNode } from 'react'
 import { Checkbox as RCheckbox } from 'radix-ui'
 import { FOCUS } from '../lib/anatomy'
-import { cx } from '../lib/cx'
+import { cx, rule } from '../lib/cx'
 import { Icon } from './Icon'
+import { Toggletip } from './Toggletip'
 import { FieldNote, fieldAria, useFieldIds } from './TextField'
 
 export type CheckedState = boolean | 'indeterminate'
@@ -20,6 +21,8 @@ export interface CheckboxProps {
   onCheckedChange?: (checked: CheckedState) => void
   disabled?: boolean
   helperText?: ReactNode
+  /** Справка по «i» после подписи (`Toggletip`); подпись — строкой. */
+  help?: ReactNode
   /** Ошибка этой галочки («нужно согласие»). У группы — на `CheckboxGroup`. */
   error?: ReactNode
   name?: string
@@ -30,10 +33,11 @@ export interface CheckboxProps {
 }
 
 export const Checkbox = forwardRef<HTMLButtonElement, CheckboxProps>(function Checkbox(
-  { label, hideLabel, checked, defaultChecked, onCheckedChange, disabled, helperText, error, name, value, required, id, className },
+  { label, hideLabel, checked, defaultChecked, onCheckedChange, disabled, helperText, help, error, name, value, required, id, className },
   ref,
 ) {
   const ids = useFieldIds(id)
+  rule(!help || typeof label === 'string', 'справка «i» у галочки с подписью не строкой: читалка не узнает, о чём справка')
   return (
     <div data-slot="checkbox" data-invalid={error ? 'true' : undefined} className={cx('flex min-w-0 flex-col', className)}>
       <div className="flex min-h-touch items-center gap-items md:min-h-dense">
@@ -64,6 +68,7 @@ export const Checkbox = forwardRef<HTMLButtonElement, CheckboxProps>(function Ch
         <label htmlFor={ids.id} id={ids.labelId} className={cx('min-w-0 cursor-pointer text-body', disabled ? 'cursor-not-allowed text-fg-disabled' : 'text-fg', hideLabel && 'sr-only')}>
           {label}
         </label>
+        {help && <Toggletip label={String(label)}>{help}</Toggletip>}
       </div>
       <FieldNote ids={ids} helperText={helperText} error={error} disabled={disabled} />
     </div>

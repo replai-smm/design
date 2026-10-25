@@ -1,6 +1,6 @@
 {
   "name": "@replai-smm/design",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "private": true,
   "type": "module",
   "description": "Дизайн-система replai-smm: роли и шкалы, ДС-React по уровням, правила машиной. Продукты ставят по тегу: github:replai-smm/design#vX.Y.Z (в теге лежит собранный dist/).",
@@ -20,6 +20,7 @@
     "./scale.json": "./scale.json",
     "./statuses.json": "./statuses.json",
     "./matrix.yaml": "./matrix.yaml",
+    "./patterns/*": "./patterns/*",
     "./fonts/*": "./fonts/*",
     "./lint": "./lint/principles.mjs",
     "./lint/cli": "./lint/cli.mjs",
@@ -37,6 +38,7 @@
     "!react/src/**/__tests__",
     "!react/src/**/*.stories.tsx",
     "!react/src/stories",
+    "!react/src/patterns",
     "!react/src/showcase.css",
     "!react/src/storybook.css",
     "tokens.json",
@@ -46,6 +48,7 @@
     "tokens.schema.json",
     "matrix.schema.json",
     "matrix.yaml",
+    "patterns",
     "NOTICE.md",
     "README.md"
   ],
@@ -59,7 +62,8 @@
     "lint": "npm run lint -w react",
     "storybook": "npm run storybook -w react",
     "storybook:build": "npm run storybook:build -w react",
-    "check": "node build.mjs && npm run typecheck && npm run lint && npm test && npm run test:visual"
+    "check": "node build.mjs && npm run typecheck && npm run lint && npm test && npm run test:visual",
+    "release": "node release.mjs deploy && node release.mjs watch"
   },
   "peerDependencies": {
     "radix-ui": "^1.4.3",

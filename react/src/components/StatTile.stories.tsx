@@ -3,7 +3,7 @@ import { Inline } from './layout'
 import { StatTile } from './StatTile'
 
 const meta = {
-  title: 'Поверхности/Плитка с цифрой',
+  title: 'Компоненты/Поверхности/Плитка с цифрой',
   component: StatTile,
   parameters: { layout: 'padded' },
   args: { value: 17, label: 'сообществ', detail: '· не ведём 2' },

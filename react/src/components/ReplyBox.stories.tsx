@@ -5,7 +5,7 @@ import { ReplyBox } from './ReplyBox'
 import { commands } from '../stories/agent-fixtures'
 
 const meta = {
-  title: 'Паттерны/Поле ответа',
+  title: 'Компоненты/Составные/Поле ответа',
   component: ReplyBox,
   parameters: { layout: 'padded' },
   args: {

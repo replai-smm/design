@@ -3,8 +3,8 @@
  * Отступ — роль шкалы (`gap="items"`), сетка — одна колонка на телефоне, больше — с 768 px.
  * `SurfaceProvider` — область, где одна главная кнопка (П5): страница, окно, карточка решения, своя область продукта.
  */
-import { createContext, useContext, useRef, type ElementType, type ReactNode } from 'react'
-import { cx } from '../lib/cx'
+import { createContext, useContext, useId, useLayoutEffect, useRef, type ElementType, type ReactNode } from 'react'
+import { cx, rule } from '../lib/cx'
 
 /** Роль отступа (scale.json → space). */
 export type Space = 'tight' | 'items' | 'compact' | 'blocks' | 'groups' | 'sections'
@@ -75,13 +75,14 @@ export function Grid({ as: Tag = 'div', gap = 'blocks', columns = 3, className, 
 interface Surface {
   name: string
   primaries: Set<string>
+  bars: Set<string>
 }
 const SurfaceContext = createContext<Surface | null>(null)
 export const useSurface = () => useContext(SurfaceContext)
 
 /** Область, где одна главная кнопка: вторая `ActionArea primary` внутри — ошибка в разработке. */
 export function SurfaceProvider({ name, children }: { name: string; children: ReactNode }) {
-  const ref = useRef<Surface>({ name, primaries: new Set() })
+  const ref = useRef<Surface>({ name, primaries: new Set(), bars: new Set() })
   return <SurfaceContext.Provider value={ref.current}>{children}</SurfaceContext.Provider>
 }
 
@@ -110,19 +111,64 @@ export function Page({ header, notice, children, className }: PageProps) {
 }
 
 export interface PageHeaderProps {
+  /** О чём экран, а не «Админка». */
   title: ReactNode
+  /** Одна строка: на какой вопрос отвечает экран. */
+  description?: ReactNode
   /** Тихие действия шапки; главная кнопка — не здесь. */
   tools?: ReactNode
 }
 
-export function PageHeader({ title, tools }: PageHeaderProps) {
+export function PageHeader({ title, description, tools }: PageHeaderProps) {
+  const h1 = (
+    <h1 data-part="title" className="m-0 min-w-0 text-page text-fg">
+      {title}
+    </h1>
+  )
   return (
     <header data-slot="page-header" className="flex min-w-0 items-start justify-between gap-blocks">
-      <h1 data-part="title" className="m-0 min-w-0 text-page text-fg">
-        {title}
-      </h1>
+      {description ? (
+        <div className="flex min-w-0 flex-col gap-tight">
+          {h1}
+          <p className="m-0 max-w-prose text-body text-fg-muted">{description}</p>
+        </div>
+      ) : (
+        h1
+      )}
       {tools && <div className="flex shrink-0 items-center gap-items">{tools}</div>}
     </header>
+  )
+}
+
+export interface BottomBarProps {
+  children?: ReactNode
+  className?: string
+}
+
+/**
+ * Липкая полоса низа страницы — последним блоком `Page`: действия, которые нужны с любого места длинной страницы
+ * (сохранить правки, «Назад — Далее» мастера). Одна на страницу: вторая — ошибка в разработке. Кнопки — `ActionArea`:
+ * на ноутбуке группой слева (Carbon: кнопки формы на странице — слева), на телефоне одним рядом поровну. Над нижней
+ * панелью продукта: её высоту продукт кладёт в `--ds-bottom-inset` на `:root`; полоску телефона полоса учитывает сама.
+ */
+export function BottomBar({ children, className }: BottomBarProps) {
+  const surface = useSurface()
+  const id = useId()
+  useLayoutEffect(() => {
+    if (!surface) return
+    surface.bars.add(id)
+    rule(surface.bars.size <= 1, `на поверхности «${surface.name}» вторая липкая полоса: одна на страницу`)
+    return () => {
+      surface.bars.delete(id)
+    }
+  }, [surface, id])
+  return (
+    <div
+      data-slot="bottom-bar"
+      className={cx('ds-bottom-bar z-10 flex min-w-0 flex-col gap-compact border-t border-line bg-surface px-blocks pt-compact shadow-raised md:flex-row md:items-center md:gap-blocks', className)}
+    >
+      {children}
+    </div>
   )
 }
 

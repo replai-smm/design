@@ -11,7 +11,7 @@ import { FOCUS } from '../lib/anatomy'
 import { useControllable } from '../lib/controllable'
 import { cx } from '../lib/cx'
 import { Icon } from './Icon'
-import { FieldShell, fieldAria, fieldBox, useFieldIds, type FieldBaseProps } from './TextField'
+import { FieldShell, fieldAria, fieldBox, useFieldIds, type FieldBaseProps, type FieldRowProps } from './TextField'
 
 export interface ComboboxOption {
   value: string
@@ -21,7 +21,7 @@ export interface ComboboxOption {
   disabled?: boolean
 }
 
-export interface ComboboxProps extends FieldBaseProps {
+export interface ComboboxProps extends FieldBaseProps, FieldRowProps {
   options: ComboboxOption[]
   value?: string | null
   defaultValue?: string | null
@@ -43,7 +43,7 @@ export interface ComboboxProps extends FieldBaseProps {
 const norm = (s: string) => s.toLocaleLowerCase('ru').replace(/ё/g, 'е')
 const matches = (o: ComboboxOption, q: string) => norm(o.label).includes(norm(q)) || (o.description ? norm(o.description).includes(norm(q)) : false)
 
-export function Combobox({ label, hideLabel, helperText, error, dense, className, options, value: valueProp, defaultValue = null, onChange, placeholder, disabled, loading, empty = 'Ничего не найдено', limit, clearable = true, name, id }: ComboboxProps) {
+export function Combobox({ label, hideLabel, helperText, error, help, inline, unit, dense, className, options, value: valueProp, defaultValue = null, onChange, placeholder, disabled, loading, empty = 'Ничего не найдено', limit, clearable = true, name, id }: ComboboxProps) {
   const ids = useFieldIds(id)
   const listId = `${ids.id}-list`
   const anchor = useRef<HTMLDivElement>(null)
@@ -124,7 +124,7 @@ export function Combobox({ label, hideLabel, helperText, error, dense, className
   )
 
   return (
-    <FieldShell slot="combobox" ids={ids} label={label} hideLabel={hideLabel} helperText={helperText} error={error} disabled={disabled} className={className}>
+    <FieldShell slot="combobox" ids={ids} label={label} hideLabel={hideLabel} helperText={helperText} error={error} disabled={disabled} className={className} help={help} inline={inline} unit={unit}>
       <Popover.Root open={listOpen} onOpenChange={(v) => (v ? setOpen(true) : close())}>
         <Popover.Anchor asChild>
           <div ref={anchor} className={cx(fieldBox({ invalid: Boolean(error), disabled, within: true, dense }), 'flex items-stretch overflow-hidden')}>

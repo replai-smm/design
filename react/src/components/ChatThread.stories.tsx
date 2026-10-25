@@ -10,7 +10,7 @@ import { DecisionCard } from './DecisionCard'
 import { Prose, ProseHtml } from './Prose'
 
 const meta = {
-  title: 'Паттерны/Переписка',
+  title: 'Компоненты/Составные/Переписка',
   component: ChatThread,
   parameters: { layout: 'padded' },
   args: { label: 'Переписка с Анной Петровой', messages: chat },

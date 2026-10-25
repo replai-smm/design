@@ -80,7 +80,7 @@ function Demo({ picked = false, phone = 'stack' as 'stack' | 'sheets' }: { picke
 }
 
 const meta = {
-  title: 'Паттерны/Три колонки',
+  title: 'Компоненты/Составные/Три колонки',
   component: Demo,
   parameters: { layout: 'fullscreen' },
 } satisfies Meta<typeof Demo>

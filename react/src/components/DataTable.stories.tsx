@@ -19,7 +19,7 @@ const columns: Column<GroupRow>[] = [
 ]
 
 const meta = {
-  title: 'Коллекции/Таблица',
+  title: 'Компоненты/Коллекции/Таблица',
   component: DataTable<GroupRow>,
   parameters: { layout: 'padded' },
   args: {

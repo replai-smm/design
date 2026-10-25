@@ -13,7 +13,7 @@ const row = (r: GroupRow) => (
 )
 
 const meta = {
-  title: 'Коллекции/Список',
+  title: 'Компоненты/Коллекции/Список',
   component: List<GroupRow>,
   parameters: { layout: 'padded' },
   args: { label: 'Группы', rows: groups, renderRow: row, getKey: (r: GroupRow) => r.id, getStatus: (r: GroupRow) => r.status, onSelect: () => {}, className: 'max-w-wide' },

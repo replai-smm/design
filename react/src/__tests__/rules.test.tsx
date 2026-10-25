@@ -32,6 +32,8 @@ const PROMISED: Record<string, string[]> = {
   'Meter.stories.tsx': ['обычное', 'много'],
   'Steps.stories.tsx': ['обычное', 'ошибка', 'всё сделано'],
   'Tooltip.stories.tsx': ['обычное'],
+  'Toggletip.stories.tsx': ['обычное'],
+  'Accordion.stories.tsx': ['обычное', 'много'],
   'Delta.stories.tsx': ['обычное'],
   'Skeleton.stories.tsx': ['загрузка'],
   'Prose.stories.tsx': ['обычное'],
@@ -65,7 +67,19 @@ const PROMISED: Record<string, string[]> = {
   'ChatThread.stories.tsx': ['обычное', 'загрузка', 'ошибка', 'первый запуск', 'много'],
   'ReplyBox.stories.tsx': ['обычное', 'загрузка', 'ошибка', 'нет доступа'],
   'AgentStep.stories.tsx': ['обычное', 'ошибка', 'много'],
-  'ListPage.stories.tsx': ['обычное', 'загрузка', 'ошибка', 'много'],
+  'patterns/Forms.stories.tsx': ['обычное', 'ошибка'],
+  'patterns/EmptyStates.stories.tsx': ['обычное'],
+  'patterns/Loading.stories.tsx': ['обычное'],
+  'patterns/Notifications.stories.tsx': ['обычное'],
+  'patterns/Dialogs.stories.tsx': ['обычное'],
+  'patterns/CommonActions.stories.tsx': ['обычное'],
+  'patterns/MultiStep.stories.tsx': ['обычное', 'ошибка'],
+  'patterns/Navigation.stories.tsx': ['обычное', 'много'],
+  'patterns/Filtering.stories.tsx': ['обычное', 'загрузка', 'ошибка', 'много'],
+  'patterns/StatusIndicators.stories.tsx': ['обычное'],
+  'patterns/Disclosures.stories.tsx': ['обычное'],
+  'patterns/ReadOnly.stories.tsx': ['обычное'],
+  'patterns/Login.stories.tsx': ['обычное', 'ошибка'],
 }
 
 describe('истории на каждое состояние', () => {
@@ -138,7 +152,8 @@ describe('движение: 110 мс и 0,6 с, без прыжка', () => {
     for (const k of keyframes) expect(k.replace(/\b(?:from|to|transform|opacity)\b|[{}:;\s\d%().-]|translate[XY]|rotate|deg|var|--[\w-]+/g, '')).toBe('')
   })
 
-  it('свёрнутое не ловит фокус: у раскрываемого — inert, пока закрыто', () => {
-    expect(tsx.match(/className="ds-expand"[^>]*inert=\{!/g)?.length).toBeGreaterThanOrEqual(3)
+  it('свёрнутое не ловит фокус: у раскрываемого — inert, пока закрыто (механика одна — lib/disclosure.tsx)', () => {
+    expect(read('src/lib/disclosure.tsx')).toMatch(/className="ds-expand" data-open=\{open\} inert=\{!open\}/)
+    expect(tsx).not.toMatch(/\bds-expand\b/)
   })
 })

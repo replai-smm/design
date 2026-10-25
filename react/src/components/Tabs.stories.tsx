@@ -4,7 +4,7 @@ import { Tabs } from './Tabs'
 const panel = (t: string) => <p className="m-0 text-body text-fg-muted">{t}</p>
 
 const meta = {
-  title: 'Паттерны/Вкладки',
+  title: 'Компоненты/Составные/Вкладки',
   component: Tabs,
   parameters: { layout: 'padded' },
   args: {

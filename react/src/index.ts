@@ -1,7 +1,7 @@
 // ДС-React: компоненты по уровням (registry.json). Импорт: `@replai-smm/design`.
 
 // Раскладка
-export { Stack, Inline, Grid, Page, PageHeader, Section, SurfaceProvider, type Space, type StackProps, type InlineProps, type GridProps, type PageProps, type PageHeaderProps, type SectionProps } from './components/layout'
+export { Stack, Inline, Grid, Page, PageHeader, Section, SurfaceProvider, type Space, type StackProps, type InlineProps, type GridProps, type PageProps, type PageHeaderProps, type SectionProps, BottomBar, type BottomBarProps } from './components/layout'
 
 // Элементы
 export { Icon, type IconName } from './components/Icon'
@@ -13,13 +13,15 @@ export { InlineLoading, type InlineLoadingProps } from './components/InlineLoadi
 export { Meter, meterTone, type MeterProps } from './components/Meter'
 export { Steps, stepProgress, type StepsProps } from './components/Steps'
 export { Tooltip, type TooltipProps } from './components/Tooltip'
+export { Toggletip, type ToggletipProps } from './components/Toggletip'
+export { Accordion, type AccordionProps } from './components/Accordion'
 export { Delta, deltaText, type DeltaProps, type DeltaUnit } from './components/Delta'
 export { Skeleton, Loading } from './components/Skeleton'
 export { Prose, ProseHtml, type ProseProps } from './components/Prose'
 export { Chart, chartHasData, niceMax, ticksOf, tickIndexes, SERIES, type ChartProps, type ChartSeries, type SeriesLine } from './components/Chart'
 
 // Поля
-export { TextField, TextArea, type TextFieldProps, type TextAreaProps, type FieldBaseProps } from './components/TextField'
+export { TextField, TextArea, type TextFieldProps, type TextAreaProps, type FieldBaseProps, type FieldRowProps } from './components/TextField'
 export { Select, type SelectProps, type SelectOption } from './components/Select'
 export { NumberField, type NumberFieldProps } from './components/NumberField'
 export { Checkbox, CheckboxGroup, type CheckboxProps, type CheckboxGroupProps, type CheckedState } from './components/Checkbox'
@@ -48,7 +50,7 @@ export { Dialog, ConfirmProvider, useConfirm, type DialogProps, type DialogSize,
 export { Toaster, useToast, type ToasterProps } from './components/Toast'
 export { CommandMenu, matchCommands, type CommandMenuProps, type CommandMenuHandle, type CommandItem } from './components/CommandMenu'
 
-// Паттерны
+// Составные
 export { Tabs, type TabItem, type TabsProps } from './components/Tabs'
 export { FilterBar, useUrlFilters, type FilterDef, type FilterOption, type FilterValue, type FilterBarProps } from './components/FilterBar'
 export { ThreeColumn, type ThreeColumnProps, type ColumnIndex } from './components/ThreeColumn'

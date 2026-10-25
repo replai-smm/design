@@ -6,7 +6,7 @@ import { Notification } from './Notification'
 import { TextField } from './TextField'
 
 const meta = {
-  title: 'Слои/Окно',
+  title: 'Компоненты/Слои/Окно',
   component: Dialog,
   parameters: { layout: 'fullscreen' },
   args: {

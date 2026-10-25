@@ -8,7 +8,7 @@ function Demo({ initial }: { initial: string }) {
 }
 
 const meta = {
-  title: 'Поля/Поиск',
+  title: 'Компоненты/Поля/Поиск',
   component: Demo,
   parameters: { layout: 'padded' },
   args: { initial: '' },

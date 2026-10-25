@@ -4,7 +4,7 @@ import { Card } from './Card'
 import { Grid } from './layout'
 
 const meta = {
-  title: 'Поверхности/Карточка',
+  title: 'Компоненты/Поверхности/Карточка',
   component: Card,
   parameters: { layout: 'padded' },
   args: {

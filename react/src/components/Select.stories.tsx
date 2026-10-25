@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Select } from './Select'
 
 const meta = {
-  title: 'Поля/Выбор',
+  title: 'Компоненты/Поля/Выбор',
   component: Select,
   parameters: { layout: 'padded' },
   args: {

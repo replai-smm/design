@@ -4,7 +4,7 @@ import { CodeBlock } from './CodeBlock'
 import { longCode, shellOutput, testRun } from '../stories/agent-fixtures'
 
 const meta = {
-  title: 'Паттерны/Шаг агента',
+  title: 'Компоненты/Составные/Шаг агента',
   component: AgentStep,
   parameters: { layout: 'padded' },
   args: { tool: 'Bash', target: 'npm test', progress: 'done', summary: 'код 0 · 3,2 с', children: <CodeBlock code={testRun} label="вывод" /> },

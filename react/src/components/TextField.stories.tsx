@@ -3,7 +3,7 @@ import { Stack } from './layout'
 import { TextArea, TextField } from './TextField'
 
 const meta = {
-  title: 'Поля/Поле ввода',
+  title: 'Компоненты/Поля/Поле ввода',
   component: TextField,
   parameters: { layout: 'padded' },
   args: { label: 'Ссылка на сообщество ВК', placeholder: 'https://vk.com/…', helperText: 'Адрес из строки браузера' },

@@ -77,6 +77,29 @@
   }
 }
 
+/* липкая полоса низа (BottomBar): над нижней панелью продукта (её высота — --ds-bottom-inset на :root); полоска телефона —
+   запасом снизу, только если панели нет или она ниже полоски */
+.ds-bottom-bar {
+  position: sticky;
+  bottom: var(--ds-bottom-inset, 0px);
+  padding-bottom: calc(var(--ds-space-compact) + max(0px, env(safe-area-inset-bottom) - var(--ds-bottom-inset, 0px)));
+}
+/* кнопки полосы: главная правее второстепенной; на ноутбуке группа слева (Carbon: кнопки формы на странице — слева),
+   на телефоне одним рядом поровну — столбец кнопок съел бы четверть экрана */
+.ds-bottom-bar [data-slot='action-area'] {
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+}
+@media (max-width: 47.99rem) {
+  .ds-bottom-bar [data-slot='action-area'] > * {
+    flex: 1 1 0;
+  }
+}
+/* всплывашки — над нижней панелью продукта, не поверх неё */
+.ds-toasts {
+  bottom: var(--ds-bottom-inset, 0px);
+}
+
 /* выезды: шторка снизу, шторка слева, окно по центру — проявляется с подъёмом */
 @keyframes ds-in-up {
   from {

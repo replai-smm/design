@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Loading, Skeleton } from './Skeleton'
 
 const meta = {
-  title: 'Элементы/Скелет',
+  title: 'Компоненты/Элементы/Скелет',
   component: Loading,
   parameters: { layout: 'padded' },
   args: { label: 'Сводка: загрузка', children: null },

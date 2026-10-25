@@ -2,9 +2,10 @@
  * Карточка: заголовок, статус меткой, до трёх фактов и одно тихое действие на лице; «подробнее» раскрывается за 0,6 с,
  * соседи едут, а не прыгают. Внутри «подробнее» — такие же карточки, не глубже двух уровней (П7).
  */
-import { createContext, useContext, useId, useState, type ReactNode } from 'react'
+import { createContext, useContext, useId, type ReactNode } from 'react'
 import { FOCUS } from '../lib/anatomy'
 import { cx, rule } from '../lib/cx'
+import { Expand, chevron, useDisclosure } from '../lib/disclosure'
 import type { StatusId } from '../lib/vocab'
 import { Icon } from './Icon'
 import { StatusBadge } from './StatusBadge'
@@ -29,7 +30,7 @@ export function Card({ title, status, facts = [], action, more, className }: Car
   const depth = useContext(DepthContext)
   rule(facts.length <= 3, `на лице карточки ${facts.length} фактов — не больше 3 (П7), остальное — в «подробнее»`)
   rule(!(more && depth >= 2), 'раскрытие глубже 2 уровней (П7): третий уровень — отдельный экран')
-  const [open, setOpen] = useState(false)
+  const fold = useDisclosure()
   const id = useId()
   return (
     <Surface as="article" data-slot="card" data-status={status} data-depth={String(depth)} aria-labelledby={`${id}-t`} flush className={className}>
@@ -53,26 +54,22 @@ export function Card({ title, status, facts = [], action, more, className }: Car
             {more && (
               <button
                 type="button"
-                aria-expanded={open}
-                aria-controls={`${id}-m`}
-                onClick={() => setOpen(!open)}
+                {...fold.trigger}
                 className={cx('inline-flex min-h-dense cursor-pointer items-center gap-tight rounded-control px-items text-body text-accent hover:underline', FOCUS)}
               >
                 подробнее
-                <Icon name="chevron-down" className={cx('transition-transform duration-move ease-standard', open && 'rotate-180')} />
+                <Icon name="chevron-down" className={chevron(fold.open)} />
               </button>
             )}
           </div>
         )}
       </div>
       {more && (
-        <div id={`${id}-m`} className="ds-expand" data-open={open} inert={!open}>
-          <div>
-            <DepthContext.Provider value={depth + 1}>
-              <div className="flex flex-col gap-items border-t border-line p-blocks">{more}</div>
-            </DepthContext.Provider>
-          </div>
-        </div>
+        <Expand id={fold.id} open={fold.open}>
+          <DepthContext.Provider value={depth + 1}>
+            <div className="flex flex-col gap-items border-t border-line p-blocks">{more}</div>
+          </DepthContext.Provider>
+        </Expand>
       )}
     </Surface>
   )

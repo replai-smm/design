@@ -3,7 +3,7 @@ import { Grid } from './layout'
 import { Surface } from './Surface'
 
 const meta = {
-  title: 'Поверхности/Поверхность',
+  title: 'Компоненты/Поверхности/Поверхность',
   component: Surface,
   parameters: { layout: 'padded' },
 } satisfies Meta<typeof Surface>

@@ -68,7 +68,7 @@ export function fileMatches(file: File, accept?: string): boolean {
 const cap = (s: string) => s[0]!.toUpperCase() + s.slice(1)
 
 export const FileField = forwardRef<FileFieldHandle, FileFieldProps>(function FileField(
-  { label, hideLabel, helperText, error, className, accept, maxSize, multiple, value, defaultValue, onChange, showFiles = true, disabled, id, name },
+  { label, hideLabel, helperText, error, help, className, accept, maxSize, multiple, value, defaultValue, onChange, showFiles = true, disabled, id, name },
   ref,
 ) {
   const ids = useFieldIds(id)
@@ -79,7 +79,7 @@ export const FileField = forwardRef<FileFieldHandle, FileFieldProps>(function Fi
 
   const types = accept ? acceptText(accept) : null
   const limits = [types && `можно: ${types}`, maxSize && `до ${fileSizeText(maxSize)}`].filter(Boolean).join(' · ')
-  const help = helperText ?? (limits ? cap(limits) : undefined)
+  const note = helperText ?? (limits ? cap(limits) : undefined)
   const shownError = error ?? rejected
 
   const pick = (list: FileList | null) => {
@@ -104,7 +104,7 @@ export const FileField = forwardRef<FileFieldHandle, FileFieldProps>(function Fi
 
   const btnTextId = `${ids.id}-btn`
   return (
-    <FieldShell slot="file-field" ids={ids} label={label} hideLabel={hideLabel} helperText={help} error={shownError} disabled={disabled} className={className}>
+    <FieldShell slot="file-field" ids={ids} label={label} hideLabel={hideLabel} helperText={note} error={shownError} help={help} disabled={disabled} className={className}>
       <input ref={input} id={ids.id} name={name} type="file" hidden accept={accept} multiple={multiple} disabled={disabled} onChange={(e) => pick(e.target.files)} />
       <div className="flex">
         <Button
@@ -112,7 +112,7 @@ export const FileField = forwardRef<FileFieldHandle, FileFieldProps>(function Fi
           disabled={disabled}
           onClick={() => input.current?.click()}
           aria-labelledby={`${ids.labelId} ${btnTextId}`}
-          aria-describedby={fieldAria(ids, { helperText: help, error: shownError })['aria-describedby']}
+          aria-describedby={fieldAria(ids, { helperText: note, error: shownError })['aria-describedby']}
         >
           <span id={btnTextId}>{multiple ? 'Выбрать файлы' : 'Выбрать файл'}</span>
         </Button>

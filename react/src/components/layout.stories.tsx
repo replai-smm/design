@@ -4,7 +4,7 @@ import { Grid, Inline, Page, PageHeader, Section, Stack } from './layout'
 import { Surface } from './Surface'
 
 const meta = {
-  title: 'Раскладка/Страница и блоки',
+  title: 'Компоненты/Раскладка/Страница и блоки',
   component: Page,
   parameters: { layout: 'fullscreen' },
 } satisfies Meta<typeof Page>

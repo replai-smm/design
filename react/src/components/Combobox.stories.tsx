@@ -13,7 +13,7 @@ const open = async ({ canvasElement }: { canvasElement: HTMLElement }) => {
 }
 
 const meta = {
-  title: 'Поля/Выбор с поиском',
+  title: 'Компоненты/Поля/Выбор с поиском',
   component: Combobox,
   parameters: { layout: 'padded' },
   args: { label: 'Сообщество', placeholder: 'Поиск сообщества', options: communities, defaultValue: 'c2', className: 'max-w-popup' },

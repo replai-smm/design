@@ -2,7 +2,7 @@
 import { composeStories } from '@storybook/react-vite'
 
 type Mod = Record<string, any> & { default: { title: string; tags?: string[] } }
-const mods = import.meta.glob<Mod>('../components/*.stories.tsx', { eager: true })
+const mods = import.meta.glob<Mod>(['../components/*.stories.tsx', '../patterns/*.stories.tsx'], { eager: true })
 
 export type Theme = 'light' | 'dark'
 export interface Entry {
@@ -13,13 +13,15 @@ export interface Entry {
   Story: any
 }
 
-export const STORY_FILES = Object.keys(mods).map((p) => p.replace('../components/', ''))
+/** Файл историй: `Button.stories.tsx` у компонента, `patterns/Forms.stories.tsx` у паттерна. */
+const fileOf = (p: string) => p.replace('../components/', '').replace('../', '')
+export const STORY_FILES = Object.keys(mods).map(fileOf)
 
 export function stories(theme: Theme = 'light'): Entry[] {
   return Object.entries(mods).flatMap(([path, mod]) => {
     const composed = composeStories(mod as any, { initialGlobals: { theme } } as any) as Record<string, any>
     return Object.entries(composed).map(([name, Story]) => ({
-      file: path.replace('../components/', ''),
+      file: fileOf(path),
       title: mod.default.title,
       name,
       tags: [...(mod.default.tags ?? []), ...((mod as any)[name]?.tags ?? [])],

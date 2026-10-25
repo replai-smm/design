@@ -5,7 +5,7 @@ import { DecisionCard } from './DecisionCard'
 import { Notification } from './Notification'
 
 const meta = {
-  title: 'Поверхности/Карточка решения',
+  title: 'Компоненты/Поверхности/Карточка решения',
   component: DecisionCard,
   parameters: { layout: 'padded' },
   args: {

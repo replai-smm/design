@@ -177,3 +177,36 @@ describe('поиск', () => {
     expect(onChange).toHaveBeenCalledWith('')
   })
 })
+
+describe('поле настройки одной строкой и справка «i»', () => {
+  it('inline: подпись слева, справа поле с единицей и под ними ошибка — ошибка у поля, а не под подписью', () => {
+    render(<NumberField inline label="За лайк" unit="балл" defaultValue={20} max={10} />)
+    const input = screen.getByRole('spinbutton', { name: 'За лайк' })
+    const column = input.closest('[data-slot="number-field"] > div:last-child')!
+    expect(column.textContent).toContain('балл')
+    expect(column.textContent).toContain('Не больше 10')
+    expect(input.getAttribute('aria-invalid')).toBe('true')
+  })
+  it('help: кнопка «i» подписана полем, открывает справку по нажатию', () => {
+    render(<TextField label="Окно записей" help="Только последние N записей." />)
+    const tip = screen.getByRole('button', { name: 'Подробнее: Окно записей' })
+    fireEvent.click(tip)
+    expect(screen.getByRole('dialog', { name: 'Окно записей' }).textContent).toContain('Только последние N записей.')
+  })
+  it('справка у подписи не строкой — ошибка в разработке (читалка не узнает, о чём справка)', () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    expect(() => render(<TextField label={<b>Окно</b>} help="…" />)).toThrow(/подписью не строкой/)
+    expect(() => render(<Checkbox label={<b>Окно</b>} help="…" />)).toThrow(/подписью не строкой/)
+  })
+  it('справка есть у всех полей: выбор, выбор с поиском, файл, галочка', () => {
+    render(
+      <>
+        <Select label="Период" help="а" options={[{ value: 'm', label: 'Месяц' }]} />
+        <Combobox label="Клиент" help="б" options={[]} />
+        <FileField label="Файл" help="в" />
+        <Checkbox label="Показывать уровни" help="г" />
+      </>,
+    )
+    for (const n of ['Период', 'Клиент', 'Файл', 'Показывать уровни']) expect(screen.getByRole('button', { name: `Подробнее: ${n}` })).toBeTruthy()
+  })
+})

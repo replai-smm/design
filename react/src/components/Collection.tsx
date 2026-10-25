@@ -14,6 +14,7 @@ import { useId, useMemo, useState, type CSSProperties, type ReactElement, type R
 import { FOCUS } from '../lib/anatomy'
 import { useControllable } from '../lib/controllable'
 import { cx } from '../lib/cx'
+import { Expand, chevron, useDisclosure } from '../lib/disclosure'
 import { rankOf, toneOf, type DataState, type EmptyView, type ErrorView, type StatusId } from '../lib/vocab'
 import { Button, RowContext } from './Button'
 import { Icon } from './Icon'
@@ -92,18 +93,18 @@ function MoreButton({ hidden, onMore }: { hidden: number; onMore: () => void }) 
   )
 }
 
-function GroupHead({ status, count, label, toggle }: { status: StatusId; count: number; label?: string; toggle?: { open: boolean; onClick: () => void; controls: string } }) {
+function GroupHead({ status, count, label, fold }: { status: StatusId; count: number; label?: string; fold?: ReturnType<typeof useDisclosure> }) {
   const inner = (
     <>
       <StatusBadge status={status} label={label} />
       <span className="text-caption text-fg-muted">{count}</span>
     </>
   )
-  if (!toggle) return <span className="inline-flex items-center gap-items">{inner}</span>
+  if (!fold) return <span className="inline-flex items-center gap-items">{inner}</span>
   return (
-    <button type="button" aria-expanded={toggle.open} aria-controls={toggle.controls} onClick={toggle.onClick} className={cx('inline-flex min-h-dense cursor-pointer items-center gap-items rounded-control px-tight hover:bg-hover', FOCUS)}>
+    <button type="button" {...fold.trigger} className={cx('inline-flex min-h-dense cursor-pointer items-center gap-items rounded-control px-tight hover:bg-hover', FOCUS)}>
       {inner}
-      <Icon name="chevron-down" className={cx('transition-transform duration-move ease-standard', toggle.open && 'rotate-180')} />
+      <Icon name="chevron-down" className={chevron(fold.open)} />
     </button>
   )
 }
@@ -182,7 +183,7 @@ export function DataTable<T>(props: DataTableProps<T>) {
   const rows = useMemo(() => sortRows(dataRows, columns, sort), [dataRows, columns, sort])
   const groups = useGroups(rows, getStatus)
   const [limit, setLimit] = useState(pageSize)
-  const [healthyOpen, setHealthyOpen] = useState(false)
+  const healthy = useDisclosure()
   const uid = useId()
   const withAction = Boolean(rowAction)
   const cols = [...columns.map((c) => track(c.grow)), ...(withAction ? ['max-content'] : [])]
@@ -317,7 +318,7 @@ export function DataTable<T>(props: DataTableProps<T>) {
                         status={g.status}
                         count={g.rows.length}
                         label={statusLabel?.(g.status)}
-                        toggle={g.healthy ? { open: healthyOpen, onClick: () => setHealthyOpen(!healthyOpen), controls: `${uid}-ok` } : undefined}
+                        fold={g.healthy ? healthy : undefined}
                       />
                     </div>
                   </div>
@@ -327,9 +328,9 @@ export function DataTable<T>(props: DataTableProps<T>) {
                 return (
                   <div key={g.status ?? gi} role="rowgroup" className="ds-rowgroup" data-group={g.status}>
                     {head}
-                    <div id={`${uid}-ok`} className="ds-expand" data-open={healthyOpen} inert={!healthyOpen}>
-                      <div>{g.rows.map(row)}</div>
-                    </div>
+                    <Expand id={healthy.id} open={healthy.open}>
+                      {g.rows.map(row)}
+                    </Expand>
                   </div>
                 )
               if (shown[gi] === 0) return null
@@ -358,8 +359,7 @@ export function List<T>(props: ListProps<T>) {
   const { rows, renderRow, getKey, getStatus, statusLabel, state = 'ready', pageSize = 50, onSelect, selectedKey, rowAction, label, className } = props
   const groups = useGroups(rows, getStatus)
   const [limit, setLimit] = useState(pageSize)
-  const [healthyOpen, setHealthyOpen] = useState(false)
-  const uid = useId()
+  const healthy = useDisclosure()
 
   const stateView = <CollectionState state={state} error={props.error} empty={props.empty} rows={rows} />
   if (state === 'error' || (state === 'ready' && rows.length === 0)) return <div className={className}>{stateView}</div>
@@ -419,13 +419,13 @@ export function List<T>(props: ListProps<T>) {
                   status={g.status}
                   count={g.rows.length}
                   label={statusLabel?.(g.status)}
-                  toggle={g.healthy ? { open: healthyOpen, onClick: () => setHealthyOpen(!healthyOpen), controls: `${uid}-ok` } : undefined}
+                  fold={g.healthy ? healthy : undefined}
                 />
               )}
               {g.healthy ? (
-                <div id={`${uid}-ok`} className="ds-expand" data-open={healthyOpen} inert={!healthyOpen}>
-                  <div>{ul(g.rows.map(item))}</div>
-                </div>
+                <Expand id={healthy.id} open={healthy.open}>
+                  {ul(g.rows.map(item))}
+                </Expand>
               ) : (
                 ul(g.rows.slice(0, shown[gi]).map(item))
               )}

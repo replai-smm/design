@@ -3,7 +3,7 @@ import { CodeBlock } from './CodeBlock'
 import { csvCode, longCode } from '../stories/agent-fixtures'
 
 const meta = {
-  title: 'Поверхности/Блок кода',
+  title: 'Компоненты/Поверхности/Блок кода',
   component: CodeBlock,
   parameters: { layout: 'padded' },
   args: { code: csvCode, label: 'src/export/csv.ts' },

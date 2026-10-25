@@ -3,7 +3,7 @@ import { CommandMenu } from './CommandMenu'
 import { commands, manyCommands } from '../stories/agent-fixtures'
 
 const meta = {
-  title: 'Слои/Меню команд',
+  title: 'Компоненты/Слои/Меню команд',
   component: CommandMenu,
   parameters: { layout: 'padded' },
   args: { label: 'Команды и скиллы', items: commands, query: '', onPick: () => {}, className: 'max-w-form' },

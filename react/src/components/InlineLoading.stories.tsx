@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { InlineLoading } from './InlineLoading'
 
 const meta = {
-  title: 'Элементы/Ход в строке',
+  title: 'Компоненты/Элементы/Ход в строке',
   component: InlineLoading,
   parameters: { layout: 'padded' },
   args: { label: 'идёт сборка' },

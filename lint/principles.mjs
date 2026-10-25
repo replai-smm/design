@@ -25,13 +25,13 @@ import { files as walk } from './cli.mjs'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 
-/** Уровни ДС — полки её Storybook (registry.json). */
+/** Уровни ДС (registry.json) — папки полки «Компоненты» её Storybook; ещё полки «Основы» и «Паттерны». */
 export const LEVELS = JSON.parse(readFileSync(join(HERE, '../react/src/registry.json'), 'utf8')).levels
 export const SHELVES = {
-  ds: { ok: new RegExp(`^(${LEVELS.join('|')})\\/[^/\\s][^]*$`), say: LEVELS.map((l) => `\`${l}/…\``).join(' · ') },
+  ds: { ok: new RegExp(`^(?:Основы|Паттерны|Компоненты\\/(?:${LEVELS.filter((l) => l !== 'Основы').join('|')}))\\/[^/\\s][^]*$`), say: `\`Основы/…\` · \`Компоненты/<уровень>/…\` (${LEVELS.slice(1).join(' · ')}) · \`Паттерны/…\`` },
   product: { ok: /^Экраны\/SCR-\d+(?: [^/]+)?(?:\/[^/]+)*$/, say: '`Экраны/SCR-NN <экран>` (истории — состояния и части экрана)' },
 }
-const DS_SHELF = new RegExp(`^(${[...LEVELS, 'Компоненты', 'ДС', 'Дизайн-система', 'Design System', 'Примитивы'].join('|')})\\/`, 'i')
+const DS_SHELF = new RegExp(`^(${[...LEVELS, 'Компоненты', 'Паттерны', 'ДС', 'Дизайн-система', 'Design System', 'Примитивы'].join('|')})\\/`, 'i')
 
 const STORY = /\.stories\.(?:[jt]sx?|mdx)$/
 const CODE = /\.(?:[jt]sx?|mjs|cjs|vue|svelte)$/
