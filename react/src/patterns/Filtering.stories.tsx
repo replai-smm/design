@@ -1,81 +1,58 @@
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { groups, many, type GroupRow } from '../stories/fixtures'
-import { ActionArea, Button } from '../components/Button'
+import md from '../../../patterns/filtering.md?raw'
 import { DataTable, type Column } from '../components/Collection'
-import { Dialog } from '../components/Dialog'
 import { FilterBar, type FilterValue } from '../components/FilterBar'
-import { Notification } from '../components/Notification'
-import { Page, PageHeader, Section, Stack } from '../components/layout'
+import { Section } from '../components/layout'
 import type { DataState } from '../lib/vocab'
-import md from '../../../patterns/Filtering.md?raw'
-import { PatternDoc } from './doc'
+import { pattern } from './story'
 
-const columns: Column<GroupRow>[] = [
-  { key: 'name', header: 'Группа', cell: (r) => r.name, face: true, grow: 2 },
-  { key: 'reason', header: 'Что случилось', cell: (r) => r.reason, face: true, grow: 2 },
-  { key: 'client', header: 'Клиент', cell: (r) => r.client },
+interface Order {
+  id: string
+  item: string
+  status: string
+  city: string
+}
+const ORDERS: Order[] = [
+  { id: '1041', item: 'Стол письменный', status: 'в пути', city: 'Казань' },
+  { id: '1042', item: 'Лампа настольная', status: 'доставлен', city: 'Пермь' },
+  { id: '1043', item: 'Кресло', status: 'в пути', city: 'Казань' },
+  { id: '1044', item: 'Полка', status: 'отменён', city: 'Омск' },
+]
+const many = Array.from({ length: 120 }, (_, i) => ({ ...ORDERS[i % 4], id: String(2000 + i) }))
+const columns: Column<Order>[] = [
+  { key: 'id', header: 'Заказ', cell: (r) => `№ ${r.id}`, face: true },
+  { key: 'item', header: 'Товар', cell: (r) => r.item, face: true, grow: 2 },
+  { key: 'status', header: 'Статус', cell: (r) => r.status },
+  { key: 'city', header: 'Город', cell: (r) => r.city },
 ]
 
-/** Страница списка «Все группы»: шапка, плашка беды, главная, фильтры, таблица, окно строки. */
-function GroupsScreen({ state = 'ready', rows = groups, notice = false }: { state?: DataState; rows?: GroupRow[]; notice?: boolean }) {
+/** Заказы: фильтр по статусу и городу, поиск, таблица; фильтр живёт в адресе. */
+function Example({ state = 'ready', rows = ORDERS }: { state?: DataState; rows?: Order[] }) {
   const [filter, setFilter] = useState<FilterValue>({})
-  const [open, setOpen] = useState<GroupRow | null>(null)
+  const shown = rows.filter((r) => (!filter.status || r.status === filter.status) && (!filter.city || r.city === filter.city))
   return (
-    <Page
-      header={<PageHeader title="Все группы" tools={<Button variant="ghost" dense icon="menu" aria-label="ещё действия" />} />}
-      notice={
-        notice ? (
-          <Notification tone="опасно" scope="page" title="VK не отвечает">
-            Ответы стоят у всех клиентов с 14:20.
-          </Notification>
-        ) : undefined
-      }
-    >
-      <ActionArea primary={{ label: 'Подключить группу', rule: 'R-12' }} label="Действия страницы" />
-      <Section title="Группы клиентов">
-        <Stack>
-          <FilterBar filters={[{ key: 'клиент', label: 'Клиент', options: [{ value: 'зерно', label: 'Зерно' }, { value: 'асана', label: 'Асана' }] }]} value={filter} onChange={setFilter} search={{ label: 'Поиск по группам' }} />
-          <DataTable
-            label="Группы клиентов"
-            rows={rows}
-            columns={columns}
-            state={state}
-            error={{ title: 'Список не загрузился', onRetry: () => {} }}
-            getKey={(r) => r.id}
-            getStatus={(r) => r.status}
-            onSelect={setOpen}
-            selectedKey={open?.id}
-            rowAction={(r) => (r.status === 'work.failing' ? <Button variant="ghost" dense>Починить</Button> : null)}
-          />
-        </Stack>
-      </Section>
-      <Dialog open={Boolean(open)} onOpenChange={(o) => !o && setOpen(null)} title={open?.name ?? ''} actions={<ActionArea primary={{ label: 'Обновить ключ' }} label="Действия окна" />}>
-        <p className="m-0 text-body">{open?.reason}</p>
-      </Dialog>
-    </Page>
+    <Section title="Заказы" className="p-blocks">
+      <FilterBar
+        filters={[
+          { key: 'status', label: 'Статус', options: [{ value: 'в пути', label: 'в пути' }, { value: 'доставлен', label: 'доставлен' }, { value: 'отменён', label: 'отменён' }] },
+          { key: 'city', label: 'Город', options: [{ value: 'Казань', label: 'Казань' }, { value: 'Пермь', label: 'Пермь' }, { value: 'Омск', label: 'Омск' }] },
+        ]}
+        value={filter}
+        onChange={setFilter}
+        search={{ label: 'Поиск по заказам' }}
+      />
+      <DataTable label="Заказы" rows={shown} columns={columns} state={state} error={{ title: 'Заказы не загрузились', onRetry: () => {} }} getKey={(r) => r.id} />
+    </Section>
   )
 }
 
-/** Правило «Фильтры и поиск» и пример — страница списка «Все группы». */
-function Doc(props: Parameters<typeof GroupsScreen>[0]) {
-  return (
-    <PatternDoc md={md} page>
-      <GroupsScreen {...props} />
-    </PatternDoc>
-  )
-}
-
-const meta = {
-  title: 'Паттерны/Фильтры и поиск',
-  component: Doc,
-  parameters: { layout: 'fullscreen' },
-} satisfies Meta<typeof Doc>
+const Doc = pattern(md, Example)
+const meta = { title: 'Паттерны/Фильтры', component: Doc, parameters: { layout: 'fullscreen' } } satisfies Meta<typeof Doc>
 export default meta
 type S = StoryObj<typeof meta>
 
 export const Обычное: S = {}
-export const БедаСистемы: S = { args: { notice: true } }
 export const Загрузка: S = { tags: ['state:загрузка'], args: { state: 'loading' } }
 export const Ошибка: S = { tags: ['state:ошибка'], args: { state: 'error' } }
 export const Много: S = { tags: ['state:много'], args: { rows: many } }

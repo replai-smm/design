@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { chat } from '../stories/df-fixtures'
+import { chat } from '../stories/fixtures'
 import { ChatThread } from './ChatThread'
 import { List } from './Collection'
 import { ReplyBox } from './ReplyBox'
@@ -8,25 +8,25 @@ import { StateView } from './StateView'
 import { ThreeColumn, type ColumnIndex } from './ThreeColumn'
 
 const dialogs = [
-  { id: 'd1', name: 'Анна Петрова', last: 'А можно заказать торт к субботе?' },
+  { id: 'd1', name: 'Анна Петрова', last: 'А можно поменять адрес доставки?' },
   { id: 'd2', name: 'Иван Смирнов', last: 'Спасибо, всё получил' },
   { id: 'd3', name: 'Мария К.', last: 'Есть ли доставка в Заречный?' },
 ]
-const groups = [
-  { id: 'g1', name: 'Кофейня «Зерно»' },
-  { id: 'g2', name: 'Пекарня «Колос»' },
-  { id: 'g3', name: 'Цветы «Флокс»' },
+const teams = [
+  { id: 't1', name: 'Продажи' },
+  { id: 't2', name: 'Поддержка' },
+  { id: 't3', name: 'Логистика' },
 ]
 
 function Demo({ picked = false, phone = 'stack' as 'stack' | 'sheets' }: { picked?: boolean; phone?: 'stack' | 'sheets' }) {
   const [active, setActive] = useState<ColumnIndex>(picked ? 2 : 0)
-  const [group, setGroup] = useState<string | null>(picked ? 'g1' : null)
+  const [team, setTeam] = useState<string | null>(picked ? 't1' : null)
   const [dialog, setDialog] = useState<string | null>(picked ? 'd1' : null)
   const [sheet, setSheet] = useState<0 | 2 | null>(null)
   return (
     <div className="h-dvh">
       <ThreeColumn
-        labels={['Сообщества', 'Диалоги', 'Переписка']}
+        labels={['Команды', 'Диалоги', 'Переписка']}
         active={active}
         onBack={setActive}
         phone={phone}
@@ -34,11 +34,11 @@ function Demo({ picked = false, phone = 'stack' as 'stack' | 'sheets' }: { picke
         onSheetChange={setSheet}
         first={
           <div className="p-items">
-            <List label="Сообщества" rows={groups} getKey={(g) => g.id} renderRow={(g) => g.name} selectedKey={group} onSelect={(g) => (setGroup(g.id), setActive(1))} />
+            <List label="Команды" rows={teams} getKey={(t) => t.id} renderRow={(t) => t.name} selectedKey={team} onSelect={(t) => (setTeam(t.id), setActive(1))} />
           </div>
         }
         second={
-          group ? (
+          team ? (
             <div className="p-items">
               <List
                 label="Диалоги"
@@ -56,7 +56,7 @@ function Demo({ picked = false, phone = 'stack' as 'stack' | 'sheets' }: { picke
             </div>
           ) : (
             <div className="p-blocks">
-              <StateView kind="первый запуск" title="Выберите сообщество слева" />
+              <StateView kind="первый запуск" title="Выберите команду слева" />
             </div>
           )
         }
@@ -65,7 +65,7 @@ function Demo({ picked = false, phone = 'stack' as 'stack' | 'sheets' }: { picke
             <div className="flex min-h-0 flex-1 flex-col">
               <ChatThread label="Переписка с Анной Петровой" messages={chat} className="flex-1" />
               <div className="border-t border-line p-blocks">
-                <ReplyBox label="Ответ клиенту" send="button" onSend={() => {}} />
+                <ReplyBox label="Ответ покупателю" send="button" onSend={() => {}} />
               </div>
             </div>
           ) : (

@@ -23,7 +23,7 @@ export interface LegendItem {
 export interface ChartFrameProps {
   title: ReactNode
   description?: ReactNode
-  /** Главный вывод словами — для читалки: «Охват вырос на 12 % за неделю». */
+  /** Главный вывод словами — для читалки: «Посещения выросли на 12 % за неделю». */
   summary: string
   legend?: LegendItem[]
   /** Тихие кнопки справа от заголовка. */

@@ -10,8 +10,8 @@ const meta = {
     placeholder: 'Выберите роль',
     options: [
       { value: 'admin', label: 'Админ' },
-      { value: 'km', label: 'Контент-менеджер' },
-      { value: 'target', label: 'Таргетолог' },
+      { value: 'editor', label: 'Редактор' },
+      { value: 'viewer', label: 'Читатель' },
     ],
     className: 'max-w-narrow',
   },

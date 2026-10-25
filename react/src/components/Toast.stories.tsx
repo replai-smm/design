@@ -7,7 +7,7 @@ const meta = {
   parameters: { layout: 'fullscreen' },
   args: {
     initial: [
-      { tone: 'хорошо', title: 'Пост опубликован', description: 'Кофейня «Зерно», 14:20' },
+      { tone: 'хорошо', title: 'Отчёт отправлен', description: 'Интернет-магазин, 14:20' },
       { tone: 'инфо', title: 'Черновик сохранён', action: { label: 'Открыть', onClick: () => {} } },
     ],
   },

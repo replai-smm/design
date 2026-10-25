@@ -1,10 +1,8 @@
-/** Слои и паттерны: окно и шторка, подтверждение, всплывашка, меню команд; вкладки, фильтры, три колонки, переписка, поле ответа, шаг агента, текст ответа. */
+/** Слои и паттерны: окно и шторка, подтверждение, всплывашка; вкладки, фильтры, три колонки, переписка, поле ответа, текст ответа. */
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
 import { render, screen, fireEvent, within, act, waitFor } from '@testing-library/react'
-import { ActionArea, AgentStep, Button, ChatThread, CommandMenu, ConfirmProvider, Dialog, FilterBar, matchCommands, Prose, ReplyBox, Tabs, TextField, ThreeColumn, Toaster, useConfirm, useToast, useUrlFilters, type CommandMenuHandle } from '../index'
-import { chat, chatFailed } from '../stories/df-fixtures'
-import { commands } from '../stories/agent-fixtures'
-import { createRef } from 'react'
+import { ActionArea, Button, ChatThread, ConfirmProvider, Dialog, FilterBar, Prose, ReplyBox, Tabs, TextField, ThreeColumn, Toaster, useConfirm, useToast, useUrlFilters } from '../index'
+import { chat, chatFailed } from '../stories/fixtures'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
@@ -48,7 +46,7 @@ describe('окно', () => {
 describe('подтверждение', () => {
   function Ask({ danger, onAnswer }: { danger?: boolean; onAnswer: (v: boolean) => void }) {
     const confirm = useConfirm()
-    return <Button onClick={async () => onAnswer(await confirm({ title: 'Удалить пост?', danger }))}>спросить</Button>
+    return <Button onClick={async () => onAnswer(await confirm({ title: 'Удалить файл?', danger }))}>спросить</Button>
   }
 
   it('опасное: кнопка тона «опасно» без главной, фокус на «Отмена»; «да» — true', async () => {
@@ -90,17 +88,6 @@ describe('всплывашка и меню команд', () => {
     expect(toast.className).toContain('border-l-success')
   })
 
-  it('меню: сужение по началу команды и слову описания; клавиши из поля', () => {
-    expect(matchCommands(commands, '/re').map((c) => c.value)).toEqual(['/review'])
-    expect(matchCommands(commands, 'модель').map((c) => c.value)).toEqual(['/model'])
-    const onPick = vi.fn()
-    const ref = createRef<CommandMenuHandle>()
-    render(<CommandMenu ref={ref} label="Команды" items={commands} query="" onPick={onPick} />)
-    act(() => void ref.current!.press({ key: 'ArrowDown' }))
-    act(() => void ref.current!.press({ key: 'Enter' }))
-    expect(onPick).toHaveBeenCalledWith(commands[1])
-    expect(ref.current!.press({ key: 'x' })).toBe(false)
-  })
 })
 
 describe('вкладки и фильтры — один ряд сегментов', () => {
@@ -137,7 +124,7 @@ describe('вкладки и фильтры — один ряд сегменто�
   })
 
   it('фильтры в адресе: выбор пишет ?ключ=значение, «все» снимает; required — без «все»', () => {
-    window.history.replaceState(null, '', '/groups?статус=падает')
+    window.history.replaceState(null, '', '/projects?статус=падает')
     function Demo() {
       const [v, set] = useUrlFilters(['статус', 'период'])
       return (
@@ -163,7 +150,7 @@ describe('вкладки и фильтры — один ряд сегменто�
 })
 
 describe('три колонки', () => {
-  const cols = { labels: ['Сообщества', 'Диалоги', 'Переписка'] as [string, string, string], first: <p>1</p>, second: <p>2</p>, third: <p>3</p> }
+  const cols = { labels: ['Команды', 'Диалоги', 'Переписка'] as [string, string, string], first: <p>1</p>, second: <p>2</p>, third: <p>3</p> }
 
   it('три области с подписями; на телефоне видна активная; «← назад» называет предыдущую', () => {
     const onBack = vi.fn()
@@ -171,7 +158,7 @@ describe('три колонки', () => {
     const regions = screen.getAllByRole('region')
     expect(regions.map((r) => r.getAttribute('aria-label'))).toEqual(cols.labels)
     expect(regions[0].className).toContain('hidden')
-    fireEvent.click(within(regions[1]).getByRole('button', { name: /Сообщества/ }))
+    fireEvent.click(within(regions[1]).getByRole('button', { name: /Команды/ }))
     expect(onBack).toHaveBeenCalledWith(0)
   })
 
@@ -181,7 +168,7 @@ describe('три колонки', () => {
     try {
       const onSheetChange = vi.fn()
       const { rerender } = render(<ThreeColumn {...cols} active={1} onBack={() => {}} phone="sheets" sheet={0} onSheetChange={onSheetChange} />)
-      expect(screen.getByRole('dialog', { name: 'Сообщества' }).getAttribute('data-side')).toBe('left')
+      expect(screen.getByRole('dialog', { name: 'Команды' }).getAttribute('data-side')).toBe('left')
       rerender(<ThreeColumn {...cols} active={1} onBack={() => {}} phone="sheets" sheet={2} onSheetChange={onSheetChange} />)
       expect(screen.getByRole('dialog', { name: 'Переписка' }).getAttribute('data-side')).toBe('bottom')
       fireEvent.click(screen.getByRole('button', { name: 'закрыть' }))
@@ -206,14 +193,14 @@ describe('переписка', () => {
   it('не ушло: знак, слово с причиной, «Повторить»; весть — поверхность с меткой; в очереди — словом', () => {
     const retry = vi.fn()
     const { rerender } = render(<ChatThread label="п" messages={chatFailed.map((m) => (m.status === 'error' ? { ...m, onRetry: retry } : m))} />)
-    expect(screen.getByRole('alert').textContent).toContain('не отправлено: ВК не ответил')
+    expect(screen.getByRole('alert').textContent).toContain('не отправлено: Сервер не ответил')
     fireEvent.click(screen.getByRole('button', { name: 'Повторить' }))
     expect(retry).toHaveBeenCalledOnce()
     rerender(
       <ChatThread
         label="п"
         messages={[
-          { id: 'n', direction: 'in', variant: 'notice', author: 'orbit', time: '14:02', text: 'весть' },
+          { id: 'n', direction: 'in', variant: 'notice', author: 'система', time: '14:02', text: 'весть' },
           { id: 'q', direction: 'out', time: '14:03', text: 'ещё', status: 'idle' },
         ]}
       />,
@@ -304,43 +291,16 @@ describe('поле ответа', () => {
     expect(screen.getByText('Только просмотр')).toBeTruthy()
   })
 
-  it('чат агента: onKeyDown продукта берёт клавишу; «Стоп» рядом с главной; меню над полем', () => {
-    const onSend = vi.fn()
+  it('разговор с агентом: «Стоп» рядом с главной, кнопки в ряд', () => {
     const onStop = vi.fn()
-    render(<ReplyBox label="Сообщение" onSend={onSend} layout="row" stop={{ onStop }} menu={<div data-testid="menu" />} activeDescendant="opt-1" onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()} />)
-    fireEvent.change(field(), { target: { value: '/re' } })
-    fireEvent.keyDown(field(), { key: 'Enter' })
-    expect(onSend).not.toHaveBeenCalled()
+    render(<ReplyBox label="Сообщение" onSend={() => {}} layout="row" stop={{ onStop }} />)
     fireEvent.click(screen.getByRole('button', { name: 'Стоп' }))
     expect(onStop).toHaveBeenCalled()
-    expect(field().getAttribute('aria-activedescendant')).toBe('opt-1')
-    expect(screen.getByTestId('menu').compareDocumentPosition(field()) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Стоп' }).closest('[role=group]')).toBe(screen.getByRole('button', { name: 'Отправить' }).closest('[role=group]'))
   })
 })
 
-describe('шаг агента и текст ответа', () => {
-  it('ошибка раскрыта сразу и видна словом; готово — свёрнуто и не берёт фокус; без результата не нажимается', () => {
-    const a = render(<AgentStep tool="Bash" target="npm test" progress="error"><p>вывод</p></AgentStep>)
-    expect(screen.getByRole('button', { expanded: true }).textContent).toContain('ошибка')
-    a.unmount()
-    const b = render(<AgentStep tool="Bash" target="npm test" progress="done"><p>вывод</p></AgentStep>)
-    expect(b.container.querySelector('.ds-expand')!.hasAttribute('inert')).toBe(true)
-    b.unmount()
-    render(<AgentStep tool="Read" target="a.ts" progress="done" />)
-    expect(screen.queryByRole('button')).toBeNull()
-  })
-
-  it('shell: поверхность с меткой «инфо», вывод раскрыт, «Стоп» рядом со строкой, пока идёт; note — под строкой', () => {
-    const onStop = vi.fn()
-    const { container } = render(<AgentStep tool="Команда" target="npm test" variant="shell" progress="running" note="песочница" stop={{ onStop }}><p>вывод</p></AgentStep>)
-    const step = container.querySelector('[data-slot=agent-step]')!
-    expect(step.getAttribute('data-mark')).toBe('info')
-    expect(screen.getByRole('button', { name: /Команда/ }).getAttribute('aria-expanded')).toBe('true')
-    fireEvent.click(screen.getByRole('button', { name: 'Стоп' }))
-    expect(onStop).toHaveBeenCalled()
-    expect(screen.getByText('песочница')).toBeTruthy()
-  })
-
+describe('текст ответа', () => {
   it('текст ответа: роль «чтение»; набор — aria-busy', () => {
     const { container, rerender } = render(<Prose streaming><p>идёт</p></Prose>)
     const p = container.querySelector('[data-slot=prose]')!

@@ -22,7 +22,7 @@ export const Статусы: S = {
   ),
 }
 
-/** Тон со своим словом: светофор, оценка поста. */
+/** Тон со своим словом: светофор, оценка отчёта. */
 export const Тон: S = {
   render: () => (
     <div className="flex flex-wrap gap-items">

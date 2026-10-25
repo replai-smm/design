@@ -12,9 +12,9 @@
 
 | Шкала | Что есть | Источник |
 |---|---|---|
-| Цвет | 36 ролей: поверхности (`canvas`, `surface`, `inverse`), текст (`fg`, `fg-muted`, `fg-disabled`, `fg-inverse`), рамки (`line`, `line-strong`), взаимодействие (`hover`, `selected`, `accent`), глубина (`scrim`, `shadow`), тоны (`danger`, `decision`, `warning`, `success` + текст и подложка у срочных), заливки статуса (`*-fill`, только сетка статуса), ряды данных `series-1…6` | `tokens.json → colors` |
-| Тон | один словарь на все компоненты: опасно · решение · внимание · инфо · нейтрально · хорошо. Подложка — только у «опасно», «решение» (ждёт решения человека, фиолетовый) и «внимание»; «хорошо» — зелёный знак без подложки. Исключение по смыслу — сетка статуса (клетка и строка дня, чей смысл — сам статус): там заливка у каждого тона (`tones.*.fill`), только в `ProofreadGrid.tsx` (`registry.json → fill`) | `tokens.json → tones`, `react/src/lib/vocab.ts` |
-| Ход работы | один словарь: `idle` впереди · `running` идёт · `done` готово · `error` ошибка — у шагов, шага агента, хода в строке, отправки сообщения | `vocab.ts → Progress` |
+| Цвет | 36 ролей: поверхности (`canvas`, `surface`, `inverse`), текст (`fg`, `fg-muted`, `fg-disabled`, `fg-inverse`), рамки (`line`, `line-strong`), взаимодействие (`hover`, `selected`, `accent`), глубина (`scrim`, `shadow`), тоны (`danger`, `decision`, `warning`, `success` + текст и подложка у срочных), заливки статуса (`*-fill`, только в файлах из `registry.json → fill`), ряды данных `series-1…6` | `tokens.json → colors` |
+| Тон | один словарь на все компоненты: опасно · решение · внимание · инфо · нейтрально · хорошо. Подложка — только у «опасно», «решение» (ждёт решения человека, фиолетовый) и «внимание»; «хорошо» — зелёный знак без подложки. Заливка у каждого тона (`tones.*.fill`) — исключение по смыслу для сетки статуса, где смысл клетки — сам статус; только в файлах из `registry.json → fill` (в ДС таких нет) | `tokens.json → tones`, `react/src/lib/vocab.ts` |
+| Ход работы | один словарь: `idle` впереди · `running` идёт · `done` готово · `error` ошибка — у шагов, хода в строке, отправки сообщения | `vocab.ts → Progress` |
 | Текст | 7 ролей: `caption` 12 · `body` 14 · `heading` 14/600 · `reading` 16 · `code` 13 моно · `title` 20 · `page` 28 | `scale.json → text` |
 | Отступ | 6 ролей: `tight` 4 · `items` 8 · `compact` 12 · `blocks` 16 · `groups` 24 · `sections` 32 — и в классах (`gap-items`, `p-blocks`), и в `Stack gap="items"` | `scale.json → space` |
 | Высота | `icon` 16 · `dense` 32 · `control` 40 · `touch` 48: контрол — 48 на телефоне и 40 на ноутбуке, плотный — 32 | `scale.json → size` |
@@ -41,38 +41,44 @@
 | Раскладка | Stack, Inline, Grid, Page, PageHeader, Section, SurfaceProvider, BottomBar |
 | Элементы | Icon, Button, ActionArea, StatusBadge, CountBadge, Avatar, InlineLoading, Meter, Steps, Tooltip, Toggletip, Accordion, Delta, Skeleton, Loading, Prose, ProseHtml, Chart |
 | Поля | TextField, TextArea, Select, NumberField, Checkbox, CheckboxGroup, Combobox, FileField, SearchField |
-| Поверхности | Surface, Card, StatTile, Notification, StateView, CodeBlock, ChartFrame; DecisionCard, Diagram — чат |
-| Коллекции | DataTable, List; ProofreadGrid, GridLegend, StatusRow, WeekCalendar — DF |
-| Слои | Dialog (окно и шторка), ConfirmProvider, Toaster; CommandMenu — чат |
-| Составные | Tabs, FilterBar, ThreeColumn, ChatThread, ReplyBox; AgentStep — чат |
+| Поверхности | Surface, Card, StatTile, Notification, StateView, CodeBlock, ChartFrame |
+| Коллекции | DataTable, List |
+| Слои | Dialog (окно и шторка), ConfirmProvider, Toaster |
+| Составные | Tabs, FilterBar, ThreeColumn, ChatThread, ReplyBox |
 
-Уровень, смысл, анатомия (поверхность, поля, роль заголовка, метка, форма) и продукт каждого компонента — в
-`react/src/registry.json`. Компоненты одного продукта помечены `product` и строятся только из ролей.
+Уровень, смысл и анатомия (поверхность, поля, роль заголовка, метка, форма) каждого компонента — в
+`react/src/registry.json`. ДС ничья: компонентов одного продукта в ней нет.
 
 ## Паттерны
 
-Паттерн — правило, а не код (Carbon: «у паттерна несколько способов сделать то же; это сочетание компонентов плюс
-правила»). Каждый — файл `patterns/<Имя>.md` в пакете: название, имя у Carbon и компоненты, затем «Когда», «Когда нет»,
-«Из чего», «Делай», «Не делай», «Доступность», «Чем держится» (что держит машина, что — глаз). В Storybook — полка
-«Паттерны»: правило и под ним живой пример из компонентов (`react/src/patterns/`).
+Паттерны — 17 паттернов ядра IBM Carbon **их же текстом в переводе** (решение Саши 25.10, RSMM-60): своих текстов правил
+нет. Источник — репо `carbon-design-system/carbon-website` (Apache-2.0, коммит `5e9cd1d`), что изменено — `NOTICE.md`.
+Каждый — файл `patterns/<имя>.md` в пакете: заголовок, строка «Carbon: … · Источник: … · Перевод с английского», строка
+«Компоненты примера» и дальше разделы Carbon в их порядке. В Storybook — полка «Паттерны»: правило и под ним живой
+пример из компонентов этой ДС (`react/src/patterns/`), примеры нейтральные — без слов наших продуктов.
 
 | Паттерн | Carbon | Файл |
 |---|---|---|
-| Формы | Forms | `patterns/Forms.md` |
-| Пустые состояния | Empty states | `patterns/EmptyStates.md` |
-| Загрузка | Loading | `patterns/Loading.md` |
-| Уведомления | Notifications | `patterns/Notifications.md` |
-| Окна и подтверждения | Dialogs | `patterns/Dialogs.md` |
-| Общие действия | Common actions | `patterns/CommonActions.md` |
-| Пошаговое создание | Progress indicator, Forms | `patterns/MultiStep.md` |
-| Навигация по разделам | Global header, UI shell left panel | `patterns/Navigation.md` |
-| Фильтры и поиск | Filtering, Search | `patterns/Filtering.md` |
-| Статусы | Status indicators | `patterns/StatusIndicators.md` |
-| Раскрытие подробностей | Disclosures, Accordion | `patterns/Disclosures.md` |
-| Только чтение и выключено | Read-only states, Disabled states | `patterns/ReadOnly.md` |
-| Вход | Login | `patterns/Login.md` |
+| Общие действия | Common actions | `patterns/common-actions.md` |
+| Окна | Dialogs | `patterns/dialogs.md` |
+| Выключенное состояние | Disabled states | `patterns/disabled-states.md` |
+| Раскрытие | Disclosures | `patterns/disclosures.md` |
+| Пустые состояния | Empty states | `patterns/empty-states.md` |
+| Фильтры | Filtering | `patterns/filtering.md` |
+| Текучие поля | Fluid styles | `patterns/fluid-styles.md` |
+| Формы | Forms | `patterns/forms.md` |
+| Шапка и навигация | Global header | `patterns/global-header.md` |
+| Загрузка | Loading | `patterns/loading.md` |
+| Вход | Login | `patterns/login.md` |
+| Уведомления | Notifications | `patterns/notifications.md` |
+| Обрезка содержимого | Overflow content | `patterns/overflow-content.md` |
+| Только чтение | Read-only states | `patterns/read-only-states.md` |
+| Поиск | Search | `patterns/search.md` |
+| Индикаторы статуса | Status indicators | `patterns/status-indicators.md` |
+| Панель правки текста | Text toolbar | `patterns/text-toolbar.md` |
 
-Расходится с Carbon — правим по Carbon: справка — знак «i», кнопки формы на странице — группой слева, шаги — от трёх.
+Пошаговый путь — раздел «Формы → длинные формы» и компонент шагов (`Steps`). Текучих полей и панели правки текста в ДС
+пока нет — их примеры честно говорят об этом.
 
 ## Правила — держит машина
 
@@ -80,7 +86,8 @@
 |---|---|---|
 | Только роли и шкалы: нет сырых цветов и размеров, произвольных значений, палитры Tailwind и классов вне шкал (`pl-5`, `gap-1.5`, `text-sm`, `h-12`, `rounded-lg`, `max-w-md`) | тема Tailwind (`dist/tailwind.css`) таких классов не создаёт; `lint/scan.mjs` (`ds/off-scale` и др.) — в ДС `npm run lint`, в продукте `lint/cli.mjs` и `lint/principles.mjs` | `__tests__/bait/off-scale.tsx` |
 | Устройство: у каждого экспорта — запись в реестре; уровень из списка; импорт только нижних уровней (своего — только база уровня или исключение с «почему»); один смысл — один компонент; пары-соседи — с «почему»; полка — «Компоненты/<уровень>/…», пример паттерна — «Паттерны/…»; тон и ход — только из словарей; значки — только `Icon`; таблетки, свои `<svg>` и заливка статуса (`*-fill`) — только в названных файлах; контейнер прокрутки (`overflow-auto`, `overflow-y-auto`) — с `relative`; раскрытие — одна механика `lib/disclosure.tsx` (`ds-expand` в компоненте — красное) | `lib/architecture.mjs`, тест `architecture.test.ts` | `__tests__/bait/architecture/` |
-| Паттерн в форме Carbon: разделы по порядку, «Чем держится» — машина и глаз, только настоящие компоненты, узкая разметка, пример на полке «Паттерны/<название>» | `__tests__/patterns.test.ts` | правило без раздела, с `Drawer` и таблицей |
+| Паттерны — ровно 17 паттернов Carbon в переводе: строка источника и коммит, узкая разметка, пример на полке «Паттерны/<название>», «Компоненты примера» = импорты примера | `__tests__/patterns.test.ts` | правило без источника, со ссылкой, цитатой, тегом и `Drawer` |
+| ДС ничья: в правилах, компонентах, историях, примерах, фикстурах и реестре нет слов наших продуктов и номеров задач | `__tests__/domain-words.test.ts` | строка со всеми запретными словами |
 | Облик и анатомия: каждая история × светлая и тёмная × 390 и 1280 против эталона; поля, роль заголовка, угол и метка — по реестру; текст, углы и высоты контролов — только из шкал | `react/visual/run.mjs` (`npm run test:visual`), эталоны `react/visual/baseline/` | `__tests__/visual.test.ts`: кадр со сдвигом на 1 px, снимок с полями 12 вместо 16 |
 | Контраст: текст ≥ 4,5 : 1 (и на заливке статуса), знаки, границы контролов, фокус и ряды данных ≥ 3 : 1 — обе темы | `lib/contrast.mjs`, `contrast.test.ts` | пара светло-серого текста на белом |
 | Форма ролей, шкал и матрицы облика — закрытые списки | `tokens.schema.json`, `matrix.schema.json`, `schemas.test.ts` | `__tests__/fixtures/schemas/*/invalid` |

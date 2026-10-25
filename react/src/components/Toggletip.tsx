@@ -11,7 +11,7 @@ import { cx } from '../lib/cx'
 import { Icon } from './Icon'
 
 export interface ToggletipProps {
-  /** О чём справка — для читалки: «Подробнее: Баллы за лайк». */
+  /** О чём справка — для читалки: «Подробнее: Срок хранения». */
   label: string
   /** Текст справки: одно-три предложения. */
   children: ReactNode

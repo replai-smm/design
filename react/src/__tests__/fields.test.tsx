@@ -9,14 +9,14 @@ const described = (el: Element) => (el.getAttribute('aria-describedby') ?? '').s
 
 describe('поле ввода', () => {
   it('подпись связана с полем, подсказка описывает поле', () => {
-    render(<TextField label="Логин" helperText="Как у ВК" />)
+    render(<TextField label="Логин" helperText="Как в профиле" />)
     const f = screen.getByLabelText('Логин')
-    expect(described(f)).toBe('Как у ВК')
+    expect(described(f)).toBe('Как в профиле')
     expect(f.getAttribute('aria-invalid')).toBeNull()
   })
 
   it('ошибка заменяет подсказку: aria-invalid, знак «опасно» и слово, рамка тона', () => {
-    const { container } = render(<TextField label="Логин" helperText="Как у ВК" error="Такого нет" />)
+    const { container } = render(<TextField label="Логин" helperText="Как в профиле" error="Такого нет" />)
     const f = screen.getByLabelText('Логин')
     expect(f.getAttribute('aria-invalid')).toBe('true')
     expect(described(f)).toBe('Такого нет')
@@ -68,8 +68,8 @@ describe('галочка', () => {
 describe('число', () => {
   it('spinbutton: стрелки — шаг, PageUp — 10, Home/End — границы; не выходит за границы', () => {
     const onChange = vi.fn()
-    render(<NumberField label="Постов" defaultValue={3} min={0} max={14} onChange={onChange} />)
-    const f = screen.getByRole('spinbutton', { name: 'Постов' })
+    render(<NumberField label="Отчётов" defaultValue={3} min={0} max={14} onChange={onChange} />)
+    const f = screen.getByRole('spinbutton', { name: 'Отчётов' })
     fireEvent.keyDown(f, { key: 'ArrowUp' })
     expect(onChange).toHaveBeenLastCalledWith(4)
     fireEvent.keyDown(f, { key: 'PageUp' })
@@ -80,22 +80,22 @@ describe('число', () => {
 
   it('буквы не принимает, пусто — null; вне границ — ошибка словами; кнопки в обход табуляции', () => {
     const onChange = vi.fn()
-    const { rerender } = render(<NumberField label="Постов" min={0} max={14} onChange={onChange} />)
+    const { rerender } = render(<NumberField label="Отчётов" min={0} max={14} onChange={onChange} />)
     const f = screen.getByRole('spinbutton')
     fireEvent.change(f, { target: { value: 'abc' } })
     expect(onChange).not.toHaveBeenCalled()
     fireEvent.change(f, { target: { value: '20' } })
     expect(described(f)).toBe('Число от 0 до 14')
     expect(screen.getByRole('button', { name: 'увеличить' }).tabIndex).toBe(-1)
-    rerender(<NumberField label="Постов" min={0} max={14} value={null} />)
+    rerender(<NumberField label="Отчётов" min={0} max={14} value={null} />)
     expect((f as HTMLInputElement).value).toBe('')
   })
 })
 
 describe('выбор с поиском', () => {
   const options = [
-    { value: 'a', label: 'Кофейня «Зерно»', description: 'Самара' },
-    { value: 'b', label: 'Пекарня «Колос»', description: 'Тольятти' },
+    { value: 'a', label: 'Анна Петрова', description: 'Продажи' },
+    { value: 'b', label: 'Борис Смирнов', description: 'Логистика' },
     { value: 'c', label: 'Ёлки', disabled: true },
     { value: 'd', label: 'Цветы' },
   ]
@@ -103,19 +103,19 @@ describe('выбор с поиском', () => {
 
   it('стрелка вниз открывает; печать сужает (ё = е, по второй строке); Enter выбирает', () => {
     const onChange = vi.fn()
-    render(<Combobox label="Сообщество" options={options} onChange={onChange} />)
+    render(<Combobox label="Сотрудник" options={options} onChange={onChange} />)
     fireEvent.keyDown(box(), { key: 'ArrowDown' })
     expect(box().getAttribute('aria-expanded')).toBe('true')
-    fireEvent.change(box(), { target: { value: 'тольят' } })
-    expect(screen.getAllByRole('option').map((o) => o.textContent)).toEqual(['Пекарня «Колос»Тольятти'])
+    fireEvent.change(box(), { target: { value: 'логист' } })
+    expect(screen.getAllByRole('option').map((o) => o.textContent)).toEqual(['Борис СмирновЛогистика'])
     fireEvent.keyDown(box(), { key: 'Enter' })
     expect(onChange).toHaveBeenCalledWith('b')
-    expect((box() as HTMLInputElement).value).toBe('Пекарня «Колос»')
+    expect((box() as HTMLInputElement).value).toBe('Борис Смирнов')
   })
 
   it('Esc закрывает; в закрытом Esc очищает выбор; «очистить выбор» тоже', () => {
     const onChange = vi.fn()
-    render(<Combobox label="Сообщество" options={options} defaultValue="a" onChange={onChange} />)
+    render(<Combobox label="Сотрудник" options={options} defaultValue="a" onChange={onChange} />)
     fireEvent.keyDown(box(), { key: 'ArrowDown' })
     fireEvent.keyDown(box(), { key: 'Escape' })
     expect(box().getAttribute('aria-expanded')).toBe('false')
@@ -124,7 +124,7 @@ describe('выбор с поиском', () => {
   })
 
   it('выбранный — aria-selected и «выбрано»; limit — первые N и «уточните поиск»; пусто — свои слова', () => {
-    const many = Array.from({ length: 30 }, (_, i) => ({ value: `m${i}`, label: `Сообщество ${i}` }))
+    const many = Array.from({ length: 30 }, (_, i) => ({ value: `m${i}`, label: `Сотрудник ${i}` }))
     const { rerender } = render(<Combobox label="С" options={many} defaultValue="m0" limit={5} />)
     fireEvent.keyDown(box(), { key: 'ArrowDown' })
     const opts = screen.getAllByRole('option')
@@ -171,8 +171,8 @@ describe('выбор файла', () => {
 describe('поиск', () => {
   it('подпись для читалки, «очистить поиск» стирает', () => {
     const onChange = vi.fn()
-    render(<SearchField label="Поиск по группам" value="зерно" onChange={onChange} />)
-    expect(screen.getByLabelText('Поиск по группам')).toBeTruthy()
+    render(<SearchField label="Поиск по проектам" value="склад" onChange={onChange} />)
+    expect(screen.getByLabelText('Поиск по проектам')).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: 'очистить поиск' }))
     expect(onChange).toHaveBeenCalledWith('')
   })
@@ -180,21 +180,21 @@ describe('поиск', () => {
 
 describe('поле настройки одной строкой и справка «i»', () => {
   it('inline: подпись слева, справа поле с единицей и под ними ошибка — ошибка у поля, а не под подписью', () => {
-    render(<NumberField inline label="За лайк" unit="балл" defaultValue={20} max={10} />)
-    const input = screen.getByRole('spinbutton', { name: 'За лайк' })
+    render(<NumberField inline label="Хранить файлы" unit="дней" defaultValue={20} max={10} />)
+    const input = screen.getByRole('spinbutton', { name: 'Хранить файлы' })
     const column = input.closest('[data-slot="number-field"] > div:last-child')!
-    expect(column.textContent).toContain('балл')
+    expect(column.textContent).toContain('дней')
     expect(column.textContent).toContain('Не больше 10')
     expect(input.getAttribute('aria-invalid')).toBe('true')
   })
   it('число в строке — узкое (роль ширины number), единица сразу за ним; текст в строке — во всю колонку', () => {
     render(
       <>
-        <NumberField inline label="За лайк" unit="балл" defaultValue={1} />
+        <NumberField inline label="Хранить файлы" unit="дней" defaultValue={1} />
         <TextField inline label="Название" />
       </>,
     )
-    expect(screen.getByRole('spinbutton', { name: 'За лайк' }).closest('.w-number')).not.toBeNull()
+    expect(screen.getByRole('spinbutton', { name: 'Хранить файлы' }).closest('.w-number')).not.toBeNull()
     expect(screen.getByRole('textbox', { name: 'Название' }).closest('.w-number')).toBeNull()
   })
   it('help: кнопка «i» подписана полем, открывает справку по нажатию', () => {
@@ -212,11 +212,11 @@ describe('поле настройки одной строкой и справк�
     render(
       <>
         <Select label="Период" help="а" options={[{ value: 'm', label: 'Месяц' }]} />
-        <Combobox label="Клиент" help="б" options={[]} />
+        <Combobox label="Получатель" help="б" options={[]} />
         <FileField label="Файл" help="в" />
         <Checkbox label="Показывать уровни" help="г" />
       </>,
     )
-    for (const n of ['Период', 'Клиент', 'Файл', 'Показывать уровни']) expect(screen.getByRole('button', { name: `Подробнее: ${n}` })).toBeTruthy()
+    for (const n of ['Период', 'Получатель', 'Файл', 'Показывать уровни']) expect(screen.getByRole('button', { name: `Подробнее: ${n}` })).toBeTruthy()
   })
 })

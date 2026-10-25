@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { CodeBlock } from './CodeBlock'
 import { Prose, ProseHtml } from './Prose'
-import { csvCode } from '../stories/agent-fixtures'
+import { csvCode } from '../stories/fixtures'
 
 const meta = {
   title: 'Компоненты/Элементы/Текст ответа',

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { CodeBlock } from './CodeBlock'
-import { csvCode, longCode } from '../stories/agent-fixtures'
+import { csvCode, longCode } from '../stories/fixtures'
 
 const meta = {
   title: 'Компоненты/Поверхности/Блок кода',

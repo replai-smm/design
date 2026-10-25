@@ -5,7 +5,7 @@ const meta = {
   title: 'Компоненты/Элементы/Аватар',
   component: Avatar,
   parameters: { layout: 'padded' },
-  args: { name: 'Кофейня «Зерно»' },
+  args: { name: 'Анна Петрова' },
 } satisfies Meta<typeof Avatar>
 export default meta
 type S = StoryObj<typeof meta>

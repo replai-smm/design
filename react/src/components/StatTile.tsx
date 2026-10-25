@@ -25,7 +25,7 @@ export interface StatTileCompare {
 export interface StatTileProps {
   /** Главное число («17», «3,4», «2/3»). */
   value: ReactNode
-  /** Что это за число: «сообществ», «Ср. просмотры». */
+  /** Что это за число: «проектов», «Ср. просмотры». */
   label: ReactNode
   /** Продолжение подписи мелко: «· не ведём 2». */
   detail?: ReactNode

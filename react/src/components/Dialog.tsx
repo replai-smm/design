@@ -6,7 +6,7 @@
  * внизу, главная справа на ноутбуке и внизу во всю ширину на телефоне. Первый фокус: `data-autofocus`, иначе первое
  * поле, иначе главная кнопка, иначе «закрыть».
  *
- * `useConfirm()` — подтверждение вместо `window.confirm`: `if (await confirm({ title: 'Удалить пост?', danger: true }))`.
+ * `useConfirm()` — подтверждение вместо `window.confirm`: `if (await confirm({ title: 'Удалить файл?', danger: true }))`.
  * Опасное — кнопкой «опасно» без главной рядом (П10), фокус сначала на «Отмена» (случайный Enter не удалит).
  * Нужен `<ConfirmProvider>` один раз вокруг приложения.
  */
@@ -16,7 +16,7 @@ import { cx } from '../lib/cx'
 import { ActionArea, Button } from './Button'
 import { SurfaceProvider } from './layout'
 
-/** sm, md — ширина на ноутбуке; full — во весь экран (долгая работа в окне: «Чат с ИИ» Статистики). */
+/** sm, md — ширина на ноутбуке; full — во весь экран (долгая работа в окне: разговор с помощником). */
 export type DialogSize = 'sm' | 'md' | 'full'
 
 export interface DialogProps {

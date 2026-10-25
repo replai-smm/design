@@ -1,14 +1,12 @@
 /**
- * Поле ответа с «Отправить» (DF: «Сообщения», «Комментарии», «ИИ», «Чаты»; чат orbit).
+ * Поле ответа с «Отправить» (сообщения, комментарии, разговор с агентом).
  * - Клавиши (`send`): `enter` — Enter отправляет, Shift+Enter — новая строка; `ctrl-enter` — Enter — новая строка,
- *   Ctrl/⌘+Enter отправляет; `button` — только кнопкой (отправка необратима: ответ в ВК). Набор через IME не трогаем.
+ *   Ctrl/⌘+Enter отправляет; `button` — только кнопкой (отправка необратима: ответ уходит адресату). Набор через IME не трогаем.
  * - Отправка идёт — кнопка «занята», поле только для чтения, второй раз не уходит. Неудача не теряет текст:
  *   `onSend` вернул отклонённое обещание — текст остаётся, ошибку показывает `error`.
  * - «Отправить» — главная области (П5) через `ActionArea`; рядом — тихие (`tools`). Уже есть главная на поверхности —
  *   `emphasis="secondary"`. `disabled` — словами, почему нельзя.
- * - Чат агента: `stop` — «Стоп», пока агент работает; `menu` — меню над полем (`CommandMenu`), клавиши поля сначала
- *   получает `onKeyDown` продукта (взял — `preventDefault`), `activeDescendant` — активная строка меню для читалки;
- *   `layout="row"` — кнопки в ряд, «Отправить» справа.
+ * - Разговор с агентом: `stop` — «Стоп», пока агент работает; `layout="row"` — кнопки в ряд, «Отправить» справа.
  */
 import { forwardRef, useId, useImperativeHandle, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
 import { cx } from '../lib/cx'
@@ -17,7 +15,7 @@ import { Icon } from './Icon'
 import { fieldBox } from './TextField'
 
 export interface ReplyBoxProps {
-  /** Подпись поля для читалки: «Ответ клиенту». */
+  /** Подпись поля для читалки: «Ответ покупателю». */
   label: string
   value?: string
   onChange?: (value: string) => void
@@ -48,11 +46,6 @@ export interface ReplyBoxProps {
   layout?: 'stack' | 'row'
   /** «Стоп» — пока агент работает. */
   stop?: { onStop: () => void; label?: ReactNode }
-  /** Меню над полем: команды «/». */
-  menu?: ReactNode
-  onKeyDown?: (e: KeyboardEvent<HTMLTextAreaElement>) => void
-  /** id активной строки меню (`aria-activedescendant`). */
-  activeDescendant?: string
   className?: string
 }
 
@@ -63,7 +56,7 @@ export interface ReplyBoxHandle {
 const HINT = { enter: 'Enter — отправить, Shift+Enter — новая строка', 'ctrl-enter': 'Ctrl+Enter — отправить', button: null } as const
 
 export const ReplyBox = forwardRef<ReplyBoxHandle, ReplyBoxProps>(function ReplyBox(
-  { label, value, onChange, onSend, placeholder, sendLabel = 'Отправить', send: mode = 'enter', sending: sendingProp, disabled, error, emptyMessage, allowEmpty = false, tools, attachment, hint, emphasis = 'primary', rows = 3, layout = 'stack', stop, menu, onKeyDown: onKeyDownProp, activeDescendant, className },
+  { label, value, onChange, onSend, placeholder, sendLabel = 'Отправить', send: mode = 'enter', sending: sendingProp, disabled, error, emptyMessage, allowEmpty = false, tools, attachment, hint, emphasis = 'primary', rows = 3, layout = 'stack', stop, className },
   ref,
 ) {
   const id = useId()
@@ -110,8 +103,7 @@ export const ReplyBox = forwardRef<ReplyBoxHandle, ReplyBoxProps>(function Reply
   }
 
   const onKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    onKeyDownProp?.(e)
-    if (e.defaultPrevented || e.key !== 'Enter' || e.nativeEvent.isComposing) return
+    if (e.key !== 'Enter' || e.nativeEvent.isComposing) return
     const mod = e.ctrlKey || e.metaKey
     if ((mode === 'ctrl-enter' && mod) || (mode === 'enter' && (mod || (!e.shiftKey && !e.altKey)))) {
       e.preventDefault()
@@ -134,10 +126,8 @@ export const ReplyBox = forwardRef<ReplyBoxHandle, ReplyBoxProps>(function Reply
       <label htmlFor={`${id}-field`} className="sr-only">
         {label}
       </label>
-      {menu}
       <textarea
         ref={area}
-        aria-activedescendant={activeDescendant}
         id={`${id}-field`}
         rows={rows}
         value={text}

@@ -1,7 +1,7 @@
 /**
- * Страница паттерна в Storybook: правило из `patterns/<Имя>.md` (один источник — его же читают люди и агенты в пакете)
- * и под ним живой пример из компонентов ДС. Разметка правила — узкое подмножество Markdown: `#`, `##`, абзац, `- `,
- * `1. `, **жирный**, `код`; другое тест паттернов не пустит.
+ * Страница паттерна в Storybook: правило из `patterns/<имя>.md` — перевод паттерна Carbon (один источник — его же читают
+ * люди и агенты в пакете) — и под ним живой пример из компонентов ДС. Разметка — узкое подмножество Markdown: `#`, `##`,
+ * `###`, абзац, `- `, `1. `, таблица `| … |`, **жирный**, `код`; другое тест паттернов не пустит.
  */
 import type { ReactNode } from 'react'
 import { Prose } from '../components/Prose'
@@ -17,21 +17,42 @@ function blocks(md: string): ReactNode[] {
   const out: ReactNode[] = []
   let list: { ordered: boolean; items: string[] } | null = null
   let para: string[] = []
+  let rows: string[][] = []
+  const cells = (l: string) => l.slice(1, -1).split('|').map((c) => c.trim())
   const flush = () => {
     if (para.length) out.push(<p key={out.length}>{inline(para.join(' '))}</p>)
     if (list) {
       const items = list.items.map((t, i) => <li key={i}>{inline(t)}</li>)
       out.push(list.ordered ? <ol key={out.length}>{items}</ol> : <ul key={out.length}>{items}</ul>)
     }
+    if (rows.length) {
+      const [head, ...body] = rows
+      out.push(
+        <table key={out.length}>
+          <thead>
+            <tr>{head.map((c, i) => (c ? <th key={i}>{inline(c)}</th> : <td key={i} />))}</tr>
+          </thead>
+          <tbody>
+            {body.map((r, i) => (
+              <tr key={i}>{r.map((c, j) => <td key={j}>{inline(c)}</td>)}</tr>
+            ))}
+          </tbody>
+        </table>,
+      )
+    }
     para = []
     list = null
+    rows = []
   }
   for (const line of md.split('\n')) {
     const item = /^(-|\d+\.) (.*)$/.exec(line)
     if (line.startsWith('# ')) continue
-    if (line.startsWith('## ')) {
+    if (line.startsWith('|')) {
+      if (para.length || list) flush()
+      if (!/^\|[\s|:-]+\|$/.test(line)) rows.push(cells(line))
+    } else if (line.startsWith('## ') || line.startsWith('### ')) {
       flush()
-      out.push(<h2 key={out.length}>{line.slice(3)}</h2>)
+      out.push(line.startsWith('## ') ? <h2 key={out.length}>{line.slice(3)}</h2> : <h3 key={out.length}>{line.slice(4)}</h3>)
     } else if (item) {
       const ordered = item[1] !== '-'
       if (para.length || (list && list.ordered !== ordered)) flush()

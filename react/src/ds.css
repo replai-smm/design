@@ -189,11 +189,6 @@
 .ds-pop[data-state='closed'] {
   animation: ds-fade-out var(--ds-motion-fast) var(--ds-ease);
 }
-/* меню у поля: не выше половины экрана */
-.ds-menu {
-  max-height: 50dvh;
-}
-
 /* три колонки на телефоне: колонка выезжает — вперёд справа, назад слева */
 @media (max-width: 63.99rem) {
   .ds-col[data-dir='forward'] {
@@ -315,14 +310,4 @@
   margin-left: var(--ds-space-tight);
   background: var(--ds-fg);
   animation: ds-blink var(--ds-motion-move) var(--ds-ease) infinite alternate;
-}
-
-/* схема: указатель агента — мягкое мерцание рамки на месте */
-@keyframes ds-glow {
-  to {
-    opacity: 0.35;
-  }
-}
-.ds-lit-ring {
-  animation: ds-glow var(--ds-motion-move) var(--ds-ease) infinite alternate;
 }

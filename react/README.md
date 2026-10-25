@@ -21,14 +21,10 @@
 | Поля | `TextField`, `TextArea`, `Select`, `NumberField`, `Checkbox`/`CheckboxGroup`, `Combobox`, `FileField`, `SearchField` | одна рамка и один каркас: подпись, подсказка, ошибка знаком и словом; `dense` — 32 px; `help` — справка «i» у подписи; `inline` · `unit` (текст, число, выбор, выбор с поиском) — поле настройки одной строкой с 1024 px, ошибка у поля |
 | Поверхности | `Surface` | слой, рамка, угол 6, поля 16; `mark` — метка тона слева; `inset` — утопленная |
 | | `Card`, `StatTile`, `Notification`, `StateView`, `CodeBlock`, `ChartFrame` | построены на `Surface`; заголовок — роль `heading` |
-| | `DecisionCard`, `Diagram` | чат orbit |
 | Коллекции | `DataTable`, `List` | строки: срочное сверху, норма свёрнута, много — «показать ещё»; `selectedKey` и `onSelect`; сортировка, подсказка у заголовка, `nowrap`, `rowMuted` у таблицы |
-| | `ProofreadGrid`, `GridLegend`, `StatusRow`, `WeekCalendar` | DF; сетка статуса — клетка и развёрнутый день (`StatusRow`) залиты тоном статуса |
 | Слои | `Dialog`, `ConfirmProvider`/`useConfirm`, `Toaster`/`useToast` | окно (шторка снизу на телефоне, `side="left"` — слева, `size`: `sm` · `md` · `full`), подтверждение, «готово» |
-| | `CommandMenu` | чат orbit |
 | Составные | `Tabs`, `FilterBar`/`useUrlFilters` | один ряд сегментов: панели и фильтры в адресе; не влезает — вкладки одной строкой с прокруткой, фильтры переносятся |
 | | `ThreeColumn`, `ChatThread`, `ReplyBox` | список → лента → карточка; переписка; поле ответа (`send`: `enter` · `ctrl-enter` · `button`) |
-| | `AgentStep` | чат orbit |
 
 Общие имена: `state` (`ready` · `loading` · `error`), `empty`, `error`, `selectedKey`, `onSelect`, `tone` (словарь
 тонов), `progress` (словарь хода), `dense`, `label` — подпись для читалки.

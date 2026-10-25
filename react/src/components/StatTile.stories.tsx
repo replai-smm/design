@@ -6,7 +6,7 @@ const meta = {
   title: 'Компоненты/Поверхности/Плитка с цифрой',
   component: StatTile,
   parameters: { layout: 'padded' },
-  args: { value: 17, label: 'сообществ', detail: '· не ведём 2' },
+  args: { value: 17, label: 'проектов', detail: '· в архиве 2' },
 } satisfies Meta<typeof StatTile>
 export default meta
 type S = StoryObj<typeof meta>

@@ -1,12 +1,8 @@
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { chat, chatFailed, longChat } from '../stories/df-fixtures'
-import { csvCode } from '../stories/agent-fixtures'
-import { AgentStep } from './AgentStep'
-import { Button } from './Button'
+import { chat, chatFailed, csvCode, longChat } from '../stories/fixtures'
 import { ChatThread, type ChatMessage } from './ChatThread'
 import { CodeBlock } from './CodeBlock'
-import { DecisionCard } from './DecisionCard'
 import { Prose, ProseHtml } from './Prose'
 
 const meta = {
@@ -30,8 +26,8 @@ export const Обычное: S = {}
 /** Наше не ушло: знак, слово, причина и «Повторить». */
 export const НеОтправлено: S = { tags: ['state:ошибка'], args: { messages: chatFailed } }
 export const Загрузка: S = { tags: ['state:загрузка'], args: { state: 'loading' } }
-export const Ошибка: S = { tags: ['state:ошибка'], args: { state: 'error', error: { title: 'Переписка не загрузилась', description: 'ВК не ответил.', onRetry: () => {} } } }
-export const ПервыйЗапуск: S = { tags: ['state:первый запуск'], args: { messages: [], empty: { kind: 'первый запуск', title: 'Спросите первое', description: 'Например: «Какие посты зашли лучше всего в сентябре?»' } } }
+export const Ошибка: S = { tags: ['state:ошибка'], args: { state: 'error', error: { title: 'Переписка не загрузилась', description: 'Сервер не ответил.', onRetry: () => {} } } }
+export const ПервыйЗапуск: S = { tags: ['state:первый запуск'], args: { messages: [], empty: { kind: 'первый запуск', title: 'Спросите первое', description: 'Например: «Какие товары продавались лучше всего в сентябре?»' } } }
 
 function LongThread() {
   const [shown, setShown] = useState<ChatMessage[]>(longChat.slice(20))
@@ -40,13 +36,13 @@ function LongThread() {
 /** Длинная: «Показать более ранние» вставляет сверху без прыжка. */
 export const Много: S = { tags: ['state:много'], render: () => <LongThread /> }
 
-/** Разговор с агентом: ответ во всю ширину (текст, шаги, решение), весть со стороны — поверхность с меткой, наше «в очереди». */
+/** Разговор с агентом: ответ во всю ширину (текст и код), весть со стороны — поверхность с меткой, наше «в очереди». */
 export const САгентом: S = {
   args: {
-    label: 'Сессия: экспорт комментариев',
-    ownLabel: 'Саша',
+    label: 'Сессия: экспорт заказов',
+    ownLabel: 'Анна',
     messages: [
-      { id: 'u1', direction: 'out', time: '14:00', text: 'Добавь экспорт комментариев в CSV.' },
+      { id: 'u1', direction: 'out', time: '14:00', text: 'Добавь экспорт заказов в CSV.' },
       {
         id: 'a1',
         direction: 'in',
@@ -55,18 +51,14 @@ export const САгентом: S = {
         time: '14:01',
         text: (
           <>
-            <AgentStep tool="Read" target="src/export/index.ts" progress="done" summary="88 строк">
-              <CodeBlock code={csvCode} label="src/export/csv.ts" />
-            </AgentStep>
-            <AgentStep tool="Bash" target="npm test" progress="running" />
             <Prose>
               <ProseHtml html="<p>Экспорт кладу рядом с JSON-выгрузкой:</p><ul><li>тот же запрос</li><li>другой формат</li></ul>" />
             </Prose>
-            <DecisionCard kicker="Изменение n5t2vd" title="Экспорт в CSV готов" facts={['PR 418', 'CI зелёный']} question="На прод?" primary={{ label: 'На прод' }} actions={<Button>Позже</Button>} />
+            <CodeBlock code={csvCode} label="src/export/csv.ts" />
           </>
         ),
       },
-      { id: 'n1', direction: 'in', variant: 'notice', author: 'orbit · весть', time: '14:02', text: 'Прод replai v2.41 — датчик видит новую версию, тесты зелёные.' },
+      { id: 'n1', direction: 'in', variant: 'notice', author: 'система · весть', time: '14:02', text: 'Выпуск v2.41 — сервер видит новую версию, тесты зелёные.' },
       { id: 'u2', direction: 'out', time: '14:03', text: 'И фильтр по дате тоже.', status: 'idle' },
     ] as ChatMessage[],
     pending: 'агент думает…',

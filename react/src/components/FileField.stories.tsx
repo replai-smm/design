@@ -11,7 +11,7 @@ const meta = {
   title: 'Компоненты/Поля/Выбор файла',
   component: FileField,
   parameters: { layout: 'padded' },
-  args: { label: 'КП клиента', accept: '.pdf,image/*', maxSize: 10 * 1024 * 1024, multiple: true, defaultValue: [file('кп-зерно.pdf', 850 * 1024)], className: 'max-w-form' },
+  args: { label: 'Документы заказа', accept: '.pdf,image/*', maxSize: 10 * 1024 * 1024, multiple: true, defaultValue: [file('счёт-1024.pdf', 850 * 1024)], className: 'max-w-form' },
 } satisfies Meta<typeof FileField>
 export default meta
 type S = StoryObj<typeof meta>

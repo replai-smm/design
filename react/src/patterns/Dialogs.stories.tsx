@@ -1,37 +1,41 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import md from '../../../patterns/Dialogs.md?raw'
+import md from '../../../patterns/dialogs.md?raw'
 import { ActionArea, Button } from '../components/Button'
 import { Dialog } from '../components/Dialog'
-import { PatternDoc } from './doc'
+import { TextField } from '../components/TextField'
+import { Stack } from '../components/layout'
+import { pattern } from './story'
 
-function Doc({ open = false }: { open?: boolean }) {
+/** Опасное подтверждение и короткий ввод в окне. */
+function Example({ open = false }: { open?: boolean }) {
   return (
-    <PatternDoc md={md}>
-      <div className="p-blocks">
-        <Dialog
-          open={open || undefined}
-          trigger={<Button tone="опасно">Удалить черновик</Button>}
-          title="Удалить черновик?"
-          description="Черновик пропадёт у всех. Вернуть нельзя."
-          actions={
-            <ActionArea label="Действия окна">
-              <Button variant="ghost" data-autofocus>
-                Отмена
-              </Button>
-              <Button tone="опасно">Удалить</Button>
-            </ActionArea>
-          }
-        />
-      </div>
-    </PatternDoc>
+    <Stack gap="items" className="p-blocks">
+      <Dialog
+        open={open || undefined}
+        trigger={<Button tone="опасно">Удалить проект</Button>}
+        title="Удалить проект «Сайт»?"
+        description="Проект и его задачи пропадут у всей команды. Вернуть нельзя."
+        actions={
+          <ActionArea label="Действия окна">
+            <Button variant="ghost" data-autofocus>
+              Отмена
+            </Button>
+            <Button tone="опасно">Удалить</Button>
+          </ActionArea>
+        }
+      />
+      <Dialog trigger={<Button>Переименовать</Button>} title="Новое имя проекта" persistent actions={<ActionArea primary={{ label: 'Сохранить' }} label="Действия окна" />}>
+        <TextField label="Имя проекта" defaultValue="Сайт" />
+      </Dialog>
+    </Stack>
   )
 }
 
-const meta = { title: 'Паттерны/Окна и подтверждения', component: Doc, parameters: { layout: 'fullscreen' } } satisfies Meta<typeof Doc>
+const Doc = pattern(md, Example)
+const meta = { title: 'Паттерны/Окна', component: Doc, parameters: { layout: 'fullscreen' } } satisfies Meta<typeof Doc>
 export default meta
 type S = StoryObj<typeof meta>
 
-/** Кнопка опасного действия открывает подтверждение. */
 export const Обычное: S = {}
-/** Подтверждение открыто: вопрос, что будет, «Удалить» тоном «опасно», фокус на «Отмена». */
+/** Подтверждение открыто: вопрос, что будет, «Удалить» — опасная, фокус на «Отмена». */
 export const Открыто: S = { args: { open: true } }

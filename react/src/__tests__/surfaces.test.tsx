@@ -1,8 +1,7 @@
-/** Поверхности: одна анатомия (Surface) у карточки, плитки, уведомления, состояния, кода, рамки графика, решения; схема. */
+/** Поверхности: одна анатомия (Surface) у карточки, плитки, уведомления, состояния, кода, рамки графика. */
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, fireEvent, within } from '@testing-library/react'
-import { Card, ChartFrame, CodeBlock, DecisionCard, Diagram, edgePath, litSet, Notification, ReplyBox, StateView, StatTile, Surface } from '../index'
-import { ringEdges, ringNodes } from '../stories/agent-fixtures'
+import { Card, ChartFrame, CodeBlock, Notification, StateView, StatTile, Surface } from '../index'
 
 const quiet = () => vi.spyOn(console, 'error').mockImplementation(() => {})
 afterEach(() => vi.restoreAllMocks())
@@ -18,10 +17,9 @@ describe('одна поверхность', () => {
         <Notification tone="опасно" title="Беда" />
         <StateView kind="ошибка" title="Не загрузилось" />
         <ChartFrame title="График" summary="вывод" />
-        <DecisionCard title="Решение" primary={{ label: 'Да' }} />
       </>,
     )
-    for (const slot of ['surface', 'card', 'stat-tile', 'notification', 'state-view', 'chart-frame', 'decision-card']) {
+    for (const slot of ['surface', 'card', 'stat-tile', 'notification', 'state-view', 'chart-frame']) {
       const el = container.querySelector(`[data-slot=${slot}]`)!
       for (const c of ANATOMY) expect(el.className, `${slot}: ${c}`).toContain(c)
       const title = el.querySelector('[data-part=title]')
@@ -61,7 +59,7 @@ describe('карточка: лицо ≤ 3 (П7), раскрытие не глу
 describe('плитка, уведомление, состояние', () => {
   it('плитка с onClick — кнопка; беда — знак и слово; сравнение — метки рядов и разница', () => {
     const onClick = vi.fn()
-    render(<StatTile value={17} label="сообществ" alert={{ tone: 'опасно', text: '2 без доступа' }} onClick={onClick} />)
+    render(<StatTile value={17} label="проектов" alert={{ tone: 'опасно', text: '2 без доступа' }} onClick={onClick} />)
     fireEvent.click(screen.getByRole('button', { name: /^17/ }))
     expect(onClick).toHaveBeenCalled()
     expect(document.querySelector('[data-part=alert] svg[data-icon=tone-danger]')).toBeTruthy()
@@ -104,53 +102,13 @@ describe('блок кода и рамка графика', () => {
   })
 
   it('рамка: заголовок и вывод связаны с рисунком; легенда — ряд и вид линии; состояния вместо графика', () => {
-    const { rerender } = render(<ChartFrame title="Охват" summary="вырос" legend={[{ key: 'a', label: 'А' }, { key: 'b', label: 'Б', series: 1, line: 'dashed' }]}><svg /></ChartFrame>)
-    const fig = screen.getByRole('figure', { name: 'Охват' })
+    const { rerender } = render(<ChartFrame title="Посещения" summary="вырос" legend={[{ key: 'a', label: 'А' }, { key: 'b', label: 'Б', series: 1, line: 'dashed' }]}><svg /></ChartFrame>)
+    const fig = screen.getByRole('figure', { name: 'Посещения' })
     expect(document.getElementById(fig.getAttribute('aria-describedby')!)?.textContent).toBe('вырос')
     const items = within(screen.getByRole('list', { name: 'Легенда' })).getAllByRole('listitem')
     expect(items[1].getAttribute('data-line')).toBe('dashed')
-    rerender(<ChartFrame title="Охват" summary="вырос" state="error" error={{ title: 'Не загрузился' }} legend={[{ key: 'a', label: 'А' }]} />)
+    rerender(<ChartFrame title="Посещения" summary="вырос" state="error" error={{ title: 'Не загрузился' }} legend={[{ key: 'a', label: 'А' }]} />)
     expect(screen.getByRole('alert').textContent).toContain('Не загрузился')
     expect(screen.queryByRole('list', { name: 'Легенда' })).toBeNull()
-  })
-})
-
-describe('карточка решения (чат)', () => {
-  it('ждёт слова: метка «инфо», своя область главной — главная поля ответа рядом не спорит', () => {
-    render(
-      <>
-        <DecisionCard title="На прод?" primary={{ label: 'На прод' }} />
-        <ReplyBox label="Сообщение" onSend={() => {}} />
-      </>,
-    )
-    expect(document.querySelectorAll('[data-variant=primary]')).toHaveLength(2)
-    expect(document.querySelector('[data-slot=decision-card]')!.getAttribute('data-mark')).toBe('info')
-  })
-
-  it('отвечено — кнопок и метки нет, слово ответа и время; больше трёх фактов — ошибка', () => {
-    render(<DecisionCard title="Разрешение" primary={{ label: 'Да' }} answered={{ word: 'Разрешено', time: '14:20', tone: 'хорошо' }} />)
-    const card = document.querySelector('[data-slot=decision-card]')!
-    expect(within(card as HTMLElement).queryAllByRole('button')).toHaveLength(0)
-    expect(card.hasAttribute('data-mark')).toBe(false)
-    expect(card.textContent).toContain('Разрешено14:20')
-    quiet()
-    expect(() => render(<DecisionCard title="x" facts={['1', '2', '3', '4']} primary={{ label: 'Да' }} />)).toThrow(/не больше 3/)
-  })
-})
-
-describe('схема (чат)', () => {
-  it('узел горит, если горит он или что внутри; связь — прямо или дугой', () => {
-    expect([...litSet(ringNodes, ['input/probe']).nodes]).toEqual(['input'])
-    expect(edgePath([0, 0], [1, 1])).toBe('M0 0L100 100')
-    expect(edgePath([0, 0], [1, 0], [0.5, 0.5])).toMatch(/^M0 0Q/)
-  })
-
-  it('указатель: подсветка, фокус — aria-current, остальное приглушено; onSelect — адреса', () => {
-    const onSelect = vi.fn()
-    const { container } = render(<Diagram label="Круг" nodes={ringNodes} edges={ringEdges} highlight={['input/probe']} focus="execution" dim onSelect={onSelect} />)
-    expect(container.querySelector('[data-address=execution]')!.getAttribute('aria-current')).toBe('location')
-    expect(container.querySelector('[data-address=event]')!.className).toContain('opacity-40')
-    fireEvent.click(screen.getByRole('button', { name: 'k8w1qa · фильтр по дате' }))
-    expect(onSelect).toHaveBeenCalledWith('k8w1qa')
   })
 })

@@ -5,7 +5,7 @@ const meta = {
   title: 'Компоненты/Элементы/Справка',
   component: Toggletip,
   parameters: { layout: 'padded' },
-  args: { label: 'Окно записей', children: 'Участвуют только последние N записей сообщества. Пусто — все записи периода.' },
+  args: { label: 'Окно записей', children: 'Участвуют только последние N записей проекта. Пусто — все записи периода.' },
   play: async ({ canvasElement }) => {
     canvasElement.querySelector<HTMLButtonElement>('[data-slot="toggletip"]')?.click()
   },

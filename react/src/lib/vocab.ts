@@ -32,7 +32,7 @@ export const TONE: Record<Tone, ToneLook> = {
   хорошо: { key: 'success', mark: 'text-success', text: 'text-fg', bg: null, icon: 'tone-success' },
 }
 
-/** Ход работы: впереди · идёт · готово · ошибка — у шагов, шага агента и загрузки в строке одни слова. */
+/** Ход работы: впереди · идёт · готово · ошибка — у шагов, хода в строке и отправки сообщения одни слова. */
 export type Progress = 'idle' | 'running' | 'done' | 'error'
 export const PROGRESS_WORD: Record<Progress, string> = { idle: 'впереди', running: 'идёт', done: 'готово', error: 'ошибка' }
 

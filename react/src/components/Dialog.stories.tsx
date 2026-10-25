@@ -20,7 +20,7 @@ const meta = {
         <Button>Отмена</Button>
       </ActionArea>
     ),
-    children: <TextField label="Папка" defaultValue="~/dev/replai" />,
+    children: <TextField label="Папка" defaultValue="~/dev/reports" />,
   },
 } satisfies Meta<typeof Dialog>
 export default meta

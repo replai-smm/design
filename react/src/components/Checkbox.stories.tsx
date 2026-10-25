@@ -15,8 +15,8 @@ export const Обычное: S = {
   render: (args) => (
     <CheckboxGroup legend={args.legend} helperText="Что сотрудник видит в меню.">
       <Checkbox label="Сообщения" defaultChecked />
-      <Checkbox label="Постинг" />
-      <Checkbox label="Все сообщества" checked="indeterminate" />
+      <Checkbox label="Задачи" />
+      <Checkbox label="Все проекты" checked="indeterminate" />
       <Checkbox label="Админ" disabled />
     </CheckboxGroup>
   ),
@@ -25,5 +25,5 @@ export const Обычное: S = {
 /** Ошибка у галочки — под ней знак и слово. */
 export const Ошибка: S = {
   tags: ['state:ошибка'],
-  render: () => <Checkbox label="Согласен с правилами публикации" error="Без согласия пост не уйдёт" />,
+  render: () => <Checkbox label="Согласен с условиями оплаты" error="Без согласия заказ не уйдёт" />,
 }

@@ -26,11 +26,11 @@ export const Сетка: S = {
   render: () => (
     <Grid columns={3}>
       <Card title="Рассылка" status="change.changing" facts={['Хотят изменить текст']} />
-      <Card title="Вход через VK" status="work.working" facts={['Работает']} />
+      <Card title="Вход по почте" status="work.working" facts={['Работает']} />
       <Card
-        title="Replai"
+        title="Интернет-магазин"
         status="work.unchecked"
-        facts={['2 модуля', '1 интент ждёт «делаем»']}
+        facts={['2 модуля', '1 задача ждёт решения']}
         more={
           <Grid columns={2} gap="items">
             <Card title="Сообщения" status="work.failing" more={<p className="m-0 text-body">Подробности модуля.</p>} />

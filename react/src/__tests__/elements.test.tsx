@@ -6,7 +6,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { Accordion, ActionArea, BottomBar, Button, Chart, chartHasData, CountBadge, countText, DataTable, Delta, deltaText, Dialog, Icon, InlineLoading, Meter, meterTone, niceMax, Notification, Page, PageHeader, StatusBadge, Steps, stepProgress, tickIndexes, ticksOf } from '../index'
 import { STATUS_IDS, TONE, TONE_ORDER, statusOf, toneOf } from '../lib/vocab'
-import { groups, type GroupRow } from '../stories/fixtures'
+import { projects, type ProjectRow } from '../stories/fixtures'
 import statusesJson from '../../../statuses.json'
 
 const quiet = () => vi.spyOn(console, 'error').mockImplementation(() => {})
@@ -50,7 +50,7 @@ describe('кнопки: одна главная (П5), опасное не ря�
 
   it('в строке: область — ошибка, рамочная и опасная — ошибка, ghost — можно', () => {
     quiet()
-    const t = (action: React.ReactNode) => render(<DataTable<GroupRow> label="т" rows={groups.slice(0, 1)} columns={[{ key: 'n', header: 'Н', cell: (r) => r.name, face: true }]} getKey={(r) => r.id} rowAction={() => action} />)
+    const t = (action: React.ReactNode) => render(<DataTable<ProjectRow> label="т" rows={projects.slice(0, 1)} columns={[{ key: 'n', header: 'Н', cell: (r) => r.name, face: true }]} getKey={(r) => r.id} rowAction={() => action} />)
     expect(() => t(<ActionArea primary={{ label: 'x' }} />)).toThrow(/в строке списка нет области/)
     expect(() => t(<Button>x</Button>)).toThrow(/только ghost/)
     expect(() => t(<Button variant="ghost" tone="опасно">x</Button>)).toThrow(/только ghost/)
@@ -229,8 +229,8 @@ describe('разница и график', () => {
   })
 
   it('график: ряды — роли рядов данных, не цвета тонов; вид линии; role=img', () => {
-    const { container } = render(<Chart kind="line" label="Охват" labels={['1', '2', '3']} series={[{ key: 'a', label: 'А', data: [1, 2, 3] }, { key: 'b', label: 'Б', data: [3, 2, null], line: 'dashed', series: 4 }]} />)
-    expect(screen.getByRole('img', { name: 'Охват' })).toBeTruthy()
+    const { container } = render(<Chart kind="line" label="Посещения" labels={['1', '2', '3']} series={[{ key: 'a', label: 'А', data: [1, 2, 3] }, { key: 'b', label: 'Б', data: [3, 2, null], line: 'dashed', series: 4 }]} />)
+    expect(screen.getByRole('img', { name: 'Посещения' })).toBeTruthy()
     const lines = container.querySelectorAll('polyline')
     expect(lines[0].getAttribute('class')).toBe('stroke-series-1')
     expect(lines[1].getAttribute('class')).toBe('stroke-series-5')
@@ -240,14 +240,14 @@ describe('разница и график', () => {
 
   it('заливка под линией: цвет ряда тише до оси, только у одного ряда линий', () => {
     const one = [{ key: 'a', label: 'А', data: [1, null, 3], series: 2 }]
-    const { container, rerender } = render(<Chart kind="line" area label="Охват" labels={['1', '2', '3']} series={one} />)
+    const { container, rerender } = render(<Chart kind="line" area label="Посещения" labels={['1', '2', '3']} series={one} />)
     const area = container.querySelector('[data-slot=chart-area]')!
     expect(area.getAttribute('class')).toBe('fill-series-3')
     expect(Number(area.getAttribute('fill-opacity'))).toBeLessThan(1)
     expect(area.getAttribute('d')).toMatch(/^M[\d.]+,216 L.* L[\d.]+,216 Z$/)
-    rerender(<Chart kind="line" area label="Охват" labels={['1', '2', '3']} series={[...one, { key: 'b', label: 'Б', data: [3, 2, 1] }]} />)
+    rerender(<Chart kind="line" area label="Посещения" labels={['1', '2', '3']} series={[...one, { key: 'b', label: 'Б', data: [3, 2, 1] }]} />)
     expect(container.querySelector('[data-slot=chart-area]')).toBeNull()
-    rerender(<Chart kind="line" label="Охват" labels={['1', '2', '3']} series={one} />)
+    rerender(<Chart kind="line" label="Посещения" labels={['1', '2', '3']} series={one} />)
     expect(container.querySelector('[data-slot=chart-area]')).toBeNull()
   })
 
@@ -262,8 +262,8 @@ describe('разница и график', () => {
 
 describe('раскладка и раскрытие (1.3)', () => {
   it('шапка: строка «о чём экран» под заголовком', () => {
-    render(<PageHeader title="Условия начисления" description="За что участник получает баллы." />)
-    expect(screen.getByRole('heading', { level: 1, name: 'Условия начисления' }).nextSibling?.textContent).toBe('За что участник получает баллы.')
+    render(<PageHeader title="Условия оплаты" description="Когда и как списываются деньги." />)
+    expect(screen.getByRole('heading', { level: 1, name: 'Условия оплаты' }).nextSibling?.textContent).toBe('Когда и как списываются деньги.')
   })
   it('липкая полоса низа — одна на страницу: вторая — ошибка в разработке', () => {
     vi.spyOn(console, 'error').mockImplementation(() => {})
@@ -293,7 +293,7 @@ describe('раскладка и раскрытие (1.3)', () => {
     ).toThrow(/последним блоком страницы/)
   })
   it('раскрытие: кнопка во всю строку, aria-expanded и aria-controls, закрытое — inert', () => {
-    render(<Accordion title="Как это работает">Баллы приходят за минуту.</Accordion>)
+    render(<Accordion title="Как это работает">Уведомления приходят за минуту.</Accordion>)
     const btn = screen.getByRole('button', { name: 'Как это работает' })
     const panel = document.getElementById(btn.getAttribute('aria-controls')!)!
     expect(btn.getAttribute('aria-expanded')).toBe('false')
@@ -301,6 +301,6 @@ describe('раскладка и раскрытие (1.3)', () => {
     fireEvent.click(btn)
     expect(btn.getAttribute('aria-expanded')).toBe('true')
     expect(panel.hasAttribute('inert')).toBe(false)
-    expect(panel.textContent).toBe('Баллы приходят за минуту.')
+    expect(panel.textContent).toBe('Уведомления приходят за минуту.')
   })
 })

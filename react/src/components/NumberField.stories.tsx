@@ -5,7 +5,7 @@ const meta = {
   title: 'Компоненты/Поля/Число',
   component: NumberField,
   parameters: { layout: 'padded' },
-  args: { label: 'Постов в неделю', defaultValue: 3, min: 0, max: 14, className: 'max-w-narrow' },
+  args: { label: 'Отчётов в неделю', defaultValue: 3, min: 0, max: 14, className: 'max-w-narrow' },
 } satisfies Meta<typeof NumberField>
 export default meta
 type S = StoryObj<typeof meta>
@@ -15,7 +15,7 @@ export const Обычное: S = {}
 export const Ошибка: S = { tags: ['state:ошибка'], args: { defaultValue: 20 } }
 /** Поле настройки одной строкой (с 1024 px): подпись и «i» слева, число с единицей справа; уже — подпись над полем. */
 export const ВСтроку: S = {
-  args: { label: 'За комментарий', inline: true, unit: 'балла', help: 'Засчитывается комментарий длиннее 10 символов.', className: 'max-w-window' },
+  args: { label: 'Хранить файлы', inline: true, unit: 'дня', help: 'Файлы старше срока удаляются из корзины.', className: 'max-w-window' },
 }
 /** Ошибка поля в строку — у поля, под ним, а не под подписью. */
-export const ВСтрокуОшибка: S = { tags: ['state:ошибка'], args: { label: 'За комментарий', inline: true, unit: 'баллов', defaultValue: 20, className: 'max-w-window' } }
+export const ВСтрокуОшибка: S = { tags: ['state:ошибка'], args: { label: 'Хранить файлы', inline: true, unit: 'дней', defaultValue: 20, className: 'max-w-window' } }

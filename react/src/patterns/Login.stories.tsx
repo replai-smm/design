@@ -1,37 +1,33 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import md from '../../../patterns/Login.md?raw'
+import md from '../../../patterns/login.md?raw'
 import { ActionArea } from '../components/Button'
 import { Notification } from '../components/Notification'
 import { TextField } from '../components/TextField'
 import { Stack } from '../components/layout'
-import { PatternDoc } from './doc'
+import { pattern } from './story'
 
-function Doc({ error = false }: { error?: boolean }) {
+function Example({ error = false }: { error?: boolean }) {
   return (
-    <PatternDoc md={md}>
-      <div className="flex justify-center p-groups">
-        <Stack as="form" gap="blocks" className="w-full max-w-popup" aria-label="Вход">
-          <div className="flex flex-col gap-tight">
-            <p className="m-0 text-title text-fg">Replai</p>
-            <p className="m-0 text-body text-fg-muted">Ответы на комментарии ваших клиентов.</p>
-          </div>
-          {error && (
-            <Notification tone="опасно" title="Не вышло войти">
-              Почта или пароль не подходят. Проверьте раскладку или восстановите пароль.
-            </Notification>
-          )}
-          <TextField label="Почта" type="email" autoComplete="email" defaultValue={error ? 'anna@agency.ru' : undefined} />
-          <TextField label="Пароль" type="password" autoComplete="current-password" />
-          <ActionArea primary={{ label: 'Войти', type: 'submit' }} />
-          <a href="#reset" className="self-start text-body text-accent">
-            Забыли пароль?
-          </a>
-        </Stack>
-      </div>
-    </PatternDoc>
+    <div className="flex justify-center p-groups">
+      <Stack as="form" gap="blocks" className="w-full max-w-popup" aria-label="Вход">
+        <p className="m-0 text-title text-fg">Вход</p>
+        {error && (
+          <Notification tone="опасно" title="Не вышло войти">
+            Почта или пароль не подходят. Проверьте раскладку или восстановите пароль.
+          </Notification>
+        )}
+        <TextField label="Почта" type="email" autoComplete="email" defaultValue={error ? 'anna@example.com' : undefined} />
+        <TextField label="Пароль" type="password" autoComplete="current-password" />
+        <ActionArea primary={{ label: 'Войти', type: 'submit' }} />
+        <a href="#reset" className="self-start text-body text-accent">
+          Забыли пароль?
+        </a>
+      </Stack>
+    </div>
   )
 }
 
+const Doc = pattern(md, Example)
 const meta = { title: 'Паттерны/Вход', component: Doc, parameters: { layout: 'fullscreen' } } satisfies Meta<typeof Doc>
 export default meta
 type S = StoryObj<typeof meta>

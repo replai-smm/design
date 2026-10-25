@@ -1,4 +1,4 @@
-// ДС-React: компоненты по уровням (registry.json). Импорт: `@replai-smm/design`.
+// ДС-React: компоненты по уровням (registry.json). Импорт — из корня пакета.
 
 // Раскладка
 export { Stack, Inline, Grid, Page, PageHeader, Section, SurfaceProvider, type Space, type StackProps, type InlineProps, type GridProps, type PageProps, type PageHeaderProps, type SectionProps, BottomBar, type BottomBarProps } from './components/layout'
@@ -37,18 +37,13 @@ export { Notification, type NotificationProps, type NotificationTone } from './c
 export { StateView, type StateViewProps } from './components/StateView'
 export { CodeBlock, type CodeBlockProps } from './components/CodeBlock'
 export { ChartFrame, type ChartFrameProps, type LegendItem } from './components/ChartFrame'
-export { DecisionCard, type DecisionCardProps, type DecisionAnswer } from './components/DecisionCard'
-export { Diagram, edgePath, litSet, type DiagramProps, type DiagramNode, type DiagramItem, type DiagramDot, type DiagramEdge } from './components/Diagram'
 
 // Коллекции
 export { DataTable, List, compareSortValues, type Column, type SortDirection, type SortState, type DataTableProps, type ListProps, type CollectionProps } from './components/Collection'
-export { ProofreadGrid, GridLegend, StatusRow, type ProofreadGridProps, type GridColumn, type GridCell, type GridLegendProps, type StatusRowProps } from './components/ProofreadGrid'
-export { WeekCalendar, mondayOf, addWeeks, weekTitle, type WeekCalendarProps } from './components/WeekCalendar'
 
 // Слои
 export { Dialog, ConfirmProvider, useConfirm, type DialogProps, type DialogSize, type ConfirmOptions } from './components/Dialog'
 export { Toaster, useToast, type ToasterProps } from './components/Toast'
-export { CommandMenu, matchCommands, type CommandMenuProps, type CommandMenuHandle, type CommandItem } from './components/CommandMenu'
 
 // Составные
 export { Tabs, type TabItem, type TabsProps } from './components/Tabs'
@@ -56,7 +51,6 @@ export { FilterBar, useUrlFilters, type FilterDef, type FilterOption, type Filte
 export { ThreeColumn, type ThreeColumnProps, type ColumnIndex } from './components/ThreeColumn'
 export { ChatThread, type ChatMessage, type ChatThreadProps } from './components/ChatThread'
 export { ReplyBox, type ReplyBoxProps, type ReplyBoxHandle } from './components/ReplyBox'
-export { AgentStep, type AgentStepProps } from './components/AgentStep'
 
 // Словари
 export { TONES, TONE_ORDER, STATUS_IDS, statusOf, toneOf, type Tone, type Progress, type StateKind, type StatusId, type DataState, type EmptyView, type ErrorView } from './lib/vocab'

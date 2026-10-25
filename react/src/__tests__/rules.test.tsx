@@ -1,7 +1,7 @@
 /**
  * Сторожа пакета: истории на каждое обещанное состояние (П12), теги состояний — только из матрицы облика; только роли
  * и шкалы в исходниках и историях; движение — токенами, раскрытие и выезд — 0,6 с без прыжка; классы тонов — те же
- * роли, что в словаре тонов tokens.json (и заливка сетки статуса).
+ * роли, что в словаре тонов tokens.json.
  */
 import { describe, it, expect } from 'vitest'
 import { readFileSync, readdirSync } from 'node:fs'
@@ -9,7 +9,6 @@ import { resolve, join } from 'node:path'
 import { scan } from '../../../lint/scan.mjs'
 import { tones } from '../../../dist/tokens.ts'
 import { TONE, TONES } from '../lib/vocab'
-import { FILL } from '../components/ProofreadGrid'
 import { stories, stateOf, STORY_FILES } from './stories'
 
 const root = resolve(import.meta.dirname, '..', '..')
@@ -52,34 +51,32 @@ const PROMISED: Record<string, string[]> = {
   'StateView.stories.tsx': ['загрузка', 'ошибка', 'первый запуск', 'всё сделано', 'ничего не найдено', 'нет доступа'],
   'CodeBlock.stories.tsx': ['обычное', 'много'],
   'ChartFrame.stories.tsx': ['обычное', 'загрузка', 'ошибка', 'первый запуск', 'ничего не найдено'],
-  'DecisionCard.stories.tsx': ['обычное', 'загрузка', 'ошибка'],
-  'Diagram.stories.tsx': ['обычное'],
   'DataTable.stories.tsx': ALL,
   'List.stories.tsx': ALL,
-  'ProofreadGrid.stories.tsx': ['обычное', 'загрузка', 'ошибка', 'ничего не найдено', 'много'],
-  'WeekCalendar.stories.tsx': ['обычное', 'загрузка', 'ошибка', 'первый запуск', 'ничего не найдено', 'много'],
   'Dialog.stories.tsx': ['обычное', 'загрузка', 'ошибка'],
   'Toast.stories.tsx': ['обычное'],
-  'CommandMenu.stories.tsx': ['обычное', 'ничего не найдено', 'много'],
   'Tabs.stories.tsx': ['обычное', 'много'],
   'FilterBar.stories.tsx': ['обычное'],
   'ThreeColumn.stories.tsx': ['обычное', 'первый запуск'],
   'ChatThread.stories.tsx': ['обычное', 'загрузка', 'ошибка', 'первый запуск', 'много'],
   'ReplyBox.stories.tsx': ['обычное', 'загрузка', 'ошибка', 'нет доступа'],
-  'AgentStep.stories.tsx': ['обычное', 'ошибка', 'много'],
-  'patterns/Forms.stories.tsx': ['обычное', 'ошибка'],
-  'patterns/EmptyStates.stories.tsx': ['обычное'],
-  'patterns/Loading.stories.tsx': ['обычное'],
-  'patterns/Notifications.stories.tsx': ['обычное'],
-  'patterns/Dialogs.stories.tsx': ['обычное'],
   'patterns/CommonActions.stories.tsx': ['обычное'],
-  'patterns/MultiStep.stories.tsx': ['обычное', 'ошибка'],
-  'patterns/Navigation.stories.tsx': ['обычное', 'много'],
-  'patterns/Filtering.stories.tsx': ['обычное', 'загрузка', 'ошибка', 'много'],
-  'patterns/StatusIndicators.stories.tsx': ['обычное'],
+  'patterns/Dialogs.stories.tsx': ['обычное'],
+  'patterns/DisabledStates.stories.tsx': ['обычное'],
   'patterns/Disclosures.stories.tsx': ['обычное'],
-  'patterns/ReadOnly.stories.tsx': ['обычное'],
+  'patterns/EmptyStates.stories.tsx': ['обычное'],
+  'patterns/Filtering.stories.tsx': ['обычное', 'загрузка', 'ошибка', 'много'],
+  'patterns/FluidStyles.stories.tsx': ['обычное'],
+  'patterns/Forms.stories.tsx': ['обычное', 'ошибка'],
+  'patterns/GlobalHeader.stories.tsx': ['обычное', 'много'],
+  'patterns/Loading.stories.tsx': ['обычное'],
   'patterns/Login.stories.tsx': ['обычное', 'ошибка'],
+  'patterns/Notifications.stories.tsx': ['обычное'],
+  'patterns/OverflowContent.stories.tsx': ['обычное'],
+  'patterns/ReadOnlyStates.stories.tsx': ['обычное'],
+  'patterns/Search.stories.tsx': ['обычное', 'ничего не найдено'],
+  'patterns/StatusIndicators.stories.tsx': ['обычное'],
+  'patterns/TextToolbar.stories.tsx': ['обычное'],
 }
 
 describe('истории на каждое состояние', () => {
@@ -126,10 +123,6 @@ describe('только роли и шкалы', () => {
       const x = tones[t]
       expect(TONE[t], t).toMatchObject({ key: x.key, mark: `text-${x.mark}`, text: `text-${x.text}`, bg: x.bg ? `bg-${x.bg}` : null, icon: `tone-${x.key}` })
     }
-  })
-
-  it('заливка сетки статуса — те же роли, что tokens.json → tones.*.fill', () => {
-    for (const t of TONES) expect(FILL[t], t).toBe(tones[t].fill ? `bg-${tones[t].fill}` : null)
   })
 })
 

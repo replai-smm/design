@@ -14,12 +14,12 @@ type S = StoryObj<typeof meta>
 /** Страница → шапка → раздел → блоки: отступы — роли, сетка — одна колонка на телефоне. */
 export const Обычное: S = {
   args: {
-    header: <PageHeader title="Дашборд агентства" tools={<Button variant="ghost" dense icon="menu" aria-label="ещё действия" />} />,
+    header: <PageHeader title="Обзор команды" tools={<Button variant="ghost" dense icon="menu" aria-label="ещё действия" />} />,
     children: (
       <>
-        <Section title="Ключевые показатели" description="За неделю, по всем сообществам.">
+        <Section title="Ключевые показатели" description="За неделю, по всем проектам.">
           <Grid columns={3}>
-            {['17 сообществ', '42 ответа', '3 без доступа'].map((t) => (
+            {['17 проектов', '42 ответа', '3 без доступа'].map((t) => (
               <Surface key={t} className="text-body">
                 {t}
               </Surface>

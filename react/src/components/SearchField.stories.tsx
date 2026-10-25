@@ -18,4 +18,4 @@ type S = StoryObj<typeof meta>
 
 export const Обычное: S = {}
 /** Набрано — «очистить». */
-export const Набрано: S = { args: { initial: 'зерно' } }
+export const Набрано: S = { args: { initial: 'склад' } }

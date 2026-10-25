@@ -9,14 +9,14 @@ import { Icon } from './Icon'
 export interface AvatarProps {
   /** Адрес картинки; продукт сам проверяет, что адрес безопасный (https). */
   src?: string | null
-  /** Имя человека или сообщества: подпись для читалки и буквы на замене. */
+  /** Имя человека или организации: подпись для читалки и буквы на замене. */
   name?: string
   /** Стоит рядом с именем — читалке не нужен. */
   decorative?: boolean
   className?: string
 }
 
-/** Буквы: первые буквы двух первых слов имени («Кофейня Зерно» → «КЗ»), без знаков и кавычек. */
+/** Буквы: первые буквы двух первых слов имени («Анна Петрова» → «АП»), без знаков и кавычек. */
 export function initials(name?: string): string {
   const words = (name ?? '').split(/\s+/).map((w) => w.replace(/[^\p{L}\p{N}]/gu, '')).filter(Boolean)
   return words
