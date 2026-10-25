@@ -154,6 +154,10 @@ export interface BottomBarProps {
 export function BottomBar({ children, className }: BottomBarProps) {
   const surface = useSurface()
   const id = useId()
+  const at = useRef<HTMLDivElement>(null)
+  useLayoutEffect(() => {
+    rule(!at.current?.nextElementSibling, 'липкая полоса — последним блоком страницы: под ней ничего нет, иначе она закроет то, что ниже')
+  })
   useLayoutEffect(() => {
     if (!surface) return
     surface.bars.add(id)
@@ -164,6 +168,7 @@ export function BottomBar({ children, className }: BottomBarProps) {
   }, [surface, id])
   return (
     <div
+      ref={at}
       data-slot="bottom-bar"
       className={cx('ds-bottom-bar z-10 flex min-w-0 flex-col gap-compact border-t border-line bg-surface px-blocks pt-compact shadow-raised md:flex-row md:items-center md:gap-blocks', className)}
     >

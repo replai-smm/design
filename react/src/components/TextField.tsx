@@ -33,6 +33,11 @@ export interface FieldRowProps {
   unit?: ReactNode
 }
 
+/** Каркасу: поле узкое по значению — число (роль ширины `number`), а не во всю колонку. */
+interface ShellWidth {
+  narrow?: boolean
+}
+
 export interface FieldIds {
   id: string
   labelId: string
@@ -84,7 +89,7 @@ export function FieldNote({ ids, helperText, error, disabled }: { ids: FieldIds;
   return null
 }
 
-export interface FieldShellProps extends Pick<FieldBaseProps, 'label' | 'hideLabel' | 'helperText' | 'error' | 'help' | 'className'>, FieldRowProps {
+export interface FieldShellProps extends Pick<FieldBaseProps, 'label' | 'hideLabel' | 'helperText' | 'error' | 'help' | 'className'>, FieldRowProps, ShellWidth {
   ids: FieldIds
   disabled?: boolean
   /** data-slot корня: text-field, select, number-field … */
@@ -95,9 +100,9 @@ export interface FieldShellProps extends Pick<FieldBaseProps, 'label' | 'hideLab
 /**
  * Каркас поля: подпись (и «i»), поле, подсказка или ошибка. `inline` — подпись слева, справа колонкой поле, единица и под
  * ними подсказка или ошибка: ошибка стоит у поля, а не под подписью. Ряд — с `lg`: рядом с колонкой разделов продукта
- * на `md` полю не хватает места.
+ * на `md` полю не хватает места. Число в строке — узкое (`narrow`, роль ширины `number`): ширина по длине значения.
  */
-export function FieldShell({ ids, label, hideLabel, helperText, error, help, disabled, slot, className, inline, unit, children }: FieldShellProps) {
+export function FieldShell({ ids, label, hideLabel, helperText, error, help, disabled, slot, className, inline, unit, narrow, children }: FieldShellProps) {
   rule(!help || typeof label === 'string', 'справка «i» у поля с подписью не строкой: читалка не узнает, о чём справка')
   const muted = disabled ? 'text-fg-disabled' : 'text-fg-muted'
   const labelEl = (
@@ -120,7 +125,7 @@ export function FieldShell({ ids, label, hideLabel, helperText, error, help, dis
         <div className="min-w-0 lg:flex lg:min-h-control lg:flex-1 lg:items-center">{head}</div>
         <div className="flex min-w-0 flex-col gap-tight lg:w-narrow">
           <div className="flex min-w-0 items-center gap-items">
-            <div className="min-w-0 flex-1">{children}</div>
+            <div className={narrow ? 'w-number shrink-0' : 'min-w-0 flex-1'}>{children}</div>
             {unit && <span className={cx('shrink-0 text-body', muted)}>{unit}</span>}
           </div>
           {note}

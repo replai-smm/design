@@ -187,6 +187,16 @@ describe('поле настройки одной строкой и справк�
     expect(column.textContent).toContain('Не больше 10')
     expect(input.getAttribute('aria-invalid')).toBe('true')
   })
+  it('число в строке — узкое (роль ширины number), единица сразу за ним; текст в строке — во всю колонку', () => {
+    render(
+      <>
+        <NumberField inline label="За лайк" unit="балл" defaultValue={1} />
+        <TextField inline label="Название" />
+      </>,
+    )
+    expect(screen.getByRole('spinbutton', { name: 'За лайк' }).closest('.w-number')).not.toBeNull()
+    expect(screen.getByRole('textbox', { name: 'Название' }).closest('.w-number')).toBeNull()
+  })
   it('help: кнопка «i» подписана полем, открывает справку по нажатию', () => {
     render(<TextField label="Окно записей" help="Только последние N записей." />)
     const tip = screen.getByRole('button', { name: 'Подробнее: Окно записей' })

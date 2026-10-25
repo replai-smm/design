@@ -55,7 +55,7 @@ export const NumberField = forwardRef<HTMLInputElement, NumberFieldProps>(functi
   const btn = cx('inline-flex shrink-0 cursor-pointer items-center justify-center text-fg hover:bg-hover', dense ? 'w-dense' : 'w-touch md:w-control', FOCUS, 'disabled:cursor-not-allowed disabled:text-fg-disabled disabled:hover:bg-transparent')
 
   return (
-    <FieldShell slot="number-field" ids={ids} label={label} hideLabel={hideLabel} helperText={helperText} error={shownError} disabled={disabled} className={className} inline={inline} unit={unit} help={help}>
+    <FieldShell slot="number-field" ids={ids} label={label} hideLabel={hideLabel} helperText={helperText} error={shownError} disabled={disabled} className={className} inline={inline} unit={unit} help={help} narrow={inline}>
       <div className={cx(fieldBox({ invalid: Boolean(shownError), disabled, readOnly, within: true, dense }), 'flex items-stretch overflow-hidden')}>
         <input
           ref={ref}

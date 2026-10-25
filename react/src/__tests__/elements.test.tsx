@@ -270,12 +270,27 @@ describe('раскладка и раскрытие (1.3)', () => {
     expect(() =>
       render(
         <Page header={<PageHeader title="x" />}>
-          <BottomBar />
-          <BottomBar />
+          <div>
+            <BottomBar />
+          </div>
+          <div>
+            <BottomBar />
+          </div>
         </Page>,
       ),
     ).toThrow(/вторая липкая полоса/)
     expect(() => render(<Page header={<PageHeader title="y" />}><BottomBar /></Page>)).not.toThrow()
+  })
+  it('липкая полоса — последним блоком страницы: блок под ней — ошибка в разработке', () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    expect(() =>
+      render(
+        <Page header={<PageHeader title="z" />}>
+          <BottomBar />
+          <p>поля формы</p>
+        </Page>,
+      ),
+    ).toThrow(/последним блоком страницы/)
   })
   it('раскрытие: кнопка во всю строку, aria-expanded и aria-controls, закрытое — inert', () => {
     render(<Accordion title="Как это работает">Баллы приходят за минуту.</Accordion>)

@@ -533,6 +533,7 @@
           "type": "object",
           "additionalProperties": false,
           "required": [
+            "number",
             "rail",
             "hint",
             "narrow",
@@ -544,6 +545,9 @@
             "page"
           ],
           "properties": {
+            "number": {
+              "$ref": "#/$defs/space"
+            },
             "rail": {
               "$ref": "#/$defs/space"
             },
