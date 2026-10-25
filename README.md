@@ -35,13 +35,13 @@
 | Уровень | Компоненты |
 |---|---|
 | Основы | роли и шкалы (без компонентов) |
-| Раскладка | Stack, Inline, Grid, Page, PageHeader, Section, SurfaceProvider |
-| Элементы | Icon, Button, ActionArea, StatusBadge, CountBadge, Avatar, InlineLoading, Meter, Steps, Tooltip, Delta, Skeleton, Loading, Prose, ProseHtml, Chart |
+| Раскладка | Stack, Inline, Grid, Page, PageHeader, Section, SurfaceProvider, BottomBar |
+| Элементы | Icon, Button, ActionArea, StatusBadge, CountBadge, Avatar, InlineLoading, Meter, Steps, Tooltip, Help, Delta, Skeleton, Loading, Prose, ProseHtml, Chart |
 | Поля | TextField, TextArea, Select, NumberField, Checkbox, CheckboxGroup, Combobox, FileField, SearchField |
 | Поверхности | Surface, Card, StatTile, Notification, StateView, CodeBlock, ChartFrame; DecisionCard, Diagram — чат |
 | Коллекции | DataTable, List; ProofreadGrid, GridLegend, StatusRow, WeekCalendar — DF |
 | Слои | Dialog (окно и шторка), ConfirmProvider, Toaster; CommandMenu — чат |
-| Паттерны | Tabs, FilterBar, ThreeColumn, ChatThread, ReplyBox; AgentStep — чат |
+| Паттерны | Tabs, FilterBar, ThreeColumn, ChatThread, ReplyBox, SettingsSection, HowItWorks, SaveBar, Wizard, SectionNav; AgentStep — чат |
 
 Уровень, смысл, анатомия (поверхность, поля, роль заголовка, метка, форма) и продукт каждого компонента — в
 `react/src/registry.json`. Компоненты одного продукта помечены `product` и строятся только из ролей.

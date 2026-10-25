@@ -69,9 +69,10 @@
   overflow: clip;
 }
 
-/* окно: на ноутбуке главная справа */
+/* окно и липкая полоса: на ноутбуке главная справа */
 @media (min-width: 48rem) {
-  .ds-dialog-footer [data-slot='action-area'] {
+  .ds-dialog-footer [data-slot='action-area'],
+  .ds-bottom-bar [data-slot='action-area'] {
     flex-direction: row-reverse;
     justify-content: flex-start;
   }
@@ -302,4 +303,22 @@
 }
 .ds-lit-ring {
   animation: ds-glow var(--ds-motion-move) var(--ds-ease) infinite alternate;
+}
+
+/* липкая полоса низа страницы (BottomBar): у низа экрана, на телефоне — над нижней панелью разделов */
+.ds-bottom-bar {
+  position: sticky;
+  bottom: var(--ds-nav-inset, 0);
+}
+/* разделы на телефоне (SectionNav): панель внизу с запасом под «полоску» телефона; страница не уходит под панель */
+@media (max-width: 47.99rem) {
+  .ds-nav {
+    --ds-nav-inset: calc(var(--ds-size-touch) + env(safe-area-inset-bottom));
+  }
+  .ds-nav > [data-part='content'] {
+    padding-bottom: var(--ds-nav-inset);
+  }
+  .ds-tabbar {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
 }

@@ -1,7 +1,7 @@
 // ДС-React: компоненты по уровням (registry.json). Импорт: `@replai-smm/design`.
 
 // Раскладка
-export { Stack, Inline, Grid, Page, PageHeader, Section, SurfaceProvider, type Space, type StackProps, type InlineProps, type GridProps, type PageProps, type PageHeaderProps, type SectionProps } from './components/layout'
+export { Stack, Inline, Grid, Page, PageHeader, Section, SurfaceProvider, BottomBar, type Space, type StackProps, type InlineProps, type GridProps, type PageProps, type PageHeaderProps, type SectionProps, type BottomBarProps } from './components/layout'
 
 // Элементы
 export { Icon, type IconName } from './components/Icon'
@@ -13,13 +13,14 @@ export { InlineLoading, type InlineLoadingProps } from './components/InlineLoadi
 export { Meter, meterTone, type MeterProps } from './components/Meter'
 export { Steps, stepProgress, type StepsProps } from './components/Steps'
 export { Tooltip, type TooltipProps } from './components/Tooltip'
+export { Help, type HelpProps } from './components/Help'
 export { Delta, deltaText, type DeltaProps, type DeltaUnit } from './components/Delta'
 export { Skeleton, Loading } from './components/Skeleton'
 export { Prose, ProseHtml, type ProseProps } from './components/Prose'
 export { Chart, chartHasData, niceMax, ticksOf, tickIndexes, SERIES, type ChartProps, type ChartSeries, type SeriesLine } from './components/Chart'
 
 // Поля
-export { TextField, TextArea, type TextFieldProps, type TextAreaProps, type FieldBaseProps } from './components/TextField'
+export { TextField, TextArea, type TextFieldProps, type TextAreaProps, type FieldBaseProps, type FieldRowProps } from './components/TextField'
 export { Select, type SelectProps, type SelectOption } from './components/Select'
 export { NumberField, type NumberFieldProps } from './components/NumberField'
 export { Checkbox, CheckboxGroup, type CheckboxProps, type CheckboxGroupProps, type CheckedState } from './components/Checkbox'
@@ -55,6 +56,10 @@ export { ThreeColumn, type ThreeColumnProps, type ColumnIndex } from './componen
 export { ChatThread, type ChatMessage, type ChatThreadProps } from './components/ChatThread'
 export { ReplyBox, type ReplyBoxProps, type ReplyBoxHandle } from './components/ReplyBox'
 export { AgentStep, type AgentStepProps } from './components/AgentStep'
+export { SettingsSection, HowItWorks, type SettingsSectionProps, type HowItWorksProps } from './components/Settings'
+export { SaveBar, changesText, type SaveBarProps } from './components/SaveBar'
+export { Wizard, type WizardProps } from './components/Wizard'
+export { SectionNav, type NavItem, type SectionNavProps } from './components/SectionNav'
 
 // Словари
 export { TONES, TONE_ORDER, STATUS_IDS, statusOf, toneOf, type Tone, type Progress, type StateKind, type StatusId, type DataState, type EmptyView, type ErrorView } from './lib/vocab'

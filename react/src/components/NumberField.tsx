@@ -8,10 +8,11 @@ import { FOCUS } from '../lib/anatomy'
 import { useControllable } from '../lib/controllable'
 import { cx } from '../lib/cx'
 import { Icon } from './Icon'
-import { FieldShell, fieldAria, fieldBox, useFieldIds, type FieldBaseProps } from './TextField'
+import { FieldShell, fieldAria, fieldBox, useFieldIds, type FieldBaseProps, type FieldRowProps } from './TextField'
 
 export interface NumberFieldProps
   extends FieldBaseProps,
+    FieldRowProps,
     Omit<InputHTMLAttributes<HTMLInputElement>, 'size' | 'children' | 'className' | 'value' | 'defaultValue' | 'onChange' | 'type' | 'min' | 'max' | 'step'> {
   value?: number | null
   defaultValue?: number | null
@@ -25,7 +26,7 @@ const fmt = (n: number | null) => (n === null ? '' : String(n))
 const parse = (t: string): number | null => (t === '' || t === '-' ? null : Number(t))
 
 export const NumberField = forwardRef<HTMLInputElement, NumberFieldProps>(function NumberField(
-  { label, hideLabel, helperText, error, dense, className, id, disabled, readOnly, value: valueProp, defaultValue = null, onChange, min, max, step = 1, onKeyDown, onBlur, ...rest },
+  { label, hideLabel, helperText, error, dense, className, id, disabled, readOnly, value: valueProp, defaultValue = null, onChange, min, max, step = 1, onKeyDown, onBlur, inline, unit, help, ...rest },
   ref,
 ) {
   const ids = useFieldIds(id)
@@ -54,7 +55,7 @@ export const NumberField = forwardRef<HTMLInputElement, NumberFieldProps>(functi
   const btn = cx('inline-flex shrink-0 cursor-pointer items-center justify-center text-fg hover:bg-hover', dense ? 'w-dense' : 'w-touch md:w-control', FOCUS, 'disabled:cursor-not-allowed disabled:text-fg-disabled disabled:hover:bg-transparent')
 
   return (
-    <FieldShell slot="number-field" ids={ids} label={label} hideLabel={hideLabel} helperText={helperText} error={shownError} disabled={disabled} className={className}>
+    <FieldShell slot="number-field" ids={ids} label={label} hideLabel={hideLabel} helperText={helperText} error={shownError} disabled={disabled} className={className} inline={inline} unit={unit} help={help}>
       <div className={cx(fieldBox({ invalid: Boolean(shownError), disabled, readOnly, within: true, dense }), 'flex items-stretch overflow-hidden')}>
         <input
           ref={ref}

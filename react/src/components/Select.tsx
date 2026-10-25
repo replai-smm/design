@@ -5,7 +5,7 @@
 import { forwardRef, type SelectHTMLAttributes } from 'react'
 import { cx } from '../lib/cx'
 import { Icon } from './Icon'
-import { FieldShell, fieldAria, fieldBox, useFieldIds, type FieldBaseProps } from './TextField'
+import { FieldShell, fieldAria, fieldBox, useFieldIds, type FieldBaseProps, type FieldRowProps } from './TextField'
 
 export interface SelectOption {
   value: string
@@ -13,7 +13,7 @@ export interface SelectOption {
   disabled?: boolean
 }
 
-export interface SelectProps extends FieldBaseProps, Omit<SelectHTMLAttributes<HTMLSelectElement>, 'size' | 'children' | 'className' | 'onChange' | 'value' | 'defaultValue'> {
+export interface SelectProps extends FieldBaseProps, FieldRowProps, Omit<SelectHTMLAttributes<HTMLSelectElement>, 'size' | 'children' | 'className' | 'onChange' | 'value' | 'defaultValue'> {
   options: SelectOption[]
   value?: string
   defaultValue?: string
@@ -23,12 +23,12 @@ export interface SelectProps extends FieldBaseProps, Omit<SelectHTMLAttributes<H
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select(
-  { label, hideLabel, helperText, error, dense, className, id, disabled, options, value, defaultValue, onChange, placeholder, ...rest },
+  { label, hideLabel, helperText, error, dense, className, id, disabled, options, value, defaultValue, onChange, placeholder, inline, unit, help, ...rest },
   ref,
 ) {
   const ids = useFieldIds(id)
   return (
-    <FieldShell slot="select" ids={ids} label={label} hideLabel={hideLabel} helperText={helperText} error={error} disabled={disabled} className={className}>
+    <FieldShell slot="select" ids={ids} label={label} hideLabel={hideLabel} helperText={helperText} error={error} disabled={disabled} className={className} inline={inline} unit={unit} help={help}>
       <div className="relative flex items-center">
         <select
           ref={ref}

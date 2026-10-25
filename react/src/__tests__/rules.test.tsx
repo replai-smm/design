@@ -32,6 +32,7 @@ const PROMISED: Record<string, string[]> = {
   'Meter.stories.tsx': ['обычное', 'много'],
   'Steps.stories.tsx': ['обычное', 'ошибка', 'всё сделано'],
   'Tooltip.stories.tsx': ['обычное'],
+  'Help.stories.tsx': ['обычное'],
   'Delta.stories.tsx': ['обычное'],
   'Skeleton.stories.tsx': ['загрузка'],
   'Prose.stories.tsx': ['обычное'],
@@ -66,6 +67,10 @@ const PROMISED: Record<string, string[]> = {
   'ReplyBox.stories.tsx': ['обычное', 'загрузка', 'ошибка', 'нет доступа'],
   'AgentStep.stories.tsx': ['обычное', 'ошибка', 'много'],
   'ListPage.stories.tsx': ['обычное', 'загрузка', 'ошибка', 'много'],
+  'Settings.stories.tsx': ['обычное', 'загрузка', 'ошибка', 'первый запуск'],
+  'SaveBar.stories.tsx': ['обычное', 'загрузка', 'ошибка', 'всё сделано'],
+  'Wizard.stories.tsx': ['обычное', 'ошибка'],
+  'SectionNav.stories.tsx': ['обычное', 'много'],
 }
 
 describe('истории на каждое состояние', () => {

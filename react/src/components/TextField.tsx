@@ -7,6 +7,7 @@
 import { forwardRef, useId, type InputHTMLAttributes, type ReactNode, type TextareaHTMLAttributes } from 'react'
 import { CONTROL, DENSE, FAST } from '../lib/anatomy'
 import { cx } from '../lib/cx'
+import { Help } from './Help'
 import { Icon } from './Icon'
 
 export interface FieldBaseProps {
@@ -20,6 +21,16 @@ export interface FieldBaseProps {
   /** 32 px — плотное поле (строка фильтров, шапка). */
   dense?: boolean
   className?: string
+}
+
+/** Поле настройки одной строкой: `Подпись (?) ……… [ 10 ] баллов`. Есть у текста, числа и выбора. */
+export interface FieldRowProps {
+  /** Подпись слева, поле с единицей справа (на телефоне — подпись над полем). Подпись — текстом, не мелкой строкой. */
+  inline?: boolean
+  /** Единица после поля: «баллов», «дней». */
+  unit?: ReactNode
+  /** Справка по «?» у подписи — вместо абзаца под полем. */
+  help?: ReactNode
 }
 
 export interface FieldIds {
@@ -73,7 +84,7 @@ export function FieldNote({ ids, helperText, error, disabled }: { ids: FieldIds;
   return null
 }
 
-export interface FieldShellProps extends Pick<FieldBaseProps, 'label' | 'hideLabel' | 'helperText' | 'error' | 'className'> {
+export interface FieldShellProps extends Pick<FieldBaseProps, 'label' | 'hideLabel' | 'helperText' | 'error' | 'className'>, FieldRowProps {
   ids: FieldIds
   disabled?: boolean
   /** data-slot корня: text-field, select, number-field … */
@@ -81,14 +92,38 @@ export interface FieldShellProps extends Pick<FieldBaseProps, 'label' | 'hideLab
   children: ReactNode
 }
 
-/** Каркас поля: подпись, поле, подсказка или ошибка. */
-export function FieldShell({ ids, label, hideLabel, helperText, error, disabled, slot, className, children }: FieldShellProps) {
+/** Каркас поля: подпись, поле, подсказка или ошибка; `inline` — подпись и поле одной строкой. */
+export function FieldShell({ ids, label, hideLabel, helperText, error, disabled, slot, className, inline, unit, help, children }: FieldShellProps) {
+  const muted = disabled ? 'text-fg-disabled' : 'text-fg-muted'
+  const labelEl = (
+    <label id={ids.labelId} htmlFor={ids.id} className={cx(inline ? 'text-body' : 'text-caption', inline && !disabled ? 'text-fg' : muted, hideLabel && 'sr-only')}>
+      {label}
+    </label>
+  )
+  const head = help ? (
+    <span className="flex min-w-0 items-center gap-tight">
+      {labelEl}
+      <Help about={typeof label === 'string' ? label : 'поле'}>{help}</Help>
+    </span>
+  ) : (
+    labelEl
+  )
   return (
-    <div data-slot={slot} data-invalid={error ? 'true' : undefined} className={cx('flex min-w-0 flex-col gap-tight', className)}>
-      <label id={ids.labelId} htmlFor={ids.id} className={cx('text-caption', disabled ? 'text-fg-disabled' : 'text-fg-muted', hideLabel && 'sr-only')}>
-        {label}
-      </label>
-      {children}
+    <div data-slot={slot} data-invalid={error ? 'true' : undefined} data-inline={inline || undefined} className={cx('flex min-w-0 flex-col gap-tight', className)}>
+      {inline ? (
+        <div className="flex min-w-0 flex-col gap-tight md:flex-row md:items-center md:gap-blocks">
+          <div className="min-w-0 md:flex-1">{head}</div>
+          <div className="flex min-w-0 items-center gap-items md:w-narrow">
+            <div className="min-w-0 flex-1">{children}</div>
+            {unit && <span className={cx('shrink-0 text-body', muted)}>{unit}</span>}
+          </div>
+        </div>
+      ) : (
+        <>
+          {head}
+          {children}
+        </>
+      )}
       <FieldNote ids={ids} helperText={helperText} error={error} disabled={disabled} />
     </div>
   )
@@ -96,18 +131,18 @@ export function FieldShell({ ids, label, hideLabel, helperText, error, disabled,
 
 /* ——— Однострочное поле ——— */
 
-export interface TextFieldProps extends FieldBaseProps, Omit<InputHTMLAttributes<HTMLInputElement>, 'size' | 'children' | 'className'> {
+export interface TextFieldProps extends FieldBaseProps, FieldRowProps, Omit<InputHTMLAttributes<HTMLInputElement>, 'size' | 'children' | 'className'> {
   /** text, email, password, url, tel, date, time, month, datetime-local … (у даты и времени — выбор системы). */
   type?: string
 }
 
 export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function TextField(
-  { label, hideLabel, helperText, error, dense, className, id, disabled, readOnly, type = 'text', ...rest },
+  { label, hideLabel, helperText, error, dense, className, id, disabled, readOnly, type = 'text', inline, unit, help, ...rest },
   ref,
 ) {
   const ids = useFieldIds(id)
   return (
-    <FieldShell slot="text-field" ids={ids} label={label} hideLabel={hideLabel} helperText={helperText} error={error} disabled={disabled} className={className}>
+    <FieldShell slot="text-field" ids={ids} label={label} hideLabel={hideLabel} helperText={helperText} error={error} disabled={disabled} className={className} inline={inline} unit={unit} help={help}>
       <input
           ref={ref}
           id={ids.id}
