@@ -64,6 +64,7 @@
     "storybook": "npm run storybook -w react",
     "storybook:build": "npm run storybook:build -w react",
     "check": "node build.mjs && npm run typecheck && npm run lint && npm test && npm run test:visual",
+    "check:ci": "node build.mjs && npm run typecheck && npm run lint && npm test",
     "release": "node release.mjs deploy && node release.mjs watch"
   },
   "peerDependencies": {

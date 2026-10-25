@@ -32,7 +32,7 @@
 - Поле настройки одной строкой: `inline` и `unit` у `TextField`, `NumberField`, `Select`, `Combobox`; число в строке узкое.
 - Роль ширины `number` (10rem), значок `information`.
 - Паттерны в пакете: `@replai-smm/design/patterns/*.md`.
-- CI: `.github/workflows/check.yml` — `npm run check` на раннере `rsmm-pool` (не для PR из форков).
+- CI: `.github/workflows/check.yml` — `npm run check:ci` в облаке GitHub (`ubuntu-latest`, без секретов); сверка облика — `npm run check` на ПК.
 
 ### Изменено поведение
 

@@ -147,7 +147,7 @@
 
 ## Выпуск
 
-Как у пакета karta: PR в design → `npm run check` зелёный на ПК (CI в репо пока нет — RSMM-86) → слияние → `npm run release`
+Как у пакета karta: PR в design → CI (`npm run check:ci` в облаке GitHub) и `npm run check` на ПК (со сверкой облика) зелёные → слияние → `npm run release`
 из клона под своей учёткой GitHub. Прод ДС — теги `vX.Y.Z`: тег — коммит поверх коммита main с собранным `dist/`, main = прод
 (родитель последнего тега — main). Выпуск, номер и откат — одно место, `release.mjs` (`deploy` · `watch` · `version` ·
 `rollback`), его держит `__tests__/release.test.ts`.

@@ -1,7 +1,9 @@
 name: check
 
-# Проверка ДС на PR и на push в main: npm run check — сборка, типы, сторож, тесты, сверка облика всех историй
-# (обе темы × 390 и 1280). Выпуска здесь нет: тег ставит `npm run release` из клона (README → «Выпуск»).
+# Проверка ДС на PR и на push в main: сборка, типы, сторож, все тесты (`npm run check:ci`). Раннер — облачный GitHub
+# (репо публичное: свой ПК под чужой код не ставим), секретов нет. Сверка облика (снимки) — на ПК перед слиянием
+# (`npm run check`): эталоны сняты на ПК, а растр шрифтов на другой машине Linux отличается. Выпуска здесь нет:
+# тег ставит `npm run release` из клона (README → «Выпуск»).
 on:
   push:
     branches: [main]
@@ -14,13 +16,10 @@ concurrency:
   group: check-${{ github.ref }}
   cancel-in-progress: true
 
-# Раннер — self-hosted пул организации на ПК (метка rsmm-pool); кэш npm и браузер Playwright — свои у пользователя раннера.
-# Репо публичное, а раннер — ПК: PR из форка (чужой код) здесь не исполняется никогда — только push и PR из веток этого репо.
 jobs:
   check:
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: [self-hosted, rsmm-pool]
-    timeout-minutes: 40
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
     env:
       IBM_TELEMETRY_DISABLED: 'true'
     steps:
@@ -30,6 +29,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm ci --prefer-offline --no-audit --no-fund
-      - run: npx playwright install chromium
-      - run: npm run check
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npm run check:ci
