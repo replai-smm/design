@@ -248,7 +248,7 @@ describe('метка и индикатор (Carbon: Tag, IconIndicator)', () => 
       unmount()
     }
     const { container } = render(<Tag type="red">просрочено</Tag>)
-    expect(container.querySelector('[data-slot=tag]')!.className).toContain('bg-danger-bg text-danger-fg')
+    expect(container.querySelector('[data-slot=tag]')!.className).toContain('bg-danger-fill text-fg')
     quiet()
     // @ts-expect-error — голубого цвета в ролях нет
     expect(() => render(<Tag type="cyan">x</Tag>)).toThrow(/цвета метки «cyan» нет/)

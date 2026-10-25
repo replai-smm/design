@@ -1,6 +1,6 @@
 /**
  * Метка (Carbon: Tag, DismissibleTag) — слово в таблетке цвета `type`: категория, выбранный фильтр, короткое состояние
- * («черновик», «в архиве»). Цвет — из ролей с проверенной парой текста: red · purple — подложка тона, green · gray —
+ * («черновик», «в архиве»). Цвет — из ролей с проверенной парой текста: red · purple · green · gray —
  * заливка, high-contrast — инверсия, outline — рамка; остальных цветов Carbon в ролях нет (README «Расходится с
  * Carbon»). Цвет никогда не один — смысл несёт слово. Состояние со знаком (успех, ошибка, ожидание) — `IconIndicator`.
  * `DismissibleTag` — метка с кнопкой «убрать» (выбранный фильтр).
@@ -12,8 +12,8 @@ import { SIZES, TAG_TYPES, type Size, type TagType } from '../lib/vocab'
 import { Icon } from './Icon'
 
 const TYPE: Record<TagType, string> = {
-  red: 'bg-danger-bg text-danger-fg border-transparent',
-  purple: 'bg-decision-bg text-decision-fg border-transparent',
+  red: 'bg-danger-fill text-fg border-transparent',
+  purple: 'bg-decision-fill text-fg border-transparent',
   green: 'bg-success-fill text-fg border-transparent',
   gray: 'bg-neutral-fill text-fg border-transparent',
   'high-contrast': 'bg-inverse text-fg-inverse border-transparent',

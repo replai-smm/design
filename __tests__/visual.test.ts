@@ -18,7 +18,7 @@ const registry = JSON.parse(readFileSync(resolve(design, 'react/src/registry.jso
 const { max_diff_pixels } = YAML.parse(readFileSync(resolve(design, 'matrix.yaml'), 'utf8'))
 
 describe('сверка снимков', () => {
-  const file = readdirSync(base).find((f) => f.startsWith('компоненты-элементы-кнопка--виды.light.1280'))!
+  const file = readdirSync(base).find((f) => f.startsWith('компоненты-элементы-button--виды.light.1280'))!
   const png = readFileSync(resolve(base, file))
 
   it('тот же кадр — разницы нет', () => {
