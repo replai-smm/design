@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import md from '../../../patterns/disclosures.md?raw'
 import { Accordion, AccordionItem } from '../components/Accordion'
-import { Card } from '../components/Card'
 import { Heading } from '../components/Heading'
+import { ExpandableTile, TileAboveTheFoldContent, TileBelowTheFoldContent } from '../components/Tile'
 import { Toggletip, ToggletipButton, ToggletipContent, ToggletipLabel } from '../components/Toggletip'
 import { Section, Stack } from '../components/layout'
 import { pattern } from './story'
@@ -28,8 +28,17 @@ function Example() {
         </Accordion>
       </Section>
       <Section as={Stack} gap={5}>
-        <Heading>Карточка: три факта на лице, остальное в «подробнее»</Heading>
-        <Card title="Проект «Сайт»" facts={['12 задач открыто', 'Срок — 30 ноября']} more="Последнее изменение — вчера, 18:40. Владелец — Анна Петрова." />
+        <Heading>Плитка: три факта на лице, остальное под сгибом</Heading>
+        <ExpandableTile tileCollapsedLabel="Подробнее" tileExpandedLabel="Свернуть" className="max-w-form">
+          <TileAboveTheFoldContent>
+            <p className="m-0 text-heading">Проект «Сайт»</p>
+            <p className="m-0 text-body text-fg-muted">12 задач открыто</p>
+            <p className="m-0 text-body text-fg-muted">Срок — 30 ноября</p>
+          </TileAboveTheFoldContent>
+          <TileBelowTheFoldContent>
+            <p className="m-0 text-body">Последнее изменение — вчера, 18:40. Владелец — Анна Петрова.</p>
+          </TileBelowTheFoldContent>
+        </ExpandableTile>
       </Section>
     </Stack>
   )

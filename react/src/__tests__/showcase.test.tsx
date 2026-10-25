@@ -45,35 +45,36 @@ const SECTIONS: Array<{ title: string; note: string; items: Array<[string, strin
   },
   {
     title: 'Поверхности',
-    note: 'Одна поверхность: слой, тихая рамка, угол 6, поля 16, заголовок одной роли; метка слева — знак тона одной ширины.',
+    note: 'Одна плитка: слой, тихая рамка, угол 6, поля 16, заголовок одной роли; метка слева у уведомления — знак вида одной ширины.',
     items: [
-      ['Surface.stories.tsx', 'Обычное'],
-      ['Card.stories.tsx', 'Сетка'],
+      ['Tile.stories.tsx', 'Обычное'],
+      ['ExpandableTile.stories.tsx', 'Сетка'],
       ['StatTile.stories.tsx', 'Обычное'],
-      ['Notification.stories.tsx', 'Обычное'],
+      ['InlineNotification.stories.tsx', 'Обычное'],
       ['StateView.stories.tsx', 'Ошибка'],
-      ['CodeBlock.stories.tsx', 'Обычное'],
+      ['CodeSnippet.stories.tsx', 'Обычное'],
     ],
   },
   {
     title: 'Коллекции',
-    note: 'Строки в порядке данных, состояние — знаком и словом; выбранная строка — роль «выбрано»; сортировка — выбор человека.',
+    note: 'Строки в порядке данных, состояние — знаком и словом; выбранная строка — роль «выбрано»; сортировка — выбор человека; длинный набор — по страницам.',
     items: [
       ['DataTable.stories.tsx', 'Обычное'],
-      ['List.stories.tsx', 'Выбрана'],
+      ['ContainedList.stories.tsx', 'Выбрана'],
+      ['Pagination.stories.tsx', 'Обычное'],
     ],
   },
   {
     title: 'Слои',
     note: 'Окно — по центру на ноутбуке, шторкой снизу на телефоне; «готово» — всплывашкой.',
     items: [
-      ['Dialog.stories.tsx', 'Обычное', 'fixed'],
-      ['Toast.stories.tsx', 'Обычное', 'toast'],
+      ['Modal.stories.tsx', 'Обычное', 'fixed'],
+      ['Toaster.stories.tsx', 'Обычное', 'toast'],
     ],
   },
   {
     title: 'Составные',
-    note: 'Вкладки и фильтры — один ряд сегментов. Правила сборки страниц — полка «Паттерны» в Storybook и patterns/*.md.',
+    note: 'Вкладки и фильтры — один ряд сегментов (ContentSwitcher). Правила сборки страниц — полка «Паттерны» в Storybook и patterns/*.md.',
     items: [
       ['Tabs.stories.tsx', 'Обычное'],
       ['FilterBar.stories.tsx', 'Обычное'],

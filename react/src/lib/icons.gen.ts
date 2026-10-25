@@ -7,15 +7,19 @@ export const ICONS = {
   "arrow-left": {"viewBox":"0 0 16 16","parts":[["path",{"d":"M6.7 12.3 2.9 8.5 15 8.5 15 7.5 2.9 7.5 6.7 3.7 6 3 1 8 6 13z"}]]},
   "arrow-up": {"viewBox":"0 0 16 16","parts":[["path",{"d":"M3.7 6.7 7.5 2.9 7.5 15 8.5 15 8.5 2.9 12.3 6.7 13 6 8 1 3 6z"}]]},
   "caret-down": {"viewBox":"0 0 32 32","parts":[["path",{"d":"M24 12 16 22 8 12z"}]]},
+  "caret-left": {"viewBox":"0 0 32 32","parts":[["path",{"d":"M20 24 10 16 20 8z"}]]},
+  "caret-right": {"viewBox":"0 0 32 32","parts":[["path",{"d":"M12 8 22 16 12 24z"}]]},
   "caret-up": {"viewBox":"0 0 32 32","parts":[["path",{"d":"M8 20 16 10 24 20z"}]]},
   "check": {"viewBox":"0 0 32 32","parts":[["path",{"d":"M13 24 4 15 5.414 13.586 13 21.171 26.586 7.586 28 9 13 24z"}]]},
   "chevron-down": {"viewBox":"0 0 16 16","parts":[["path",{"d":"M8 11 3 6 3.7 5.3 8 9.6 12.3 5.3 13 6z"}]]},
   "chevron-left": {"viewBox":"0 0 16 16","parts":[["path",{"d":"M5 8 10 3 10.7 3.7 6.4 8 10.7 12.3 10 13z"}]]},
   "chevron-right": {"viewBox":"0 0 16 16","parts":[["path",{"d":"M11 8 6 13 5.3 12.3 9.6 8 5.3 3.7 6 3z"}]]},
   "close": {"viewBox":"0 0 32 32","parts":[["path",{"d":"M17.4141 16 24 9.4141 22.5859 8 16 14.5859 9.4143 8 8 9.4141 14.5859 16 8 22.5859 9.4143 24 16 17.4141 22.5859 24 24 22.5859 17.4141 16z"}]]},
+  "copy": {"viewBox":"0 0 32 32","parts":[["path",{"d":"M28,10V28H10V10H28m0-2H10a2,2,0,0,0-2,2V28a2,2,0,0,0,2,2H28a2,2,0,0,0,2-2V10a2,2,0,0,0-2-2Z"}],["path",{"d":"M4,18H2V4A2,2,0,0,1,4,2H18V4H4Z"}]]},
   "information": {"viewBox":"0 0 16 16","parts":[["path",{"d":"M8.5 11 8.5 6.5 6.5 6.5 6.5 7.5 7.5 7.5 7.5 11 6 11 6 12 10 12 10 11z"}],["path",{"d":"M8,3.5c-0.4,0-0.8,0.3-0.8,0.8S7.6,5,8,5c0.4,0,0.8-0.3,0.8-0.8S8.4,3.5,8,3.5z"}],["path",{"d":"M8,15c-3.9,0-7-3.1-7-7s3.1-7,7-7s7,3.1,7,7S11.9,15,8,15z M8,2C4.7,2,2,4.7,2,8s2.7,6,6,6s6-2.7,6-6S11.3,2,8,2z"}]]},
   "menu": {"viewBox":"0 0 16 16","parts":[["path",{"d":"M2 12H14V13H2z"}],["path",{"d":"M2 9H14V10H2z"}],["path",{"d":"M2 6H14V7H2z"}],["path",{"d":"M2 3H14V4H2z"}]]},
   "minus": {"viewBox":"0 0 32 32","parts":[["path",{"d":"M8 15H24V17H8z"}]]},
+  "overflow-menu-vertical": {"viewBox":"0 0 32 32","parts":[["circle",{"cx":"16","cy":"8","r":"2"}],["circle",{"cx":"16","cy":"16","r":"2"}],["circle",{"cx":"16","cy":"24","r":"2"}]]},
   "search": {"viewBox":"0 0 16 16","parts":[["path",{"d":"M15,14.3L10.7,10c1.9-2.3,1.6-5.8-0.7-7.7S4.2,0.7,2.3,3S0.7,8.8,3,10.7c2,1.7,5,1.7,7,0l4.3,4.3L15,14.3z M2,6.5\tC2,4,4,2,6.5,2S11,4,11,6.5S9,11,6.5,11S2,9,2,6.5z"}]]},
   "sort": {"viewBox":"0 0 32 32","parts":[["path",{"d":"M27.6 20.6 24 24.2 24 4 22 4 22 24.2 18.4 20.6 17 22 23 28 29 22z"}],["path",{"d":"M9 4 3 10 4.4 11.4 8 7.8 8 28 10 28 10 7.8 13.6 11.4 15 10z"}]]},
   "stop": {"viewBox":"0 0 32 32","parts":[["path",{"d":"M24,6H8A2,2,0,0,0,6,8V24a2,2,0,0,0,2,2H24a2,2,0,0,0,2-2V8a2,2,0,0,0-2-2Z"}]]},
@@ -63,15 +67,19 @@ export const ArrowDown = icon("arrow-down", 'ArrowDown')
 export const ArrowLeft = icon("arrow-left", 'ArrowLeft')
 export const ArrowUp = icon("arrow-up", 'ArrowUp')
 export const CaretDown = icon("caret-down", 'CaretDown')
+export const CaretLeft = icon("caret-left", 'CaretLeft')
+export const CaretRight = icon("caret-right", 'CaretRight')
 export const CaretUp = icon("caret-up", 'CaretUp')
 export const Checkmark = icon("check", 'Checkmark')
 export const ChevronDown = icon("chevron-down", 'ChevronDown')
 export const ChevronLeft = icon("chevron-left", 'ChevronLeft')
 export const ChevronRight = icon("chevron-right", 'ChevronRight')
 export const Close = icon("close", 'Close')
+export const Copy = icon("copy", 'Copy')
 export const Information = icon("information", 'Information')
 export const Menu = icon("menu", 'Menu')
 export const Subtract = icon("minus", 'Subtract')
+export const OverflowMenuVertical = icon("overflow-menu-vertical", 'OverflowMenuVertical')
 export const Search = icon("search", 'Search')
 export const ArrowsVertical = icon("sort", 'ArrowsVertical')
 export const StopFilledAlt = icon("stop", 'StopFilledAlt')

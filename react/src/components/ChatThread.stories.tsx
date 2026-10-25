@@ -2,11 +2,11 @@ import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { chat, chatFailed, csvCode, longChat } from '../stories/fixtures'
 import { ChatThread, type ChatMessage } from './ChatThread'
-import { CodeBlock } from './CodeBlock'
+import { CodeSnippet } from './CodeSnippet'
 import { Prose, ProseHtml } from './Prose'
 
 const meta = {
-  title: 'Компоненты/Составные/Переписка',
+  title: 'Компоненты/Составные/ChatThread',
   component: ChatThread,
   parameters: { layout: 'padded' },
   args: { label: 'Переписка с Анной Петровой', messages: chat },
@@ -54,7 +54,9 @@ export const САгентом: S = {
             <Prose>
               <ProseHtml html="<p>Экспорт кладу рядом с JSON-выгрузкой:</p><ul><li>тот же запрос</li><li>другой формат</li></ul>" />
             </Prose>
-            <CodeBlock code={csvCode} label="src/export/csv.ts" />
+            <CodeSnippet type="multi" aria-label="Код: src/export/csv.ts">
+              {csvCode}
+            </CodeSnippet>
           </>
         ),
       },

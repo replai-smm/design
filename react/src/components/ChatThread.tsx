@@ -3,13 +3,13 @@
  * разделитель дня; «Показать более ранние» сверху без прыжка; новое внизу — лента остаётся внизу.
  * - Вид сообщения (`variant`): `bubble` — пузырь (переписка людей; наше — утопленное, входящее — на поверхности);
  *   `wide` — во всю ширину без рамки (ответ агента: текст, код); `notice` — весть со стороны (система)
- *   — поверхность с меткой, как уведомление.
+ *   — плитка с меткой, как уведомление.
  * - Наше — словарь хода: в очереди, отправляется, не отправлено — словом; у ошибки — знак «опасно» и «Повторить».
  * - Лента — `role="log"`: читалка слышит новое, не перечитывая старое.
  * Состояния: загрузка (скелет пузырей той же формы), ошибка, пусто, много.
  */
 import { Fragment, useLayoutEffect, useRef, type ReactNode } from 'react'
-import { SUNKEN, SURFACE } from '../lib/anatomy'
+import { MARK, SUNKEN, SURFACE } from '../lib/anatomy'
 import { cx } from '../lib/cx'
 import type { DataState, EmptyView, ErrorView, Progress } from '../lib/vocab'
 import { ArrowUp } from '../lib/icons.gen'
@@ -18,7 +18,7 @@ import { Icon } from './Icon'
 import { InlineLoading } from './InlineLoading'
 import { SkeletonText } from './SkeletonText'
 import { StateView } from './StateView'
-import { Surface } from './Surface'
+import { Tile } from './Tile'
 
 export interface ChatMessage {
   id: string
@@ -85,9 +85,9 @@ function Message({ m, ownLabel }: { m: ChatMessage; ownLabel: string }) {
           <time dateTime={m.datetime}>{m.time}</time>
         </div>
         {variant === 'notice' ? (
-          <Surface mark="инфо" className="w-full gap-items text-body break-words">
+          <Tile data-mark="info" className={cx('w-full gap-items text-body break-words', MARK, 'border-l-fg')}>
             {body}
-          </Surface>
+          </Tile>
         ) : (
           <div
             className={cx(

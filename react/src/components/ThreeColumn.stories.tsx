@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { chat } from '../stories/fixtures'
 import { ChatThread } from './ChatThread'
-import { List } from './Collection'
+import { ContainedList, ContainedListItem } from './ContainedList'
 import { ReplyBox } from './ReplyBox'
 import { StateView } from './StateView'
 import { ThreeColumn, type ColumnIndex } from './ThreeColumn'
@@ -34,25 +34,28 @@ function Demo({ picked = false, phone = 'stack' as 'stack' | 'sheets' }: { picke
         onSheetChange={setSheet}
         first={
           <div className="p-items">
-            <List label="Команды" rows={teams} getKey={(t) => t.id} renderRow={(t) => t.name} selectedKey={team} onSelect={(t) => (setTeam(t.id), setActive(1))} />
+            <ContainedList label="Команды">
+              {teams.map((t) => (
+                <ContainedListItem key={t.id} aria-current={t.id === team || undefined} onClick={() => (setTeam(t.id), setActive(1))}>
+                  {t.name}
+                </ContainedListItem>
+              ))}
+            </ContainedList>
           </div>
         }
         second={
           team ? (
             <div className="p-items">
-              <List
-                label="Диалоги"
-                rows={dialogs}
-                getKey={(d) => d.id}
-                selectedKey={dialog}
-                onSelect={(d) => (setDialog(d.id), setActive(2))}
-                renderRow={(d) => (
-                  <span className="flex min-w-0 flex-col">
-                    <span className="truncate">{d.name}</span>
-                    <span className="truncate text-caption text-fg-muted">{d.last}</span>
-                  </span>
-                )}
-              />
+              <ContainedList label="Диалоги">
+                {dialogs.map((d) => (
+                  <ContainedListItem key={d.id} aria-current={d.id === dialog || undefined} onClick={() => (setDialog(d.id), setActive(2))}>
+                    <span className="flex min-w-0 flex-col">
+                      <span className="truncate">{d.name}</span>
+                      <span className="truncate text-caption text-fg-muted">{d.last}</span>
+                    </span>
+                  </ContainedListItem>
+                ))}
+              </ContainedList>
             </div>
           ) : (
             <div className="p-blocks">
@@ -65,7 +68,7 @@ function Demo({ picked = false, phone = 'stack' as 'stack' | 'sheets' }: { picke
             <div className="flex min-h-0 flex-1 flex-col">
               <ChatThread label="Переписка с Анной Петровой" messages={chat} className="flex-1" />
               <div className="border-t border-line p-blocks">
-                <ReplyBox label="Ответ покупателю" send="button" onSend={() => {}} />
+                <ReplyBox labelText="Ответ покупателю" send="button" onSend={() => {}} />
               </div>
             </div>
           ) : (
@@ -80,7 +83,7 @@ function Demo({ picked = false, phone = 'stack' as 'stack' | 'sheets' }: { picke
 }
 
 const meta = {
-  title: 'Компоненты/Составные/Три колонки',
+  title: 'Компоненты/Составные/ThreeColumn',
   component: Demo,
   parameters: { layout: 'fullscreen' },
 } satisfies Meta<typeof Demo>

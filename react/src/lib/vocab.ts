@@ -118,3 +118,21 @@ export const ICON_INDICATOR: Record<
 }
 export type IconIndicatorKind = keyof typeof ICON_INDICATOR
 export const ICON_INDICATOR_KINDS = Object.keys(ICON_INDICATOR) as IconIndicatorKind[]
+
+/** InlineNotification, ActionableNotification, ToastNotification `kind` (Carbon; `info-square`, `warning-alt` не сделаны) и тон
+ * словаря, которым он нарисован: метка слева и знак своей формы. Тона «решение» у Carbon нет. */
+export const NOTIFICATION_TONE = { error: 'опасно', warning: 'внимание', info: 'инфо', success: 'хорошо' } as const satisfies Record<string, Tone>
+export type NotificationKind = keyof typeof NOTIFICATION_TONE
+export const NOTIFICATION_KINDS = Object.keys(NOTIFICATION_TONE) as NotificationKind[]
+
+/** Modal `size` (Carbon ModalSizes): ширина окна на ноутбуке. */
+export const MODAL_SIZES = ['xs', 'sm', 'md', 'lg'] as const
+export type ModalSize = (typeof MODAL_SIZES)[number]
+
+/** Направление сортировки DataTable (Carbon DataTableSortState): по кругу NONE → ASC → DESC → NONE. */
+export const SORT_STATES = { NONE: 'NONE', ASC: 'ASC', DESC: 'DESC' } as const
+export type DataTableSortState = keyof typeof SORT_STATES
+
+/** ContainedList `kind` (Carbon): на странице · раскрытый внутри другого слоя. */
+export const CONTAINED_LIST_KINDS = ['on-page', 'disclosed'] as const
+export type ContainedListKind = (typeof CONTAINED_LIST_KINDS)[number]

@@ -3,14 +3,14 @@
  * прокручивается сама; уже — по одной (`active`), во второй и третьей сверху «← назад» к предыдущей, переход — выезд
  * 0,6 с, фокус — на колонку. Без `third` — две колонки «список → карточка». `header` — полоса над колонками.
  * `phone="sheets"` — рабочее место: на телефоне видна лента, первая колонка — шторкой слева, третья — снизу
- * (`sheet`, `onSheetChange`); шторка — то же окно ДС (`Dialog`), что и везде.
+ * (`sheet`, `onSheetChange`); шторка — то же окно ДС (`Modal` без кнопок; слева — его внутренняя шторка `LeftSheet`).
  */
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { FOCUS } from '../lib/anatomy'
 import { cx } from '../lib/cx'
 import { Button } from './Button'
 import { Icon } from './Icon'
-import { Dialog } from './Dialog'
+import { LeftSheet, Modal } from './Modal'
 
 export type ColumnIndex = 0 | 1 | 2
 
@@ -81,12 +81,14 @@ export function ThreeColumn({ first, second, third, labels, active, onBack, firs
       )}
       <div className="flex min-h-0 min-w-0 flex-1">
         {cols.map((content, i) => {
-          if (sheets && i !== 1)
+          if (sheets && i !== 1) {
+            const Sheet = i === 0 ? LeftSheet : Modal
             return (
-              <Dialog key={i} side={i === 0 ? 'left' : undefined} title={labels[i]} open={sheet === i} onOpenChange={(o) => !o && onSheetChange?.(null)}>
+              <Sheet key={i} passiveModal modalHeading={labels[i]} open={sheet === i} onRequestClose={() => onSheetChange?.(null)}>
                 {content}
-              </Dialog>
+              </Sheet>
             )
+          }
           const on = sheets || i === active
           return (
             <section

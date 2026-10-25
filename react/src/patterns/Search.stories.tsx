@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import md from '../../../patterns/search.md?raw'
 import { Button } from '../components/Button'
-import { List } from '../components/Collection'
+import { ContainedList, ContainedListItem } from '../components/ContainedList'
 import { Search } from '../components/Search'
 import { StateView } from '../components/StateView'
 import { Heading } from '../components/Heading'
@@ -20,7 +20,11 @@ function Example({ query = '' }: { query?: string }) {
       <Heading>Документы</Heading>
       <Search labelText="Поиск по документам" placeholder="Название документа" value={q} onChange={(e) => setQ(e.target.value)} />
       {found.length ? (
-        <List label="Найдено" rows={found} getKey={(r) => r.id} renderRow={(r) => r.name} />
+        <ContainedList label="Найдено">
+          {found.map((d) => (
+            <ContainedListItem key={d.id}>{d.name}</ContainedListItem>
+          ))}
+        </ContainedList>
       ) : (
         <StateView kind="ничего не найдено" title={`По запросу «${q}» ничего`} action={<Button kind="secondary" onClick={() => setQ('')}>
               Сбросить поиск

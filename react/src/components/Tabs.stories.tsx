@@ -1,27 +1,42 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Tabs } from './Tabs'
+import { CountBadge } from './CountBadge'
+import { Tab, TabList, TabPanel, TabPanels, Tabs } from './Tabs'
 
 const panel = (t: string) => <p className="m-0 text-body text-fg-muted">{t}</p>
 
 const meta = {
-  title: 'Компоненты/Составные/Вкладки',
+  title: 'Компоненты/Составные/Tabs',
   component: Tabs,
   parameters: { layout: 'padded' },
   args: {
-    label: 'Разделы',
-    defaultValue: 'inbox',
-    items: [
-      { value: 'inbox', label: 'Ждут ответа', count: 7, tone: 'опасно', content: panel('Семь сообщений без ответа больше часа.') },
-      { value: 'new', label: 'Новые', count: 3, tone: 'инфо', content: panel('Три новых.') },
-      { value: 'done', label: 'Отвечено', count: 120, content: panel('Отвеченные за неделю.') },
-      { value: 'all', label: 'Все', content: panel('Все переписки.') },
-    ],
+    children: (
+      <>
+        <TabList aria-label="Разделы">
+          <Tab>
+            Ждут ответа <CountBadge count={7} tone="опасно" />
+          </Tab>
+          <Tab>
+            Новые <CountBadge count={3} tone="инфо" />
+          </Tab>
+          <Tab>
+            Отвечено <CountBadge count={120} />
+          </Tab>
+          <Tab>Все</Tab>
+        </TabList>
+        <TabPanels>
+          <TabPanel>{panel('Семь сообщений без ответа больше часа.')}</TabPanel>
+          <TabPanel>{panel('Три новых.')}</TabPanel>
+          <TabPanel>{panel('Отвеченные за неделю.')}</TabPanel>
+          <TabPanel>{panel('Все переписки.')}</TabPanel>
+        </TabPanels>
+      </>
+    ),
   },
 } satisfies Meta<typeof Tabs>
 export default meta
 type S = StoryObj<typeof meta>
 
-/** Тот же ряд сегментов, что у фильтров; выбранная — «выбрано»; счётчик тоном словаря. */
+/** Тот же ряд сегментов, что у ContentSwitcher; выбранная — «выбрано»; счётчик — CountBadge в слове вкладки. */
 export const Обычное: S = {}
 
 const sections = ['Обзор', 'Сообщения', 'Задачи', 'Файлы', 'Отчёты', 'Заказы', 'Оплата', 'Команда', 'Профиль', 'Настройки']
@@ -30,7 +45,23 @@ const sections = ['Обзор', 'Сообщения', 'Задачи', 'Файл�
 export const Много: S = {
   tags: ['state:много'],
   args: {
-    defaultValue: 'Профиль',
-    items: sections.map((v) => ({ value: v, label: v, count: v === 'Сообщения' ? 12 : undefined, tone: 'опасно' as const, content: panel(`Раздел «${v}».`) })),
+    defaultSelectedIndex: 8,
+    children: (
+      <>
+        <TabList aria-label="Разделы">
+          {sections.map((v) => (
+            <Tab key={v}>
+              {v}
+              {v === 'Сообщения' && <CountBadge count={12} tone="опасно" />}
+            </Tab>
+          ))}
+        </TabList>
+        <TabPanels>
+          {sections.map((v) => (
+            <TabPanel key={v}>{panel(`Раздел «${v}».`)}</TabPanel>
+          ))}
+        </TabPanels>
+      </>
+    ),
   },
 }

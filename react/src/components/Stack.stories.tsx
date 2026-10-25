@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Inline, Stack } from './layout'
-import { Surface } from './Surface'
+import { Tile } from './Tile'
 
 const meta = {
   title: 'Компоненты/Раскладка/Stack',
@@ -12,9 +12,9 @@ export default meta
 type S = StoryObj<typeof meta>
 
 const box = (t: string) => (
-  <Surface key={t} className="text-body">
+  <Tile key={t} className="text-body">
     {t}
-  </Surface>
+  </Tile>
 )
 
 /** Столбиком и в ряд: отступ — шаг шкалы (2 — 4 px … 7 — 32 px); Inline — ряд с переносом. */

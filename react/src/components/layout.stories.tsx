@@ -3,7 +3,7 @@ import { Menu } from '../lib/icons.gen'
 import { Button, IconButton } from './Button'
 import { Heading } from './Heading'
 import { Column, Grid, Inline, Page, PageHeader, Section, Stack } from './layout'
-import { Surface } from './Surface'
+import { Tile } from './Tile'
 
 const meta = {
   title: 'Компоненты/Раскладка/Page',
@@ -34,7 +34,7 @@ export const Обычное: S = {
           <Grid narrow withRowGap>
             {['17 проектов', '42 ответа', '3 без доступа'].map((t) => (
               <Column key={t} sm={4} md={4} lg={5}>
-                <Surface className="text-body">{t}</Surface>
+                <Tile className="text-body">{t}</Tile>
               </Column>
             ))}
           </Grid>

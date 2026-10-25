@@ -4,11 +4,11 @@ import { Button } from './Button'
 import { ReplyBox } from './ReplyBox'
 
 const meta = {
-  title: 'Компоненты/Составные/Поле ответа',
+  title: 'Компоненты/Составные/ReplyBox',
   component: ReplyBox,
   parameters: { layout: 'padded' },
   args: {
-    label: 'Ответ от имени команды',
+    labelText: 'Ответ от имени команды',
     placeholder: 'Ответ от имени команды',
     onSend: () => {},
     tools: (
@@ -28,12 +28,12 @@ type S = StoryObj<typeof meta>
 /** «Отправить» — главная; рядом тихие; подсказка о клавишах. */
 export const Обычное: S = {}
 export const Загрузка: S = { tags: ['state:загрузка'], args: { value: 'Да, с 9 до 21.', sending: true } }
-export const Ошибка: S = { tags: ['state:ошибка'], args: { value: 'Да, с 9 до 21.', error: 'Сервер не принял ответ: нет доступа к диалогу' } }
-export const НетДоступа: S = { tags: ['state:нет доступа'], args: { disabled: 'Только просмотр: отвечает админ команды' } }
+export const Ошибка: S = { tags: ['state:ошибка'], args: { value: 'Да, с 9 до 21.', invalid: true, invalidText: 'Сервер не принял ответ: нет доступа к диалогу' } }
+export const НетДоступа: S = { tags: ['state:нет доступа'], args: { disabled: true, helperText: 'Только просмотр: отвечает админ команды' } }
 /** Разговор с агентом: кнопки в ряд, «Стоп» пока агент работает. */
 export const Агент: S = {
   args: {
-    label: 'Сообщение агенту',
+    labelText: 'Сообщение агенту',
     placeholder: 'Сообщение агенту',
     layout: 'row',
     stop: { onStop: () => {} },

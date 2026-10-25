@@ -2,7 +2,7 @@
 
 Carbon: Dialogs · Источник: carbon-website src/pages/patterns/dialog-pattern/index.mdx @ 5e9cd1d · Перевод с английского, Apache-2.0
 
-Компоненты примера: `Button`, `ButtonSet`, `Dialog`, `Stack`, `TextInput`
+Компоненты примера: `Button`, `Modal`, `Stack`, `TextInput`
 
 Окно — это «разговор» между системой и человеком. Оно появляется, когда системе нужен ввод от человека или нужно срочно сообщить ему что-то о его текущей работе.
 

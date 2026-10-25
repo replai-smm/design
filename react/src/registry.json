@@ -14,7 +14,7 @@
   "base": {
     "Icon.tsx": "значок — часть каждого элемента: знак тона, кнопка-значок, стрелка",
     "TextInput.tsx": "каркас поля (подпись, подсказка, ошибка) и рамка поля — одни у всех полей",
-    "Surface.tsx": "поверхность — одна анатомия всего, что лежит слоем: остальные поверхности построены на ней"
+    "Tile.tsx": "плитка — одна анатомия всего, что лежит слоем: остальные поверхности построены на ней"
   },
   "sameLevel": {
     "ChartFrame.tsx → StateView.tsx": "пусто и ошибка графика — то же состояние, что у всех, в высоте графика",
@@ -232,13 +232,29 @@
       "file": "Accordion.tsx",
       "meaning": "стопка раскрытий",
       "near": {
-        "Card": "у карточки «подробнее» — продолжение её фактов внутри поверхности; раскрытие — самостоятельная строка с заголовком на странице (правила экрана, редкие настройки); механика одна — lib/disclosure.tsx"
+        "ExpandableTile": "у плитки подробности — продолжение её фактов внутри поверхности; раскрытие — самостоятельная строка с заголовком на странице (правила экрана, редкие настройки); механика одна — lib/disclosure.tsx"
       }
     },
     "AccordionItem": {
       "level": "Элементы",
       "file": "Accordion.tsx",
       "meaning": "заголовок строкой и содержимое по требованию"
+    },
+    "ContentSwitcher": {
+      "level": "Элементы",
+      "file": "ContentSwitcher.tsx",
+      "meaning": "ряд сегментов: один вид из нескольких",
+      "anatomy": {
+        "slot": "content-switcher"
+      },
+      "near": {
+        "RadioButtonGroup": "кружки — выбор значения в форме; сегменты — переключить вид или сузить список сразу (Carbon: ContentSwitcher)"
+      }
+    },
+    "Switch": {
+      "level": "Элементы",
+      "file": "ContentSwitcher.tsx",
+      "meaning": "сегмент ряда"
     },
     "Delta": {
       "level": "Элементы",
@@ -375,29 +391,48 @@
       "file": "Form.tsx",
       "meaning": "группа связанных полей одной подписью"
     },
-    "Surface": {
+    "Tile": {
       "level": "Поверхности",
-      "file": "Surface.tsx",
+      "file": "Tile.tsx",
       "meaning": "слой с рамкой: основа всех поверхностей",
       "anatomy": {
-        "slot": "surface",
+        "slot": "tile",
+        "shape": "surface",
+        "padding": "blocks"
+      }
+    },
+    "ClickableTile": {
+      "level": "Поверхности",
+      "file": "Tile.tsx",
+      "meaning": "плитка-переход или плитка-действие целиком",
+      "anatomy": {
+        "slot": "clickable-tile",
+        "shape": "surface",
+        "padding": "blocks"
+      }
+    },
+    "ExpandableTile": {
+      "level": "Поверхности",
+      "file": "Tile.tsx",
+      "meaning": "лицо объекта: заголовок, до трёх фактов, подробности под сгибом",
+      "anatomy": {
+        "slot": "expandable-tile",
         "shape": "surface",
         "padding": "blocks"
       },
       "near": {
-        "Card": "Card — заголовок, факты и «подробнее» на поверхности; Surface — пустая поверхность для своего содержимого продукта"
+        "Tile": "Tile — пустая плитка для своего содержимого; ExpandableTile — лицо и подробности по требованию"
       }
     },
-    "Card": {
+    "TileAboveTheFoldContent": {
       "level": "Поверхности",
-      "file": "Card.tsx",
-      "meaning": "лицо объекта: заголовок, до трёх фактов, подробнее",
-      "anatomy": {
-        "slot": "card",
-        "shape": "surface",
-        "padding": "blocks",
-        "title": "heading"
-      }
+      "file": "Tile.tsx",
+      "meaning": "лицо плитки: видно всегда"
+    },
+    "TileBelowTheFoldContent": {
+      "level": "Поверхности",
+      "file": "Tile.tsx",
+      "meaning": "подробности плитки после раскрытия"
     },
     "StatTile": {
       "level": "Поверхности",
@@ -409,15 +444,15 @@
         "padding": "blocks"
       },
       "near": {
-        "Card": "у плитки одно число и нет «подробнее»; больше фактов — Card"
+        "ExpandableTile": "у плитки с цифрой одно число и нет подробностей; больше фактов — ExpandableTile"
       }
     },
-    "Notification": {
+    "InlineNotification": {
       "level": "Поверхности",
-      "file": "Notification.tsx",
+      "file": "InlineNotification.tsx",
       "meaning": "беда или новость в потоке у её места",
       "anatomy": {
-        "slot": "notification",
+        "slot": "inline-notification",
         "shape": "surface",
         "padding": "blocks",
         "title": "heading",
@@ -426,6 +461,21 @@
       "near": {
         "StateView": "уведомление — рядом с данными; состояние — вместо данных",
         "Toaster": "в потоке у места против всплывающего «готово»"
+      }
+    },
+    "ActionableNotification": {
+      "level": "Поверхности",
+      "file": "InlineNotification.tsx",
+      "meaning": "беда с действием у причины",
+      "anatomy": {
+        "slot": "actionable-notification",
+        "shape": "surface",
+        "padding": "blocks",
+        "title": "heading",
+        "mark": true
+      },
+      "near": {
+        "InlineNotification": "у InlineNotification только слова (Carbon запрещает в нём кнопки); действие у причины — ActionableNotification"
       }
     },
     "StateView": {
@@ -439,12 +489,12 @@
         "title": "heading"
       }
     },
-    "CodeBlock": {
+    "CodeSnippet": {
       "level": "Поверхности",
-      "file": "CodeBlock.tsx",
+      "file": "CodeSnippet.tsx",
       "meaning": "код как есть с копированием",
       "anatomy": {
-        "slot": "code-block",
+        "slot": "code-snippet",
         "shape": "surface"
       }
     },
@@ -461,26 +511,85 @@
     },
     "DataTable": {
       "level": "Коллекции",
-      "file": "Collection.tsx",
-      "meaning": "строки с колонками",
-      "anatomy": {
-        "slot": "data-table"
-      },
+      "file": "DataTable.tsx",
+      "meaning": "строки с колонками: данные и сортировка",
       "near": {
-        "List": "одна логика Collection; таблица — колонки и сортировка, список — строка своего вида"
+        "ContainedList": "таблица — колонки и сортировка; список — строка своего вида"
       }
     },
-    "List": {
+    "Table": {
       "level": "Коллекции",
-      "file": "Collection.tsx",
-      "meaning": "строки своего вида"
+      "file": "DataTable.tsx",
+      "meaning": "таблица строк и колонок",
+      "anatomy": {
+        "slot": "table"
+      }
     },
-    "Dialog": {
+    "TableContainer": {
+      "level": "Коллекции",
+      "file": "DataTable.tsx",
+      "meaning": "рамка таблицы с заголовком и прокруткой вбок",
+      "anatomy": {
+        "slot": "table-container"
+      }
+    },
+    "TableHead": {
+      "level": "Коллекции",
+      "file": "DataTable.tsx",
+      "meaning": "шапка таблицы"
+    },
+    "TableRow": {
+      "level": "Коллекции",
+      "file": "DataTable.tsx",
+      "meaning": "строка таблицы"
+    },
+    "TableHeader": {
+      "level": "Коллекции",
+      "file": "DataTable.tsx",
+      "meaning": "заголовок колонки"
+    },
+    "TableBody": {
+      "level": "Коллекции",
+      "file": "DataTable.tsx",
+      "meaning": "строки данных таблицы"
+    },
+    "TableCell": {
+      "level": "Коллекции",
+      "file": "DataTable.tsx",
+      "meaning": "ячейка таблицы"
+    },
+    "DataTableSkeleton": {
+      "level": "Коллекции",
+      "file": "DataTable.tsx",
+      "meaning": "место таблицы при загрузке"
+    },
+    "ContainedList": {
+      "level": "Коллекции",
+      "file": "ContainedList.tsx",
+      "meaning": "строки своего вида с подписью",
+      "anatomy": {
+        "slot": "contained-list"
+      }
+    },
+    "ContainedListItem": {
+      "level": "Коллекции",
+      "file": "ContainedList.tsx",
+      "meaning": "строка списка"
+    },
+    "Pagination": {
+      "level": "Коллекции",
+      "file": "Pagination.tsx",
+      "meaning": "страницы длинного набора строк",
+      "anatomy": {
+        "slot": "pagination"
+      }
+    },
+    "Modal": {
       "level": "Слои",
-      "file": "Dialog.tsx",
+      "file": "Modal.tsx",
       "meaning": "окно или шторка поверх экрана",
       "anatomy": {
-        "slot": "dialog",
+        "slot": "modal",
         "shape": "surface",
         "padding": "blocks",
         "title": "title"
@@ -488,12 +597,25 @@
     },
     "ConfirmProvider": {
       "level": "Слои",
-      "file": "Dialog.tsx",
+      "file": "Modal.tsx",
       "meaning": "подтверждение действия вместо window.confirm"
+    },
+    "OverflowMenu": {
+      "level": "Слои",
+      "file": "OverflowMenu.tsx",
+      "meaning": "меню действий за кнопкой «…»",
+      "near": {
+        "ButtonSet": "набор — видимые кнопки с одной главной; меню «…» — редкие и опасные действия подальше от главной (П10)"
+      }
+    },
+    "OverflowMenuItem": {
+      "level": "Слои",
+      "file": "OverflowMenu.tsx",
+      "meaning": "пункт меню действий"
     },
     "Toaster": {
       "level": "Слои",
-      "file": "Toast.tsx",
+      "file": "Toaster.tsx",
       "meaning": "всплывающее «готово»",
       "anatomy": {
         "slot": "toast",
@@ -508,8 +630,29 @@
       "file": "Tabs.tsx",
       "meaning": "панели по вкладкам",
       "near": {
-        "FilterBar": "тот же ряд сегментов; вкладки меняют панель, фильтры сужают список и живут в адресе; не влезает — вкладки одной строкой с прокруткой (ряд разделов не съедает экран), фильтры переносятся (видны все варианты)"
+        "FilterBar": "тот же ряд сегментов; вкладки меняют панель, фильтры сужают список и живут в адресе; не влезает — вкладки одной строкой с прокруткой (ряд разделов не съедает экран), фильтры переносятся (видны все варианты)",
+        "ContentSwitcher": "вкладки — ряд и панели под ним; ContentSwitcher — только ряд, вид меняет тот, кто его держит"
       }
+    },
+    "TabList": {
+      "level": "Составные",
+      "file": "Tabs.tsx",
+      "meaning": "ряд вкладок"
+    },
+    "Tab": {
+      "level": "Составные",
+      "file": "Tabs.tsx",
+      "meaning": "вкладка ряда"
+    },
+    "TabPanels": {
+      "level": "Составные",
+      "file": "Tabs.tsx",
+      "meaning": "панели вкладок по порядку"
+    },
+    "TabPanel": {
+      "level": "Составные",
+      "file": "Tabs.tsx",
+      "meaning": "панель одной вкладки"
     },
     "FilterBar": {
       "level": "Составные",

@@ -2,7 +2,7 @@
 
 Carbon: Overflow content · Источник: carbon-website src/pages/patterns/overflow-content/index.mdx @ 5e9cd1d · Перевод с английского, Apache-2.0
 
-Компоненты примера: `Heading`, `List`, `Section`, `Stack`, `Tooltip`
+Компоненты примера: `Button`, `ContainedList`, `ContainedListItem`, `Heading`, `Section`, `Stack`, `Tooltip`
 
 Не влезающее содержимое — это текст, например абзац или строка, который не помещается в отведённое место. Это относится и к ряду компонентов, которые выходят за заданное место.
 

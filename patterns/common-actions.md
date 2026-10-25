@@ -2,7 +2,7 @@
 
 Carbon: Common actions · Источник: carbon-website src/pages/patterns/common-actions/index.mdx @ 5e9cd1d · Перевод с английского, Apache-2.0
 
-Компоненты примера: `Button`, `ButtonSet`, `Heading`, `IconButton`, `Inline`, `List`, `Notification`, `Section`, `Stack`
+Компоненты примера: `ActionableNotification`, `Button`, `ButtonSet`, `ContainedList`, `ContainedListItem`, `OverflowMenu`, `OverflowMenuItem`, `Stack`
 
 Общие действия — частые действия, которые встречаются в разных компонентах и процессах.
 

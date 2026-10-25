@@ -10,7 +10,7 @@ import type axe from 'axe-core'
 import { runAxe } from './axe'
 import { stories, type Theme } from './stories'
 import { many } from '../stories/fixtures'
-import { DataTable } from '../components/Collection'
+import { Table, TableBody, TableCell, TableRow } from '../components/DataTable'
 
 /**
  * Один набор опций axe на все проверки. `resultTypes: ['violations']` — скорость, не послабление: правила те же
@@ -52,14 +52,16 @@ describe.sequential('a11y: опции axe не глушат нарушения',
   // Сторож опций: в большом дереве (150 строк) нарушение в последней строке находится, и его селектор ведёт к узлу.
   it('кнопка без имени в 150 строках — нарушение button-name с селектором узла', async () => {
     render(
-      <DataTable
-        label="Группы"
-        rows={many}
-        columns={[{ key: 'name', header: 'Группа', cell: (r) => r.name, face: true }]}
-        getKey={(r) => r.id}
-        pageSize={many.length}
-        rowAction={(r) => (r.id === 'm149' ? <button type="button" data-bad="" /> : null)}
-      />,
+      <Table aria-label="Группы">
+        <TableBody>
+          {many.map((r) => (
+            <TableRow key={r.id}>
+              <TableCell>{r.name}</TableCell>
+              <TableCell>{r.id === 'm149' ? <button type="button" data-bad="" /> : null}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>,
     )
     const res = await runAxe(document.body, check(false))
     expect(res.violations.map((v) => v.id)).toEqual(['button-name'])

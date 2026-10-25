@@ -18,19 +18,25 @@
 | | `Avatar`, `Tooltip` | лицо 32 px; подсказка у элемента, который берёт фокус (`label` — имя, `description` — описание, `align`) |
 | | `Toggletip` (+ `ToggletipLabel`, `ToggletipButton`, `ToggletipContent`), `Accordion` + `AccordionItem` | справка «i» по нажатию; раскрытие строкой с заголовком (`open`, `onHeadingClick`, `size`, `align`) |
 | | `InlineLoading`, `Meter`, `ProgressIndicator` + `ProgressStep` | ход в строке (`status`, `description`, `onSuccess`); сколько взято из предела; путь из шагов (`currentIndex`, `onChange`) |
+| | `ContentSwitcher` + `Switch` | ряд сегментов: один вид из нескольких (`selectedIndex`, `onChange({ index, name, text })`) |
 | | `Delta`, `SkeletonText`/`SkeletonPlaceholder`, `Prose`/`ProseHtml`, `Chart` | разница двух чисел, место будущего текста и блока (`aria-busy` — у области), текст ответа (роль «чтение»), рисунок рядов данных (`area` — заливка под одной линией) |
 | Поля | `TextInput`, `PasswordInput`, `TextArea`, `NumberInput`, `Select` + `SelectItem`/`SelectItemGroup`, `ComboBox`, `Search` | одна рамка и один каркас (Carbon): подпись (`labelText`; у числа — `label`, у выбора с поиском — `titleText`), `helperText`, `invalid` + `invalidText` и `warn` + `warnText` — знаком и словом; `size` `sm` · `md` · `lg`; `id` обязателен; справка «i» — `Toggletip` в подписи; `inline` (+ `unit` — наше) — поле настройки одной строкой с 1024 px, ошибка у поля |
 | | `Checkbox`/`CheckboxGroup`, `RadioButton`/`RadioButtonGroup`, `Toggle` | галочка (`onChange(event, { checked, id })`, `indeterminate`), один из 2–5 (`name`, `valueSelected`, `onChange(value, name, event)`), переключатель сразу (`toggled`, `onToggle`); группа — `legendText` |
 | | `FileUploader`, `FileUploaderItem`, `Form`, `FormGroup` | выбор файла (`labelTitle`, `labelDescription`, `filenameStatus`, `onAddFiles`; не подошедший — строкой с ошибкой); форма и группа полей одной подписью (`legendText`) |
-| Поверхности | `Surface` | слой, рамка, угол 6, поля 16; `mark` — метка тона слева; `inset` — утопленная |
-| | `Card`, `StatTile`, `Notification`, `StateView`, `CodeBlock`, `ChartFrame` | построены на `Surface`; заголовок — роль `heading` |
-| Коллекции | `DataTable`, `List` | строки в порядке данных, много — «показать ещё»; `selectedKey` и `onSelect`; сортировка, подсказка у заголовка, `nowrap`, `rowMuted` у таблицы |
-| Слои | `Dialog`, `ConfirmProvider`/`useConfirm`, `Toaster`/`useToast` | окно (шторка снизу на телефоне, `side="left"` — слева, `size`: `sm` · `md` · `full`), подтверждение, «готово» |
-| Составные | `Tabs`, `FilterBar`/`useUrlFilters` | один ряд сегментов: панели и фильтры в адресе; не влезает — вкладки одной строкой с прокруткой, фильтры переносятся |
-| | `ThreeColumn`, `ChatThread`, `ReplyBox` | список → лента → карточка; переписка; поле ответа (`send`: `enter` · `ctrl-enter` · `button`) |
+| Поверхности | `Tile`, `ClickableTile` | плитка (Carbon: Tile): слой, рамка, угол 6, поля 16; вся плитка — переход (`href`) или действие (`onClick`) |
+| | `ExpandableTile` + `TileAboveTheFoldContent`/`TileBelowTheFoldContent` | лицо объекта: заголовок и до трёх фактов, подробности под сгибом (`expanded`, `tileCollapsedLabel`); не глубже двух уровней |
+| | `InlineNotification`, `ActionableNotification` | беда или новость у места (`kind` `error` · `warning` · `info` · `success`, `title`, `subtitle`, `hideCloseButton`, `onClose`); с действием у причины — `actionButtonLabel`, `onActionButtonClick`, `inline` |
+| | `CodeSnippet`, `StatTile`, `StateView`, `ChartFrame` | код с копированием (`type` `single` · `multi`, «Показать ещё»); одно число; что вместо данных; рамка графика — все на плитке, заголовок — роль `heading` |
+| Коллекции | `DataTable` + `TableContainer`, `Table`, `TableHead`, `TableRow`, `TableHeader`, `TableBody`, `TableCell` | таблица Carbon: строки и сортировка — `DataTable` (дети-функция: `rows`, `headers`, `getHeaderProps`…), вид — частями; `isSortable` по кругу; выбранная строка — `isSelected`; в строке — только ghost и меню «…»; прокрутка вбок, первая колонка стоит |
+| | `DataTableSkeleton`, `Pagination` | место таблицы при загрузке; страницы длинного набора (`page`, `pageSize`, `pageSizes`, `totalItems`, `onChange({ page, pageSize })`) |
+| | `ContainedList` + `ContainedListItem` | строки своего вида с подписью (`label`, `action`); строка — кнопка (`onClick`), действие строки — `action`; открытая — `aria-current` |
+| Слои | `Modal`, `ConfirmProvider`/`useConfirm` | окно Carbon (`open`, `modalHeading`, `primaryButtonText`, `secondaryButtonText`, `onRequestSubmit`, `onRequestClose`, `danger`, `passiveModal`, `size` `xs` · `sm` · `md` · `lg`; шторка снизу на телефоне); подтверждение на нём (`await confirm({ modalHeading, danger })`) |
+| | `OverflowMenu` + `OverflowMenuItem`, `Toaster`/`useToast` | меню «…» (`iconDescription`, `itemText`, `isDelete`, `hasDivider`); «готово» всплывашкой (поля Carbon ToastNotification: `kind`, `title`, `subtitle`, `caption`, `timeout`) |
+| Составные | `Tabs` + `TabList`/`Tab`/`TabPanels`/`TabPanel`, `FilterBar`/`useUrlFilters` | один ряд сегментов: вкладки по номеру (`selectedIndex`, `onChange({ selectedIndex })`, все панели смонтированы), фильтры рядами `ContentSwitcher` в адресе; не влезает — вкладки одной строкой с прокруткой, фильтры переносятся |
+| | `ThreeColumn`, `ChatThread`, `ReplyBox` | список → лента → карточка; переписка; поле ответа (`labelText`, `invalid` + `invalidText`, `helperText`; `send`: `enter` · `ctrl-enter` · `button`) |
 
 Общие имена: у компонентов с парой в Carbon — имена и значения Carbon (`kind`, `size`, `renderIcon`, `label`,
-`description`, `status`); у наших — `state` (`ready` · `loading` · `error`), `empty`, `error`, `selectedKey`, `onSelect`,
+`description`, `status`); у наших — `state` (`ready` · `loading` · `error`), `empty`, `error` (у `ChartFrame`, `ChatThread`),
 `tone` (словарь тонов), `label` — подпись для читалки. Что не как у Carbon — корневой README → «Договор Carbon».
 
 ## Проверки

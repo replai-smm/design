@@ -14,12 +14,12 @@ import {
   Chart,
   chartHasData,
   Column,
+  ContainedList,
+  ContainedListItem,
   CountBadge,
   countText,
-  DataTable,
   Delta,
   deltaText,
-  Dialog,
   DismissibleTag,
   Grid,
   Heading,
@@ -30,8 +30,8 @@ import {
   Link,
   Meter,
   meterTone,
+  Modal,
   niceMax,
-  Notification,
   Page,
   PageHeader,
   ProgressIndicator,
@@ -40,6 +40,10 @@ import {
   SkeletonPlaceholder,
   SkeletonText,
   Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableRow,
   Tag,
   tickIndexes,
   ticksOf,
@@ -48,9 +52,8 @@ import {
   ToggletipContent,
   Tooltip,
 } from '../index'
-import { ICON_INDICATOR, ICON_INDICATOR_KINDS, TAG_TYPES, TONE_ORDER } from '../lib/vocab'
+import { ICON_INDICATOR, ICON_INDICATOR_KINDS, NOTIFICATION_TONE, TAG_TYPES, TONE_ORDER } from '../lib/vocab'
 import { Add, Close } from '../lib/icons.gen'
-import { projects, type ProjectRow } from '../stories/fixtures'
 
 const quiet = () => vi.spyOn(console, 'error').mockImplementation(() => {})
 afterEach(() => vi.restoreAllMocks())
@@ -77,15 +80,7 @@ describe('кнопки: одна главная (П5), опасное не ря�
       <Page header={<PageHeader title="Т" />}>
         <Button>Главная страницы</Button>
         <Button kind="secondary">Тихая</Button>
-        <Dialog
-          open
-          title="Окно"
-          actions={
-            <ButtonSet>
-              <Button>Главная окна</Button>
-            </ButtonSet>
-          }
-        />
+        <Modal open modalHeading="Окно" primaryButtonText="Главная окна" />
       </Page>,
     )
     expect(document.querySelectorAll('[data-kind=primary]')).toHaveLength(2)
@@ -135,7 +130,12 @@ describe('кнопки: одна главная (П5), опасное не ря�
 
   it('приманка: в строке списка набор — ошибка, любой вид кроме ghost — ошибка, ghost — можно', () => {
     quiet()
-    const t = (action: React.ReactNode) => render(<DataTable<ProjectRow> label="т" rows={projects.slice(0, 1)} columns={[{ key: 'n', header: 'Н', cell: (r) => r.name, face: true }]} getKey={(r) => r.id} rowAction={() => action} />)
+    const t = (action: React.ReactNode) =>
+      render(
+        <ContainedList>
+          <ContainedListItem action={action}>строка</ContainedListItem>
+        </ContainedList>,
+      )
     expect(() => t(<ButtonSet />)).toThrow(/в строке списка нет набора/)
     expect(() => t(<Button>x</Button>)).toThrow(/только kind="ghost"/)
     expect(() => t(<Button kind="secondary">x</Button>)).toThrow(/только kind="ghost"/)
@@ -148,6 +148,18 @@ describe('кнопки: одна главная (П5), опасное не ря�
       ),
     ).toThrow(/только kind="ghost"/)
     expect(() => t(<Button kind="ghost">Починить</Button>)).not.toThrow()
+    const row = (action: React.ReactNode) =>
+      render(
+        <Table aria-label="т">
+          <TableBody>
+            <TableRow>
+              <TableCell>{action}</TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>,
+      )
+    expect(() => row(<Button>x</Button>)).toThrow(/только kind="ghost"/)
+    expect(() => row(<Button kind="ghost">Починить</Button>)).not.toThrow()
   })
 
   it('виды Carbon: danger — заливка тона, danger--tertiary — рамка, tertiary — рамка цвета главной; чужой вид — ошибка', () => {
@@ -263,21 +275,17 @@ describe('метка и индикатор (Carbon: Tag, IconIndicator)', () => 
     expect(() => render(<IconIndicator kind="failed" label="" />)).toThrow(/нет слова/)
   })
 
-  it('«решение» — фиолетовый тон с подложкой: счётчик со знаком, значок, уведомление; в порядке внимания — сразу за «опасно»', () => {
+  it('«решение» — фиолетовый тон с подложкой у наших компонентов (счётчик со знаком, значок); в порядке внимания — сразу за «опасно»; у пар Carbon его нет', () => {
     const { container } = render(
       <>
         <CountBadge count={2} tone="решение" />
         <Icon tone="решение" />
-        <Notification tone="решение" title="Нужно решение" />
       </>,
     )
     expect(container.querySelector('[data-slot=count-badge] svg[data-icon=tone-decision]')).toBeTruthy()
     expect(container.querySelector(':scope > svg[data-icon=tone-decision]')?.getAttribute('class')).toContain('text-decision')
-    const note = container.querySelector('[data-slot=notification]')!
-    expect(note.getAttribute('data-mark')).toBe('decision')
-    expect(note.className).toContain('border-l-decision')
-    expect(note.getAttribute('role')).toBe('status')
     expect(TONE_ORDER.slice(0, 3)).toEqual(['опасно', 'решение', 'внимание'])
+    expect(Object.values(NOTIFICATION_TONE)).not.toContain('решение')
   })
 })
 

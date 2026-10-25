@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Column, Grid } from './layout'
-import { Surface } from './Surface'
+import { Tile } from './Tile'
 
 const meta = {
   title: 'Компоненты/Раскладка/Grid',
@@ -16,17 +16,17 @@ export const Обычное: S = {
   render: (args) => (
     <Grid {...args}>
       <Column>
-        <Surface className="text-body">Во всю строку</Surface>
+        <Tile className="text-body">Во всю строку</Tile>
       </Column>
       <Column sm={4} md={4} lg={8}>
-        <Surface className="text-body">sm 4 · md 4 · lg 8</Surface>
+        <Tile className="text-body">sm 4 · md 4 · lg 8</Tile>
       </Column>
       <Column sm={4} md={4} lg={8}>
-        <Surface className="text-body">sm 4 · md 4 · lg 8</Surface>
+        <Tile className="text-body">sm 4 · md 4 · lg 8</Tile>
       </Column>
       {[1, 2, 3, 4].map((i) => (
         <Column key={i} span="25%">
-          <Surface className="text-body">25%</Surface>
+          <Tile className="text-body">25%</Tile>
         </Column>
       ))}
     </Grid>

@@ -13,7 +13,7 @@
 | Шкала | Что есть | Источник |
 |---|---|---|
 | Цвет | 36 ролей: поверхности (`canvas`, `surface`, `inverse`), текст (`fg`, `fg-muted`, `fg-disabled`, `fg-inverse`), рамки (`line`, `line-strong`), взаимодействие (`hover`, `selected`, `accent`), глубина (`scrim`, `shadow`), тоны (`danger`, `decision`, `warning`, `success` + текст и подложка у срочных), заливки (`*-fill`, только в файлах из `registry.json → fill`: цвет метки `Tag`), ряды данных `series-1…6` | `tokens.json → colors` |
-| Тон | у наших компонентов без пары в Carbon (`Icon tone`, `CountBadge`, `Meter`, `StateView`…) — один словарь: опасно · решение · внимание · инфо · нейтрально · хорошо. Подложка — только у «опасно», «решение» (ждёт решения человека, фиолетовый) и «внимание»; «хорошо» — зелёный знак без подложки. У компонентов с парой — значения Carbon (`Button kind`, `Tag type`, `IconIndicator kind`, `InlineLoading status`), тоже из `vocab.ts`. Заливка тона (`tones.*.fill`) — фон, где цвет и есть смысл: метка `Tag` (`registry.json → fill`) | `tokens.json → tones`, `react/src/lib/vocab.ts` |
+| Тон | у наших компонентов без пары в Carbon (`Icon tone`, `CountBadge`, `Meter`, `StateView`…) — один словарь: опасно · решение · внимание · инфо · нейтрально · хорошо. Подложка — только у «опасно», «решение» (ждёт решения человека, фиолетовый) и «внимание»; «хорошо» — зелёный знак без подложки. У компонентов с парой — значения Carbon (`Button kind`, `Tag type`, `IconIndicator kind`, `InlineLoading status`, `InlineNotification kind`, `Modal size`), тоже из `vocab.ts`. Заливка тона (`tones.*.fill`) — фон, где цвет и есть смысл: метка `Tag` (`registry.json → fill`) | `tokens.json → tones`, `react/src/lib/vocab.ts` |
 | Ход работы | наш словарь `idle` впереди · `running` идёт · `done` готово · `error` ошибка — у отправки сообщения; у пар Carbon — их слова: `InlineLoading status` (`inactive` · `active` · `finished` · `error`), `ProgressStep` (`complete` · `current` · `invalid`) | `vocab.ts` |
 | Текст | 7 ролей: `caption` 12 · `body` 14 · `heading` 14/600 · `reading` 16 · `code` 13 моно · `title` 20 · `page` 28 | `scale.json → text` |
 | Отступ | 6 ролей: `tight` 4 · `items` 8 · `compact` 12 · `blocks` 16 · `groups` 24 · `sections` 32 — в классах (`gap-items`, `p-blocks`); у `Stack` и `Inline` — шаг шкалы Carbon spacing того же размера: `gap={2}` 4 · `3` 8 · `4` 12 · `5` 16 · `6` 24 · `7` 32 | `scale.json → space` |
@@ -39,12 +39,12 @@
 |---|---|
 | Основы | роли и шкалы (без компонентов) |
 | Раскладка | Stack, Inline, Grid, Column, Page, PageHeader, Section, SurfaceProvider, BottomBar |
-| Элементы | Icon, Button, ButtonSet, IconButton, Heading, Link, Tag, DismissibleTag, IconIndicator, CountBadge, Avatar, InlineLoading, Meter, ProgressIndicator, ProgressStep, Tooltip, Toggletip, ToggletipLabel, ToggletipButton, ToggletipContent, Accordion, AccordionItem, Delta, SkeletonText, SkeletonPlaceholder, Prose, ProseHtml, Chart |
+| Элементы | Icon, Button, ButtonSet, IconButton, Heading, Link, Tag, DismissibleTag, IconIndicator, CountBadge, Avatar, InlineLoading, Meter, ProgressIndicator, ProgressStep, Tooltip, Toggletip, ToggletipLabel, ToggletipButton, ToggletipContent, Accordion, AccordionItem, ContentSwitcher, Switch, Delta, SkeletonText, SkeletonPlaceholder, Prose, ProseHtml, Chart |
 | Поля | TextInput, PasswordInput, TextArea, NumberInput, Select, SelectItem, SelectItemGroup, Checkbox, CheckboxGroup, RadioButton, RadioButtonGroup, Toggle, ComboBox, FileUploader, FileUploaderItem, Search, Form, FormGroup |
-| Поверхности | Surface, Card, StatTile, Notification, StateView, CodeBlock, ChartFrame |
-| Коллекции | DataTable, List |
-| Слои | Dialog (окно и шторка), ConfirmProvider, Toaster |
-| Составные | Tabs, FilterBar, ThreeColumn, ChatThread, ReplyBox |
+| Поверхности | Tile, ClickableTile, ExpandableTile, TileAboveTheFoldContent, TileBelowTheFoldContent, StatTile, InlineNotification, ActionableNotification, StateView, CodeSnippet, ChartFrame |
+| Коллекции | DataTable, Table, TableContainer, TableHead, TableRow, TableHeader, TableBody, TableCell, DataTableSkeleton, ContainedList, ContainedListItem, Pagination |
+| Слои | Modal (окно и шторка), ConfirmProvider, OverflowMenu, OverflowMenuItem, Toaster |
+| Составные | Tabs, TabList, Tab, TabPanels, TabPanel, FilterBar, ThreeColumn, ChatThread, ReplyBox |
 
 Уровень, смысл и анатомия (поверхность, поля, роль заголовка, метка, форма) каждого компонента — в
 `react/src/registry.json`. ДС ничья: компонентов одного продукта в ней нет.
@@ -76,7 +76,19 @@ Carbon, которые не нужны, не сделаны; сделанные 
 | `FileUploader` | `labelTitle` — строка роли `heading`, не `<h3>`; не тот тип (`accept`) или больше `maxFileSize` — строка `FileUploaderItem invalid` с причиной (у Carbon — только `invalidFileType` в `onAddFiles`, тип не проверяется) | уровень заголовка даёт `Section`; не взятый молча файл — потеря без слова |
 | `Toggle` | включено — инверсия (у Carbon — зелёный); слова по умолчанию «Выкл» · «Вкл» | цвет тона — только смысл |
 | `Form`, `FormGroup` | своих отступов нет: поля внутри ставит `Stack` | только роли и шкалы, как у `Section` |
-| П5 | «одна главная на поверхность», «опасное не рядом с главной», «в строке — только ghost» — проверка в разработке (`rule()`), у Carbon её нет | правило ДС |
+| `Tile`, `ClickableTile` | `light`, `decorator`, `slug`, `hasRoundedCorners`, `clicked` нет; `ClickableTile` без `href` — `<button>` (у Carbon — `<a>` без адреса с `tabIndex`) | у плитки-действия роль кнопки; угол у плитки один |
+| `ExpandableTile` | раскрывает всегда кнопка со знаком под лицом (вид Carbon «interactive»); есть `tileCollapsedLabel` — слово на кнопке, иначе имя для читалки — `tileCollapsedIconText`; `tileMaxHeight`, `tilePadding` нет — высоту ведёт раскрытие ДС (0,6 с); П7 — проверкой в разработке: детей `TileAboveTheFoldContent` ≤ 4 (заголовок и три факта), вложенных раскрытий ≤ 2 | раскрытие — одна механика ДС; плитка-кнопка с заголовком и кнопками внутри читалке не прочесть |
+| Глубина (Carbon: `Layer`) | нет: слоёв в ролях два — холст и плитка; утопленное (код, своё сообщение) — анатомия `SUNKEN` | нет потребителя |
+| `InlineNotification`, `ActionableNotification`, всплывашка | `kind` — `error` · `warning` · `info` · `success` (`info-square`, `warning-alt` нет); облик один — как `lowContrast` у Carbon (плитка с меткой вида), `lowContrast` нет; `ActionableNotification` без `inline` — плашка с тенью и кнопкой с рамкой | высококонтрастный вид — инверсия, знаков тонов на ней нет среди проверенных пар ролей |
+| `CodeSnippet` | `type` — `single` · `multi` (`inline` нет); «Показать ещё» — по числу строк (у Carbon — по высоте в пикселях); `align`, `autoAlign`, `light`, `minCollapsedNumberOfRows`, `minExpandedNumberOfRows` нет | строки кода одной высоты; jsdom не меряет |
+| `DataTable` | геттеры не отдают `key` — ключ ставят сами (`key={row.id}`); выбора строк, раскрытия строк, панели инструментов (`TableToolbar…`), `TableBatchActions`, `filterRows`, `stickyHeader`, `useZebraStyles`, `experimentalAutoAlign` нет; `size` — `sm` · `md` · `lg`; первая колонка стоит при прокрутке вбок; `sortRow` по умолчанию — как у Carbon (`locale` `en`) | React 19 ругается на `key` в разворачивании; остальное не нужно примерам и продуктам |
+| `ContainedList` | `size` — `sm` · `md` · `lg` (`xl` нет); строки — в рамке с углом поверхности; открытая строка — `aria-current` на `ContainedListItem` (роль «выбрано») | одно «выбрано» на всю ДС |
+| `Pagination` | слова по умолчанию — русские; `renderPageSelect`, `backwardTextTooltipPosition`, `forwardTextTooltipPosition` нет | не нужны |
+| `Modal` | на телефоне — шторка снизу (у Carbon — окно); `size` по умолчанию `md`; `secondaryButtons`, `isFullWidth`, `alert`, `shouldSubmitOnEnter`, `launcherButtonRef`, `selectorsFloatingMenus`, `hasScrollingContent` нет — фокус после закрытия возвращает слой сам; шторки слева в API нет (её берёт только `ThreeColumn`) | на телефоне окно по центру закрывает палец; шторка слева — колонка раскладки, не окно |
+| `OverflowMenu` | кнопка — всегда `kind="ghost"`; `focusTrap`, `menuOffset`, `menuOffsetFlip`, `selectorPrimaryFocus`, `light` нет; пункты — `itemText` (дети не берутся) | меню стоит в строке списка (П5) |
+| `ContentSwitcher`, `Switch` | `size`, `lowContrast`, `light`, `IconSwitch` нет; ряд переносится по `className` (фильтры) | ряд сегментов один на ДС — тот же, что у вкладок |
+| `Tabs` | все панели смонтированы, неактивные `hidden` (как у Carbon); `contained`, `fullWidth`, `dismissable`, `IconTab`, `TabsVertical`, `secondaryLabel` нет — счётчик — `CountBadge` в слове вкладки; ряд не влезает — прокрутка без полосы, без стрелок прокрутки | счётчик тона — наш компонент |
+| П5 | «одна главная на поверхность», «опасное не рядом с главной», «в строке — только ghost» (`TableRow`, `ContainedListItem action`) — проверка в разработке (`rule()`), у Carbon её нет | правило ДС |
 
 ### Расширения сверх Carbon
 
@@ -84,6 +96,7 @@ Carbon, которые не нужны, не сделаны; сделанные 
 |---|---|
 | `ButtonSet` на телефоне — одним рядом поровну | столбец кнопок съел бы четверть экрана |
 | `unit` у `TextInput`, `NumberInput`, `Select` с `inline` — единица после поля («дней»); `NumberInput inline` — узкое (роль ширины `number`) | поле настройки одной строкой: `Подпись ……… [ 10 ] дней`, ошибка — у поля |
+| `Toaster` без `timeout` — гаснет за 5 с (у Carbon `timeout` 0 — висит); `timeout={0}` — висит; `role` всплывашки — как объявить (`alert` — сразу) | «готово» не копится на экране |
 
 ### Без пары в Carbon
 
@@ -100,6 +113,16 @@ Carbon, которые не нужны, не сделаны; сделанные 
 | `Meter` | сколько взято из предела: ProgressBar Carbon — ход процесса; имена свойств — как у ProgressBar |
 | `Prose`, `ProseHtml` | длинный текст ответа ролью «чтение» |
 | `Chart` | рисунок рядов данных (у Carbon — отдельный пакет `@carbon/charts`) |
+| `StatTile` | одно число с подписью и сравнением периодов (у Carbon — только ibm-products `BigNumber`) |
+| `StateView` | что показать вместо данных: первый запуск, всё сделано, ничего не найдено, нет доступа, ошибка (у Carbon — ibm-products `EmptyState`) |
+| `ChartFrame` | рамка графика: заголовок, легенда словом и видом линии, вывод словами для читалки, состояния той же высоты |
+| `ConfirmProvider` / `useConfirm` | `await confirm({ modalHeading, danger })` вместо `window.confirm` — на том же `Modal` (у Carbon — только сам `Modal danger`) |
+| `Toaster` / `useToast` | очередь всплывашек, место и свайп; одна всплывашка — поля Carbon `ToastNotification` (`kind`, `title`, `subtitle`, `caption`, `timeout`), отдельного компонента нет |
+| `FilterBar` / `useUrlFilters` | фильтры списка рядами `ContentSwitcher` и поиск — в адресе страницы (у Carbon — ibm-products `FilterPanel`) |
+| `ThreeColumn` | список → лента → карточка рядом, на телефоне — по одной или шторками |
+| `ChatThread` | лента переписки (у Carbon — отдельный пакет `@carbon/ai-chat`) |
+| `ReplyBox` | поле ответа с отправкой по клавишам; свойства поля — как у `TextArea` (`labelText`, `invalid`, `invalidText`, `helperText`) |
+| «Показать ещё» | не компонент, а сборка паттерна «Обрезка содержимого»: `ContainedList` + `Button kind="ghost"`; страницы таблицы — `Pagination` |
 
 ## Паттерны
 
@@ -143,7 +166,7 @@ Carbon, которые не нужны, не сделаны; сделанные 
 | Облик и анатомия: каждая история × светлая и тёмная × 390 и 1280 против эталона; поля, роль заголовка, угол и метка — по реестру; текст, углы и высоты контролов — только из шкал | `react/visual/run.mjs` (`npm run test:visual`), эталоны `react/visual/baseline/` | `__tests__/visual.test.ts`: кадр со сдвигом на 1 px, снимок с полями 12 вместо 16 |
 | Контраст: текст ≥ 4,5 : 1 (и на заливке статуса), знаки, границы контролов, фокус и ряды данных ≥ 3 : 1 — обе темы | `lib/contrast.mjs`, `contrast.test.ts` | пара светло-серого текста на белом |
 | Форма ролей, шкал и матрицы облика — закрытые списки | `tokens.schema.json`, `matrix.schema.json`, `schemas.test.ts` | `__tests__/fixtures/schemas/*/invalid` |
-| Одна `kind="primary"` на поверхность и в наборе; опасное (`danger…`) не в одном `ButtonSet` с главной; в строке списка — только `kind="ghost"`; на лице карточки ≤ 3 фактов, раскрытие ≤ 2 уровней; одна липкая полоса на страницу; шагов — от трёх | сами компоненты (`rule()` бросает в разработке), тесты `react/src/__tests__` | `elements.test.tsx`: вторая главная на странице, `danger` рядом с главной, не-ghost в строке — красные |
+| Одна `kind="primary"` на поверхность и в наборе; опасное (`danger…`) не в одном `ButtonSet` с главной; в строке списка — только `kind="ghost"`; на лице `ExpandableTile` — заголовок и ≤ 3 фактов, раскрытие ≤ 2 уровней; одна липкая полоса на страницу; шагов — от трёх | сами компоненты (`rule()` бросает в разработке), тесты `react/src/__tests__` | `elements.test.tsx`: вторая главная на странице, `danger` рядом с главной, не-ghost в строке — красные |
 | История на каждое обещанное состояние, теги состояний — из `matrix.yaml`; a11y axe в обеих темах | `rules.test.tsx`, `a11y.test.tsx` | — |
 | Продукт: экраны только на полке `Экраны/SCR-NN …`; своего компонента с именем компонента ДС нет; новое нарушение «только роли» — красное, старое — долг | `lint/principles.mjs --kind product --base origin/main` в `check` продукта | `principles.test.ts` |
 

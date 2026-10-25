@@ -1,17 +1,16 @@
 /**
  * Плитка с цифрой: одно число и подпись — поверхность. `compact` — число и подпись в строку (плитки-переходы);
  * `metric` — подпись сверху, число крупно, по желанию сравнение двух периодов (метка цвета ряда графика и `Delta`).
- * Беда рядом с числом (`alert`) — знак тона и слово. Вся плитка — кнопка (`onClick`), без него не нажимается.
- * Больше одного числа — `Card`.
+ * Беда рядом с числом (`alert`) — знак тона и слово. Вся плитка нажимается (`onClick` — `ClickableTile`), без него —
+ * `Tile`. Больше одного числа — `ExpandableTile`.
  */
 import type { ReactNode } from 'react'
-import { FOCUS } from '../lib/anatomy'
 import { cx } from '../lib/cx'
 import type { Tone } from '../lib/vocab'
 import { SERIES } from './Chart'
 import { Delta } from './Delta'
 import { Icon } from './Icon'
-import { Surface } from './Surface'
+import { ClickableTile, Tile } from './Tile'
 
 export interface StatTileCompare {
   /** Число периода Б. */
@@ -89,15 +88,13 @@ export function StatTile({ value, label, detail, alert, variant = 'compact', com
         {alertView}
       </span>
     )
-  return (
-    <Surface
-      as={onClick ? 'button' : 'div'}
-      {...(onClick ? { type: 'button' as const, onClick } : {})}
-      data-slot="stat-tile"
-      data-variant={variant}
-      className={cx('text-start', onClick && cx('cursor-pointer hover:bg-hover', FOCUS), className)}
-    >
+  return onClick ? (
+    <ClickableTile onClick={onClick} data-slot="stat-tile" data-variant={variant} className={className}>
       {body}
-    </Surface>
+    </ClickableTile>
+  ) : (
+    <Tile data-slot="stat-tile" data-variant={variant} className={cx('text-start', className)}>
+      {body}
+    </Tile>
   )
 }

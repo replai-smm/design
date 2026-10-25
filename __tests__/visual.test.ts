@@ -41,7 +41,7 @@ describe('сверка снимков', () => {
 
 describe('анатомия по реестру', () => {
   const good = {
-    slots: [{ slot: 'card', padding: 16, radius: 6, height: 120, markWidth: 1, hasMark: false, title: { size: 14, weight: 600 } }],
+    slots: [{ slot: 'state-view', padding: 16, radius: 6, height: 120, markWidth: 1, hasMark: false, title: { size: 14, weight: 600 } }],
     fonts: [12, 14],
     radii: [0, 4, 6],
     controls: [{ what: 'кнопка «Да»', height: 40 }],
@@ -54,8 +54,8 @@ describe('анатомия по реестру', () => {
   it('приманка: поля, заголовок, метка, угол, текст, плотность — каждое названо', () => {
     const bait = {
       slots: [
-        { slot: 'card', padding: 12, radius: 6, height: 120, markWidth: 1, hasMark: false, title: { size: 16, weight: 600 } },
-        { slot: 'notification', padding: 16, radius: 6, height: 60, markWidth: 4, hasMark: true, title: { size: 14, weight: 600 } },
+        { slot: 'state-view', padding: 12, radius: 6, height: 120, markWidth: 1, hasMark: false, title: { size: 16, weight: 600 } },
+        { slot: 'inline-notification', padding: 16, radius: 6, height: 60, markWidth: 4, hasMark: true, title: { size: 14, weight: 600 } },
         { slot: 'button', padding: 16, radius: 0, height: 40, markWidth: 1, hasMark: false, title: null },
       ],
       fonts: [14, 15],

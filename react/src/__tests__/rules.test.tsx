@@ -40,6 +40,7 @@ const PROMISED: Record<string, string[]> = {
   'Tooltip.stories.tsx': ['обычное'],
   'Toggletip.stories.tsx': ['обычное'],
   'Accordion.stories.tsx': ['обычное', 'много'],
+  'ContentSwitcher.stories.tsx': ['обычное'],
   'Delta.stories.tsx': ['обычное'],
   'SkeletonText.stories.tsx': ['загрузка'],
   'Prose.stories.tsx': ['обычное'],
@@ -56,17 +57,19 @@ const PROMISED: Record<string, string[]> = {
   'FileUploader.stories.tsx': ['обычное', 'ошибка'],
   'Search.stories.tsx': ['обычное'],
   'Form.stories.tsx': ['обычное', 'ошибка'],
-  'Surface.stories.tsx': ['обычное'],
-  'Card.stories.tsx': ['обычное'],
+  'Tile.stories.tsx': ['обычное'],
+  'ExpandableTile.stories.tsx': ['обычное'],
   'StatTile.stories.tsx': ['обычное'],
-  'Notification.stories.tsx': ['обычное', 'ошибка'],
+  'InlineNotification.stories.tsx': ['обычное', 'ошибка'],
   'StateView.stories.tsx': ['загрузка', 'ошибка', 'первый запуск', 'всё сделано', 'ничего не найдено', 'нет доступа'],
-  'CodeBlock.stories.tsx': ['обычное', 'много'],
+  'CodeSnippet.stories.tsx': ['обычное', 'много'],
   'ChartFrame.stories.tsx': ['обычное', 'загрузка', 'ошибка', 'первый запуск', 'ничего не найдено'],
   'DataTable.stories.tsx': ALL,
-  'List.stories.tsx': ALL,
-  'Dialog.stories.tsx': ['обычное', 'загрузка', 'ошибка'],
-  'Toast.stories.tsx': ['обычное'],
+  'ContainedList.stories.tsx': ALL,
+  'Pagination.stories.tsx': ['обычное', 'много'],
+  'Modal.stories.tsx': ['обычное', 'загрузка', 'ошибка'],
+  'OverflowMenu.stories.tsx': ['обычное'],
+  'Toaster.stories.tsx': ['обычное'],
   'Tabs.stories.tsx': ['обычное', 'много'],
   'FilterBar.stories.tsx': ['обычное'],
   'ThreeColumn.stories.tsx': ['обычное', 'первый запуск'],
@@ -96,8 +99,7 @@ describe('истории на каждое состояние', () => {
 
   it('у каждого файла компонента есть истории; список обещаний — ровно файлы историй', () => {
     const comps = readdirSync(resolve(root, 'src/components')).filter((f) => f.endsWith('.tsx') && !f.includes('.stories.'))
-    const covered = new Set(['Collection.tsx']) // DataTable и List
-    for (const c of comps) if (!covered.has(c)) expect(STORY_FILES, `нет историй у ${c}`).toContain(c.replace('.tsx', '.stories.tsx'))
+    for (const c of comps) expect(STORY_FILES, `нет историй у ${c}`).toContain(c.replace('.tsx', '.stories.tsx'))
     expect(Object.keys(PROMISED).sort()).toEqual([...STORY_FILES].sort())
   })
 

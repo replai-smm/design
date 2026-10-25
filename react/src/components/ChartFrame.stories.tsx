@@ -7,7 +7,7 @@ import { visits } from '../stories/fixtures'
 const labels = visits.map((_, i) => `${i + 1}.10`)
 
 const meta = {
-  title: 'Компоненты/Поверхности/Рамка графика',
+  title: 'Компоненты/Поверхности/ChartFrame',
   component: ChartFrame,
   parameters: { layout: 'padded' },
   args: {

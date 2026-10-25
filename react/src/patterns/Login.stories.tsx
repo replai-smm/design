@@ -3,7 +3,7 @@ import md from '../../../patterns/login.md?raw'
 import { Button, ButtonSet } from '../components/Button'
 import { Link } from '../components/Link'
 import { Form } from '../components/Form'
-import { Notification } from '../components/Notification'
+import { InlineNotification } from '../components/InlineNotification'
 import { PasswordInput, TextInput } from '../components/TextInput'
 import { Stack } from '../components/layout'
 import { pattern } from './story'
@@ -15,9 +15,7 @@ function Example({ error = false }: { error?: boolean }) {
         <Stack gap={5}>
           <p className="m-0 text-title text-fg">Вход</p>
           {error && (
-            <Notification tone="опасно" title="Не вышло войти">
-              Почта или пароль не подходят. Проверьте раскладку или восстановите пароль.
-            </Notification>
+            <InlineNotification kind="error" role="alert" title="Не вышло войти" subtitle="Почта или пароль не подходят. Проверьте раскладку или восстановите пароль." hideCloseButton />
           )}
           <TextInput id="login-email" labelText="Почта" type="email" autoComplete="email" defaultValue={error ? 'anna@example.com' : undefined} />
           <PasswordInput id="login-password" labelText="Пароль" autoComplete="current-password" />

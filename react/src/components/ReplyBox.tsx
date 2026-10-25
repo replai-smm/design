@@ -3,9 +3,11 @@
  * - Клавиши (`send`): `enter` — Enter отправляет, Shift+Enter — новая строка; `ctrl-enter` — Enter — новая строка,
  *   Ctrl/⌘+Enter отправляет; `button` — только кнопкой (отправка необратима: ответ уходит адресату). Набор через IME не трогаем.
  * - Отправка идёт — на месте «Отправить» ход в строке (`InlineLoading`), поле только для чтения, второй раз не уходит. Неудача не теряет текст:
- *   `onSend` вернул отклонённое обещание — текст остаётся, ошибку показывает `error`.
+ *   `onSend` вернул отклонённое обещание — текст остаётся, ошибку показывает `invalid` + `invalidText` (как у полей Carbon).
  * - «Отправить» — главная `Button` в `ButtonSet` (П5), последней; рядом — тихие (`tools`). Уже есть главная на
- *   поверхности — `emphasis="secondary"`. `disabled` — словами, почему нельзя.
+ *   поверхности — `buttonKind="secondary"`. Под полем — `helperText` (по умолчанию — подсказка о клавишах, на ноутбуке);
+ *   `disabled` — почему нельзя, словами в `helperText`.
+ * Пары в Carbon нет; имена свойств поля — как у TextArea (`labelText`, `invalid`, `helperText`).
  * - Разговор с агентом: `stop` — «Стоп», пока агент работает; `layout="row"` — кнопки в ряд, «Отправить» справа.
  */
 import { forwardRef, useId, useImperativeHandle, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
@@ -18,7 +20,7 @@ import { fieldBox } from './TextInput'
 
 export interface ReplyBoxProps {
   /** Подпись поля для читалки: «Ответ покупателю». */
-  label: string
+  labelText: string
   value?: string
   onChange?: (value: string) => void
   /** Отправить. Вернул обещание — пока оно идёт, кнопка занята; отклонено — текст остаётся. */
@@ -29,10 +31,11 @@ export interface ReplyBoxProps {
   send?: 'enter' | 'ctrl-enter' | 'button'
   /** Отправка идёт (если продукт ведёт её сам). */
   sending?: boolean
-  /** Нельзя писать: `true` или слова, почему (видны под полем). */
-  disabled?: ReactNode
-  /** Ошибка отправки — под полем, знак и слово. */
-  error?: ReactNode
+  /** Нельзя писать; почему — словами в `helperText`. */
+  disabled?: boolean
+  /** Ошибка отправки — под полем, знак и слово `invalidText`. */
+  invalid?: boolean
+  invalidText?: ReactNode
   /** Что сказать при попытке отправить пустое. Без него пустое молча не уходит. */
   emptyMessage?: ReactNode
   /** Можно отправить без текста (приложен файл). */
@@ -41,9 +44,10 @@ export interface ReplyBoxProps {
   tools?: ReactNode
   /** Вложение над кнопками. */
   attachment?: ReactNode
-  /** Подсказка о клавишах под полем; по умолчанию — по `send`; false — без подсказки. */
-  hint?: ReactNode | false
-  emphasis?: 'primary' | 'secondary'
+  /** Строка под полем; по умолчанию — подсказка о клавишах по `send` (на ноутбуке); `null` — без строки. */
+  helperText?: ReactNode
+  /** Вид «Отправить»: главная (по умолчанию) или второстепенная, если главная на поверхности уже есть. */
+  buttonKind?: 'primary' | 'secondary'
   rows?: number
   layout?: 'stack' | 'row'
   /** «Стоп» — пока агент работает. */
@@ -58,7 +62,7 @@ export interface ReplyBoxHandle {
 const HINT = { enter: 'Enter — отправить, Shift+Enter — новая строка', 'ctrl-enter': 'Ctrl+Enter — отправить', button: null } as const
 
 export const ReplyBox = forwardRef<ReplyBoxHandle, ReplyBoxProps>(function ReplyBox(
-  { label, value, onChange, onSend, placeholder, sendLabel = 'Отправить', send: mode = 'enter', sending: sendingProp, disabled, error, emptyMessage, allowEmpty = false, tools, attachment, hint, emphasis = 'primary', rows = 3, layout = 'stack', stop, className },
+  { labelText, value, onChange, onSend, placeholder, sendLabel = 'Отправить', send: mode = 'enter', sending: sendingProp, disabled = false, invalid = false, invalidText, emptyMessage, allowEmpty = false, tools, attachment, helperText, buttonKind = 'primary', rows = 3, layout = 'stack', stop, className },
   ref,
 ) {
   const id = useId()
@@ -71,8 +75,7 @@ export const ReplyBox = forwardRef<ReplyBoxHandle, ReplyBoxProps>(function Reply
   const controlled = value !== undefined
   const text = controlled ? value : own
   const sending = Boolean(sendingProp) || busy
-  const off = Boolean(disabled)
-  const reason = typeof disabled === 'boolean' ? null : disabled
+  const off = disabled
 
   const set = (v: string) => {
     if (!controlled) setOwn(v)
@@ -97,7 +100,7 @@ export const ReplyBox = forwardRef<ReplyBoxHandle, ReplyBoxProps>(function Reply
       await r
       if (!controlled) setOwn('')
     } catch {
-      // текст остаётся в поле; ошибку показывает продукт через `error`
+      // текст остаётся в поле; ошибку показывает продукт через `invalid` + `invalidText`
     } finally {
       busyRef.current = false
       setBusy(false)
@@ -113,13 +116,14 @@ export const ReplyBox = forwardRef<ReplyBoxHandle, ReplyBoxProps>(function Reply
     }
   }
 
-  const shownError = error ?? (emptyShown ? emptyMessage : null)
-  const hintText = hint === false ? null : (hint ?? HINT[mode])
-  const describedBy = [shownError ? `${id}-err` : null, reason ? `${id}-why` : null, hintText ? `${id}-hint` : null].filter(Boolean).join(' ') || undefined
+  const shownError = invalid ? invalidText : emptyShown ? emptyMessage : null
+  const keysHint = helperText === undefined
+  const hintText = keysHint ? (off ? null : HINT[mode]) : helperText
+  const describedBy = [shownError ? `${id}-err` : null, hintText ? `${id}-hint` : null].filter(Boolean).join(' ') || undefined
   const sendButton = sending ? (
     <InlineLoading description="Отправляем…" data-part="send" className={cx(layout === 'row' && 'ml-auto')} />
   ) : (
-    <Button kind={emphasis === 'primary' ? 'primary' : 'secondary'} onClick={() => void doSend()} disabled={off} data-part="send" className={cx(layout === 'row' && 'ml-auto')}>
+    <Button kind={buttonKind} onClick={() => void doSend()} disabled={off} data-part="send" className={cx(layout === 'row' && 'ml-auto')}>
       {sendLabel}
     </Button>
   )
@@ -127,7 +131,7 @@ export const ReplyBox = forwardRef<ReplyBoxHandle, ReplyBoxProps>(function Reply
   return (
     <div data-slot="reply-box" data-state={sending ? 'загрузка' : shownError ? 'ошибка' : undefined} className={cx('flex min-w-0 flex-col gap-items', className)}>
       <label htmlFor={`${id}-field`} className="sr-only">
-        {label}
+        {labelText}
       </label>
       <textarea
         ref={area}
@@ -150,18 +154,13 @@ export const ReplyBox = forwardRef<ReplyBoxHandle, ReplyBoxProps>(function Reply
           <span>{shownError}</span>
         </p>
       )}
-      {reason && (
-        <p id={`${id}-why`} className="m-0 text-caption text-fg-muted">
-          {reason}
-        </p>
-      )}
-      {hintText && !off && (
-        <p id={`${id}-hint`} className="m-0 text-caption text-fg-muted max-md:hidden">
+      {hintText && (
+        <p id={`${id}-hint`} className={cx('m-0 text-caption text-fg-muted', keysHint && 'max-md:hidden')}>
           {hintText}
         </p>
       )}
       {attachment && <div className="flex flex-wrap gap-items">{attachment}</div>}
-      <ButtonSet aria-label={`${label}: действия`}>
+      <ButtonSet aria-label={`${labelText}: действия`}>
         {stop && (
           <Button kind="secondary" renderIcon={StopFilledAlt} onClick={stop.onStop} data-part="stop">
             {stop.label ?? 'Стоп'}

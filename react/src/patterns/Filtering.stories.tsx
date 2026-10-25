@@ -1,9 +1,12 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import md from '../../../patterns/filtering.md?raw'
-import { DataTable, type DataTableColumn } from '../components/Collection'
+import { Button } from '../components/Button'
+import { DataTable, DataTableSkeleton, Table, TableBody, TableCell, TableContainer, TableHead, TableHeader, TableRow } from '../components/DataTable'
 import { FilterBar, type FilterValue } from '../components/FilterBar'
 import { Heading } from '../components/Heading'
+import { Pagination } from '../components/Pagination'
+import { StateView } from '../components/StateView'
 import { Section, Stack } from '../components/layout'
 import type { DataState } from '../lib/vocab'
 import { pattern } from './story'
@@ -20,18 +23,20 @@ const ORDERS: Order[] = [
   { id: '1043', item: 'Кресло', status: 'в пути', city: 'Казань' },
   { id: '1044', item: 'Полка', status: 'отменён', city: 'Омск' },
 ]
-const many = Array.from({ length: 120 }, (_, i) => ({ ...ORDERS[i % 4], id: String(2000 + i) }))
-const columns: DataTableColumn<Order>[] = [
-  { key: 'id', header: 'Заказ', cell: (r) => `№ ${r.id}`, face: true },
-  { key: 'item', header: 'Товар', cell: (r) => r.item, face: true, grow: 2 },
-  { key: 'status', header: 'Статус', cell: (r) => r.status },
-  { key: 'city', header: 'Город', cell: (r) => r.city },
+const many = Array.from({ length: 120 }, (_, i) => ({ ...ORDERS[i % 4]!, id: String(2000 + i) }))
+const headers = [
+  { key: 'number', header: 'Заказ' },
+  { key: 'item', header: 'Товар' },
+  { key: 'status', header: 'Статус' },
+  { key: 'city', header: 'Город' },
 ]
 
-/** Заказы: фильтр по статусу и городу, поиск, таблица; фильтр живёт в адресе. */
+/** Заказы: фильтр по статусу и городу, поиск, таблица по страницам; фильтр живёт в адресе. */
 function Example({ state = 'ready', rows = ORDERS }: { state?: DataState; rows?: Order[] }) {
   const [filter, setFilter] = useState<FilterValue>({})
+  const [page, setPage] = useState({ page: 1, pageSize: 10 })
   const shown = rows.filter((r) => (!filter.status || r.status === filter.status) && (!filter.city || r.city === filter.city))
+  const from = (page.page - 1) * page.pageSize
   return (
     <Section as={Stack} gap={5} className="p-blocks">
       <Heading>Заказы</Heading>
@@ -41,10 +46,49 @@ function Example({ state = 'ready', rows = ORDERS }: { state?: DataState; rows?:
           { key: 'city', label: 'Город', options: [{ value: 'Казань', label: 'Казань' }, { value: 'Пермь', label: 'Пермь' }, { value: 'Омск', label: 'Омск' }] },
         ]}
         value={filter}
-        onChange={setFilter}
-        search={{ label: 'Поиск по заказам' }}
+        onChange={(v) => (setFilter(v), setPage((p) => ({ ...p, page: 1 })))}
+        search={{ labelText: 'Поиск по заказам' }}
       />
-      <DataTable label="Заказы" rows={shown} columns={columns} state={state} error={{ title: 'Заказы не загрузились', onRetry: () => {} }} getKey={(r) => r.id} />
+      {state === 'loading' ? (
+        <div role="status" aria-busy="true">
+          <span className="sr-only">Заказы: загрузка</span>
+          <DataTableSkeleton headers={headers} showHeader={false} showToolbar={false} />
+        </div>
+      ) : state === 'error' ? (
+        <StateView kind="ошибка" title="Заказы не загрузились" action={<Button kind="secondary">Повторить</Button>} />
+      ) : (
+        <div className="flex flex-col">
+          <DataTable rows={shown.slice(from, from + page.pageSize).map((r) => ({ ...r, number: `№ ${r.id}` }))} headers={headers}>
+            {({ rows: view, headers: cols, getHeaderProps, getRowProps, getTableProps, getCellProps }) => (
+              <TableContainer>
+                <Table aria-label="Заказы" {...getTableProps()}>
+                  <TableHead>
+                    <TableRow>
+                      {cols.map((header) => (
+                        <TableHeader key={header.key} {...getHeaderProps({ header })}>
+                          {header.header}
+                        </TableHeader>
+                      ))}
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {view.map((row) => (
+                      <TableRow key={row.id} {...getRowProps({ row })}>
+                        {row.cells.map((cell) => (
+                          <TableCell key={cell.id} {...getCellProps({ cell })}>
+                            {cell.value as ReactNode}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            )}
+          </DataTable>
+          {shown.length > page.pageSize && <Pagination totalItems={shown.length} page={page.page} pageSize={page.pageSize} pageSizes={[10, 25, 50]} onChange={setPage} />}
+        </div>
+      )}
     </Section>
   )
 }

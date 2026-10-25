@@ -26,34 +26,8 @@
   display: none;
 }
 
-/* таблица: сетка с подсеткой — колонки ровные во всех строках, свёрнутая группа раскрывается без прыжка */
-.ds-table {
-  display: grid;
-  grid-template-columns: var(--table-cols-phone);
-}
-@media (min-width: 48rem) {
-  .ds-table {
-    grid-template-columns: var(--table-cols);
-  }
-}
-.ds-table > *,
-.ds-table .ds-row,
-.ds-table .ds-rowgroup {
-  grid-column: 1 / -1;
-}
-.ds-table .ds-row,
-.ds-table .ds-rowgroup {
-  display: grid;
-  grid-template-columns: subgrid;
-}
-@media (max-width: 47.99rem) {
-  .ds-table .ds-cell-more {
-    display: none;
-  }
-}
-/* первая колонка стоит при прокрутке вбок */
-.ds-table .ds-row > [role='cell']:first-child,
-.ds-table .ds-row > [role='columnheader']:first-child {
+/* таблица: не влезает — прокрутка вбок внутри TableContainer, первая колонка стоит (цвет — строки) */
+.ds-table :is(th, td):first-child {
   position: sticky;
   left: 0;
   z-index: 1;
@@ -282,4 +256,14 @@
   margin-left: var(--ds-space-tight);
   background: var(--ds-fg);
   animation: ds-blink var(--ds-motion-move) var(--ds-ease) infinite alternate;
+}
+
+/* список: разделители строк с отступом от края (ContainedList isInset) */
+.ds-rule-inset:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: var(--ds-space-compact);
+  right: var(--ds-space-compact);
+  bottom: 0;
+  border-bottom: 1px solid var(--ds-line);
 }

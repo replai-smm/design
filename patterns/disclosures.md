@@ -2,7 +2,7 @@
 
 Carbon: Disclosures · Источник: carbon-website src/pages/patterns/disclosures-pattern/index.mdx @ 5e9cd1d · Перевод с английского, Apache-2.0
 
-Компоненты примера: `Accordion`, `AccordionItem`, `Card`, `Heading`, `Section`, `Stack`, `Toggletip`, `ToggletipButton`, `ToggletipContent`, `ToggletipLabel`
+Компоненты примера: `Accordion`, `AccordionItem`, `ExpandableTile`, `Heading`, `Section`, `Stack`, `TileAboveTheFoldContent`, `TileBelowTheFoldContent`, `Toggletip`, `ToggletipButton`, `ToggletipContent`, `ToggletipLabel`
 
 Раскрытие — это элемент, который открывается на странице и показывает дополнительные сведения, связанные с тем, что его вызвало.
 

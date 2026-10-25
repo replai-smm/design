@@ -1,15 +1,15 @@
 /**
- * Рамка графика — поверхность: заголовок, тихие кнопки, легенда словом и видом линии, вывод словами для читалки
+ * Рамка графика — плитка: заголовок, тихие кнопки, легенда словом и видом линии, вывод словами для читалки
  * (`summary`, обязателен), состояния той же высоты, что график (без прыжка). Сам график — `Chart` внутри.
  */
 import { useId, type ReactNode } from 'react'
+import { SURFACE } from '../lib/anatomy'
 import { cx } from '../lib/cx'
 import type { DataState, EmptyView, ErrorView } from '../lib/vocab'
 import { Button } from './Button'
 import { SERIES, seriesIndex, type SeriesLine } from './Chart'
 import { SkeletonPlaceholder } from './SkeletonText'
 import { StateView } from './StateView'
-import { Surface } from './Surface'
 
 export interface LegendItem {
   key: string
@@ -71,7 +71,7 @@ export function ChartFrame({ title, description, summary, legend, tools, state =
     )
   const ready = state === 'ready' && !empty
   return (
-    <Surface as="figure" data-slot="chart-frame" aria-labelledby={`${id}-t`} aria-describedby={`${id}-s`} className={cx('m-0 gap-blocks', className)}>
+    <figure data-slot="chart-frame" aria-labelledby={`${id}-t`} aria-describedby={`${id}-s`} className={cx('m-0 flex min-w-0 flex-col gap-blocks p-blocks', SURFACE, className)}>
       <div className="flex min-w-0 flex-wrap items-start justify-between gap-items">
         <figcaption className="flex min-w-0 flex-col gap-tight">
           <span id={`${id}-t`} data-part="title" className="text-heading text-fg">
@@ -103,6 +103,6 @@ export function ChartFrame({ title, description, summary, legend, tools, state =
           })}
         </ul>
       )}
-    </Surface>
+    </figure>
   )
 }

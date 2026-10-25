@@ -1,6 +1,8 @@
+import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import md from '../../../patterns/overflow-content.md?raw'
-import { List } from '../components/Collection'
+import { Button } from '../components/Button'
+import { ContainedList, ContainedListItem } from '../components/ContainedList'
 import { Tooltip } from '../components/Tooltip'
 import { Heading } from '../components/Heading'
 import { Section, Stack } from '../components/layout'
@@ -10,6 +12,7 @@ const TASKS = Array.from({ length: 24 }, (_, i) => ({ id: String(i + 1), name: `
 const long = 'Квартальный отчёт по проектам направления «Новые офисы» с приложениями и протоколами встреч'
 
 function Example() {
+  const [limit, setLimit] = useState(5)
   return (
     <Stack gap={6} className="p-blocks">
       <Section as={Stack} gap={5}>
@@ -22,7 +25,20 @@ function Example() {
       </Section>
       <Section as={Stack} gap={5}>
         <Heading>«Показать ещё» у длинного списка</Heading>
-        <List label="Задачи" rows={TASKS} getKey={(r) => r.id} renderRow={(r) => <span className="truncate">{r.name}</span>} pageSize={5} />
+        <ContainedList label="Задачи">
+          {TASKS.slice(0, limit).map((t) => (
+            <ContainedListItem key={t.id}>
+              <span className="block truncate">{t.name}</span>
+            </ContainedListItem>
+          ))}
+        </ContainedList>
+        {limit < TASKS.length && (
+          <div>
+            <Button kind="ghost" onClick={() => setLimit(limit + 5)}>
+              Показать ещё · {TASKS.length - limit}
+            </Button>
+          </div>
+        )}
       </Section>
     </Stack>
   )

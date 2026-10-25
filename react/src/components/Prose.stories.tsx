@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { CodeBlock } from './CodeBlock'
+import { CodeSnippet } from './CodeSnippet'
 import { Prose, ProseHtml } from './Prose'
 import { csvCode } from '../stories/fixtures'
 
@@ -18,7 +18,9 @@ export const Обычное: S = {
   render: () => (
     <Prose>
       <ProseHtml html={html} />
-      <CodeBlock code={csvCode} label="src/export/csv.ts" />
+      <CodeSnippet type="multi" aria-label="Код: src/export/csv.ts">
+        {csvCode}
+      </CodeSnippet>
     </Prose>
   ),
 }
