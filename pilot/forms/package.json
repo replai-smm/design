@@ -1,0 +1,26 @@
+{
+  "name": "pilot-carbon-forms",
+  "private": true,
+  "type": "module",
+  "description": "Пилот A/B: экран «Уведомления» — A на @carbon/react, B на ДС. Отдельное приложение, не рабочая область репо.",
+  "scripts": {
+    "build": "vite build",
+    "measure": "node measure.mjs"
+  },
+  "dependencies": {
+    "@carbon/react": "1.119.0",
+    "@carbon/styles": "1.118.0",
+    "radix-ui": "1.7.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "4.3.3",
+    "@vitejs/plugin-react": "6.1.2",
+    "axe-core": "4.14.0",
+    "playwright": "1.63.0",
+    "sass": "1.106.1",
+    "tailwindcss": "4.3.3",
+    "vite": "8.3.3"
+  }
+}

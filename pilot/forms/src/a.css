@@ -1,0 +1,206 @@
+@layer theme, base, carbon, components, utilities;
+@import "tailwindcss" source(none);
+@source "./a.tsx";
+
+/* ——— 1. Шрифт: Carbon сам грузит Plex из @ibm/plex ($css--font-face), здесь — те же файлы, что у B ——— */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-weight: 400;
+  font-display: swap;
+  src: url('../../../fonts/IBMPlexSans-Regular.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-weight: 600;
+  font-display: swap;
+  src: url('../../../fonts/IBMPlexSans-SemiBold.woff2') format('woff2');
+}
+
+/* ——— 2. Тема: наши роли в токенах Carbon (только custom properties) ——— */
+.cds--g10 {
+  --cds-text-helper: #525252;
+  --cds-border-subtle: #e0e0e0;
+  --cds-background-inverse: #161616;
+  --cds-background-inverse-hover: #393939;
+  --cds-layer-hover: #8d8d8d1f;
+  --cds-field-hover: #8d8d8d1f;
+  --cds-text-error: #a2191f;
+}
+.cds--g100 {
+  --cds-background: #0f0f11;
+  --cds-layer-01: #17171a;
+  --cds-layer: #17171a;
+  --cds-field-01: #17171a;
+  --cds-field: #17171a;
+  --cds-text-primary: #ececec;
+  --cds-icon-primary: #ececec;
+  --cds-text-secondary: #a1a1aa;
+  --cds-text-helper: #a1a1aa;
+  --cds-icon-secondary: #a1a1aa;
+  --cds-border-subtle-01: #2a2a2f;
+  --cds-border-subtle: #2a2a2f;
+  --cds-border-strong-01: #6f6f76;
+  --cds-border-strong: #6f6f76;
+  --cds-layer-hover: #8d8d8d29;
+  --cds-field-hover: #8d8d8d29;
+  --cds-focus: #78a9ff;
+  --cds-background-inverse: #ececec;
+  --cds-background-inverse-hover: #c6c6c6;
+  --cds-text-inverse: #0f0f11;
+  --cds-text-error: #ffb3b8;
+}
+.app {
+  --cds-button-radius: 4px;
+  --cds-button-primary: var(--cds-background-inverse);
+  --cds-button-primary-hover: var(--cds-background-inverse-hover);
+  --cds-button-secondary: transparent;
+  --cds-button-secondary-hover: var(--cds-layer-hover);
+  --cds-notification-background-error: var(--cds-layer-01);
+}
+
+/* ——— 3. Свой текст страницы (у Carbon нет компонента шапки формы) ——— */
+.page-title {
+  font-size: 1.75rem;
+  line-height: 2.25rem;
+  font-weight: 400;
+  color: var(--cds-text-primary);
+}
+.page-description,
+.bar-text,
+.unit {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--cds-text-secondary);
+}
+.section-title {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  font-weight: 400;
+}
+.bottom-bar {
+  background: var(--cds-layer-01);
+  border-top: 1px solid var(--cds-border-subtle);
+  box-shadow: 0 2px 6px 0 #0000002e;
+}
+
+/* ——— 4. Облик компонентов Carbon под наш: переписываем классы .cds--* ——— */
+/* поле в рамке со скруглением, а не линия снизу */
+.cds--text-input,
+.cds--select-input,
+.cds--number__input-wrapper {
+  border: 1px solid var(--cds-border-strong);
+  border-radius: 4px;
+}
+.cds--number__input-wrapper {
+  overflow: hidden;
+  background: var(--cds-field);
+}
+.cds--number input[type='number'] {
+  min-inline-size: 0;
+  border: 0;
+  block-size: calc(var(--cds-layout-size-height-local) - 2px);
+  padding-inline: 0.75rem calc(2 * var(--cds-layout-size-height-local));
+}
+.cds--number__control-btn {
+  border-block-end: 0;
+  border-inline-start: 1px solid var(--cds-border-subtle);
+}
+.cds--number__control-btn::before,
+.cds--number__control-btn::after,
+.cds--number__rule-divider {
+  display: none;
+}
+.cds--label {
+  margin-block-end: 0.25rem;
+}
+/* кнопки: слово по центру, поля 16 с обеих сторон; второстепенная — рамка без заливки */
+.cds--btn {
+  justify-content: center;
+  padding-inline: 1rem;
+}
+.cds--btn--primary {
+  color: var(--cds-text-inverse);
+}
+.cds--btn--secondary {
+  border: 1px solid var(--cds-border-strong);
+  color: var(--cds-text-primary);
+}
+/* уведомление: поверхность с меткой слева во всю ширину */
+.cds--inline-notification {
+  max-inline-size: none;
+  border-radius: 6px;
+}
+.cds--inline-notification--low-contrast::before {
+  border-color: var(--cds-border-subtle);
+  border-radius: 6px;
+}
+/* справка «i»: цель нажатия 40 при знаке 16 */
+.cds--toggletip-button {
+  box-sizing: content-box;
+  padding: 0.75rem;
+  margin: -0.75rem;
+}
+
+/* ——— 5. Строка настройки: подпись слева, поле и единица справа с 1024; уже — подпись над полем ——— */
+.setting {
+  display: grid;
+  grid-template-columns: 10rem 1fr;
+  align-items: center;
+  gap: 0.25rem 0.5rem;
+}
+.setting .cds--form-item,
+.setting .cds--number,
+.setting .cds--select {
+  display: contents;
+}
+.setting .cds--label {
+  grid-area: 1 / 1 / 2 / -1;
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--cds-text-primary);
+}
+.setting .cds--number__input-wrapper {
+  grid-area: 2 / 1;
+}
+.setting .unit {
+  grid-area: 2 / 2;
+}
+.setting .cds--select-input__wrapper {
+  grid-area: 2 / 1 / 3 / -1;
+}
+.setting .cds--form__helper-text {
+  grid-area: 3 / 1 / 4 / -1;
+  margin: 0;
+}
+@media (min-width: 64rem) {
+  .setting {
+    grid-template-columns: 1fr 10rem 10rem;
+    column-gap: 0;
+  }
+  .setting .cds--label {
+    grid-area: 1 / 1;
+    padding-inline-end: 1rem;
+  }
+  .setting .cds--number__input-wrapper {
+    grid-area: 1 / 2;
+  }
+  .setting .unit {
+    grid-area: 1 / 3;
+    padding-inline-start: 0.5rem;
+  }
+  .setting .cds--select-input__wrapper {
+    grid-area: 1 / 2 / 2 / 4;
+  }
+  .setting .cds--form__helper-text {
+    grid-area: 2 / 2 / 3 / 4;
+  }
+}
+
+/* ——— 6. Телефон: строка галочки — 48 под палец (у Checkbox нет size) ——— */
+@media (max-width: 47.98rem) {
+  .cds--checkbox-wrapper {
+    min-block-size: 3rem;
+    justify-content: center;
+  }
+}

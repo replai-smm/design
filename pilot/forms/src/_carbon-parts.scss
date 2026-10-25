@@ -1,0 +1,13 @@
+// Carbon, как его берёт продукт: сброс, токены раскладки, зоны тем для <Theme>, стили только нужных компонентов.
+@use '@carbon/styles/scss/reset';
+@use '@carbon/styles/scss/layout';
+@use '@carbon/styles/scss/zone';
+@use '@carbon/styles/scss/components/text-input';
+@use '@carbon/styles/scss/components/number-input';
+@use '@carbon/styles/scss/components/select';
+@use '@carbon/styles/scss/components/checkbox';
+@use '@carbon/styles/scss/components/toggletip';
+@use '@carbon/styles/scss/components/accordion';
+@use '@carbon/styles/scss/components/notification';
+@use '@carbon/styles/scss/components/button';
+@use '@carbon/styles/scss/components/stack';

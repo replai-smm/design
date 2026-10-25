@@ -1,0 +1,336 @@
+{
+  "weight": {
+    "a": {
+      "js": {
+        "min": 334840,
+        "gzip": 103085
+      },
+      "css": {
+        "min": 264832,
+        "gzip": 25765
+      },
+      "files": [
+        "assets/a-CEEGwF3E.js",
+        "assets/content-yHBy76lF.js",
+        "assets/a-Lo_MGjSR.css"
+      ]
+    },
+    "b": {
+      "js": {
+        "min": 323516,
+        "gzip": 103320
+      },
+      "css": {
+        "min": 37446,
+        "gzip": 8240
+      },
+      "files": [
+        "assets/b-DjToTEv9.js",
+        "assets/content-yHBy76lF.js",
+        "assets/b-Cr2EjN3M.css"
+      ]
+    }
+  },
+  "shots": {
+    "shots/a-light-390.png": {
+      "height": 968,
+      "errors": []
+    },
+    "shots/a-light-1280.png": {
+      "height": 800,
+      "errors": []
+    },
+    "shots/a-dark-390.png": {
+      "height": 968,
+      "errors": []
+    },
+    "shots/a-dark-1280.png": {
+      "height": 800,
+      "errors": []
+    },
+    "shots/b-light-390.png": {
+      "height": 957,
+      "errors": []
+    },
+    "shots/b-light-1280.png": {
+      "height": 800,
+      "errors": []
+    },
+    "shots/b-dark-390.png": {
+      "height": 957,
+      "errors": []
+    },
+    "shots/b-dark-1280.png": {
+      "height": 800,
+      "errors": []
+    }
+  },
+  "axe": {
+    "a-light-390": [],
+    "a-light-1280": [],
+    "a-dark-390": [],
+    "a-dark-1280": [],
+    "b-light-390": [],
+    "b-light-1280": [],
+    "b-dark-390": [],
+    "b-dark-1280": []
+  },
+  "touch": {
+    "a": {
+      "поле «Адрес почты»": 48,
+      "число «Напоминать о сроке за»": 48,
+      "кнопки шага числа (−/+)": 46,
+      "выбор «Язык писем»": 48,
+      "галочка: квадрат": 16,
+      "галочка: строка с подписью": 48,
+      "справка «i»": 40,
+      "раскрытие «Как работают напоминания»": 48,
+      "кнопка «Отменить»": 48,
+      "кнопка «Сохранить»": 48
+    },
+    "b": {
+      "поле «Адрес почты»": 48,
+      "число «Напоминать о сроке за»": 48,
+      "кнопки шага числа (−/+)": 46,
+      "выбор «Язык писем»": 48,
+      "галочка: квадрат": 16,
+      "галочка: строка с подписью": 48,
+      "справка «i»": 40,
+      "раскрытие «Как работают напоминания»": 40,
+      "кнопка «Отменить»": 48,
+      "кнопка «Сохранить»": 48
+    }
+  },
+  "theme": {
+    "a ?theme=light система=dark": "rgb(244, 244, 244)",
+    "a ?theme=dark система=light": "rgb(15, 15, 17)",
+    "a (нет) система=light": "rgb(244, 244, 244)",
+    "a (нет) система=dark": "rgb(15, 15, 17)",
+    "b ?theme=light система=dark": "rgb(244, 244, 244)",
+    "b ?theme=dark система=light": "rgb(15, 15, 17)",
+    "b (нет) система=light": "rgb(244, 244, 244)",
+    "b (нет) система=dark": "rgb(15, 15, 17)"
+  },
+  "probe": {
+    "plain": {
+      "own-div-padding": {
+        "class": "px-4",
+        "prop": "padding-left",
+        "carbon": "0px",
+        "tailwind": "0px",
+        "tailwind!": "16px",
+        "changed": false,
+        "changedWithImportant": true
+      },
+      "input-classname-direct": {
+        "class": "rounded-sm",
+        "prop": "border-top-left-radius",
+        "carbon": "0px",
+        "tailwind": "0px",
+        "tailwind!": "0px",
+        "changed": false,
+        "changedWithImportant": false
+      },
+      "input-height": {
+        "class": "[&_input]:h-12",
+        "prop": "height",
+        "carbon": "40px",
+        "tailwind": "40px",
+        "tailwind!": "48px",
+        "changed": false,
+        "changedWithImportant": true
+      },
+      "input-radius": {
+        "class": "[&_input]:rounded-sm",
+        "prop": "border-top-left-radius",
+        "carbon": "0px",
+        "tailwind": "0px",
+        "tailwind!": "4px",
+        "changed": false,
+        "changedWithImportant": true
+      },
+      "input-border": {
+        "class": "[&_input]:border-t",
+        "prop": "border-top-width",
+        "carbon": "0px",
+        "tailwind": "0px",
+        "tailwind!": "1px",
+        "changed": false,
+        "changedWithImportant": true
+      },
+      "input-padding": {
+        "class": "[&_input]:px-6",
+        "prop": "padding-left",
+        "carbon": "16px",
+        "tailwind": "16px",
+        "tailwind!": "24px",
+        "changed": false,
+        "changedWithImportant": true
+      },
+      "input-bg": {
+        "class": "[&_input]:bg-red-500",
+        "prop": "background-color",
+        "carbon": "rgb(244, 244, 244)",
+        "tailwind": "rgb(244, 244, 244)",
+        "tailwind!": "oklch(0.637 0.237 25.331)",
+        "changed": false,
+        "changedWithImportant": true
+      },
+      "button-radius": {
+        "class": "rounded-sm",
+        "prop": "border-top-right-radius",
+        "carbon": "0px",
+        "tailwind": "0px",
+        "tailwind!": "4px",
+        "changed": false,
+        "changedWithImportant": true
+      },
+      "button-padding": {
+        "class": "pr-4",
+        "prop": "padding-right",
+        "carbon": "63px",
+        "tailwind": "63px",
+        "tailwind!": "16px",
+        "changed": false,
+        "changedWithImportant": true
+      },
+      "button-bg": {
+        "class": "bg-black",
+        "prop": "background-color",
+        "carbon": "rgb(15, 98, 254)",
+        "tailwind": "rgb(15, 98, 254)",
+        "tailwind!": "rgb(0, 0, 0)",
+        "changed": false,
+        "changedWithImportant": true
+      },
+      "button-height": {
+        "class": "min-h-8",
+        "prop": "min-height",
+        "carbon": "48px",
+        "tailwind": "48px",
+        "tailwind!": "32px",
+        "changed": false,
+        "changedWithImportant": true
+      },
+      "button-justify": {
+        "class": "justify-center",
+        "prop": "justify-content",
+        "carbon": "space-between",
+        "tailwind": "space-between",
+        "tailwind!": "center",
+        "changed": false,
+        "changedWithImportant": true
+      }
+    },
+    "layered": {
+      "own-div-padding": {
+        "class": "px-4",
+        "prop": "padding-left",
+        "carbon": "0px",
+        "tailwind": "16px",
+        "tailwind!": "16px",
+        "changed": true,
+        "changedWithImportant": true
+      },
+      "input-classname-direct": {
+        "class": "rounded-sm",
+        "prop": "border-top-left-radius",
+        "carbon": "0px",
+        "tailwind": "0px",
+        "tailwind!": "0px",
+        "changed": false,
+        "changedWithImportant": false
+      },
+      "input-height": {
+        "class": "[&_input]:h-12",
+        "prop": "height",
+        "carbon": "40px",
+        "tailwind": "48px",
+        "tailwind!": "48px",
+        "changed": true,
+        "changedWithImportant": true
+      },
+      "input-radius": {
+        "class": "[&_input]:rounded-sm",
+        "prop": "border-top-left-radius",
+        "carbon": "0px",
+        "tailwind": "4px",
+        "tailwind!": "4px",
+        "changed": true,
+        "changedWithImportant": true
+      },
+      "input-border": {
+        "class": "[&_input]:border-t",
+        "prop": "border-top-width",
+        "carbon": "0px",
+        "tailwind": "1px",
+        "tailwind!": "1px",
+        "changed": true,
+        "changedWithImportant": true
+      },
+      "input-padding": {
+        "class": "[&_input]:px-6",
+        "prop": "padding-left",
+        "carbon": "16px",
+        "tailwind": "24px",
+        "tailwind!": "24px",
+        "changed": true,
+        "changedWithImportant": true
+      },
+      "input-bg": {
+        "class": "[&_input]:bg-red-500",
+        "prop": "background-color",
+        "carbon": "rgb(244, 244, 244)",
+        "tailwind": "oklch(0.637 0.237 25.331)",
+        "tailwind!": "oklch(0.637 0.237 25.331)",
+        "changed": true,
+        "changedWithImportant": true
+      },
+      "button-radius": {
+        "class": "rounded-sm",
+        "prop": "border-top-right-radius",
+        "carbon": "0px",
+        "tailwind": "4px",
+        "tailwind!": "4px",
+        "changed": true,
+        "changedWithImportant": true
+      },
+      "button-padding": {
+        "class": "pr-4",
+        "prop": "padding-right",
+        "carbon": "63px",
+        "tailwind": "16px",
+        "tailwind!": "16px",
+        "changed": true,
+        "changedWithImportant": true
+      },
+      "button-bg": {
+        "class": "bg-black",
+        "prop": "background-color",
+        "carbon": "rgb(15, 98, 254)",
+        "tailwind": "rgb(0, 0, 0)",
+        "tailwind!": "rgb(0, 0, 0)",
+        "changed": true,
+        "changedWithImportant": true
+      },
+      "button-height": {
+        "class": "min-h-8",
+        "prop": "min-height",
+        "carbon": "48px",
+        "tailwind": "32px",
+        "tailwind!": "32px",
+        "changed": true,
+        "changedWithImportant": true
+      },
+      "button-justify": {
+        "class": "justify-center",
+        "prop": "justify-content",
+        "carbon": "space-between",
+        "tailwind": "center",
+        "tailwind!": "center",
+        "changed": true,
+        "changedWithImportant": true
+      }
+    }
+  }
+}

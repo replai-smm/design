@@ -1,0 +1,7 @@
+// Carbon в слое `carbon` между base и utilities Tailwind 4 (порядок слоёв — в a.css): без слоя сброс Carbon
+// (`div { padding: 0; margin: 0 }` без слоя) бьёт любую утилиту Tailwind, даже px-4 на своём div.
+@use 'sass:meta';
+@use '@carbon/styles/scss/config' with ($css--font-face: false);
+@layer carbon {
+  @include meta.load-css('carbon-parts');
+}

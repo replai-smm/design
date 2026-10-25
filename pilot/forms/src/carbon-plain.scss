@@ -1,0 +1,3 @@
+// Carbon без слоя — как по умолчанию (только для пробы утилит Tailwind).
+@use '@carbon/styles/scss/config' with ($css--font-face: false);
+@use 'carbon-parts';
