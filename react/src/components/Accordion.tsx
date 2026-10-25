@@ -25,7 +25,7 @@ export function Accordion({ title, defaultOpen = false, children, className }: A
       <button
         type="button"
         {...fold.trigger}
-        className={cx('flex min-h-control w-full cursor-pointer items-center justify-between gap-items px-compact text-start text-body text-fg hover:bg-hover', FOCUS)}
+        className={cx('flex min-h-touch w-full cursor-pointer items-center justify-between gap-items px-compact text-start text-body text-fg hover:bg-hover md:min-h-control', FOCUS)}
       >
         <span data-part="title" className="min-w-0">
           {title}
