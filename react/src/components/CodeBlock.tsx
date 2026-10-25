@@ -33,7 +33,7 @@ export function CodeBlock({ code, label, copy = true, maxLines = 12, className }
         <figcaption data-part="title" className="flex min-h-dense items-center justify-between gap-items border-b border-line pl-compact text-caption text-fg-muted">
           <span className="truncate font-mono">{label}</span>
           {copy && (
-            <Button variant="ghost" dense onClick={() => void navigator.clipboard?.writeText(code).then(() => setCopied(true))} aria-live="polite" data-slot="code-copy">
+            <Button kind="ghost" size="sm" onClick={() => void navigator.clipboard?.writeText(code).then(() => setCopied(true))} aria-live="polite" data-slot="code-copy">
               {copied ? 'скопировано' : 'Копировать'}
             </Button>
           )}

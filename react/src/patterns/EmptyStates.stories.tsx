@@ -1,18 +1,18 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import md from '../../../patterns/empty-states.md?raw'
-import { ActionArea, Button } from '../components/Button'
+import { Button } from '../components/Button'
 import { StateView } from '../components/StateView'
 import { Stack } from '../components/layout'
 import { pattern } from './story'
 
 function Example() {
   return (
-    <Stack gap="blocks" className="p-blocks">
-      <StateView kind="первый запуск" title="Создайте первый проект" description="Задачи и отчёты проекта появятся здесь." action={<ActionArea primary={{ label: 'Создать проект' }} />} />
+    <Stack gap={5} className="p-blocks">
+      <StateView kind="первый запуск" title="Создайте первый проект" description="Задачи и отчёты проекта появятся здесь." action={<Button>Создать проект</Button>} />
       <StateView kind="всё сделано" title="Все задачи закрыты" description="Новые появятся здесь сами." />
-      <StateView kind="ничего не найдено" title="По фильтру ничего" action={<Button>Сбросить фильтры</Button>} />
+      <StateView kind="ничего не найдено" title="По фильтру ничего" action={<Button kind="secondary">Сбросить фильтры</Button>} />
       <StateView kind="нет доступа" title="Нет доступа к проекту" description="Попросите владельца проекта добавить вас в команду." />
-      <StateView kind="ошибка" title="Список не загрузился" description="Сервер не ответил за 30 с." action={<Button>Повторить</Button>} />
+      <StateView kind="ошибка" title="Список не загрузился" description="Сервер не ответил за 30 с." action={<Button kind="secondary">Повторить</Button>} />
     </Stack>
   )
 }

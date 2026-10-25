@@ -14,7 +14,11 @@ const meta = {
     title: 'Посещения по дням',
     description: 'Интернет-магазин, 1–14 октября',
     summary: 'Посещения выросли с 12 до 52 тысяч за две недели',
-    tools: <Button dense variant="ghost">90 дней</Button>,
+    tools: (
+      <Button kind="ghost" size="sm">
+        90 дней
+      </Button>
+    ),
     legend: [
       { key: 'a', label: 'период А', series: 0 },
       { key: 'b', label: 'период Б', series: 1, line: 'dashed' },

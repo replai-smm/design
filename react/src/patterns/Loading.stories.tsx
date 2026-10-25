@@ -1,30 +1,36 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import md from '../../../patterns/loading.md?raw'
-import { ActionArea } from '../components/Button'
+import { Button, ButtonSet } from '../components/Button'
+import { Heading } from '../components/Heading'
 import { InlineLoading } from '../components/InlineLoading'
-import { Loading, Skeleton } from '../components/Skeleton'
+import { SkeletonText } from '../components/SkeletonText'
 import { Section, Stack } from '../components/layout'
 import { pattern } from './story'
 
 function Example() {
   return (
-    <Stack gap="groups" className="p-blocks">
-      <Section title="Скелет той же формы">
-        <Loading>
-          <Stack gap="compact">
-            {[0, 1, 2].map((i) => (
-              <Stack key={i} gap="tight">
-                <Skeleton width="1/3" />
-                <Skeleton />
-              </Stack>
-            ))}
-          </Stack>
-        </Loading>
+    <Stack gap={6} className="p-blocks">
+      <Section as={Stack} gap={5}>
+        <Heading>Скелет той же формы</Heading>
+        <Stack gap={4} role="status" aria-busy="true">
+          <span className="sr-only">загрузка</span>
+          {[0, 1, 2].map((i) => (
+            <Stack key={i} gap={2}>
+              <SkeletonText width="33%" />
+              <SkeletonText />
+            </Stack>
+          ))}
+        </Stack>
       </Section>
-      <Section title="Загрузка в строке">
-        <ActionArea primary={{ label: 'Сохранить', loading: true }} />
-        <InlineLoading progress="running" label="Сохраняем…" />
-        <InlineLoading progress="done" label="Сохранено" />
+      <Section as={Stack} gap={5}>
+        <Heading>Загрузка в строке</Heading>
+        <ButtonSet aria-label="Действия формы">
+          <Button kind="secondary" disabled>
+            Отменить
+          </Button>
+          <InlineLoading description="Сохраняем…" />
+        </ButtonSet>
+        <InlineLoading status="finished" description="Сохранено" />
       </Section>
     </Stack>
   )

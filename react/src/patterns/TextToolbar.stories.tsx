@@ -7,7 +7,7 @@ import { pattern } from './story'
 /** Панели правки текста в ДС пока нет (CHANGELOG 2.0.0 → «нет пары»): пример — поле текста без панели. */
 function Example() {
   return (
-    <Stack gap="blocks" className="max-w-window p-blocks">
+    <Stack gap={5} className="max-w-window p-blocks">
       <p className="m-0 text-body text-fg-muted">Панели правки текста в ДС пока нет — поле текста без панели.</p>
       <TextArea label="Описание проекта" defaultValue="Новый сайт компании: каталог, корзина и личный кабинет." />
     </Stack>

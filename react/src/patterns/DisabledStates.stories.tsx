@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import md from '../../../patterns/disabled-states.md?raw'
-import { ActionArea } from '../components/Button'
+import { Button, ButtonSet } from '../components/Button'
 import { Checkbox } from '../components/Checkbox'
 import { TextField } from '../components/TextField'
 import { Stack } from '../components/layout'
@@ -8,10 +8,12 @@ import { pattern } from './story'
 
 function Example() {
   return (
-    <Stack gap="blocks" className="max-w-form p-blocks">
+    <Stack gap={5} className="max-w-form p-blocks">
       <TextField label="Платёжный счёт" disabled helperText="Меняет только владелец проекта." />
       <Checkbox label="Списывать оплату каждый месяц" disabled helperText="Сначала добавьте карту." />
-      <ActionArea primary={{ label: 'Оплатить', disabled: true }} />
+      <ButtonSet>
+        <Button disabled>Оплатить</Button>
+      </ButtonSet>
       <p className="m-0 text-caption text-fg-muted">Оплатить можно, когда выбран хотя бы один счёт.</p>
     </Stack>
   )

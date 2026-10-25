@@ -6,7 +6,8 @@
 import type { ReactNode } from 'react'
 import { cx } from '../lib/cx'
 import type { Tone } from '../lib/vocab'
-import { Button } from './Button'
+import { Close } from '../lib/icons.gen'
+import { IconButton } from './Button'
 import { Icon } from './Icon'
 import { Surface } from './Surface'
 
@@ -31,7 +32,11 @@ export function Notification({ tone, title, children, action, scope = 'list', on
         <p data-part="title" className="m-0 min-w-0 flex-1 text-heading">
           {title}
         </p>
-        {onClose && <Button variant="ghost" dense icon="close" aria-label="закрыть" onClick={onClose} className="-my-tight shrink-0" />}
+        {onClose && (
+          <IconButton kind="ghost" size="sm" label="закрыть" onClick={onClose} className="-my-tight">
+            <Close />
+          </IconButton>
+        )}
       </div>
       {children && <div className="min-w-0 text-fg-muted">{children}</div>}
       {action && <div className="pt-tight">{action}</div>}

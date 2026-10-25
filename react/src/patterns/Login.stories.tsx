@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import md from '../../../patterns/login.md?raw'
-import { ActionArea } from '../components/Button'
+import { Button, ButtonSet } from '../components/Button'
+import { Link } from '../components/Link'
 import { Notification } from '../components/Notification'
 import { TextField } from '../components/TextField'
 import { Stack } from '../components/layout'
@@ -9,7 +10,7 @@ import { pattern } from './story'
 function Example({ error = false }: { error?: boolean }) {
   return (
     <div className="flex justify-center p-groups">
-      <Stack as="form" gap="blocks" className="w-full max-w-popup" aria-label="Вход">
+      <Stack as="form" gap={5} className="w-full max-w-popup" aria-label="Вход">
         <p className="m-0 text-title text-fg">Вход</p>
         {error && (
           <Notification tone="опасно" title="Не вышло войти">
@@ -18,10 +19,12 @@ function Example({ error = false }: { error?: boolean }) {
         )}
         <TextField label="Почта" type="email" autoComplete="email" defaultValue={error ? 'anna@example.com' : undefined} />
         <TextField label="Пароль" type="password" autoComplete="current-password" />
-        <ActionArea primary={{ label: 'Войти', type: 'submit' }} />
-        <a href="#reset" className="self-start text-body text-accent">
+        <ButtonSet>
+          <Button type="submit">Войти</Button>
+        </ButtonSet>
+        <Link href="#reset" className="self-start">
           Забыли пароль?
-        </a>
+        </Link>
       </Stack>
     </div>
   )

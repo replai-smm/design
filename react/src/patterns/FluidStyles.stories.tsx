@@ -8,7 +8,7 @@ import { pattern } from './story'
 /** Текучих полей в ДС пока нет (CHANGELOG 2.0.0 → «нет пары»): пример — та же форма адреса обычными полями. */
 function Example() {
   return (
-    <Stack gap="blocks" className="max-w-form p-blocks">
+    <Stack gap={5} className="max-w-form p-blocks">
       <p className="m-0 text-body text-fg-muted">Текучих полей в ДС пока нет — та же форма адреса обычными полями.</p>
       <TextField label="Улица и дом" defaultValue="ул. Садовая, 12" />
       <TextField label="Квартира или офис" />

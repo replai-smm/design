@@ -1,35 +1,27 @@
 /**
- * Коллекция строк: таблица `DataTable` и список `List` — одна логика, разный вид.
- * - Группы по статусу, срочное сверху (П2): опасно → внимание → инфо → нейтрально → хорошо; внутри — порядок данных.
- * - Норма не пишется (П3): группа «хорошо» свёрнута внизу, раскрывается за 0,6 с без прыжка.
+ * Коллекция строк: таблица `DataTable` и список `List` — одна логика, разный вид; строки — в порядке данных.
  * - Состояния (П12): загрузка — скелет той же высоты строк, ошибка с «Повторить», пусто (`empty`), много — первые
  *   `pageSize` и «показать ещё».
  * - В строке главной кнопки нет (П5): действие строки — ghost-кнопка или нажатие на строку (`onSelect`).
  * - Выбранная строка (`selectedKey`) — роль «выбрано» и `aria-current`; одно «выбрано» на всю ДС.
  * - Таблица: на телефоне видны колонки лица (`face`); широкая не ужимается — колонка не уже самого длинного слова,
  *   `nowrap` — значение в одну строку (деньги); не влезает — прокрутка вбок внутри таблицы, первая колонка стоит.
- *   Сортировка по заголовку (`sortValue`) — выбор человека: строки переставляются внутри группы тона, срочное сверху.
+ *   Сортировка по заголовку (`sortValue`) — выбор человека.
  */
-import { useId, useMemo, useState, type CSSProperties, type ReactElement, type ReactNode } from 'react'
+import { useMemo, useState, type CSSProperties, type ReactElement, type ReactNode } from 'react'
 import { FOCUS } from '../lib/anatomy'
 import { useControllable } from '../lib/controllable'
 import { cx } from '../lib/cx'
-import { Expand, chevron, useDisclosure } from '../lib/disclosure'
-import { rankOf, toneOf, type DataState, type EmptyView, type ErrorView, type StatusId } from '../lib/vocab'
+import type { DataState, EmptyView, ErrorView } from '../lib/vocab'
 import { Button, RowContext } from './Button'
 import { Icon } from './Icon'
-import { Skeleton } from './Skeleton'
+import { SkeletonText } from './SkeletonText'
 import { StateView } from './StateView'
-import { StatusBadge } from './StatusBadge'
 import { Tooltip } from './Tooltip'
 
 export interface CollectionProps<T> {
   rows: T[]
   getKey: (row: T) => string
-  /** Статус строки — для групп «срочное сверху». Без него групп нет. */
-  getStatus?: (row: T) => StatusId
-  /** Слова групп — слова продукта вместо слов закона (тон остаётся). */
-  statusLabel?: (id: StatusId) => string | undefined
   state?: DataState
   error?: ErrorView
   empty?: EmptyView
@@ -46,39 +38,9 @@ export interface CollectionProps<T> {
   className?: string
 }
 
-interface Group<T> {
-  status: StatusId | null
-  rows: T[]
-  healthy: boolean
-}
-
-function useGroups<T>(rows: T[], getStatus?: (r: T) => StatusId): Group<T>[] {
-  return useMemo(() => {
-    if (!getStatus) return [{ status: null, rows, healthy: false }]
-    const by = new Map<StatusId, T[]>()
-    for (const r of rows) {
-      const s = getStatus(r)
-      if (!by.has(s)) by.set(s, [])
-      by.get(s)!.push(r)
-    }
-    return [...by.entries()].sort(([a], [b]) => rankOf(a) - rankOf(b)).map(([status, rs]) => ({ status, rows: rs, healthy: toneOf(status) === 'хорошо' }))
-  }, [rows, getStatus])
-}
-
-/** Сколько строк каждой группы показать при лимите `limit` (свёрнутая норма в лимит не входит). */
-function budget<T>(groups: Group<T>[], limit: number): number[] {
-  let left = limit
-  return groups.map((g) => {
-    if (g.healthy) return g.rows.length
-    const n = Math.min(g.rows.length, Math.max(left, 0))
-    left -= n
-    return n
-  })
-}
-
 function CollectionState<T>({ state, error, empty, rows }: Pick<CollectionProps<T>, 'state' | 'error' | 'empty' | 'rows'>) {
   if (state === 'error')
-    return <StateView kind="ошибка" title={error?.title ?? 'Не загрузилось'} description={error?.description} action={error?.onRetry && <Button onClick={error.onRetry}>Повторить</Button>} />
+    return <StateView kind="ошибка" title={error?.title ?? 'Не загрузилось'} description={error?.description} action={error?.onRetry && <Button kind="secondary" onClick={error.onRetry}>Повторить</Button>} />
   if (state !== 'loading' && rows.length === 0) return <StateView kind={empty?.kind ?? 'ничего не найдено'} title={empty?.title ?? 'Пусто'} description={empty?.description} action={empty?.action} />
   return null
 }
@@ -86,32 +48,16 @@ function CollectionState<T>({ state, error, empty, rows }: Pick<CollectionProps<
 function MoreButton({ hidden, onMore }: { hidden: number; onMore: () => void }) {
   return (
     <div className="flex justify-start pt-items">
-      <Button variant="ghost" onClick={onMore} data-slot="show-more">
+      <Button kind="ghost" onClick={onMore} data-slot="show-more">
         показать ещё · {hidden}
       </Button>
     </div>
   )
 }
 
-function GroupHead({ status, count, label, fold }: { status: StatusId; count: number; label?: string; fold?: ReturnType<typeof useDisclosure> }) {
-  const inner = (
-    <>
-      <StatusBadge status={status} label={label} />
-      <span className="text-caption text-fg-muted">{count}</span>
-    </>
-  )
-  if (!fold) return <span className="inline-flex items-center gap-items">{inner}</span>
-  return (
-    <button type="button" {...fold.trigger} className={cx('inline-flex min-h-dense cursor-pointer items-center gap-items rounded-control px-tight hover:bg-hover', FOCUS)}>
-      {inner}
-      <Icon name="chevron-down" className={chevron(fold.open)} />
-    </button>
-  )
-}
-
 /* ——— Таблица ——— */
 
-export interface Column<T> {
+export interface DataTableColumn<T> {
   key: string
   header: ReactNode
   cell: (row: T) => ReactNode
@@ -138,7 +84,7 @@ export interface SortState {
 }
 
 export interface DataTableProps<T> extends CollectionProps<T> {
-  columns: Column<T>[]
+  columns: DataTableColumn<T>[]
   /** Управляемая сортировка (`null` — порядок данных); без неё таблица держит сортировку сама. */
   sort?: SortState | null
   defaultSort?: SortState | null
@@ -164,7 +110,7 @@ export function compareSortValues(a: SortValue, b: SortValue, direction: SortDir
   return collator.compare(String(a), String(b)) * sign
 }
 
-function sortRows<T>(rows: T[], columns: Column<T>[], sort: SortState | null): T[] {
+function sortRows<T>(rows: T[], columns: DataTableColumn<T>[], sort: SortState | null): T[] {
   const get = sort ? columns.find((c) => c.key === sort.key)?.sortValue : undefined
   if (!sort || !get) return rows
   return rows
@@ -177,14 +123,10 @@ function sortRows<T>(rows: T[], columns: Column<T>[], sort: SortState | null): T
 const track = (grow = 1) => (grow === 0 ? 'max-content' : `minmax(min-content, ${grow}fr)`)
 
 export function DataTable<T>(props: DataTableProps<T>) {
-  const { rows: dataRows, columns, getKey, getStatus, statusLabel, state = 'ready', pageSize = 50, onSelect, selectedKey, rowAction, rowMuted, label, className } = props
+  const { rows: dataRows, columns, getKey, state = 'ready', pageSize = 50, onSelect, selectedKey, rowAction, rowMuted, label, className } = props
   const [sort, setSort] = useControllable<SortState | null>(props.sort, props.defaultSort ?? null, props.onSortChange)
-  // сортируем до групп: группы срочного стоят на месте (П2), внутри группы — порядок, выбранный человеком
   const rows = useMemo(() => sortRows(dataRows, columns, sort), [dataRows, columns, sort])
-  const groups = useGroups(rows, getStatus)
   const [limit, setLimit] = useState(pageSize)
-  const healthy = useDisclosure()
-  const uid = useId()
   const withAction = Boolean(rowAction)
   const cols = [...columns.map((c) => track(c.grow)), ...(withAction ? ['max-content'] : [])]
   const phoneCols = [...columns.filter((c) => c.face).map((c) => track(c.grow)), ...(withAction ? ['max-content'] : [])]
@@ -193,9 +135,8 @@ export function DataTable<T>(props: DataTableProps<T>) {
   const stateView = <CollectionState state={state} error={props.error} empty={props.empty} rows={rows} />
   if (state === 'error' || (state === 'ready' && rows.length === 0)) return <div className={className}>{stateView}</div>
 
-  const shown = budget(groups, limit)
-  const hidden = groups.reduce((n, g, i) => n + (g.healthy ? 0 : g.rows.length - shown[i]), 0)
-  const cellCls = (c: Column<T>) => cx('flex min-h-touch items-center px-compact py-items text-body md:min-h-control', c.nowrap ? 'whitespace-nowrap' : 'min-w-0', c.align === 'end' && 'justify-end text-end', !c.face && 'ds-cell-more')
+  const hidden = Math.max(rows.length - limit, 0)
+  const cellCls = (c: DataTableColumn<T>) => cx('flex min-h-touch items-center px-compact py-items text-body md:min-h-control', c.nowrap ? 'whitespace-nowrap' : 'min-w-0', c.align === 'end' && 'justify-end text-end', !c.face && 'ds-cell-more')
 
   const row = (r: T) => {
     const key = getKey(r)
@@ -247,19 +188,8 @@ export function DataTable<T>(props: DataTableProps<T>) {
             <div role="row" className="ds-row border-b border-line bg-canvas">
               {columns.map((c) => {
                 const active = c.sortValue && sort?.key === c.key ? sort.direction : undefined
-                const hintId = c.hint ? `${uid}-hint-${c.key}` : undefined
                 const title = <span className={cx('min-w-0', Boolean(c.hint) && 'underline decoration-dotted underline-offset-4')}>{c.header}</span>
-                const withHint = (trigger: ReactElement) =>
-                  c.hint ? (
-                    <>
-                      <Tooltip content={c.hint}>{trigger}</Tooltip>
-                      <span id={hintId} hidden>
-                        {c.hint}
-                      </span>
-                    </>
-                  ) : (
-                    trigger
-                  )
+                const withHint = (trigger: ReactElement) => (c.hint ? <Tooltip description={c.hint}>{trigger}</Tooltip> : trigger)
                 return (
                   <div key={c.key} role="columnheader" aria-sort={active} className={cx(cellCls(c), 'text-heading text-fg', c.sortValue && 'p-0')}>
                     {c.sortValue ? (
@@ -267,7 +197,6 @@ export function DataTable<T>(props: DataTableProps<T>) {
                         <button
                           type="button"
                           data-part="sort"
-                          aria-describedby={hintId}
                           onClick={() => setSort({ key: c.key, direction: active ? (active === 'ascending' ? 'descending' : 'ascending') : (c.sortFirst ?? 'ascending') })}
                           className={cx('flex min-h-touch w-full min-w-0 cursor-pointer items-center gap-items px-compact py-items text-heading text-fg hover:bg-hover md:min-h-control', FOCUS, c.align === 'end' ? 'justify-end text-end' : 'text-start')}
                         >
@@ -277,7 +206,7 @@ export function DataTable<T>(props: DataTableProps<T>) {
                       )
                     ) : c.hint ? (
                       withHint(
-                        <button type="button" data-part="hint" aria-describedby={hintId} className={cx('min-w-0 cursor-help rounded-control text-heading text-fg', FOCUS, c.align === 'end' ? 'text-end' : 'text-start')}>
+                        <button type="button" data-part="hint" className={cx('min-w-0 cursor-help rounded-control text-heading text-fg', FOCUS, c.align === 'end' ? 'text-end' : 'text-start')}>
                           {title}
                         </button>,
                       )
@@ -300,7 +229,7 @@ export function DataTable<T>(props: DataTableProps<T>) {
                 <div key={i} role="row" className="ds-row border-b border-line bg-surface">
                   {columns.map((c) => (
                     <div key={c.key} role="cell" className={cellCls(c)}>
-                      <Skeleton width={c.face ? '3/4' : '1/2'} />
+                      <SkeletonText width={c.face ? '75%' : '50%'} />
                     </div>
                   ))}
                   {withAction && <div role="cell" />}
@@ -308,39 +237,9 @@ export function DataTable<T>(props: DataTableProps<T>) {
               ))}
             </div>
           ) : (
-            groups.map((g, gi) => {
-              const head = g.status && (
-                <div role="row" className="ds-row bg-surface">
-                  <div role="rowheader" className="flex items-center px-compact pt-blocks pb-tight" style={{ gridColumn: '1 / -1' }}>
-                    {/* слово группы стоит при прокрутке вбок, как первая колонка */}
-                    <div className="sticky left-compact">
-                      <GroupHead
-                        status={g.status}
-                        count={g.rows.length}
-                        label={statusLabel?.(g.status)}
-                        fold={g.healthy ? healthy : undefined}
-                      />
-                    </div>
-                  </div>
-                </div>
-              )
-              if (g.healthy)
-                return (
-                  <div key={g.status ?? gi} role="rowgroup" className="ds-rowgroup" data-group={g.status}>
-                    {head}
-                    <Expand id={healthy.id} open={healthy.open}>
-                      {g.rows.map(row)}
-                    </Expand>
-                  </div>
-                )
-              if (shown[gi] === 0) return null
-              return (
-                <div key={g.status ?? gi} role="rowgroup" className="ds-rowgroup" data-group={g.status ?? undefined}>
-                  {head}
-                  {g.rows.slice(0, shown[gi]).map(row)}
-                </div>
-              )
-            })
+            <div role="rowgroup" className="ds-rowgroup">
+              {rows.slice(0, limit).map(row)}
+            </div>
           )}
         </div>
       </div>
@@ -356,10 +255,8 @@ export interface ListProps<T> extends CollectionProps<T> {
 }
 
 export function List<T>(props: ListProps<T>) {
-  const { rows, renderRow, getKey, getStatus, statusLabel, state = 'ready', pageSize = 50, onSelect, selectedKey, rowAction, label, className } = props
-  const groups = useGroups(rows, getStatus)
+  const { rows, renderRow, getKey, state = 'ready', pageSize = 50, onSelect, selectedKey, rowAction, label, className } = props
   const [limit, setLimit] = useState(pageSize)
-  const healthy = useDisclosure()
 
   const stateView = <CollectionState state={state} error={props.error} empty={props.empty} rows={rows} />
   if (state === 'error' || (state === 'ready' && rows.length === 0)) return <div className={className}>{stateView}</div>
@@ -398,40 +295,18 @@ export function List<T>(props: ListProps<T>) {
         {ul(
           Array.from({ length: 5 }, (_, i) => (
             <li key={i} className="flex min-h-touch items-center border-b border-line bg-surface px-compact py-items last:border-b-0 md:min-h-control">
-              <Skeleton width={i % 2 ? '1/2' : '3/4'} />
+              <SkeletonText width={i % 2 ? '50%' : '75%'} />
             </li>
           )),
         )}
       </div>
     )
 
-  const shown = budget(groups, limit)
-  const hidden = groups.reduce((n, g, i) => n + (g.healthy ? 0 : g.rows.length - shown[i]), 0)
+  const hidden = Math.max(rows.length - limit, 0)
   return (
     <div data-slot="list" className={cx('flex min-w-0 flex-col gap-items', className)}>
-      <div role="group" aria-label={label} className="flex flex-col gap-blocks">
-        {groups.map((g, gi) => {
-          if (!g.healthy && shown[gi] === 0) return null
-          return (
-            <section key={g.status ?? gi} data-group={g.status ?? undefined} aria-label={g.status ? statusLabel?.(g.status) : undefined} className="flex flex-col gap-items">
-              {g.status && (
-                <GroupHead
-                  status={g.status}
-                  count={g.rows.length}
-                  label={statusLabel?.(g.status)}
-                  fold={g.healthy ? healthy : undefined}
-                />
-              )}
-              {g.healthy ? (
-                <Expand id={healthy.id} open={healthy.open}>
-                  {ul(g.rows.map(item))}
-                </Expand>
-              ) : (
-                ul(g.rows.slice(0, shown[gi]).map(item))
-              )}
-            </section>
-          )
-        })}
+      <div role="group" aria-label={label}>
+        {ul(rows.slice(0, limit).map(item))}
       </div>
       {hidden > 0 && <MoreButton hidden={hidden} onMore={() => setLimit(limit + pageSize)} />}
     </div>

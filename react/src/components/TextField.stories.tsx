@@ -14,7 +14,7 @@ type S = StoryObj<typeof meta>
 /** Подпись над полем, подсказка под ним; дата — выбор системы; плотное — 32 px; многострочное. */
 export const Обычное: S = {
   render: (args) => (
-    <Stack className="max-w-form">
+    <Stack gap={5} className="max-w-form">
       <TextField {...args} />
       <TextField label="Дата и время" type="datetime-local" defaultValue="2026-10-08T12:00" />
       <TextField label="Фильтр по имени" dense placeholder="Имя" />

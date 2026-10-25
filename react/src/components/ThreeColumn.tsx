@@ -9,6 +9,7 @@ import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 're
 import { FOCUS } from '../lib/anatomy'
 import { cx } from '../lib/cx'
 import { Button } from './Button'
+import { Icon } from './Icon'
 import { Dialog } from './Dialog'
 
 export type ColumnIndex = 0 | 1 | 2
@@ -110,7 +111,8 @@ export function ThreeColumn({ first, second, third, labels, active, onBack, firs
             >
               {i > 0 && phoneMode === 'stack' && (
                 <div className="border-b border-line px-items py-tight lg:hidden">
-                  <Button variant="ghost" dense icon="arrow-left" onClick={() => onBack((i - 1) as ColumnIndex)} data-part="column-back">
+                  <Button kind="ghost" size="sm" onClick={() => onBack((i - 1) as ColumnIndex)} data-part="column-back">
+                    <Icon name="arrow-left" />
                     {labels[i - 1]}
                   </Button>
                 </div>

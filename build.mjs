@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Собрать dist/ из tokens.json, scale.json, statuses.json.
+// Собрать dist/ из tokens.json и scale.json.
 //   npm run build          — записать dist/
 //   node build.mjs --check  — только сверить: dist/ совпадает с источником? нет — выход 1 (так же проверяет тест)
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs'
@@ -23,4 +23,4 @@ if (check && stale.length) {
   console.error(`✗ dist/ отстал от источника: ${stale.join(', ')}. Собрать: npm run build`)
   process.exit(1)
 }
-if (check) console.log('✓ dist/ совпадает с tokens.json, scale.json, statuses.json')
+if (check) console.log('✓ dist/ совпадает с tokens.json и scale.json')

@@ -201,7 +201,7 @@ describe('поле настройки одной строкой и справк�
     render(<TextField label="Окно записей" help="Только последние N записей." />)
     const tip = screen.getByRole('button', { name: 'Подробнее: Окно записей' })
     fireEvent.click(tip)
-    expect(screen.getByRole('dialog', { name: 'Окно записей' }).textContent).toContain('Только последние N записей.')
+    expect(screen.getByRole('dialog', { name: 'Подробнее: Окно записей' }).textContent).toContain('Только последние N записей.')
   })
   it('справка у подписи не строкой — ошибка в разработке (читалка не узнает, о чём справка)', () => {
     vi.spyOn(console, 'error').mockImplementation(() => {})

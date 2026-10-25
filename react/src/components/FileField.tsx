@@ -7,7 +7,8 @@
 import { forwardRef, useImperativeHandle, useRef, useState } from 'react'
 import { useControllable } from '../lib/controllable'
 import { cx } from '../lib/cx'
-import { Button } from './Button'
+import { Close, Upload } from '../lib/icons.gen'
+import { Button, IconButton } from './Button'
 import { FieldShell, fieldAria, useFieldIds, type FieldBaseProps } from './TextField'
 
 export interface FileFieldProps extends Omit<FieldBaseProps, 'dense'> {
@@ -108,7 +109,8 @@ export const FileField = forwardRef<FileFieldHandle, FileFieldProps>(function Fi
       <input ref={input} id={ids.id} name={name} type="file" hidden accept={accept} multiple={multiple} disabled={disabled} onChange={(e) => pick(e.target.files)} />
       <div className="flex">
         <Button
-          icon="upload"
+          kind="secondary"
+          renderIcon={Upload}
           disabled={disabled}
           onClick={() => input.current?.click()}
           aria-labelledby={`${ids.labelId} ${btnTextId}`}
@@ -124,7 +126,9 @@ export const FileField = forwardRef<FileFieldHandle, FileFieldProps>(function Fi
               <span className="min-w-0 truncate">{f.name}</span>
               <span className="flex shrink-0 items-center gap-tight">
                 <span className="text-caption text-fg-muted">{fileSizeText(f.size)}</span>
-                <Button variant="ghost" dense icon="close" disabled={disabled} aria-label={`Убрать «${f.name}»`} onClick={() => remove(i)} />
+                <IconButton kind="ghost" size="sm" disabled={disabled} label={`Убрать «${f.name}»`} onClick={() => remove(i)}>
+                  <Close />
+                </IconButton>
               </span>
             </li>
           ))}

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import md from '../../../patterns/dialogs.md?raw'
-import { ActionArea, Button } from '../components/Button'
+import { Button, ButtonSet } from '../components/Button'
 import { Dialog } from '../components/Dialog'
 import { TextField } from '../components/TextField'
 import { Stack } from '../components/layout'
@@ -9,22 +9,31 @@ import { pattern } from './story'
 /** Опасное подтверждение и короткий ввод в окне. */
 function Example({ open = false }: { open?: boolean }) {
   return (
-    <Stack gap="items" className="p-blocks">
+    <Stack gap={3} className="p-blocks">
       <Dialog
         open={open || undefined}
-        trigger={<Button tone="опасно">Удалить проект</Button>}
+        trigger={<Button kind="danger--tertiary">Удалить проект</Button>}
         title="Удалить проект «Сайт»?"
         description="Проект и его задачи пропадут у всей команды. Вернуть нельзя."
         actions={
-          <ActionArea label="Действия окна">
-            <Button variant="ghost" data-autofocus>
+          <ButtonSet aria-label="Действия окна">
+            <Button kind="ghost" data-autofocus>
               Отмена
             </Button>
-            <Button tone="опасно">Удалить</Button>
-          </ActionArea>
+            <Button kind="danger">Удалить</Button>
+          </ButtonSet>
         }
       />
-      <Dialog trigger={<Button>Переименовать</Button>} title="Новое имя проекта" persistent actions={<ActionArea primary={{ label: 'Сохранить' }} label="Действия окна" />}>
+      <Dialog
+        trigger={<Button kind="secondary">Переименовать</Button>}
+        title="Новое имя проекта"
+        persistent
+        actions={
+          <ButtonSet aria-label="Действия окна">
+            <Button>Сохранить</Button>
+          </ButtonSet>
+        }
+      >
         <TextField label="Имя проекта" defaultValue="Сайт" />
       </Dialog>
     </Stack>

@@ -1,34 +1,23 @@
-/** Коллекции: срочное сверху (П2), норма свёрнута (П3), много (П12), выбранная строка, сортировка, подсказка, широкая таблица. */
+/** Коллекции: строки в порядке данных, много (П12), выбранная строка, сортировка, подсказка, широкая таблица. */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent, within, act, waitFor } from '@testing-library/react'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { compareSortValues, DataTable, List, type Column, type SortState } from '../index'
-import { TONE_ORDER, toneOf } from '../lib/vocab'
+import { compareSortValues, DataTable, List, type DataTableColumn, type SortState } from '../index'
 import { accounts, projects, many, type AccountRow, type ProjectRow } from '../stories/fixtures'
 
-const cols: Column<ProjectRow>[] = [{ key: 'n', header: 'Проект', cell: (r) => r.name, face: true }]
+const cols: DataTableColumn<ProjectRow>[] = [{ key: 'n', header: 'Проект', cell: (r) => r.name, face: true }]
 
-describe('таблица и список: срочное сверху, норма свёрнута, много', () => {
-  it('группы по порядку внимания: опасно → … → хорошо', () => {
-    const { container } = render(<DataTable<ProjectRow> label="т" rows={projects} columns={cols} getKey={(r) => r.id} getStatus={(r) => r.status} />)
-    const order = [...container.querySelectorAll('[data-group]')].map((g) => toneOf(g.getAttribute('data-group') as never))
-    expect(order).toEqual([...order].sort((a, b) => TONE_ORDER.indexOf(a) - TONE_ORDER.indexOf(b)))
-    expect([order[0], order.at(-1)]).toEqual(['опасно', 'хорошо'])
-  })
-
-  it('«работает» свёрнуто: строки недоступны, пока не раскрыли (0,6 с, ds-expand)', () => {
-    const { container } = render(<List<ProjectRow> label="т" rows={projects} renderRow={(r) => r.name} getKey={(r) => r.id} getStatus={(r) => r.status} />)
-    const ok = container.querySelector('[data-group="work.working"]') as HTMLElement
-    const region = ok.querySelector('.ds-expand')!
-    expect(region.hasAttribute('inert')).toBe(true)
-    fireEvent.click(within(ok).getByRole('button', { expanded: false }))
-    expect(region.getAttribute('data-open')).toBe('true')
+describe('таблица и список: порядок данных, много', () => {
+  it('строки — в порядке данных: группировки по состоянию нет (это логика продукта)', () => {
+    const { container } = render(<DataTable<ProjectRow> label="т" rows={projects} columns={cols} getKey={(r) => r.id} />)
+    expect([...container.querySelectorAll('[data-slot=row]')].map((r) => r.textContent)).toEqual(projects.map((p) => p.name))
+    expect(container.querySelector('[data-group]')).toBeNull()
   })
 
   it('150 строк: видно 50, «показать ещё · N» добавляет', () => {
-    const rows = many.filter((r) => r.status !== 'work.working')
-    const { container } = render(<DataTable<ProjectRow> label="т" rows={rows} columns={cols} getKey={(r) => r.id} getStatus={(r) => r.status} />)
+    const rows = many
+    const { container } = render(<DataTable<ProjectRow> label="т" rows={rows} columns={cols} getKey={(r) => r.id} />)
     expect(container.querySelectorAll('[data-slot=row]').length).toBe(50)
     fireEvent.click(screen.getByRole('button', { name: new RegExp(`показать ещё · ${rows.length - 50}`) }))
     expect(container.querySelectorAll('[data-slot=row]').length).toBe(Math.min(100, rows.length))
@@ -37,7 +26,7 @@ describe('таблица и список: срочное сверху, норм�
   it('загрузка — скелет; ошибка — «Повторить»; пусто — своё состояние', () => {
     const retry = vi.fn()
     const { container, rerender } = render(<DataTable<ProjectRow> label="т" rows={[]} columns={cols} getKey={(r) => r.id} state="loading" />)
-    expect(container.querySelectorAll('[data-slot=skeleton]').length).toBeGreaterThan(0)
+    expect(container.querySelectorAll('[data-slot=skeleton-text]').length).toBeGreaterThan(0)
     rerender(<DataTable<ProjectRow> label="т" rows={[]} columns={cols} getKey={(r) => r.id} state="error" error={{ title: 'Не загрузилось', onRetry: retry }} />)
     fireEvent.click(screen.getByRole('button', { name: 'Повторить' }))
     expect(retry).toHaveBeenCalled()
@@ -61,8 +50,8 @@ describe('таблица и список: срочное сверху, норм�
   })
 })
 
-describe('таблица: сортировка — выбор человека, срочное сверху остаётся', () => {
-  const ccols: Column<AccountRow>[] = [
+describe('таблица: сортировка — выбор человека', () => {
+  const ccols: DataTableColumn<AccountRow>[] = [
     { key: 'name', header: 'Счёт', cell: (r) => r.name, face: true, sortValue: (r) => r.name },
     { key: 'mg', header: 'Менеджер', cell: (r) => r.manager, hint: 'Кто ведёт счёт' },
     { key: 'left', header: 'Остаток', cell: (r) => (r.left == null ? '—' : String(r.left)), align: 'end', nowrap: true, sortValue: (r) => r.left, sortFirst: 'descending', hint: 'Остаток на вчера' },
@@ -80,10 +69,9 @@ describe('таблица: сортировка — выбор человека, 
     expect(names().at(-1)).toBe('Счёт склада')
   })
 
-  it('с группами тона — внутри группы; управляемая — зовёт onSortChange', () => {
+  it('управляемая — зовёт onSortChange', () => {
     const onSortChange = vi.fn()
-    render(<DataTable<AccountRow> label="К" rows={accounts} columns={ccols} getKey={(r) => r.id} getStatus={(r) => r.status} sort={null} onSortChange={onSortChange} />)
-    expect([...document.querySelectorAll('[data-group]')].map((g) => g.getAttribute('data-group'))).toEqual(['work.failing', 'work.unchecked', 'work.working'])
+    render(<DataTable<AccountRow> label="К" rows={accounts} columns={ccols} getKey={(r) => r.id} sort={null} onSortChange={onSortChange} />)
     fireEvent.click(within(header('Счёт')).getByRole('button'))
     expect(onSortChange).toHaveBeenCalledWith({ key: 'name', direction: 'ascending' } satisfies SortState)
   })

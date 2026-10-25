@@ -1,7 +1,7 @@
 /**
  * Состояние вместо данных (П12): первый запуск, всё сделано, ничего не найдено, нет доступа, ошибка — слова матрицы
  * облика. Поверхность со знаком тона состояния, заголовком и одним действием («Повторить», «Сбросить фильтры»).
- * «Всё сделано» и «первый запуск» — разные состояния. Загрузка — не здесь: скелет той же формы (`Loading`, `Skeleton`).
+ * «Всё сделано» и «первый запуск» — разные состояния. Загрузка — не здесь: скелет той же формы (`SkeletonText`, `SkeletonPlaceholder`).
  */
 import type { ReactNode } from 'react'
 import { STATE_TONE, type StateKind } from '../lib/vocab'
@@ -12,7 +12,7 @@ export interface StateViewProps {
   kind: StateKind
   title: ReactNode
   description?: ReactNode
-  /** Что сделать дальше: тихая кнопка или `<ActionArea primary>`. */
+  /** Что сделать дальше: тихая кнопка или главная `<Button kind="primary">`. */
   action?: ReactNode
   className?: string
 }

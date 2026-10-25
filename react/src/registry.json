@@ -17,7 +17,8 @@
     "Surface.tsx": "поверхность — одна анатомия всего, что лежит слоем: остальные поверхности построены на ней"
   },
   "sameLevel": {
-    "ChartFrame.tsx → StateView.tsx": "пусто и ошибка графика — то же состояние, что у всех, в высоте графика"
+    "ChartFrame.tsx → StateView.tsx": "пусто и ошибка графика — то же состояние, что у всех, в высоте графика",
+    "Button.tsx → Tooltip.tsx": "у кнопки-значка подпись — подсказка (Carbon: IconButton держит Tooltip)"
   },
   "svg": {
     "Icon.tsx": "значки набора Carbon — данные путей из icons.gen.ts",
@@ -25,29 +26,39 @@
     "InlineLoading.tsx": "дуга «идёт» вращается — это не значок набора"
   },
   "pill": {
-    "StatusBadge.tsx": "метка — таблетка (решение Б2)",
+    "Tag.tsx": "метка — таблетка (Carbon: Tag)",
     "CountBadge.tsx": "счётчик — таблетка (решение Б2)",
     "Avatar.tsx": "лицо — круг",
     "Meter.tsx": "дорожка шкалы",
     "StatTile.tsx": "точка цвета ряда",
     "ChatThread.tsx": "точка «думает»"
   },
-  "fill": {},
+  "fill": {
+    "Tag.tsx": "цвет метки — сам её смысл (Carbon: Tag type green, gray): заливка — фон с проверенной парой текста"
+  },
   "components": {
     "Stack": {
       "level": "Раскладка",
       "file": "layout.tsx",
-      "meaning": "блоки друг под другом с отступом-ролью"
+      "meaning": "блоки столбиком или в ряд с отступом-шагом"
     },
     "Inline": {
       "level": "Раскладка",
       "file": "layout.tsx",
-      "meaning": "элементы в строку с переносом"
+      "meaning": "элементы в строку с переносом",
+      "near": {
+        "Stack": "Stack orientation=\"horizontal\" — ряд без переноса (как у Carbon); Inline — переносится и выравнивается, у Carbon пары нет"
+      }
     },
     "Grid": {
       "level": "Раскладка",
       "file": "layout.tsx",
-      "meaning": "сетка поверхностей: одна колонка на телефоне"
+      "meaning": "сетка из 16 колонок: 4 на телефоне, 8 и 16 шире"
+    },
+    "Column": {
+      "level": "Раскладка",
+      "file": "layout.tsx",
+      "meaning": "колонка сетки шириной в колонках"
     },
     "Page": {
       "level": "Раскладка",
@@ -66,10 +77,9 @@
     "Section": {
       "level": "Раскладка",
       "file": "layout.tsx",
-      "meaning": "раздел страницы с заголовком",
+      "meaning": "раздел страницы: уровень заголовка внутри на один глубже",
       "anatomy": {
-        "slot": "section",
-        "title": "title"
+        "slot": "section"
       }
     },
     "SurfaceProvider": {
@@ -97,20 +107,55 @@
         "density": true
       }
     },
-    "ActionArea": {
+    "ButtonSet": {
       "level": "Элементы",
       "file": "Button.tsx",
-      "meaning": "группа действий с одной главной",
+      "meaning": "набор кнопок с одной главной",
       "anatomy": {
-        "slot": "action-area"
+        "slot": "button-set"
       }
     },
-    "StatusBadge": {
+    "IconButton": {
       "level": "Элементы",
-      "file": "StatusBadge.tsx",
-      "meaning": "статус или тон словом и знаком",
+      "file": "Button.tsx",
+      "meaning": "действие значком без слова с подписью-подсказкой"
+    },
+    "Heading": {
+      "level": "Элементы",
+      "file": "Heading.tsx",
+      "meaning": "заголовок уровня своего раздела"
+    },
+    "Link": {
+      "level": "Элементы",
+      "file": "Link.tsx",
+      "meaning": "переход по адресу",
+      "near": {
+        "Button": "ссылка ведёт по адресу; кнопка делает действие на месте (Carbon: Link и Button)"
+      }
+    },
+    "Tag": {
+      "level": "Элементы",
+      "file": "Tag.tsx",
+      "meaning": "слово в цветной таблетке",
       "anatomy": {
-        "slot": "status-badge"
+        "slot": "tag",
+        "shape": "pill"
+      },
+      "near": {
+        "IconIndicator": "метка — слово в цветной таблетке (категория, фильтр); индикатор — знак своей формы и слово (состояние работы)"
+      }
+    },
+    "DismissibleTag": {
+      "level": "Элементы",
+      "file": "Tag.tsx",
+      "meaning": "метка с кнопкой «убрать»"
+    },
+    "IconIndicator": {
+      "level": "Элементы",
+      "file": "IconIndicator.tsx",
+      "meaning": "состояние знаком своей формы и словом",
+      "anatomy": {
+        "slot": "icon-indicator"
       }
     },
     "CountBadge": {
@@ -141,10 +186,15 @@
       "file": "Meter.tsx",
       "meaning": "сколько взято из предела"
     },
-    "Steps": {
+    "ProgressIndicator": {
       "level": "Элементы",
-      "file": "Steps.tsx",
+      "file": "ProgressIndicator.tsx",
       "meaning": "путь из нескольких шагов"
+    },
+    "ProgressStep": {
+      "level": "Элементы",
+      "file": "ProgressIndicator.tsx",
+      "meaning": "шаг пути"
     },
     "Tooltip": {
       "level": "Элементы",
@@ -160,28 +210,48 @@
         "Tooltip": "подсказка — по наведению и фокусу, пара слов у кнопки, на телефоне её нет; справка — по нажатию, объяснение у подписи поля или раздела, работает на телефоне (Carbon: Tooltip и Toggletip)"
       }
     },
+    "ToggletipLabel": {
+      "level": "Элементы",
+      "file": "Toggletip.tsx",
+      "meaning": "подпись рядом со справкой"
+    },
+    "ToggletipButton": {
+      "level": "Элементы",
+      "file": "Toggletip.tsx",
+      "meaning": "кнопка, которая открывает справку"
+    },
+    "ToggletipContent": {
+      "level": "Элементы",
+      "file": "Toggletip.tsx",
+      "meaning": "текст справки у кнопки"
+    },
     "Accordion": {
       "level": "Элементы",
       "file": "Accordion.tsx",
-      "meaning": "заголовок строкой и содержимое по требованию",
+      "meaning": "стопка раскрытий",
       "near": {
         "Card": "у карточки «подробнее» — продолжение её фактов внутри поверхности; раскрытие — самостоятельная строка с заголовком на странице (правила экрана, редкие настройки); механика одна — lib/disclosure.tsx"
       }
+    },
+    "AccordionItem": {
+      "level": "Элементы",
+      "file": "Accordion.tsx",
+      "meaning": "заголовок строкой и содержимое по требованию"
     },
     "Delta": {
       "level": "Элементы",
       "file": "Delta.tsx",
       "meaning": "разница двух чисел стрелкой"
     },
-    "Skeleton": {
+    "SkeletonText": {
       "level": "Элементы",
-      "file": "Skeleton.tsx",
+      "file": "SkeletonText.tsx",
       "meaning": "место будущего текста при загрузке"
     },
-    "Loading": {
+    "SkeletonPlaceholder": {
       "level": "Элементы",
-      "file": "Skeleton.tsx",
-      "meaning": "загрузка области для читалки"
+      "file": "SkeletonText.tsx",
+      "meaning": "место будущей картинки или блока при загрузке"
     },
     "Prose": {
       "level": "Элементы",

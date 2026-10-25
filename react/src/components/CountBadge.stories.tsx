@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { CountBadge } from './CountBadge'
 
 const meta = {
-  title: 'Компоненты/Элементы/Счётчик',
+  title: 'Компоненты/Элементы/CountBadge',
   component: CountBadge,
   parameters: { layout: 'padded' },
   args: { count: 3, label: 'непрочитанных' },

@@ -1,7 +1,8 @@
 import { useEffect } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { ActionArea, Button } from './Button'
+import { Button, ButtonSet } from './Button'
 import { ConfirmProvider, Dialog, useConfirm } from './Dialog'
+import { InlineLoading } from './InlineLoading'
 import { Notification } from './Notification'
 import { TextField } from './TextField'
 
@@ -16,9 +17,10 @@ const meta = {
     size: 'md',
     persistent: true,
     actions: (
-      <ActionArea primary={{ label: 'Начать' }} label="Действия окна">
-        <Button>Отмена</Button>
-      </ActionArea>
+      <ButtonSet aria-label="Действия окна">
+        <Button kind="secondary">Отмена</Button>
+        <Button>Начать</Button>
+      </ButtonSet>
     ),
     children: <TextField label="Папка" defaultValue="~/dev/reports" />,
   },
@@ -28,8 +30,20 @@ type S = StoryObj<typeof meta>
 
 /** Окно: по центру на ноутбуке, шторкой снизу на телефоне; одна кнопка «закрыть»; главная справа. */
 export const Обычное: S = {}
-/** Действие идёт: главная занята. */
-export const Загрузка: S = { tags: ['state:загрузка'], args: { actions: <ActionArea primary={{ label: 'Начинаем…', loading: true }} label="Действия окна" /> } }
+/** Действие идёт: на месте главной — ход в строке. */
+export const Загрузка: S = {
+  tags: ['state:загрузка'],
+  args: {
+    actions: (
+      <ButtonSet aria-label="Действия окна">
+        <Button kind="secondary" disabled>
+          Отмена
+        </Button>
+        <InlineLoading description="Начинаем…" />
+      </ButtonSet>
+    ),
+  },
+}
 /** Беда внутри окна — уведомлением у места. */
 export const Ошибка: S = {
   tags: ['state:ошибка'],
@@ -46,7 +60,7 @@ function Ask() {
   return null
 }
 
-/** Подтверждение: опасное — кнопкой тона «опасно», фокус на «Отмена». */
+/** Подтверждение: опасное — кнопкой `kind="danger"`, фокус на «Отмена». */
 export const Подтверждение: S = {
   render: () => (
     <ConfirmProvider>

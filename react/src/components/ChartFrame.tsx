@@ -7,7 +7,7 @@ import { cx } from '../lib/cx'
 import type { DataState, EmptyView, ErrorView } from '../lib/vocab'
 import { Button } from './Button'
 import { SERIES, seriesIndex, type SeriesLine } from './Chart'
-import { Loading, Skeleton } from './Skeleton'
+import { SkeletonPlaceholder } from './SkeletonText'
 import { StateView } from './StateView'
 import { Surface } from './Surface'
 
@@ -45,11 +45,12 @@ export function ChartFrame({ title, description, summary, legend, tools, state =
   let area: ReactNode
   if (state === 'loading')
     area = (
-      <Loading label={`${typeof title === 'string' ? title : 'график'}: загрузка`}>
+      <div role="status" aria-busy="true" data-state="загрузка">
+        <span className="sr-only">{`${typeof title === 'string' ? title : 'график'}: загрузка`}</span>
         <div className={cx('flex flex-col justify-end gap-items', AREA)}>
-          <Skeleton className="h-full" />
+          <SkeletonPlaceholder className="h-full w-full" />
         </div>
-      </Loading>
+      </div>
     )
   else if (state === 'error')
     area = (
@@ -58,7 +59,7 @@ export function ChartFrame({ title, description, summary, legend, tools, state =
         kind="ошибка"
         title={error?.title ?? 'График не загрузился'}
         description={error?.description}
-        action={error?.onRetry && <Button onClick={error.onRetry}>Повторить</Button>}
+        action={error?.onRetry && <Button kind="secondary" onClick={error.onRetry}>Повторить</Button>}
       />
     )
   else if (empty) area = <StateView className={AREA} kind={empty.kind} title={empty.title} description={empty.description} action={empty.action} />

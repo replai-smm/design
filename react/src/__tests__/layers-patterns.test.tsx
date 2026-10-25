@@ -1,7 +1,7 @@
 /** Слои и паттерны: окно и шторка, подтверждение, всплывашка; вкладки, фильтры, три колонки, переписка, поле ответа, текст ответа. */
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
 import { render, screen, fireEvent, within, act, waitFor } from '@testing-library/react'
-import { ActionArea, Button, ChatThread, ConfirmProvider, Dialog, FilterBar, Prose, ReplyBox, Tabs, TextField, ThreeColumn, Toaster, useConfirm, useToast, useUrlFilters } from '../index'
+import { Button, ButtonSet, ChatThread, ConfirmProvider, Dialog, FilterBar, Prose, ReplyBox, Tabs, TextField, ThreeColumn, Toaster, useConfirm, useToast, useUrlFilters } from '../index'
 import { chat, chatFailed } from '../stories/fixtures'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
@@ -35,8 +35,16 @@ describe('окно', () => {
     vi.spyOn(console, 'error').mockImplementation(() => {})
     expect(() =>
       render(
-        <Dialog open title="О" actions={<ActionArea primary={{ label: 'А' }} />}>
-          <ActionArea primary={{ label: 'Б' }} />
+        <Dialog
+          open
+          title="О"
+          actions={
+            <ButtonSet>
+              <Button>А</Button>
+            </ButtonSet>
+          }
+        >
+          <Button>Б</Button>
         </Dialog>,
       ),
     ).toThrow(/вторая главная/)
@@ -46,10 +54,14 @@ describe('окно', () => {
 describe('подтверждение', () => {
   function Ask({ danger, onAnswer }: { danger?: boolean; onAnswer: (v: boolean) => void }) {
     const confirm = useConfirm()
-    return <Button onClick={async () => onAnswer(await confirm({ title: 'Удалить файл?', danger }))}>спросить</Button>
+    return (
+      <Button kind="secondary" onClick={async () => onAnswer(await confirm({ title: 'Удалить файл?', danger }))}>
+        спросить
+      </Button>
+    )
   }
 
-  it('опасное: кнопка тона «опасно» без главной, фокус на «Отмена»; «да» — true', async () => {
+  it('опасное: kind="danger" без главной, фокус на «Отмена»; «да» — true', async () => {
     const onAnswer = vi.fn()
     render(
       <ConfirmProvider>
@@ -58,8 +70,8 @@ describe('подтверждение', () => {
     )
     fireEvent.click(screen.getByRole('button', { name: 'спросить' }))
     const del = await screen.findByRole('button', { name: 'Удалить' })
-    expect(del.dataset.tone).toBe('danger')
-    expect(document.querySelector('[data-variant=primary]')).toBeNull()
+    expect(del.dataset.kind).toBe('danger')
+    expect(document.querySelector('[data-kind=primary]')).toBeNull()
     await waitFor(() => expect(document.activeElement?.textContent).toBe('Отмена'))
     await act(async () => fireEvent.click(del))
     expect(onAnswer).toHaveBeenCalledWith(true)
@@ -75,7 +87,11 @@ describe('всплывашка и меню команд', () => {
   it('useToast().show — «готово» всплывает с меткой тона', async () => {
     function Demo() {
       const t = useToast()
-      return <Button onClick={() => t.show({ title: 'Готово' })}>Сделать</Button>
+      return (
+        <Button kind="secondary" onClick={() => t.show({ title: 'Готово' })}>
+          Сделать
+        </Button>
+      )
     }
     render(
       <Toaster>

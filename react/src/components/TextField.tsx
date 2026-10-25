@@ -8,7 +8,7 @@ import { forwardRef, useId, type InputHTMLAttributes, type ReactNode, type Texta
 import { CONTROL, DENSE, FAST } from '../lib/anatomy'
 import { cx, rule } from '../lib/cx'
 import { Icon } from './Icon'
-import { Toggletip } from './Toggletip'
+import { Toggletip, ToggletipButton, ToggletipContent } from './Toggletip'
 
 export interface FieldBaseProps {
   /** Подпись поля — всегда есть (читалка); `hideLabel` прячет её с экрана, когда смысл виден рядом. */
@@ -113,7 +113,10 @@ export function FieldShell({ ids, label, hideLabel, helperText, error, help, dis
   const head = help ? (
     <span className="flex min-w-0 items-center gap-tight">
       {labelEl}
-      <Toggletip label={String(label)}>{help}</Toggletip>
+      <Toggletip>
+        <ToggletipButton label={`Подробнее: ${String(label)}`} />
+        <ToggletipContent>{help}</ToggletipContent>
+      </Toggletip>
     </span>
   ) : (
     labelEl

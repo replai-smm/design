@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import md from '../../../patterns/global-header.md?raw'
-import { Accordion } from '../components/Accordion'
+import { Accordion, AccordionItem } from '../components/Accordion'
 import { CountBadge } from '../components/CountBadge'
 import { FOCUS } from '../lib/anatomy'
 import { cx } from '../lib/cx'
@@ -18,6 +18,7 @@ const MORE = ['Файлы', 'Счета', 'Интеграции', 'Журнал'
 /** Левая панель: основные разделы на виду, редкие — в «Ещё»; разделы — ссылки с адресом. */
 function Example({ start = 'projects' }: { start?: string }) {
   const [selected, setSelected] = useState(start)
+  const [moreOpen] = useState(() => MORE.some((i) => i.id === start))
   const link = (item: { id: string; label: string; count?: number }, quiet = false) => (
     <a
       key={item.id}
@@ -36,8 +37,10 @@ function Example({ start = 'projects' }: { start?: string }) {
   return (
     <nav aria-label="Разделы" className="flex w-rail flex-col gap-tight p-items">
       {MAIN.map((i) => link(i))}
-      <Accordion title="Ещё" defaultOpen={MORE.some((i) => i.id === selected)}>
-        <div className="-mx-compact flex flex-col gap-tight">{MORE.map((i) => link(i, true))}</div>
+      <Accordion>
+        <AccordionItem title="Ещё" open={moreOpen}>
+          <div className="-mx-compact flex flex-col gap-tight">{MORE.map((i) => link(i, true))}</div>
+        </AccordionItem>
       </Accordion>
     </nav>
   )

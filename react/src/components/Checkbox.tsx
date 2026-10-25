@@ -8,7 +8,7 @@ import { Checkbox as RCheckbox } from 'radix-ui'
 import { FOCUS } from '../lib/anatomy'
 import { cx, rule } from '../lib/cx'
 import { Icon } from './Icon'
-import { Toggletip } from './Toggletip'
+import { Toggletip, ToggletipButton, ToggletipContent } from './Toggletip'
 import { FieldNote, fieldAria, useFieldIds } from './TextField'
 
 export type CheckedState = boolean | 'indeterminate'
@@ -68,7 +68,12 @@ export const Checkbox = forwardRef<HTMLButtonElement, CheckboxProps>(function Ch
         <label htmlFor={ids.id} id={ids.labelId} className={cx('min-w-0 cursor-pointer text-body', disabled ? 'cursor-not-allowed text-fg-disabled' : 'text-fg', hideLabel && 'sr-only')}>
           {label}
         </label>
-        {help && <Toggletip label={String(label)}>{help}</Toggletip>}
+        {help && (
+          <Toggletip>
+            <ToggletipButton label={`Подробнее: ${String(label)}`} />
+            <ToggletipContent>{help}</ToggletipContent>
+          </Toggletip>
+        )}
       </div>
       <FieldNote ids={ids} helperText={helperText} error={error} disabled={disabled} />
     </div>

@@ -52,8 +52,8 @@ describe('полки', () => {
 describe('свои компоненты с именами ДС', () => {
   const names = dsNames()
   it('имена — компоненты из react/src/index.ts, без типов и хуков', () => {
-    for (const n of ['Button', 'Dialog', 'ThreeColumn', 'ChatThread', 'StatusBadge', 'ConfirmProvider']) expect(names.has(n)).toBe(true)
-    for (const n of ['ButtonProps', 'useToast', 'cx', 'STATUS_IDS', 'SERIES', 'TONES']) expect(names.has(n)).toBe(false)
+    for (const n of ['Button', 'Dialog', 'ThreeColumn', 'ChatThread', 'Tag', 'ConfirmProvider']) expect(names.has(n)).toBe(true)
+    for (const n of ['ButtonProps', 'useToast', 'cx', 'TAG_TYPES', 'SERIES', 'TONES']) expect(names.has(n)).toBe(false)
   })
   it('ловит function, const, class; не ловит импорт, вызов и строку с ds-allow', () => {
     const src = [

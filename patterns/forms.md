@@ -2,7 +2,7 @@
 
 Carbon: Forms · Источник: carbon-website src/pages/patterns/forms-pattern/index.mdx @ 5e9cd1d · Перевод с английского, Apache-2.0
 
-Компоненты примера: `Accordion`, `ActionArea`, `BottomBar`, `Button`, `Checkbox`, `Icon`, `NumberField`, `Page`, `PageHeader`, `Section`, `Select`, `TextField`
+Компоненты примера: `Accordion`, `AccordionItem`, `BottomBar`, `Button`, `ButtonSet`, `Checkbox`, `Heading`, `Icon`, `NumberField`, `Page`, `PageHeader`, `Section`, `Select`, `Stack`, `TextField`
 
 Форма — группа связанных полей, через которые человек вводит данные или настраивает параметры.
 

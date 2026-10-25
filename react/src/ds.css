@@ -38,18 +38,12 @@
 }
 .ds-table > *,
 .ds-table .ds-row,
-.ds-table .ds-rowgroup,
-.ds-table .ds-expand,
-.ds-table .ds-expand > * {
+.ds-table .ds-rowgroup {
   grid-column: 1 / -1;
 }
 .ds-table .ds-row,
-.ds-table .ds-rowgroup,
-.ds-table .ds-expand > * {
+.ds-table .ds-rowgroup {
   display: grid;
-  grid-template-columns: subgrid;
-}
-.ds-table .ds-expand {
   grid-template-columns: subgrid;
 }
 @media (max-width: 47.99rem) {
@@ -57,24 +51,13 @@
     display: none;
   }
 }
-/* первая колонка стоит при прокрутке вбок; в свёрнутой группе обрезка — clip (hidden ломает закрепление) */
+/* первая колонка стоит при прокрутке вбок */
 .ds-table .ds-row > [role='cell']:first-child,
 .ds-table .ds-row > [role='columnheader']:first-child {
   position: sticky;
   left: 0;
   z-index: 1;
   background-color: inherit;
-}
-.ds-table .ds-expand > * {
-  overflow: clip;
-}
-
-/* окно: на ноутбуке главная справа */
-@media (min-width: 48rem) {
-  .ds-dialog-footer [data-slot='action-area'] {
-    flex-direction: row-reverse;
-    justify-content: flex-start;
-  }
 }
 
 /* липкая полоса низа (BottomBar): над нижней панелью продукта (её высота — --ds-bottom-inset на :root); полоска телефона —
@@ -83,17 +66,6 @@
   position: sticky;
   bottom: var(--ds-bottom-inset, 0px);
   padding-bottom: calc(var(--ds-space-compact) + max(0px, env(safe-area-inset-bottom) - var(--ds-bottom-inset, 0px)));
-}
-/* кнопки полосы: главная правее второстепенной; на ноутбуке группа слева (Carbon: кнопки формы на странице — слева),
-   на телефоне одним рядом поровну — столбец кнопок съел бы четверть экрана */
-.ds-bottom-bar [data-slot='action-area'] {
-  flex-direction: row-reverse;
-  justify-content: flex-end;
-}
-@media (max-width: 47.99rem) {
-  .ds-bottom-bar [data-slot='action-area'] > * {
-    flex: 1 1 0;
-  }
 }
 /* всплывашки — над нижней панелью продукта, не поверх неё */
 .ds-toasts {

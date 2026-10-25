@@ -2,16 +2,18 @@
  * Поле ответа с «Отправить» (сообщения, комментарии, разговор с агентом).
  * - Клавиши (`send`): `enter` — Enter отправляет, Shift+Enter — новая строка; `ctrl-enter` — Enter — новая строка,
  *   Ctrl/⌘+Enter отправляет; `button` — только кнопкой (отправка необратима: ответ уходит адресату). Набор через IME не трогаем.
- * - Отправка идёт — кнопка «занята», поле только для чтения, второй раз не уходит. Неудача не теряет текст:
+ * - Отправка идёт — на месте «Отправить» ход в строке (`InlineLoading`), поле только для чтения, второй раз не уходит. Неудача не теряет текст:
  *   `onSend` вернул отклонённое обещание — текст остаётся, ошибку показывает `error`.
- * - «Отправить» — главная области (П5) через `ActionArea`; рядом — тихие (`tools`). Уже есть главная на поверхности —
- *   `emphasis="secondary"`. `disabled` — словами, почему нельзя.
+ * - «Отправить» — главная `Button` в `ButtonSet` (П5), последней; рядом — тихие (`tools`). Уже есть главная на
+ *   поверхности — `emphasis="secondary"`. `disabled` — словами, почему нельзя.
  * - Разговор с агентом: `stop` — «Стоп», пока агент работает; `layout="row"` — кнопки в ряд, «Отправить» справа.
  */
 import { forwardRef, useId, useImperativeHandle, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
 import { cx } from '../lib/cx'
-import { ActionArea, Button } from './Button'
+import { StopFilledAlt } from '../lib/icons.gen'
+import { Button, ButtonSet } from './Button'
 import { Icon } from './Icon'
+import { InlineLoading } from './InlineLoading'
 import { fieldBox } from './TextField'
 
 export interface ReplyBoxProps {
@@ -114,10 +116,11 @@ export const ReplyBox = forwardRef<ReplyBoxHandle, ReplyBoxProps>(function Reply
   const shownError = error ?? (emptyShown ? emptyMessage : null)
   const hintText = hint === false ? null : (hint ?? HINT[mode])
   const describedBy = [shownError ? `${id}-err` : null, reason ? `${id}-why` : null, hintText ? `${id}-hint` : null].filter(Boolean).join(' ') || undefined
-  const sendProps = { onClick: () => void doSend(), loading: sending, disabled: off, 'data-part': 'send' }
-  const stopButton = stop && (
-    <Button onClick={stop.onStop} icon="stop" data-part="stop">
-      {stop.label ?? 'Стоп'}
+  const sendButton = sending ? (
+    <InlineLoading description="Отправляем…" data-part="send" className={cx(layout === 'row' && 'ml-auto')} />
+  ) : (
+    <Button kind={emphasis === 'primary' ? 'primary' : 'secondary'} onClick={() => void doSend()} disabled={off} data-part="send" className={cx(layout === 'row' && 'ml-auto')}>
+      {sendLabel}
     </Button>
   )
 
@@ -158,20 +161,15 @@ export const ReplyBox = forwardRef<ReplyBoxHandle, ReplyBoxProps>(function Reply
         </p>
       )}
       {attachment && <div className="flex flex-wrap gap-items">{attachment}</div>}
-      {emphasis === 'primary' ? (
-        <ActionArea primary={{ label: sendLabel, ...sendProps }} label={`${label}: действия`} layout={layout}>
-          {stopButton}
-          {tools}
-        </ActionArea>
-      ) : (
-        <div role="group" aria-label={`${label}: действия`} className="flex flex-col-reverse gap-items md:flex-row md:flex-wrap md:items-center">
-          <Button className="max-md:w-full" {...sendProps}>
-            {sendLabel}
+      <ButtonSet aria-label={`${label}: действия`}>
+        {stop && (
+          <Button kind="secondary" renderIcon={StopFilledAlt} onClick={stop.onStop} data-part="stop">
+            {stop.label ?? 'Стоп'}
           </Button>
-          {stopButton}
-          {tools}
-        </div>
-      )}
+        )}
+        {tools}
+        {sendButton}
+      </ButtonSet>
     </div>
   )
 })

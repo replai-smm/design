@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { Add } from '../lib/icons.gen'
 import { Button } from './Button'
 import { ReplyBox } from './ReplyBox'
 
@@ -12,10 +13,10 @@ const meta = {
     onSend: () => {},
     tools: (
       <>
-        <Button variant="ghost" icon="add">
+        <Button kind="ghost" renderIcon={Add}>
           Черновик ИИ
         </Button>
-        <Button variant="ghost">Ответ не нужен</Button>
+        <Button kind="ghost">Ответ не нужен</Button>
       </>
     ),
     className: 'max-w-window',

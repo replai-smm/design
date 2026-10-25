@@ -12,18 +12,18 @@
 
 | Шкала | Что есть | Источник |
 |---|---|---|
-| Цвет | 36 ролей: поверхности (`canvas`, `surface`, `inverse`), текст (`fg`, `fg-muted`, `fg-disabled`, `fg-inverse`), рамки (`line`, `line-strong`), взаимодействие (`hover`, `selected`, `accent`), глубина (`scrim`, `shadow`), тоны (`danger`, `decision`, `warning`, `success` + текст и подложка у срочных), заливки статуса (`*-fill`, только в файлах из `registry.json → fill`), ряды данных `series-1…6` | `tokens.json → colors` |
-| Тон | один словарь на все компоненты: опасно · решение · внимание · инфо · нейтрально · хорошо. Подложка — только у «опасно», «решение» (ждёт решения человека, фиолетовый) и «внимание»; «хорошо» — зелёный знак без подложки. Заливка у каждого тона (`tones.*.fill`) — исключение по смыслу для сетки статуса, где смысл клетки — сам статус; только в файлах из `registry.json → fill` (в ДС таких нет) | `tokens.json → tones`, `react/src/lib/vocab.ts` |
-| Ход работы | один словарь: `idle` впереди · `running` идёт · `done` готово · `error` ошибка — у шагов, хода в строке, отправки сообщения | `vocab.ts → Progress` |
+| Цвет | 36 ролей: поверхности (`canvas`, `surface`, `inverse`), текст (`fg`, `fg-muted`, `fg-disabled`, `fg-inverse`), рамки (`line`, `line-strong`), взаимодействие (`hover`, `selected`, `accent`), глубина (`scrim`, `shadow`), тоны (`danger`, `decision`, `warning`, `success` + текст и подложка у срочных), заливки (`*-fill`, только в файлах из `registry.json → fill`: цвет метки `Tag`), ряды данных `series-1…6` | `tokens.json → colors` |
+| Тон | у наших компонентов без пары в Carbon (`Icon tone`, `CountBadge`, `Meter`, `StateView`…) — один словарь: опасно · решение · внимание · инфо · нейтрально · хорошо. Подложка — только у «опасно», «решение» (ждёт решения человека, фиолетовый) и «внимание»; «хорошо» — зелёный знак без подложки. У компонентов с парой — значения Carbon (`Button kind`, `Tag type`, `IconIndicator kind`, `InlineLoading status`), тоже из `vocab.ts`. Заливка тона (`tones.*.fill`) — фон, где цвет и есть смысл: метка `Tag` (`registry.json → fill`) | `tokens.json → tones`, `react/src/lib/vocab.ts` |
+| Ход работы | наш словарь `idle` впереди · `running` идёт · `done` готово · `error` ошибка — у отправки сообщения; у пар Carbon — их слова: `InlineLoading status` (`inactive` · `active` · `finished` · `error`), `ProgressStep` (`complete` · `current` · `invalid`) | `vocab.ts` |
 | Текст | 7 ролей: `caption` 12 · `body` 14 · `heading` 14/600 · `reading` 16 · `code` 13 моно · `title` 20 · `page` 28 | `scale.json → text` |
-| Отступ | 6 ролей: `tight` 4 · `items` 8 · `compact` 12 · `blocks` 16 · `groups` 24 · `sections` 32 — и в классах (`gap-items`, `p-blocks`), и в `Stack gap="items"` | `scale.json → space` |
-| Высота | `icon` 16 · `dense` 32 · `control` 40 · `touch` 48: контрол — 48 на телефоне и 40 на ноутбуке, плотный — 32 | `scale.json → size` |
+| Отступ | 6 ролей: `tight` 4 · `items` 8 · `compact` 12 · `blocks` 16 · `groups` 24 · `sections` 32 — в классах (`gap-items`, `p-blocks`); у `Stack` и `Inline` — шаг шкалы Carbon spacing того же размера: `gap={2}` 4 · `3` 8 · `4` 12 · `5` 16 · `6` 24 · `7` 32 | `scale.json → space` |
+| Высота | `icon` 16 · `dense` 32 · `control` 40 · `touch` 48: у кнопок и раскрытия — `size` Carbon: `sm` 32 · `md` 40 · `lg` 48 постоянно; без `size` — 48 на телефоне и 40 на ноутбуке | `scale.json → size` |
 | Ширина | предел колонки, окна, страницы: `number` 10rem (поле числа) · `rail` 16rem · `hint` · `narrow` · `popup` · `form` · `panel` · `wide` · `window` · `page` 80rem — `max-w-window`, `w-rail`; размеров контейнеров Tailwind (`max-w-md`) нет | `scale.json → measure` |
 | Угол | `control` 4 · `surface` 6 · `full` — только метка, счётчик, аватар, точка | `scale.json → radius` |
 | Глубина | плоско (рамка) · всплывает (`shadow-raised`) · поверх (`shadow-overlay` и затемнение `scrim`) | `scale.json → elevation` |
 | Движение | `duration-fast` 110 мс (отклик) · `duration-move` 0,6 с (раскрытие, выезд), одна кривая; «уменьшить движение» — обе 0 | `scale.json → motion` |
 | Шрифт | IBM Plex Sans 400/600, IBM Plex Mono 400 — в пакете, с кириллицей | `fonts/` |
-| Значки | один набор (IBM Carbon, 16 px) через один `Icon`; знаков-значков символами (◀ ▶ ×) нет | `lib/icons.mjs` → `react/src/lib/icons.gen.ts` |
+| Значки | один набор (IBM Carbon, 16 px): `Icon` по имени и компоненты с именами Carbon для `renderIcon` (`import { Add } from '@replai-smm/design/icons'`); знаков-значков символами (◀ ▶ ×) нет | `lib/icons.mjs` → `react/src/lib/icons.gen.ts` |
 
 Облик: главное действие — инверсия (чёрное в светлой, белое в тёмной), синий — только ссылка и фокус, цвет тона —
 только смысл. Тёмная тема — почти чёрный холст, слои отделяет рамка.
@@ -38,8 +38,8 @@
 | Уровень | Компоненты |
 |---|---|
 | Основы | роли и шкалы (без компонентов) |
-| Раскладка | Stack, Inline, Grid, Page, PageHeader, Section, SurfaceProvider, BottomBar |
-| Элементы | Icon, Button, ActionArea, StatusBadge, CountBadge, Avatar, InlineLoading, Meter, Steps, Tooltip, Toggletip, Accordion, Delta, Skeleton, Loading, Prose, ProseHtml, Chart |
+| Раскладка | Stack, Inline, Grid, Column, Page, PageHeader, Section, SurfaceProvider, BottomBar |
+| Элементы | Icon, Button, ButtonSet, IconButton, Heading, Link, Tag, DismissibleTag, IconIndicator, CountBadge, Avatar, InlineLoading, Meter, ProgressIndicator, ProgressStep, Tooltip, Toggletip, ToggletipLabel, ToggletipButton, ToggletipContent, Accordion, AccordionItem, Delta, SkeletonText, SkeletonPlaceholder, Prose, ProseHtml, Chart |
 | Поля | TextField, TextArea, Select, NumberField, Checkbox, CheckboxGroup, Combobox, FileField, SearchField |
 | Поверхности | Surface, Card, StatTile, Notification, StateView, CodeBlock, ChartFrame |
 | Коллекции | DataTable, List |
@@ -48,6 +48,51 @@
 
 Уровень, смысл и анатомия (поверхность, поля, роль заголовка, метка, форма) каждого компонента — в
 `react/src/registry.json`. ДС ничья: компонентов одного продукта в ней нет.
+
+## Договор Carbon
+
+Компоненты свои (Radix + Tailwind + роли ДС), а имя, свойства, значения и поведение — как у `@carbon/react` 1.119.0
+(решение Саши: «принципы Carbon, компоненты свои»): агент, который знает Carbon, пишет Carbon-код — он работает. Свойства
+Carbon, которые не нужны, не сделаны; сделанные называются и работают как у Carbon. Ниже — всё, что не так.
+
+### Расходится с Carbon
+
+| Что | Как у нас | Почему |
+|---|---|---|
+| `size` по умолчанию | без `size` — 48 на телефоне и 40 на ноутбуке; `sm` 32 · `md` 40 · `lg` 48 — постоянно; `xs`, `xl`, `2xl` нет | цель пальца на телефоне; меньше 32 — мимо пальца |
+| `Stack gap`, `Inline gap` | только шаги 2–7 (4–32 px), своей строки-размера нет | только роли и шкалы |
+| `Grid` + `Column` | 4 колонки до 768 px, 8 до 1024 px, 16 шире (у Carbon — 672 и 1056); промежуток 32, `narrow` — 16; `condensed`, `fullWidth`, `xlg`, `max` нет | точки перелома Tailwind — одни на всю ДС |
+| `Section` | `level` и вложенность — как у Carbon; описание и инструменты раздела — детьми (`<Inline>`), своего облика нет | — |
+| `Button kind` | главная — инверсия (не синяя): синий у нас — только ссылка и фокус; `secondary` — рамка, `tertiary` — рамка цвета главной | облик ДС |
+| `Button`, `IconButton` | значок только компонентом (`renderIcon={Add}`); у `Button` без слова значка нет — это `IconButton` | один способ на один смысл |
+| `Tag type` | только `red` · `purple` · `green` · `gray` · `high-contrast` · `outline`; `magenta`, `blue`, `cyan`, `teal`, `cool-gray`, `warm-gray` нет | у этих цветов нет ролей с проверенной парой текста |
+| `IconIndicator` | синих видов нет: `normal` · `in-progress` · `incomplete` · `informative` — цвет текста; `caution-major` — цвет «внимание» (оранжевого нет, различает форма); `size` 20 и `compact` нет | синий — только ссылка и фокус |
+| `ProgressIndicator` | на телефоне — строка «Шаг 2 из 4 · Куда» вместо ряда шагов; шагов — от трёх (меньше — ошибка в разработке) | ряд шагов не влезает в 390 px |
+| `Tooltip`, `Toggletip` | `align` — стороны Carbon; `autoAlign`, `highContrast`, `dropShadow`, `leaveDelayMs` нет; `ToggletipActions` нет | Radix ставит сам у края экрана; одна тень и одна инверсия |
+| `DismissibleTag` | «убрать» — кнопка с подписью без всплывающей подсказки | метка — элемент, ему подсказка не нужна |
+| П5 | «одна главная на поверхность», «опасное не рядом с главной», «в строке — только ghost» — проверка в разработке (`rule()`), у Carbon её нет | правило ДС |
+
+### Расширения сверх Carbon
+
+| Что | Зачем |
+|---|---|
+| `ButtonSet` на телефоне — одним рядом поровну | столбец кнопок съел бы четверть экрана |
+
+### Без пары в Carbon
+
+| Компонент | Почему пары нет |
+|---|---|
+| `Inline` | ряд с переносом и выравниванием: Carbon Stack в ряд не переносится |
+| `Page` | шапка, плашка беды и содержимое — наша сборка (`Content` Carbon — только `<main>`) |
+| `SurfaceProvider` | область одной главной кнопки — наше правило П5 |
+| `BottomBar` | липкий низ страницы (у Carbon — только футеры в ibm-products) |
+| `Icon` | значок по имени и знак тона; у Carbon значки — отдельный пакет компонентов (у нас — `/icons`) |
+| `CountBadge` | счётчик строки и вкладки (BadgeIndicator Carbon не экспортирован) |
+| `Avatar` | лицо (у Carbon — только ibm-products `UserAvatar`) |
+| `Delta` | разница двух чисел |
+| `Meter` | сколько взято из предела: ProgressBar Carbon — ход процесса; имена свойств — как у ProgressBar |
+| `Prose`, `ProseHtml` | длинный текст ответа ролью «чтение» |
+| `Chart` | рисунок рядов данных (у Carbon — отдельный пакет `@carbon/charts`) |
 
 ## Паттерны
 
@@ -77,7 +122,7 @@
 | Индикаторы статуса | Status indicators | `patterns/status-indicators.md` |
 | Панель правки текста | Text toolbar | `patterns/text-toolbar.md` |
 
-Пошаговый путь — раздел «Формы → длинные формы» и компонент шагов (`Steps`). Текучих полей и панели правки текста в ДС
+Пошаговый путь — раздел «Формы → длинные формы» и компонент шагов (`ProgressIndicator`). Текучих полей и панели правки текста в ДС
 пока нет — их примеры честно говорят об этом.
 
 ## Правила — держит машина
@@ -91,7 +136,7 @@
 | Облик и анатомия: каждая история × светлая и тёмная × 390 и 1280 против эталона; поля, роль заголовка, угол и метка — по реестру; текст, углы и высоты контролов — только из шкал | `react/visual/run.mjs` (`npm run test:visual`), эталоны `react/visual/baseline/` | `__tests__/visual.test.ts`: кадр со сдвигом на 1 px, снимок с полями 12 вместо 16 |
 | Контраст: текст ≥ 4,5 : 1 (и на заливке статуса), знаки, границы контролов, фокус и ряды данных ≥ 3 : 1 — обе темы | `lib/contrast.mjs`, `contrast.test.ts` | пара светло-серого текста на белом |
 | Форма ролей, шкал и матрицы облика — закрытые списки | `tokens.schema.json`, `matrix.schema.json`, `schemas.test.ts` | `__tests__/fixtures/schemas/*/invalid` |
-| Одна главная кнопка на область и поверхность; опасное не рядом с главной; в строке списка — только ghost; на лице карточки ≤ 3 фактов, раскрытие ≤ 2 уровней; одна липкая полоса на страницу; шагов — от трёх; справка «i» — у подписи строкой | сами компоненты (`rule()` бросает в разработке), тесты `react/src/__tests__` | — |
+| Одна `kind="primary"` на поверхность и в наборе; опасное (`danger…`) не в одном `ButtonSet` с главной; в строке списка — только `kind="ghost"`; на лице карточки ≤ 3 фактов, раскрытие ≤ 2 уровней; одна липкая полоса на страницу; шагов — от трёх; справка «i» — у подписи строкой | сами компоненты (`rule()` бросает в разработке), тесты `react/src/__tests__` | `elements.test.tsx`: вторая главная на странице, `danger` рядом с главной, не-ghost в строке — красные |
 | История на каждое обещанное состояние, теги состояний — из `matrix.yaml`; a11y axe в обеих темах | `rules.test.tsx`, `a11y.test.tsx` | — |
 | Продукт: экраны только на полке `Экраны/SCR-NN …`; своего компонента с именем компонента ДС нет; новое нарушение «только роли» — красное, старое — долг | `lint/principles.mjs --kind product --base origin/main` в `check` продукта | `principles.test.ts` |
 
@@ -132,7 +177,7 @@
 @source "../node_modules/@replai-smm/design/react/src";
 ```
 
-Компоненты — `import { Button, Page } from '@replai-smm/design'` (исходники TypeScript, сборщик продукта транспилирует их
+Компоненты — `import { Button, Page } from '@replai-smm/design'`, значки для `renderIcon` — `import { Add } from '@replai-smm/design/icons'` (исходники TypeScript, сборщик продукта транспилирует их
 сам; `resolve.dedupe: ['react', 'react-dom', 'radix-ui']`). Пакету нужны только React и Radix из продукта. Вокруг
 приложения — `<Toaster>` и `<ConfirmProvider>` один раз. Сторож в `check` продукта:
 `node node_modules/@replai-smm/design/lint/principles.mjs --kind product --base origin/main src`; правило ESLint —
@@ -172,7 +217,7 @@
 
 | Файл | Что это |
 |---|---|
-| `tokens.json`, `scale.json`, `statuses.json` (+ `*.schema.json`) | роли и тоны, шкалы, закрытый список статусов |
+| `tokens.json`, `scale.json` (+ `*.schema.json`) | роли и тоны, шкалы |
 | `matrix.yaml` | матрица облика: темы × ширины × состояния, допуск сверки снимков |
 | `patterns/` | паттерны — правила сборки типовых ситуаций (формат Carbon), идут в пакете |
 | `INSIGHTS.md` | ВРЕМЕННО: что ломалось и какие правила может держать машина — до «машинного контроля» |

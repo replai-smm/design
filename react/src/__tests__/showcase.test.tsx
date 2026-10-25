@@ -21,12 +21,13 @@ const OUT = resolve(root, 'dist', 'showcase-components.html')
 const SECTIONS: Array<{ title: string; note: string; items: Array<[string, string, ('fixed' | 'toast')?]> }> = [
   {
     title: 'Элементы',
-    note: 'Главная — инверсия и только в области действий; тихие — рамкой или без; опасное — тоном. Метка — знак и слово, подложка только у срочного.',
+    note: 'Главная — инверсия, одна на поверхность; тихие — рамкой или без; опасное — тоном. Метка — слово в цвете, индикатор — знак своей формы и слово.',
     items: [
       ['Button.stories.tsx', 'Виды'],
-      ['StatusBadge.stories.tsx', 'Статусы'],
+      ['Tag.stories.tsx', 'Обычное'],
+      ['IconIndicator.stories.tsx', 'Обычное'],
       ['CountBadge.stories.tsx', 'Обычное'],
-      ['Steps.stories.tsx', 'Обычное'],
+      ['ProgressIndicator.stories.tsx', 'Обычное'],
       ['Meter.stories.tsx', 'Обычное'],
       ['InlineLoading.stories.tsx', 'Обычное'],
     ],
@@ -54,7 +55,7 @@ const SECTIONS: Array<{ title: string; note: string; items: Array<[string, strin
   },
   {
     title: 'Коллекции',
-    note: 'Срочное сверху, норма свёрнута; выбранная строка — роль «выбрано»; сортировка — выбор человека.',
+    note: 'Строки в порядке данных, состояние — знаком и словом; выбранная строка — роль «выбрано»; сортировка — выбор человека.',
     items: [
       ['DataTable.stories.tsx', 'Обычное'],
       ['List.stories.tsx', 'Выбрана'],

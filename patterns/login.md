@@ -2,7 +2,7 @@
 
 Carbon: Login · Источник: carbon-website src/pages/patterns/login-pattern/index.mdx @ 5e9cd1d · Перевод с английского, Apache-2.0
 
-Компоненты примера: `ActionArea`, `Notification`, `Stack`, `TextField`
+Компоненты примера: `Button`, `ButtonSet`, `Link`, `Notification`, `Stack`, `TextField`
 
 Страница входа даёт человеку доступ к приложению: он вводит логин и пароль.
 

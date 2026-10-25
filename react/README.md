@@ -7,27 +7,29 @@
 
 | Уровень | Компонент | Смысл |
 |---|---|---|
-| Раскладка | `Page`, `PageHeader`, `Section` | страница, шапка (заголовок, строка «о чём экран» — `description`, тихие действия), раздел с заголовком |
-| | `BottomBar` | липкая полоса низа страницы, одна на страницу: кнопки группой слева, на телефоне одним рядом; над нижней панелью продукта — `--ds-bottom-inset` |
-| | `Stack`, `Inline`, `Grid` | блоки столбиком, в строку, сеткой; отступ — роль (`gap="items"`) |
+| Раскладка | `Page`, `PageHeader`, `Section` | страница; шапка (`title`, строка «о чём экран» — `subtitle`, тихие действия — `pageActions`); раздел поднимает уровень `Heading` внутри (Carbon: Section) |
+| | `BottomBar` | липкая полоса низа страницы, одна на страницу: `ButtonSet` группой слева, на телефоне одним рядом; над нижней панелью продукта — `--ds-bottom-inset` |
+| | `Stack`, `Inline`, `Grid` + `Column` | блоки столбиком или в ряд (`orientation`), в строку с переносом, сеткой 16 колонок; отступ — шаг шкалы (`gap={3}`) |
 | | `SurfaceProvider` | область одной главной кнопки (своя область продукта) |
-| Элементы | `Icon` | значок набора по имени или знак тона (`tone="опасно"`) |
-| | `Button`, `ActionArea` | действие; главная — только `ActionArea primary`, одна; `secondary` · `ghost` · `tone="опасно"`; `dense` — 32 px; `icon` |
-| | `StatusBadge`, `CountBadge` | статус из закрытого списка или тон со словом; число у строки и вкладки |
-| | `Avatar`, `Tooltip` | лицо 32 px; подсказка у элемента, который берёт фокус |
-| | `Toggletip`, `Accordion` | справка «i» по нажатию (Carbon: Toggletip); раскрытие строкой с заголовком (Carbon: Accordion) |
-| | `InlineLoading`, `Meter`, `Steps` | ход в строке, сколько взято из предела, путь из шагов — словарь хода |
-| | `Delta`, `Skeleton`/`Loading`, `Prose`/`ProseHtml`, `Chart` | разница двух чисел, загрузка той же формы, текст ответа (роль «чтение»), рисунок рядов данных (`area` — заливка под одной линией) |
+| Элементы | `Icon` | значок набора по имени или знак тона (`tone="опасно"`); значки для `renderIcon` — `@replai-smm/design/icons` |
+| | `Button`, `ButtonSet`, `IconButton` | действие (Carbon): `kind` `primary` (по умолчанию, одна на поверхность) · `secondary` · `tertiary` · `ghost` · `danger` · `danger--tertiary` · `danger--ghost`; `size` `sm` · `md` · `lg`; `renderIcon`; `href`; набор кнопок — главная последней; значок без слова — `IconButton label` |
+| | `Heading`, `Link` | заголовок уровня своего раздела; ссылка (`inline` — в тексте) |
+| | `Tag`/`DismissibleTag`, `IconIndicator`, `CountBadge` | слово в цветной таблетке (`type`), с «убрать»; состояние знаком своей формы и словом (`kind`); число у строки и вкладки |
+| | `Avatar`, `Tooltip` | лицо 32 px; подсказка у элемента, который берёт фокус (`label` — имя, `description` — описание, `align`) |
+| | `Toggletip` (+ `ToggletipLabel`, `ToggletipButton`, `ToggletipContent`), `Accordion` + `AccordionItem` | справка «i» по нажатию; раскрытие строкой с заголовком (`open`, `onHeadingClick`, `size`, `align`) |
+| | `InlineLoading`, `Meter`, `ProgressIndicator` + `ProgressStep` | ход в строке (`status`, `description`, `onSuccess`); сколько взято из предела; путь из шагов (`currentIndex`, `onChange`) |
+| | `Delta`, `SkeletonText`/`SkeletonPlaceholder`, `Prose`/`ProseHtml`, `Chart` | разница двух чисел, место будущего текста и блока (`aria-busy` — у области), текст ответа (роль «чтение»), рисунок рядов данных (`area` — заливка под одной линией) |
 | Поля | `TextField`, `TextArea`, `Select`, `NumberField`, `Checkbox`/`CheckboxGroup`, `Combobox`, `FileField`, `SearchField` | одна рамка и один каркас: подпись, подсказка, ошибка знаком и словом; `dense` — 32 px; `help` — справка «i» у подписи; `inline` · `unit` (текст, число, выбор, выбор с поиском) — поле настройки одной строкой с 1024 px, ошибка у поля |
 | Поверхности | `Surface` | слой, рамка, угол 6, поля 16; `mark` — метка тона слева; `inset` — утопленная |
 | | `Card`, `StatTile`, `Notification`, `StateView`, `CodeBlock`, `ChartFrame` | построены на `Surface`; заголовок — роль `heading` |
-| Коллекции | `DataTable`, `List` | строки: срочное сверху, норма свёрнута, много — «показать ещё»; `selectedKey` и `onSelect`; сортировка, подсказка у заголовка, `nowrap`, `rowMuted` у таблицы |
+| Коллекции | `DataTable`, `List` | строки в порядке данных, много — «показать ещё»; `selectedKey` и `onSelect`; сортировка, подсказка у заголовка, `nowrap`, `rowMuted` у таблицы |
 | Слои | `Dialog`, `ConfirmProvider`/`useConfirm`, `Toaster`/`useToast` | окно (шторка снизу на телефоне, `side="left"` — слева, `size`: `sm` · `md` · `full`), подтверждение, «готово» |
 | Составные | `Tabs`, `FilterBar`/`useUrlFilters` | один ряд сегментов: панели и фильтры в адресе; не влезает — вкладки одной строкой с прокруткой, фильтры переносятся |
 | | `ThreeColumn`, `ChatThread`, `ReplyBox` | список → лента → карточка; переписка; поле ответа (`send`: `enter` · `ctrl-enter` · `button`) |
 
-Общие имена: `state` (`ready` · `loading` · `error`), `empty`, `error`, `selectedKey`, `onSelect`, `tone` (словарь
-тонов), `progress` (словарь хода), `dense`, `label` — подпись для читалки.
+Общие имена: у компонентов с парой в Carbon — имена и значения Carbon (`kind`, `size`, `renderIcon`, `label`,
+`description`, `status`); у наших — `state` (`ready` · `loading` · `error`), `empty`, `error`, `selectedKey`, `onSelect`,
+`tone` (словарь тонов), `label` — подпись для читалки. Что не как у Carbon — корневой README → «Договор Carbon».
 
 ## Проверки
 

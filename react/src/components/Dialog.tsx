@@ -2,18 +2,19 @@
  * Окно — единственный слой поверх экрана: по центру на ноутбуке, шторкой снизу на телефоне (`side="left"` — шторка
  * слева: колонка раскладки на телефоне). Глубина «поверх»: затемнение и тень окна. Шапка — заголовок ролью `title` и
  * одна кнопка «закрыть» (та же, что у уведомления); Esc и нажатие мимо закрывают, фокус заперт и возвращается на
- * кнопку, которая открыла окно. Открытое окно — своя область главной кнопки (П5): `actions` — `<ActionArea primary>`
- * внизу, главная справа на ноутбуке и внизу во всю ширину на телефоне. Первый фокус: `data-autofocus`, иначе первое
- * поле, иначе главная кнопка, иначе «закрыть».
+ * кнопку, которая открыла окно. Открытое окно — своя область главной кнопки (П5): `actions` — `<ButtonSet>` внизу,
+ * главная `<Button kind="primary">` последней — справа; на телефоне кнопки одним рядом поровну. Первый фокус:
+ * `data-autofocus`, иначе первое поле, иначе главная кнопка, иначе «закрыть».
  *
  * `useConfirm()` — подтверждение вместо `window.confirm`: `if (await confirm({ title: 'Удалить файл?', danger: true }))`.
- * Опасное — кнопкой «опасно» без главной рядом (П10), фокус сначала на «Отмена» (случайный Enter не удалит).
+ * Опасное — кнопкой `kind="danger"` без главной рядом (П10), фокус сначала на «Отмена» (случайный Enter не удалит).
  * Нужен `<ConfirmProvider>` один раз вокруг приложения.
  */
 import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Dialog as RDialog } from 'radix-ui'
 import { cx } from '../lib/cx'
-import { ActionArea, Button } from './Button'
+import { Close } from '../lib/icons.gen'
+import { Button, ButtonSet, IconButton } from './Button'
 import { SurfaceProvider } from './layout'
 
 /** sm, md — ширина на ноутбуке; full — во весь экран (долгая работа в окне: разговор с помощником). */
@@ -30,7 +31,7 @@ export interface DialogProps {
   size?: DialogSize
   /** Шторка слева на любой ширине (колонка раскладки на телефоне); без него — окно. */
   side?: 'left'
-  /** `<ActionArea primary={…}>` — низ окна. */
+  /** `<ButtonSet>` с одной `<Button kind="primary">` — низ окна. */
   actions?: ReactNode
   /** Не закрывать нажатием мимо — у окна с полями, чтобы случайное нажатие не стёрло набранное. */
   persistent?: boolean
@@ -64,7 +65,7 @@ export function Dialog({ open, onOpenChange, trigger, title, description, size =
             const target =
               root?.querySelector<HTMLElement>('[data-autofocus]') ??
               root?.querySelector<HTMLElement>(`[data-part=body] :is(${TABBABLE})`) ??
-              root?.querySelector<HTMLElement>('[data-part=footer] [data-variant=primary]:not([disabled])')
+              root?.querySelector<HTMLElement>('[data-part=footer] [data-kind=primary]:not([disabled])')
             if (target) {
               e.preventDefault()
               target.focus()
@@ -79,7 +80,9 @@ export function Dialog({ open, onOpenChange, trigger, title, description, size =
                 {title}
               </RDialog.Title>
               <RDialog.Close asChild>
-                <Button variant="ghost" icon="close" aria-label="закрыть" className="shrink-0" />
+                <IconButton kind="ghost" label="закрыть">
+                  <Close />
+                </IconButton>
               </RDialog.Close>
             </div>
             <div data-part="body" className="relative flex min-h-0 flex-1 flex-col gap-blocks overflow-y-auto p-blocks">
@@ -87,7 +90,7 @@ export function Dialog({ open, onOpenChange, trigger, title, description, size =
               {children}
             </div>
             {actions && (
-              <div data-part="footer" className="ds-dialog-footer border-t border-line p-blocks">
+              <div data-part="footer" className="border-t border-line p-blocks">
                 {actions}
               </div>
             )}
@@ -108,7 +111,7 @@ export interface ConfirmOptions {
   /** Слово действия: «Удалить» (не «Да» и не «ОК»). */
   confirmLabel?: string
   cancelLabel?: string
-  /** Опасное действие: кнопка «опасно», фокус сначала на «Отмена». */
+  /** Опасное действие: кнопка `kind="danger"`, фокус сначала на «Отмена». */
   danger?: boolean
   /** Правило Карты, которое разрешает действие (П15) — в data-rule кнопки. */
   rule?: string
@@ -143,7 +146,7 @@ export function ConfirmProvider({ children }: { children?: ReactNode }) {
   const o = req?.o
   const word = o?.confirmLabel ?? (o?.danger ? 'Удалить' : 'Продолжить')
   const cancel = (
-    <Button data-autofocus={o?.danger ? '' : undefined} onClick={() => done(false)}>
+    <Button kind="secondary" data-autofocus={o?.danger ? '' : undefined} onClick={() => done(false)}>
       {o?.cancelLabel ?? 'Отмена'}
     </Button>
   )
@@ -156,18 +159,12 @@ export function ConfirmProvider({ children }: { children?: ReactNode }) {
           onOpenChange={(v) => !v && done(false)}
           title={o.title}
           actions={
-            o.danger ? (
-              <ActionArea label="Подтверждение">
-                <Button tone="опасно" rule={o.rule} onClick={() => done(true)}>
-                  {word}
-                </Button>
-                {cancel}
-              </ActionArea>
-            ) : (
-              <ActionArea label="Подтверждение" primary={{ label: word, rule: o.rule, onClick: () => done(true) }}>
-                {cancel}
-              </ActionArea>
-            )
+            <ButtonSet aria-label="Подтверждение">
+              {cancel}
+              <Button kind={o.danger ? 'danger' : 'primary'} data-rule={o.rule} onClick={() => done(true)}>
+                {word}
+              </Button>
+            </ButtonSet>
           }
         >
           {o.body ? <div className="text-body">{o.body}</div> : null}

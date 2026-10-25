@@ -5,9 +5,10 @@
  */
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
 import { Toast as RToast } from 'radix-ui'
-import { FOCUS, MARK, SURFACE } from '../lib/anatomy'
+import { MARK, SURFACE } from '../lib/anatomy'
 import { cx } from '../lib/cx'
-import { Button } from './Button'
+import { Close } from '../lib/icons.gen'
+import { Button, IconButton } from './Button'
 import { Icon } from './Icon'
 import type { NotificationTone } from './Notification'
 
@@ -60,13 +61,15 @@ export function Toaster({ children, initial = [] }: ToasterProps) {
             </div>
             {t.action && (
               <RToast.Action altText={t.action.label} asChild>
-                <Button variant="ghost" dense onClick={t.action.onClick} className="-my-tight">
+                <Button kind="ghost" size="sm" onClick={t.action.onClick} className="-my-tight">
                   {t.action.label}
                 </Button>
               </RToast.Action>
             )}
             <RToast.Close asChild>
-              <Button variant="ghost" dense icon="close" aria-label="закрыть" className={cx('-my-tight shrink-0', FOCUS)} />
+              <IconButton kind="ghost" size="sm" label="закрыть" className="-my-tight">
+                <Close />
+              </IconButton>
             </RToast.Close>
           </RToast.Root>
         ))}

@@ -1,26 +1,29 @@
 /** Данные историй и тестов: проекты, счета, переписка, ряды графиков, код — нейтральные примеры. Даты зашиты — кадры не плывут. */
 import { createElement } from 'react'
 import type { ChatMessage } from '../components/ChatThread'
-import type { StatusId } from '../lib/vocab'
+import type { IconIndicatorKind } from '../lib/vocab'
+
+/** Слово состояния строки — у индикатора рядом со знаком. */
+export const STATUS_WORD: Partial<Record<IconIndicatorKind, string>> = { failed: 'падает', 'caution-minor': 'меняется', succeeded: 'работает', 'not-started': 'не проверено', pending: 'ждёт прогона' }
 
 export interface ProjectRow {
   id: string
   name: string
   team: string
-  status: StatusId
+  status: IconIndicatorKind
   reason: string
   checked: string
 }
 
 const base: ProjectRow[] = [
-  { id: 'p1', name: 'Интернет-магазин', team: 'Продажи', status: 'work.failing', reason: 'Ключ доступа отозван', checked: '5 мин назад' },
-  { id: 'p2', name: 'Портал поддержки', team: 'Поддержка', status: 'change.changing', reason: 'Меняем шаблоны писем', checked: '12 мин назад' },
-  { id: 'p3', name: 'Склад', team: 'Логистика', status: 'work.working', reason: '—', checked: '1 мин назад' },
-  { id: 'p4', name: 'Мобильное приложение', team: 'Продукт', status: 'work.unchecked', reason: 'Ещё не проверяли', checked: '—' },
-  { id: 'p5', name: 'Бухгалтерия', team: 'Финансы', status: 'work.working', reason: '—', checked: '3 мин назад' },
-  { id: 'p6', name: 'Рассылка новостей', team: 'Маркетинг', status: 'work.failing', reason: 'Письма не приходят', checked: '8 мин назад' },
-  { id: 'p7', name: 'Онбординг сотрудников', team: 'Кадры', status: 'work.awaiting-run', reason: 'Ждёт прогона тестов', checked: '—' },
-  { id: 'p8', name: 'Отчёты', team: 'Аналитика', status: 'work.working', reason: '—', checked: '2 мин назад' },
+  { id: 'p1', name: 'Интернет-магазин', team: 'Продажи', status: 'failed', reason: 'Ключ доступа отозван', checked: '5 мин назад' },
+  { id: 'p2', name: 'Портал поддержки', team: 'Поддержка', status: 'caution-minor', reason: 'Меняем шаблоны писем', checked: '12 мин назад' },
+  { id: 'p3', name: 'Склад', team: 'Логистика', status: 'succeeded', reason: '—', checked: '1 мин назад' },
+  { id: 'p4', name: 'Мобильное приложение', team: 'Продукт', status: 'not-started', reason: 'Ещё не проверяли', checked: '—' },
+  { id: 'p5', name: 'Бухгалтерия', team: 'Финансы', status: 'succeeded', reason: '—', checked: '3 мин назад' },
+  { id: 'p6', name: 'Рассылка новостей', team: 'Маркетинг', status: 'failed', reason: 'Письма не приходят', checked: '8 мин назад' },
+  { id: 'p7', name: 'Онбординг сотрудников', team: 'Кадры', status: 'pending', reason: 'Ждёт прогона тестов', checked: '—' },
+  { id: 'p8', name: 'Отчёты', team: 'Аналитика', status: 'succeeded', reason: '—', checked: '2 мин назад' },
 ]
 
 export const projects = base
@@ -31,14 +34,14 @@ export const many: ProjectRow[] = Array.from({ length: 150 }, (_, i) => {
   return { ...b, id: `m${i}`, name: `${b.name} · ${i + 1}` }
 })
 
-export const allWorking: ProjectRow[] = base.map((p) => ({ ...p, status: 'work.working' as StatusId, reason: '—' }))
+export const allWorking: ProjectRow[] = base.map((p) => ({ ...p, status: 'succeeded' as IconIndicatorKind, reason: '—' }))
 
 /** Счета оплаты: таблица с сортировкой по заголовку, деньгами и приглушёнными строками. */
 export interface AccountRow {
   id: string
   name: string
   manager: string
-  status: StatusId
+  status: IconIndicatorKind
   week: number
   left: number | null
   /** Не списывается — слово причины (приглушённая строка). */
@@ -46,12 +49,12 @@ export interface AccountRow {
 }
 
 export const accounts: AccountRow[] = [
-  { id: 'a1', name: 'Основной счёт', manager: 'Анна', status: 'work.failing', week: 18400, left: 2100 },
-  { id: 'a2', name: 'Счёт поддержки', manager: 'Борис', status: 'work.working', week: 9200, left: 15400 },
-  { id: 'a3', name: 'Счёт склада', manager: 'Анна', status: 'work.working', week: 31000, left: null, idle: 'не подключался' },
-  { id: 'a4', name: 'Счёт маркетинга', manager: 'Вера', status: 'work.failing', week: 4600, left: 300 },
-  { id: 'a5', name: 'Резервный счёт', manager: 'Борис', status: 'work.unchecked', week: 12750, left: 8800, idle: 'не списывается 12 дней' },
-  { id: 'a6', name: 'Счёт продаж', manager: 'Вера', status: 'work.working', week: 21300, left: 6400 },
+  { id: 'a1', name: 'Основной счёт', manager: 'Анна', status: 'failed', week: 18400, left: 2100 },
+  { id: 'a2', name: 'Счёт поддержки', manager: 'Борис', status: 'succeeded', week: 9200, left: 15400 },
+  { id: 'a3', name: 'Счёт склада', manager: 'Анна', status: 'succeeded', week: 31000, left: null, idle: 'не подключался' },
+  { id: 'a4', name: 'Счёт маркетинга', manager: 'Вера', status: 'failed', week: 4600, left: 300 },
+  { id: 'a5', name: 'Резервный счёт', manager: 'Борис', status: 'not-started', week: 12750, left: 8800, idle: 'не списывается 12 дней' },
+  { id: 'a6', name: 'Счёт продаж', manager: 'Вера', status: 'succeeded', week: 21300, left: 6400 },
 ]
 
 export const chat: ChatMessage[] = [

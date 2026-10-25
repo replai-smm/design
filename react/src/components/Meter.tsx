@@ -1,7 +1,9 @@
 /**
- * Шкала заполнения: сколько из предела уже взято — лимит плана, контекст сессии. Не путь из шагов (`Steps`) и не
- * загрузка (`InlineLoading`). Полоса и слово («62 % · сброс 18:40») — по полосе число не прочесть. С 80 % — тон
- * «внимание», с 95 % — «опасно», знаком и цветом полосы; ниже — полоса цвета текста. `role="meter"` для читалки.
+ * Шкала заполнения: сколько из предела уже взято — лимит плана, контекст сессии. Не путь из шагов (`ProgressIndicator`)
+ * и не загрузка (`InlineLoading`); пары в Carbon нет (ProgressBar — ход процесса), имена свойств — как у ProgressBar:
+ * `label`, `value`, `max`, `helperText`, `hideLabel`, `type="inline"`. Полоса и слово («62 % · сброс 18:40») — по полосе
+ * число не прочесть. С 80 % — тон «внимание», с 95 % — «опасно», знаком и цветом полосы; ниже — полоса цвета текста.
+ * `role="meter"` для читалки.
  */
 import type { ReactNode } from 'react'
 import { cx } from '../lib/cx'
@@ -14,9 +16,11 @@ export interface MeterProps {
   value: number
   max?: number
   /** Слово рядом: «62 % · сброс 18:40». По умолчанию — проценты. */
-  valueText?: ReactNode
-  /** Подпись, полоса и слово в одну строку (шапка приложения); иначе подпись сверху. */
-  inline?: boolean
+  helperText?: ReactNode
+  /** Подпись только для читалки. */
+  hideLabel?: boolean
+  /** `inline` — подпись, полоса и слово в одну строку (шапка приложения); `default` — подпись сверху. */
+  type?: 'default' | 'inline'
   className?: string
 }
 
@@ -27,14 +31,15 @@ export function meterTone(share: number): Extract<Tone, 'внимание' | 'о
 
 const BAR = { опасно: 'bg-danger', внимание: 'bg-warning' } as const
 
-export function Meter({ label, value, max = 100, valueText, inline = false, className }: MeterProps) {
+export function Meter({ label, value, max = 100, helperText, hideLabel = false, type = 'default', className }: MeterProps) {
+  const inline = type === 'inline'
   const share = max > 0 ? Math.min(Math.max(value / max, 0), 1) : 0
   const pct = Math.round(share * 100)
   const tone = meterTone(share)
-  const text = valueText ?? `${pct} %`
+  const text = helperText ?? `${pct} %`
   return (
     <div data-slot="meter" data-tone={tone ?? undefined} className={cx('flex min-w-0 text-caption', inline ? 'items-center gap-items' : 'flex-col gap-tight', className)}>
-      <span className="shrink-0 text-fg-muted">{label}</span>
+      <span className={cx('shrink-0 text-fg-muted', hideLabel && 'sr-only')}>{label}</span>
       <span
         role="meter"
         aria-label={label}

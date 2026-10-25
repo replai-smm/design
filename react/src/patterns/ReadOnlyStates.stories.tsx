@@ -7,7 +7,7 @@ import { pattern } from './story'
 
 function Example() {
   return (
-    <Stack gap="blocks" className="max-w-form p-blocks">
+    <Stack gap={5} className="max-w-form p-blocks">
       <TextField label="Имя" defaultValue="Анна Петрова" readOnly />
       <TextField label="Почта" type="email" defaultValue="anna@example.com" readOnly helperText="Почту меняют в настройках входа." />
       <NumberField label="Мест в команде" defaultValue={12} readOnly />

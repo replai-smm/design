@@ -5,7 +5,8 @@ import { Button } from '../components/Button'
 import { List } from '../components/Collection'
 import { SearchField } from '../components/SearchField'
 import { StateView } from '../components/StateView'
-import { Section } from '../components/layout'
+import { Heading } from '../components/Heading'
+import { Section, Stack } from '../components/layout'
 import { pattern } from './story'
 
 const DOCS = ['Договор поставки', 'Отчёт за март', 'Отчёт за апрель', 'План проекта', 'Счёт № 18'].map((name) => ({ id: name, name }))
@@ -15,12 +16,15 @@ function Example({ query = '' }: { query?: string }) {
   const [q, setQ] = useState(query)
   const found = DOCS.filter((d) => d.name.toLowerCase().includes(q.trim().toLowerCase()))
   return (
-    <Section title="Документы" className="p-blocks">
+    <Section as={Stack} gap={5} className="p-blocks">
+      <Heading>Документы</Heading>
       <SearchField label="Поиск по документам" placeholder="Название документа" value={q} onChange={setQ} />
       {found.length ? (
         <List label="Найдено" rows={found} getKey={(r) => r.id} renderRow={(r) => r.name} />
       ) : (
-        <StateView kind="ничего не найдено" title={`По запросу «${q}» ничего`} action={<Button onClick={() => setQ('')}>Сбросить поиск</Button>} />
+        <StateView kind="ничего не найдено" title={`По запросу «${q}» ничего`} action={<Button kind="secondary" onClick={() => setQ('')}>
+              Сбросить поиск
+            </Button>} />
       )}
     </Section>
   )

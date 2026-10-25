@@ -2,7 +2,7 @@
 
 Carbon: Loading · Источник: carbon-website src/pages/patterns/loading-pattern/index.mdx @ 5e9cd1d · Перевод с английского, Apache-2.0
 
-Компоненты примера: `ActionArea`, `InlineLoading`, `Loading`, `Section`, `Skeleton`, `Stack`
+Компоненты примера: `Button`, `ButtonSet`, `Heading`, `InlineLoading`, `Section`, `SkeletonText`, `Stack`
 
 Паттерны загрузки используют, когда сведения долго обрабатываются и появляются на экране не сразу.
 

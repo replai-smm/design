@@ -2,7 +2,7 @@
 
 Carbon: Status indicators · Источник: carbon-website src/pages/patterns/status-indicator-pattern/index.mdx @ 5e9cd1d · Перевод с английского, Apache-2.0
 
-Компоненты примера: `CountBadge`, `Icon`, `Inline`, `Section`, `Stack`, `StatusBadge`
+Компоненты примера: `CountBadge`, `Heading`, `IconIndicator`, `Inline`, `Section`, `Stack`, `Tag`
 
 Индикаторы статуса — важный способ сообщить человеку об уровне важности. Разные фигуры и цвета помогают человеку быстро оценить и распознать статус и правильно отреагировать.
 

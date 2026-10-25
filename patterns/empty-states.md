@@ -2,7 +2,7 @@
 
 Carbon: Empty states · Источник: carbon-website src/pages/patterns/empty-states-pattern/index.mdx @ 5e9cd1d · Перевод с английского, Apache-2.0
 
-Компоненты примера: `ActionArea`, `Button`, `Stack`, `StateView`
+Компоненты примера: `Button`, `Stack`, `StateView`
 
 Пустые состояния — это моменты в приложении, когда человеку нечего показать: данных нет.
 

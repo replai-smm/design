@@ -2,17 +2,28 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import md from '../../../patterns/notifications.md?raw'
 import { Button } from '../components/Button'
 import { Notification } from '../components/Notification'
+import { Heading } from '../components/Heading'
 import { Section, Stack } from '../components/layout'
 import { pattern } from './story'
 
 function Example() {
   return (
-    <Stack gap="groups" className="p-blocks">
+    <Stack gap={6} className="p-blocks">
       <Notification tone="опасно" scope="page" title="Сервис оплаты не отвечает">
         Счета не уходят с 14:20. Мы уже чиним.
       </Notification>
-      <Section title="Файлы проекта">
-        <Notification tone="внимание" scope="list" title="Два файла не загрузились" action={<Button variant="ghost" dense>Повторить</Button>}>
+      <Section as={Stack} gap={5}>
+        <Heading>Файлы проекта</Heading>
+        <Notification
+          tone="внимание"
+          scope="list"
+          title="Два файла не загрузились"
+          action={
+            <Button kind="ghost" size="sm">
+              Повторить
+            </Button>
+          }
+        >
           Остальные файлы на месте.
         </Notification>
       </Section>

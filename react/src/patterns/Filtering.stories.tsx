@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import md from '../../../patterns/filtering.md?raw'
-import { DataTable, type Column } from '../components/Collection'
+import { DataTable, type DataTableColumn } from '../components/Collection'
 import { FilterBar, type FilterValue } from '../components/FilterBar'
-import { Section } from '../components/layout'
+import { Heading } from '../components/Heading'
+import { Section, Stack } from '../components/layout'
 import type { DataState } from '../lib/vocab'
 import { pattern } from './story'
 
@@ -20,7 +21,7 @@ const ORDERS: Order[] = [
   { id: '1044', item: 'Полка', status: 'отменён', city: 'Омск' },
 ]
 const many = Array.from({ length: 120 }, (_, i) => ({ ...ORDERS[i % 4], id: String(2000 + i) }))
-const columns: Column<Order>[] = [
+const columns: DataTableColumn<Order>[] = [
   { key: 'id', header: 'Заказ', cell: (r) => `№ ${r.id}`, face: true },
   { key: 'item', header: 'Товар', cell: (r) => r.item, face: true, grow: 2 },
   { key: 'status', header: 'Статус', cell: (r) => r.status },
@@ -32,7 +33,8 @@ function Example({ state = 'ready', rows = ORDERS }: { state?: DataState; rows?:
   const [filter, setFilter] = useState<FilterValue>({})
   const shown = rows.filter((r) => (!filter.status || r.status === filter.status) && (!filter.city || r.city === filter.city))
   return (
-    <Section title="Заказы" className="p-blocks">
+    <Section as={Stack} gap={5} className="p-blocks">
+      <Heading>Заказы</Heading>
       <FilterBar
         filters={[
           { key: 'status', label: 'Статус', options: [{ value: 'в пути', label: 'в пути' }, { value: 'доставлен', label: 'доставлен' }, { value: 'отменён', label: 'отменён' }] },

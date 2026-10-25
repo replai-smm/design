@@ -1,136 +1,276 @@
 /**
- * Элементы и правила API: одна главная на область и поверхность (П5), опасное не рядом (П10), в строке — только ghost,
- * закрытый список статусов и словарь тонов, счётчик, шаги, шкала, ход в строке, разница, график, значок.
+ * Элементы и правила API: одна главная на поверхность (П5), опасное не рядом с главной (П10), в строке — только ghost
+ * (проверка в разработке, приманка на каждое), виды и размеры Carbon, метка и индикатор, счётчик, шаги, шкала, ход в
+ * строке, подсказка, справка, раскрытие, скелет, разница, график, значок.
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
-import { Accordion, ActionArea, BottomBar, Button, Chart, chartHasData, CountBadge, countText, DataTable, Delta, deltaText, Dialog, Icon, InlineLoading, Meter, meterTone, niceMax, Notification, Page, PageHeader, StatusBadge, Steps, stepProgress, tickIndexes, ticksOf } from '../index'
-import { STATUS_IDS, TONE, TONE_ORDER, statusOf, toneOf } from '../lib/vocab'
+import { render, screen, fireEvent, act, waitFor } from '@testing-library/react'
+import {
+  Accordion,
+  AccordionItem,
+  Button,
+  ButtonSet,
+  BottomBar,
+  Chart,
+  chartHasData,
+  Column,
+  CountBadge,
+  countText,
+  DataTable,
+  Delta,
+  deltaText,
+  Dialog,
+  DismissibleTag,
+  Grid,
+  Heading,
+  Icon,
+  IconButton,
+  IconIndicator,
+  InlineLoading,
+  Link,
+  Meter,
+  meterTone,
+  niceMax,
+  Notification,
+  Page,
+  PageHeader,
+  ProgressIndicator,
+  ProgressStep,
+  Section,
+  SkeletonPlaceholder,
+  SkeletonText,
+  Stack,
+  Tag,
+  tickIndexes,
+  ticksOf,
+  Toggletip,
+  ToggletipButton,
+  ToggletipContent,
+  Tooltip,
+} from '../index'
+import { ICON_INDICATOR, ICON_INDICATOR_KINDS, TAG_TYPES, TONE_ORDER } from '../lib/vocab'
+import { Add, Close } from '../lib/icons.gen'
 import { projects, type ProjectRow } from '../stories/fixtures'
-import statusesJson from '../../../statuses.json'
 
 const quiet = () => vi.spyOn(console, 'error').mockImplementation(() => {})
 afterEach(() => vi.restoreAllMocks())
 
-describe('кнопки: одна главная (П5), опасное не рядом (П10)', () => {
-  it('у Button нет главного вида — главная только через ActionArea, она — инверсия', () => {
-    // @ts-expect-error — главного вида у Button нет в типе
-    const bad = <Button variant="primary">x</Button>
-    expect(bad).toBeTruthy()
-    render(<ActionArea primary={{ label: 'Сохранить' }} />)
+describe('кнопки: одна главная (П5), опасное не рядом (П10), в строке — ghost', () => {
+  it('kind по умолчанию — primary, как у Carbon: инверсия', () => {
+    render(<Button>Сохранить</Button>)
     const b = screen.getByRole('button', { name: 'Сохранить' })
-    expect(b.dataset.variant).toBe('primary')
+    expect(b.dataset.kind).toBe('primary')
     expect(b.className).toContain('bg-inverse')
   })
 
-  it('две главные на одной странице — ошибка; окно — своя поверхность', () => {
+  it('приманка: вторая kind="primary" на странице — ошибка; окно — своя поверхность', () => {
     quiet()
     expect(() =>
       render(
         <Page header={<PageHeader title="Т" />}>
-          <ActionArea primary={{ label: 'Первая' }} />
-          <ActionArea primary={{ label: 'Вторая' }} />
+          <Button>Первая</Button>
+          <Button>Вторая</Button>
         </Page>,
       ),
     ).toThrow(/вторая главная кнопка/)
     render(
       <Page header={<PageHeader title="Т" />}>
-        <ActionArea primary={{ label: 'Главная страницы' }} />
-        <Dialog open title="Окно" actions={<ActionArea primary={{ label: 'Главная окна' }} />} />
+        <Button>Главная страницы</Button>
+        <Button kind="secondary">Тихая</Button>
+        <Dialog
+          open
+          title="Окно"
+          actions={
+            <ButtonSet>
+              <Button>Главная окна</Button>
+            </ButtonSet>
+          }
+        />
       </Page>,
     )
-    expect(document.querySelectorAll('[data-variant=primary]')).toHaveLength(2)
+    expect(document.querySelectorAll('[data-kind=primary]')).toHaveLength(2)
   })
 
-  it('область в области — ошибка; опасное рядом с главной — ошибка', () => {
+  it('приманка: kind="danger" в одном ButtonSet с primary — ошибка; любой опасный вид — тоже; без главной — можно', () => {
     quiet()
-    expect(() => render(<ActionArea primary={{ label: 'А' }}><ActionArea primary={{ label: 'Б' }} /></ActionArea>)).toThrow(/внутри другой области/)
-    expect(() => render(<ActionArea primary={{ label: 'Сохранить' }}><Button tone="опасно">Удалить</Button></ActionArea>)).toThrow(/опасное/)
+    for (const kind of ['danger', 'danger--tertiary', 'danger--ghost'] as const)
+      expect(
+        () =>
+          render(
+            <ButtonSet>
+              <Button kind={kind}>Удалить</Button>
+              <Button>Сохранить</Button>
+            </ButtonSet>,
+          ),
+        kind,
+      ).toThrow(/опасное действие рядом с главным/)
+    expect(() =>
+      render(
+        <ButtonSet>
+          <Button kind="secondary">Отмена</Button>
+          <Button kind="danger">Удалить</Button>
+        </ButtonSet>,
+      ),
+    ).not.toThrow()
   })
 
-  it('в строке: область — ошибка, рамочная и опасная — ошибка, ghost — можно', () => {
+  it('приманка: две главные в одном наборе и набор в наборе — ошибка', () => {
+    quiet()
+    expect(() =>
+      render(
+        <ButtonSet>
+          <Button>А</Button>
+          <Button>Б</Button>
+        </ButtonSet>,
+      ),
+    ).toThrow(/две главные/)
+    expect(() =>
+      render(
+        <ButtonSet>
+          <ButtonSet />
+        </ButtonSet>,
+      ),
+    ).toThrow(/внутри другого набора/)
+  })
+
+  it('приманка: в строке списка набор — ошибка, любой вид кроме ghost — ошибка, ghost — можно', () => {
     quiet()
     const t = (action: React.ReactNode) => render(<DataTable<ProjectRow> label="т" rows={projects.slice(0, 1)} columns={[{ key: 'n', header: 'Н', cell: (r) => r.name, face: true }]} getKey={(r) => r.id} rowAction={() => action} />)
-    expect(() => t(<ActionArea primary={{ label: 'x' }} />)).toThrow(/в строке списка нет области/)
-    expect(() => t(<Button>x</Button>)).toThrow(/только ghost/)
-    expect(() => t(<Button variant="ghost" tone="опасно">x</Button>)).toThrow(/только ghost/)
-    expect(() => t(<Button variant="ghost">Починить</Button>)).not.toThrow()
+    expect(() => t(<ButtonSet />)).toThrow(/в строке списка нет набора/)
+    expect(() => t(<Button>x</Button>)).toThrow(/только kind="ghost"/)
+    expect(() => t(<Button kind="secondary">x</Button>)).toThrow(/только kind="ghost"/)
+    expect(() => t(<Button kind="danger--ghost">x</Button>)).toThrow(/только kind="ghost"/)
+    expect(() =>
+      t(
+        <IconButton kind="secondary" label="Убрать">
+          <Close />
+        </IconButton>,
+      ),
+    ).toThrow(/только kind="ghost"/)
+    expect(() => t(<Button kind="ghost">Починить</Button>)).not.toThrow()
   })
 
-  it('rule → data-rule, loading → aria-busy и disabled; кнопка-значок без подписи — ошибка', () => {
-    render(<ActionArea primary={{ label: 'Сохранить', rule: 'R-12', loading: true }} />)
-    const b = screen.getByRole('button', { name: 'Сохранить' })
-    expect(b.dataset.rule).toBe('R-12')
-    expect(b.getAttribute('aria-busy')).toBe('true')
-    expect((b as HTMLButtonElement).disabled).toBe(true)
-    quiet()
-    expect(() => render(<Button icon="close" />)).toThrow(/aria-label/)
-    render(<Button icon="close" aria-label="закрыть" />)
-    expect(screen.getByRole('button', { name: 'закрыть' }).querySelector('svg[data-icon=close]')).toBeTruthy()
-  })
-
-  it('плотность: обычная 48/40, dense — 32', () => {
+  it('виды Carbon: danger — заливка тона, danger--tertiary — рамка, tertiary — рамка цвета главной; чужой вид — ошибка', () => {
     render(
       <>
-        <Button>А</Button>
-        <Button dense>Б</Button>
+        <Button kind="danger">А</Button>
+        <Button kind="danger--tertiary">Б</Button>
+        <Button kind="tertiary">В</Button>
+      </>,
+    )
+    expect(screen.getByRole('button', { name: 'А' }).className).toContain('bg-danger')
+    expect(screen.getByRole('button', { name: 'Б' }).className).toContain('border-danger')
+    expect(screen.getByRole('button', { name: 'В' }).className).toContain('border-inverse')
+    quiet()
+    // @ts-expect-error — вида «warning» у Carbon нет
+    expect(() => render(<Button kind="warning">x</Button>)).toThrow(/вида кнопки «warning» нет/)
+  })
+
+  it('размер: без size — 48/40, sm 32, md 40, lg 48; xs — ошибка', () => {
+    render(
+      <>
+        <Button kind="secondary">А</Button>
+        <Button kind="secondary" size="sm">
+          Б
+        </Button>
+        <Button kind="secondary" size="lg">
+          В
+        </Button>
       </>,
     )
     expect(screen.getByRole('button', { name: 'А' }).className).toContain('min-h-touch md:min-h-control')
     expect(screen.getByRole('button', { name: 'Б' }).className).toContain('min-h-dense')
+    expect(screen.getByRole('button', { name: 'В' }).className).toContain('min-h-touch')
+    quiet()
+    // @ts-expect-error — xs нет: меньше цели пальца
+    expect(() => render(<Button size="xs">x</Button>)).toThrow(/размера «xs» нет/)
+  })
+
+  it('renderIcon — компонент значка после слова; без слова — IconButton, у Button — ошибка; href — ссылка видом кнопки', () => {
+    render(
+      <Button kind="ghost" renderIcon={Add}>
+        Добавить
+      </Button>,
+    )
+    const b = screen.getByRole('button', { name: 'Добавить' })
+    expect(b.lastElementChild?.getAttribute('data-icon')).toBe('add')
+    quiet()
+    expect(() => render(<Button kind="ghost" renderIcon={Add} />)).toThrow(/IconButton/)
+    render(
+      <Button kind="secondary" href="#x">
+        Перейти
+      </Button>,
+    )
+    expect(screen.getByRole('link', { name: 'Перейти' }).getAttribute('href')).toBe('#x')
+  })
+
+  it('IconButton: подпись — имя для читалки и подсказка; без подписи — ошибка', async () => {
+    render(
+      <IconButton kind="ghost" label="Закрыть">
+        <Close />
+      </IconButton>,
+    )
+    const b = screen.getByRole('button', { name: 'Закрыть' })
+    expect(b.className).toContain('w-touch md:w-control')
+    act(() => b.focus())
+    await waitFor(() => expect(screen.getByRole('tooltip').textContent).toBe('Закрыть'))
+    quiet()
+    expect(() =>
+      render(
+        // @ts-expect-error — label обязателен
+        <IconButton kind="ghost">
+          <Close />
+        </IconButton>,
+      ),
+    ).toThrow(/нет подписи label/)
   })
 })
 
-describe('метка статуса и словарь тонов', () => {
-  it('список статусов — ровно statuses.json; неизвестный — ошибка', () => {
-    expect([...STATUS_IDS]).toEqual(statusesJson.statuses.map((s) => s.id))
-    quiet()
-    expect(() => render(<StatusBadge status={'work.unknown' as never} />)).toThrow(/закрытом списке/)
-  })
-
-  it('слово закона и знак тона; подложка — только у «опасно» и «внимание»', () => {
-    for (const id of STATUS_IDS) {
-      const { container, unmount } = render(<StatusBadge status={id} />)
-      const el = container.querySelector('[data-slot=status-badge]')!
-      expect(el.textContent).toBe(statusOf(id).say)
-      expect(el.querySelector('svg[data-icon^=tone-]')).toBeTruthy()
-      const look = TONE[toneOf(id)]
-      if (look.bg) expect(el.className).toContain(look.bg)
-      else expect(el.className).not.toMatch(/\bbg-/)
+describe('метка и индикатор (Carbon: Tag, IconIndicator)', () => {
+  it('Tag: цвет — пара роли, проверенная контрастом; цвета без роли — ошибка', () => {
+    for (const type of TAG_TYPES) {
+      const { container, unmount } = render(<Tag type={type}>слово</Tag>)
+      const el = container.querySelector('[data-slot=tag]')!
+      expect(el.getAttribute('data-type')).toBe(type)
+      expect(el.className).toContain('rounded-full')
       unmount()
     }
-  })
-
-  it('«работает» — знак «хорошо» без подложки (норма не кричит)', () => {
-    const { container } = render(<StatusBadge status="work.working" />)
-    const el = container.querySelector('[data-slot=status-badge]')!
-    expect(el.getAttribute('data-tone')).toBe('success')
-    expect(el.className).not.toContain('rounded-full')
-  })
-
-  it('тон со своим словом; без слова и чужой тон — ошибка', () => {
-    render(<StatusBadge tone="внимание" label="ниже среднего" />)
-    expect(screen.getByText('ниже среднего').closest('[data-slot=status-badge]')?.getAttribute('data-tone')).toBe('warning')
+    const { container } = render(<Tag type="red">просрочено</Tag>)
+    expect(container.querySelector('[data-slot=tag]')!.className).toContain('bg-danger-bg text-danger-fg')
     quiet()
-    // @ts-expect-error — у метки тона слово обязательно
-    expect(() => render(<StatusBadge tone="опасно" />)).toThrow(/нет слова/)
-    // @ts-expect-error — тона «синий» нет
-    expect(() => render(<StatusBadge tone="синий" label="x" />)).toThrow(/тона «синий» нет/)
+    // @ts-expect-error — голубого цвета в ролях нет
+    expect(() => render(<Tag type="cyan">x</Tag>)).toThrow(/цвета метки «cyan» нет/)
   })
 
-  it('«решение» — фиолетовый тон с подложкой: метка, счётчик со знаком, значок, уведомление; в порядке внимания — сразу за «опасно»', () => {
+  it('DismissibleTag: кнопка «убрать» с подписью; нажатие — onClose', () => {
+    const onClose = vi.fn()
+    render(<DismissibleTag text="Казань" onClose={onClose} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Убрать: Казань' }))
+    expect(onClose).toHaveBeenCalled()
+  })
+
+  it('IconIndicator: у каждого вида свой знак и роль цвета; слово обязательно', () => {
+    for (const kind of ICON_INDICATOR_KINDS) {
+      const { container, unmount } = render(<IconIndicator kind={kind} label="слово" />)
+      const svg = container.querySelector('svg')!
+      expect(svg.getAttribute('data-icon'), kind).toBe(ICON_INDICATOR[kind].icon)
+      expect(svg.getAttribute('class'), kind).toContain(ICON_INDICATOR[kind].mark)
+      expect(container.textContent).toBe('слово')
+      unmount()
+    }
+    expect(new Set(ICON_INDICATOR_KINDS.map((k) => ICON_INDICATOR[k].icon)).size).toBe(ICON_INDICATOR_KINDS.length)
+    quiet()
+    expect(() => render(<IconIndicator kind="failed" label="" />)).toThrow(/нет слова/)
+  })
+
+  it('«решение» — фиолетовый тон с подложкой: счётчик со знаком, значок, уведомление; в порядке внимания — сразу за «опасно»', () => {
     const { container } = render(
       <>
-        <StatusBadge tone="решение" label="ждёт решения" />
         <CountBadge count={2} tone="решение" />
         <Icon tone="решение" />
         <Notification tone="решение" title="Нужно решение" />
       </>,
     )
-    const badge = container.querySelector('[data-slot=status-badge]')!
-    expect(badge.getAttribute('data-tone')).toBe('decision')
-    expect(badge.className).toContain('bg-decision-bg')
-    expect(badge.className).toContain('text-decision-fg')
     expect(container.querySelector('[data-slot=count-badge] svg[data-icon=tone-decision]')).toBeTruthy()
     expect(container.querySelector(':scope > svg[data-icon=tone-decision]')?.getAttribute('class')).toContain('text-decision')
     const note = container.querySelector('[data-slot=notification]')!
@@ -175,41 +315,68 @@ describe('счётчик', () => {
   })
 })
 
-describe('ход работы — один словарь', () => {
-  it('шаги: done · running · idle · error; текущий — aria-current=step; телефон — «Шаг 2 из 4 · Куда»', () => {
-    expect([0, 1, 2, 3].map((i) => stepProgress(i, 2))).toEqual(['done', 'done', 'running', 'idle'])
-    expect(stepProgress(3, 3, 3)).toBe('error')
-    render(<Steps label="Шаги публикации" steps={['Текст', 'Куда', 'Предпросмотр', 'Итог']} current={1} />)
-    const nav = screen.getByRole('navigation', { name: 'Шаги публикации' })
-    const items = nav.querySelectorAll('[data-slot=step]')
-    expect([...items].map((li) => li.getAttribute('data-progress'))).toEqual(['done', 'running', 'idle', 'idle'])
+describe('ход работы', () => {
+  const steps = (invalidAt?: number) => ['Текст', 'Куда', 'Предпросмотр', 'Итог'].map((l, i) => <ProgressStep key={l} label={l} invalid={i === invalidAt} />)
+
+  it('шаги: пройден · текущий · впереди · ошибка; текущий — aria-current=step; телефон — «Шаг 2 из 4 · Куда»', () => {
+    const { container, rerender } = render(<ProgressIndicator aria-label="Шаги публикации" currentIndex={1}>{steps()}</ProgressIndicator>)
+    const list = screen.getByRole('list', { name: 'Шаги публикации' })
+    const items = list.querySelectorAll('[data-slot=progress-step]')
+    expect([...items].map((li) => li.getAttribute('data-state'))).toEqual(['complete', 'current', 'incomplete', 'incomplete'])
     expect(items[1].getAttribute('aria-current')).toBe('step')
     expect(items[0].textContent).toContain('пройден')
-    expect(nav.querySelector('[data-slot=steps-compact]')!.textContent).toBe('Шаг 2 из 4 · Куда')
+    expect(container.querySelector('[data-slot=progress-compact]')!.textContent).toBe('Шаг 2 из 4 · Куда')
+    rerender(<ProgressIndicator aria-label="Шаги публикации" currentIndex={3}>{steps(3)}</ProgressIndicator>)
+    expect(list.querySelectorAll('[data-slot=progress-step]')[3].getAttribute('data-state')).toBe('invalid')
   })
 
-  it('назад — только к пройденным; меньше двух шагов — ошибка', () => {
+  it('onChange — нажимаются шаги кроме текущего и выключенных (как у Carbon); меньше трёх шагов — ошибка', () => {
     const seen: number[] = []
-    render(<Steps label="Шаги" steps={['А', 'Б', 'В']} current={2} onStepClick={(i) => seen.push(i)} />)
+    render(
+      <ProgressIndicator aria-label="Шаги" currentIndex={1} onChange={(i) => seen.push(i)}>
+        <ProgressStep label="А" />
+        <ProgressStep label="Б" />
+        <ProgressStep label="В" />
+        <ProgressStep label="Г" disabled />
+      </ProgressIndicator>,
+    )
     const btns = screen.getAllByRole('button')
     expect(btns).toHaveLength(2)
-    fireEvent.click(btns[0])
-    expect(seen).toEqual([0])
+    fireEvent.click(btns[1])
+    expect(seen).toEqual([2])
     quiet()
-    expect(() => render(<Steps label="Шаги" steps={['А', 'Б']} current={0} />)).toThrow(/шагов меньше трёх/)
+    expect(() =>
+      render(
+        <ProgressIndicator aria-label="Шаги">
+          <ProgressStep label="А" />
+          <ProgressStep label="Б" />
+        </ProgressIndicator>,
+      ),
+    ).toThrow(/шагов меньше трёх/)
   })
 
-  it('ход в строке: идёт — role=status со словом; ошибка — слово цвета «опасно»', () => {
-    const { container, rerender } = render(<InlineLoading label="работает" />)
-    expect(screen.getByRole('status').textContent).toContain('работает')
+  it('ход в строке: active — дуга и aria-live, error — слово цвета «опасно», finished — onSuccess через successDelay', () => {
+    vi.useFakeTimers()
+    const done = vi.fn()
+    const { container, rerender } = render(<InlineLoading description="работает" />)
+    const el = container.querySelector('[data-slot=inline-loading]')!
+    expect(el.getAttribute('aria-live')).toBe('assertive')
     expect(container.querySelector('[data-slot=spinner]')).toBeTruthy()
-    rerender(<InlineLoading label="не вышло" progress="error" />)
+    rerender(<InlineLoading description="не вышло" status="error" />)
     expect(screen.getByText('не вышло').className).toContain('text-danger-fg')
+    rerender(<InlineLoading description="готово" status="finished" onSuccess={done} successDelay={500} />)
+    act(() => vi.advanceTimersByTime(499))
+    expect(done).not.toHaveBeenCalled()
+    act(() => vi.advanceTimersByTime(1))
+    expect(done).toHaveBeenCalled()
+    rerender(<InlineLoading description="ждёт" status="inactive" />)
+    expect(el.getAttribute('aria-live')).toBe('off')
+    vi.useRealTimers()
   })
 
   it('шкала: ниже 80 % без тона, с 80 % — внимание, с 95 % — опасно; role=meter со словом', () => {
     expect([meterTone(0.5), meterTone(0.8), meterTone(0.95)]).toEqual([null, 'внимание', 'опасно'])
-    render(<Meter label="5 ч" value={97} valueText="97 % · сброс 18:40" />)
+    render(<Meter label="5 ч" value={97} helperText="97 % · сброс 18:40" />)
     const m = screen.getByRole('meter', { name: '5 ч' })
     expect(m.getAttribute('aria-valuetext')).toBe('97 % · сброс 18:40')
     expect(document.querySelector('[data-slot=meter] svg[data-icon=tone-danger]')).toBeTruthy()
@@ -260,13 +427,70 @@ describe('разница и график', () => {
   })
 })
 
-describe('раскладка и раскрытие (1.3)', () => {
-  it('шапка: строка «о чём экран» под заголовком', () => {
-    render(<PageHeader title="Условия оплаты" description="Когда и как списываются деньги." />)
-    expect(screen.getByRole('heading', { level: 1, name: 'Условия оплаты' }).nextSibling?.textContent).toBe('Когда и как списываются деньги.')
+describe('раскладка, заголовки, подсказка, справка, раскрытие, скелет', () => {
+  it('Stack: шаг шкалы → роль отступа, без gap — без отступа; чужой шаг — ошибка', () => {
+    const { container } = render(
+      <>
+        <Stack gap={5} />
+        <Stack />
+        <Stack orientation="horizontal" gap={3} />
+      </>,
+    )
+    const [a, b, c] = container.querySelectorAll('[data-slot=stack]')
+    expect(a.className).toContain('gap-blocks')
+    expect(b.className).not.toMatch(/\bgap-/)
+    expect(c.className).toContain('grid-flow-col')
+    quiet()
+    // @ts-expect-error — шага 9 нет
+    expect(() => render(<Stack gap={9} />)).toThrow(/шага отступа 9 нет/)
   })
+
+  it('Grid + Column: 4 · 8 · 16 колонок; ширина числом и долей; без ширины — во всю строку', () => {
+    const { container } = render(
+      <Grid>
+        <Column />
+        <Column sm={2} md={4} lg={8} />
+        <Column span="25%" />
+      </Grid>,
+    )
+    expect(container.querySelector('[data-slot=grid]')!.className).toContain('grid-cols-4 md:grid-cols-8 lg:grid-cols-16')
+    const [a, b, c] = container.querySelectorAll('[data-slot=column]')
+    expect(a.className).toContain('col-span-full')
+    expect(b.className).toContain('col-span-2 md:col-span-4 lg:col-span-8')
+    expect(c.className).toContain('col-span-1 md:col-span-2 lg:col-span-4')
+    quiet()
+    expect(() => render(<Column lg={17} />)).toThrow(/от 1 до 16/)
+  })
+
+  it('Section + Heading: уровень из вложенности (h1 → h2 → h3), роль текста по уровню', () => {
+    render(
+      <>
+        <Heading>А</Heading>
+        <Section>
+          <Heading>Б</Heading>
+          <Section>
+            <Heading>В</Heading>
+          </Section>
+        </Section>
+        <Section level={4}>
+          <Heading>Г</Heading>
+        </Section>
+      </>,
+    )
+    expect(screen.getByRole('heading', { level: 1, name: 'А' }).className).toContain('text-page')
+    expect(screen.getByRole('heading', { level: 2, name: 'Б' }).className).toContain('text-title')
+    expect(screen.getByRole('heading', { level: 3, name: 'В' }).className).toContain('text-heading')
+    expect(screen.getByRole('heading', { level: 4, name: 'Г' })).toBeTruthy()
+  })
+
+  it('шапка: subtitle — строка «о чём экран» под заголовком, pageActions — справа', () => {
+    render(<PageHeader title="Условия оплаты" subtitle="Когда и как списываются деньги." pageActions={<Button kind="ghost">Ещё</Button>} />)
+    expect(screen.getByRole('heading', { level: 1, name: 'Условия оплаты' }).nextSibling?.textContent).toBe('Когда и как списываются деньги.')
+    expect(screen.getByRole('button', { name: 'Ещё' })).toBeTruthy()
+  })
+
   it('липкая полоса низа — одна на страницу: вторая — ошибка в разработке', () => {
-    vi.spyOn(console, 'error').mockImplementation(() => {})
+    quiet()
     expect(() =>
       render(
         <Page header={<PageHeader title="x" />}>
@@ -279,10 +503,17 @@ describe('раскладка и раскрытие (1.3)', () => {
         </Page>,
       ),
     ).toThrow(/вторая липкая полоса/)
-    expect(() => render(<Page header={<PageHeader title="y" />}><BottomBar /></Page>)).not.toThrow()
+    expect(() =>
+      render(
+        <Page header={<PageHeader title="y" />}>
+          <BottomBar />
+        </Page>,
+      ),
+    ).not.toThrow()
   })
+
   it('липкая полоса — последним блоком страницы: блок под ней — ошибка в разработке', () => {
-    vi.spyOn(console, 'error').mockImplementation(() => {})
+    quiet()
     expect(() =>
       render(
         <Page header={<PageHeader title="z" />}>
@@ -292,8 +523,45 @@ describe('раскладка и раскрытие (1.3)', () => {
       ),
     ).toThrow(/последним блоком страницы/)
   })
-  it('раскрытие: кнопка во всю строку, aria-expanded и aria-controls, закрытое — inert', () => {
-    render(<Accordion title="Как это работает">Уведомления приходят за минуту.</Accordion>)
+
+  it('Tooltip: label — имя элемента (aria-labelledby), description — описание (aria-describedby)', () => {
+    render(
+      <>
+        <Tooltip label="Прикрепить файл">
+          <button type="button">+</button>
+        </Tooltip>
+        <Tooltip description="Списано за 7 дней">
+          <button type="button">Расход</button>
+        </Tooltip>
+      </>,
+    )
+    expect(screen.getByRole('button', { name: 'Прикрепить файл' })).toBeTruthy()
+    const b = screen.getByRole('button', { name: 'Расход' })
+    expect(document.getElementById(b.getAttribute('aria-describedby')!)?.textContent).toBe('Списано за 7 дней')
+  })
+
+  it('Toggletip: кнопка «i» с подписью открывает содержимое по нажатию, его имя — подпись кнопки', () => {
+    render(
+      <Toggletip>
+        <ToggletipButton label="Подробнее: срок" />
+        <ToggletipContent>Сколько дней хранятся записи.</ToggletipContent>
+      </Toggletip>,
+    )
+    const b = screen.getByRole('button', { name: 'Подробнее: срок' })
+    expect(b.querySelector('svg[data-icon=information]')).toBeTruthy()
+    fireEvent.click(b)
+    expect(screen.getByRole('dialog', { name: 'Подробнее: срок' }).textContent).toBe('Сколько дней хранятся записи.')
+  })
+
+  it('раскрытие: кнопка во всю строку, aria-expanded и aria-controls, закрытое — inert; onHeadingClick; open меняет состояние', () => {
+    const onHeadingClick = vi.fn()
+    const { rerender } = render(
+      <Accordion>
+        <AccordionItem title="Как это работает" onHeadingClick={onHeadingClick}>
+          Уведомления приходят за минуту.
+        </AccordionItem>
+      </Accordion>,
+    )
     const btn = screen.getByRole('button', { name: 'Как это работает' })
     const panel = document.getElementById(btn.getAttribute('aria-controls')!)!
     expect(btn.getAttribute('aria-expanded')).toBe('false')
@@ -302,5 +570,42 @@ describe('раскладка и раскрытие (1.3)', () => {
     expect(btn.getAttribute('aria-expanded')).toBe('true')
     expect(panel.hasAttribute('inert')).toBe(false)
     expect(panel.textContent).toBe('Уведомления приходят за минуту.')
+    expect(onHeadingClick).toHaveBeenCalledWith(expect.objectContaining({ isOpen: true }))
+    rerender(
+      <Accordion size="sm">
+        <AccordionItem title="Как это работает" open={false}>
+          Уведомления приходят за минуту.
+        </AccordionItem>
+      </Accordion>,
+    )
+    expect(btn.className).toContain('min-h-dense')
+  })
+
+  it('скелет: строка ширины доли, абзац из строк, место блока; скрыт от читалки', () => {
+    const { container } = render(
+      <>
+        <SkeletonText width="50%" />
+        <SkeletonText paragraph lineCount={4} />
+        <SkeletonPlaceholder />
+      </>,
+    )
+    const [line, para] = container.querySelectorAll('[data-slot=skeleton-text]')
+    expect((line as HTMLElement).style.width).toBe('50%')
+    expect(para.children).toHaveLength(4)
+    expect(container.querySelector('[data-slot=skeleton-placeholder]')!.getAttribute('aria-hidden')).toBe('true')
+  })
+
+  it('Link: адрес, синий цвет ссылки; выключенная — без адреса', () => {
+    render(
+      <>
+        <Link href="#a">Раздел</Link>
+        <Link href="#b" disabled>
+          Архив
+        </Link>
+      </>,
+    )
+    const a = screen.getByRole('link', { name: 'Раздел' })
+    expect(a.className).toContain('text-accent')
+    expect(screen.getByText('Архив').hasAttribute('href')).toBe(false)
   })
 })

@@ -5,7 +5,7 @@ import { ordersPerDay, visits } from '../stories/fixtures'
 const days = visits.map((_, i) => `${i + 1}.10`)
 
 const meta = {
-  title: 'Компоненты/Элементы/График',
+  title: 'Компоненты/Элементы/Chart',
   component: Chart,
   parameters: { layout: 'padded' },
   args: {
