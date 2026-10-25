@@ -4,32 +4,61 @@ import md from '../../../patterns/forms.md?raw'
 import { Accordion, AccordionItem } from '../components/Accordion'
 import { Button, ButtonSet } from '../components/Button'
 import { Checkbox } from '../components/Checkbox'
+import { Form } from '../components/Form'
 import { Heading } from '../components/Heading'
 import { Icon } from '../components/Icon'
-import { NumberField } from '../components/NumberField'
-import { Select } from '../components/Select'
-import { TextField } from '../components/TextField'
+import { NumberInput } from '../components/NumberInput'
+import { RadioButton, RadioButtonGroup } from '../components/RadioButton'
+import { Select, SelectItem } from '../components/Select'
+import { TextInput } from '../components/TextInput'
+import { Toggle } from '../components/Toggle'
+import { Toggletip, ToggletipButton, ToggletipContent, ToggletipLabel } from '../components/Toggletip'
 import { BottomBar, Page, PageHeader, Section, Stack } from '../components/layout'
 import { pattern } from './story'
 
 /** Настройки уведомлений: группы полей, поле настройки строкой, пустое — пустое, подсказка под полем, одна полоса сохранения. */
 function Settings({ error }: { error?: string }) {
-  const [days, setDays] = useState<number | null>(3)
-  const [limit, setLimit] = useState<number | null>(null)
-  const changes = (days !== 2 ? 1 : 0) + (limit !== null ? 1 : 0)
+  const [days, setDays] = useState<number | string>(3)
+  const [limit, setLimit] = useState<number | string>('')
+  const changes = (days !== 2 ? 1 : 0) + (limit !== '' ? 1 : 0)
   return (
     <Page header={<PageHeader title="Уведомления" subtitle="Когда и как напоминать о сроках задач." />}>
-      <Section as={Stack} gap={5}>
-        <Heading>Почта</Heading>
-        <TextField label="Адрес для уведомлений" type="email" defaultValue="anna@example.com" helperText="Сюда придут напоминания и отчёты." />
-        <Checkbox label="Присылать сводку по понедельникам" defaultChecked help="Сводка — список задач со сроком на этой неделе." />
-      </Section>
-      <Section as={Stack} gap={5}>
-        <Heading>Напоминания</Heading>
-        <NumberField inline label="Напоминать о сроке за" unit="дня" min={0} value={days} onChange={setDays} />
-        <NumberField inline label="Не больше писем в день" unit="писем" helperText="Например, 10. Пусто — без предела." min={1} value={limit} onChange={setLimit} />
-        <Select inline label="Язык писем" defaultValue="ru" options={[{ value: 'ru', label: 'Русский' }, { value: 'en', label: 'English' }]} />
-      </Section>
+      <Form id="notify" aria-label="Уведомления" onSubmit={(e) => e.preventDefault()}>
+        <Stack gap={6}>
+          <Section as={Stack} gap={5}>
+            <Heading>Почта</Heading>
+            <TextInput id="notify-email" labelText="Адрес для уведомлений" type="email" defaultValue="anna@example.com" helperText="Сюда придут напоминания и отчёты." />
+            <Checkbox
+              id="notify-digest"
+              defaultChecked
+              labelText={
+                <>
+                  <ToggletipLabel>Присылать сводку по понедельникам</ToggletipLabel>
+                  <Toggletip>
+                    <ToggletipButton label="Подробнее: сводка по понедельникам" />
+                    <ToggletipContent>Сводка — список задач со сроком на этой неделе.</ToggletipContent>
+                  </Toggletip>
+                </>
+              }
+            />
+          </Section>
+          <Section as={Stack} gap={5}>
+            <Heading>Напоминания</Heading>
+            <NumberInput id="notify-days" inline label="Напоминать о сроке за" unit="дня" min={0} value={days} onChange={(_, { value }) => setDays(value)} />
+            <NumberInput id="notify-limit" inline label="Не больше писем в день" unit="писем" helperText="Например, 10. Пусто — без предела." min={1} allowEmpty value={limit} onChange={(_, { value }) => setLimit(value)} />
+            <Select id="notify-lang" inline labelText="Язык писем" defaultValue="ru">
+              <SelectItem value="ru" text="Русский" />
+              <SelectItem value="en" text="English" />
+            </Select>
+            <RadioButtonGroup name="notify-time" legendText="Когда присылать" defaultSelected="morning">
+              <RadioButton labelText="Утром" value="morning" />
+              <RadioButton labelText="Днём" value="day" />
+              <RadioButton labelText="Вечером" value="evening" />
+            </RadioButtonGroup>
+            <Toggle id="notify-weekend" labelText="Напоминать в выходные" />
+          </Section>
+        </Stack>
+      </Form>
       <Accordion>
         <AccordionItem title="Как работают напоминания">Письмо уходит в 9:00 по вашему поясу. Задача без срока не напоминает о себе.</AccordionItem>
       </Accordion>
@@ -37,7 +66,9 @@ function Settings({ error }: { error?: string }) {
         <BottomBar>
           <ButtonSet aria-label="Сохранение">
             <Button kind="ghost">Отменить</Button>
-            <Button>{error ? 'Повторить' : 'Сохранить'}</Button>
+            <Button type="submit" form="notify">
+              {error ? 'Повторить' : 'Сохранить'}
+            </Button>
           </ButtonSet>
           {error ? (
             <p role="alert" className="m-0 flex min-w-0 items-start gap-items text-body text-danger-fg">

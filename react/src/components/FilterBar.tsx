@@ -2,13 +2,13 @@
  * Фильтры в адресе страницы (`?статус=падает&q=…`): ссылку можно переслать, «назад» возвращает прежний вид.
  * Фильтр — ряд сегментов (тот же ряд, что у вкладок; на узком переносится — видны все варианты), выбранный —
  * «выбрано»; «все» — сброс; `required` — выбор обязателен (режим «30 дней / 90 дней»). Поиск по ключу `q` —
- * `SearchField`. `useUrlFilters` — один на экран.
+ * `Search`. `useUrlFilters` — один на экран.
  */
 import { useCallback, useEffect, useId, useState, type ReactNode } from 'react'
 import { ToggleGroup } from 'radix-ui'
 import { SEGMENT, SEGMENT_ON, SEGMENTS, SEGMENTS_WRAP } from '../lib/anatomy'
 import { cx } from '../lib/cx'
-import { SearchField } from './SearchField'
+import { Search } from './Search'
 
 export interface FilterOption {
   value: string
@@ -71,7 +71,7 @@ export function FilterBar({ filters, value, onChange, search, allLabel = 'все
   const uid = useId().replace(/[^a-zA-Z0-9_-]/g, '')
   return (
     <div data-slot="filter-bar" role="search" className={cx('flex min-w-0 flex-col gap-compact', className)}>
-      {search && <SearchField label={search.label} placeholder={search.placeholder} value={value.q ?? ''} onChange={(q) => onChange({ ...value, q })} />}
+      {search && <Search labelText={search.label} placeholder={search.placeholder} value={value.q ?? ''} onChange={(e) => onChange({ ...value, q: e.target.value })} />}
       {filters.map((f) => (
         <div key={f.key} className="flex min-w-0 flex-col gap-tight md:flex-row md:items-center md:gap-compact">
           <span id={`ds-f-${uid}-${f.key}`} className="text-caption text-fg-muted">

@@ -4,7 +4,7 @@ import { Button, ButtonSet } from './Button'
 import { ConfirmProvider, Dialog, useConfirm } from './Dialog'
 import { InlineLoading } from './InlineLoading'
 import { Notification } from './Notification'
-import { TextField } from './TextField'
+import { TextInput } from './TextInput'
 
 const meta = {
   title: 'Компоненты/Слои/Окно',
@@ -22,7 +22,7 @@ const meta = {
         <Button>Начать</Button>
       </ButtonSet>
     ),
-    children: <TextField label="Папка" defaultValue="~/dev/reports" />,
+    children: <TextInput id="folder" labelText="Папка" defaultValue="~/dev/reports" />,
   },
 } satisfies Meta<typeof Dialog>
 export default meta

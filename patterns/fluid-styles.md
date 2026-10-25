@@ -2,7 +2,7 @@
 
 Carbon: Fluid styles · Источник: carbon-website src/pages/patterns/fluid-styles/index.mdx @ 5e9cd1d · Перевод с английского, Apache-2.0
 
-Компоненты примера: `Select`, `Stack`, `TextField`
+Компоненты примера: `Select`, `SelectItem`, `Stack`, `TextInput`
 
 Текучие версии некоторых привычных компонентов дают другой стиль, который отличает их от стандартных версий.
 

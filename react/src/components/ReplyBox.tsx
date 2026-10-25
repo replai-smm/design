@@ -14,7 +14,7 @@ import { StopFilledAlt } from '../lib/icons.gen'
 import { Button, ButtonSet } from './Button'
 import { Icon } from './Icon'
 import { InlineLoading } from './InlineLoading'
-import { fieldBox } from './TextField'
+import { fieldBox } from './TextInput'
 
 export interface ReplyBoxProps {
   /** Подпись поля для читалки: «Ответ покупателю». */

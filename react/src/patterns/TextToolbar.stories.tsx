@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import md from '../../../patterns/text-toolbar.md?raw'
-import { TextArea } from '../components/TextField'
+import { TextArea } from '../components/TextInput'
 import { Stack } from '../components/layout'
 import { pattern } from './story'
 
@@ -9,7 +9,7 @@ function Example() {
   return (
     <Stack gap={5} className="max-w-window p-blocks">
       <p className="m-0 text-body text-fg-muted">Панели правки текста в ДС пока нет — поле текста без панели.</p>
-      <TextArea label="Описание проекта" defaultValue="Новый сайт компании: каталог, корзина и личный кабинет." />
+      <TextArea labelText="Описание проекта" defaultValue="Новый сайт компании: каталог, корзина и личный кабинет." />
     </Stack>
   )
 }

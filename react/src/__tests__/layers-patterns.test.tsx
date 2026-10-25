@@ -1,7 +1,7 @@
 /** Слои и паттерны: окно и шторка, подтверждение, всплывашка; вкладки, фильтры, три колонки, переписка, поле ответа, текст ответа. */
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
 import { render, screen, fireEvent, within, act, waitFor } from '@testing-library/react'
-import { Button, ButtonSet, ChatThread, ConfirmProvider, Dialog, FilterBar, Prose, ReplyBox, Tabs, TextField, ThreeColumn, Toaster, useConfirm, useToast, useUrlFilters } from '../index'
+import { Button, ButtonSet, ChatThread, ConfirmProvider, Dialog, FilterBar, Prose, ReplyBox, Tabs, TextInput, ThreeColumn, Toaster, useConfirm, useToast, useUrlFilters } from '../index'
 import { chat, chatFailed } from '../stories/fixtures'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
@@ -13,7 +13,7 @@ describe('окно', () => {
     const onOpenChange = vi.fn()
     render(
       <Dialog open title="Новая сессия" onOpenChange={onOpenChange}>
-        <TextField label="Папка" />
+        <TextInput id="folder" labelText="Папка" />
       </Dialog>,
     )
     await waitFor(() => expect(document.activeElement).toBe(screen.getByLabelText('Папка')))

@@ -17,7 +17,7 @@
 | Ход работы | наш словарь `idle` впереди · `running` идёт · `done` готово · `error` ошибка — у отправки сообщения; у пар Carbon — их слова: `InlineLoading status` (`inactive` · `active` · `finished` · `error`), `ProgressStep` (`complete` · `current` · `invalid`) | `vocab.ts` |
 | Текст | 7 ролей: `caption` 12 · `body` 14 · `heading` 14/600 · `reading` 16 · `code` 13 моно · `title` 20 · `page` 28 | `scale.json → text` |
 | Отступ | 6 ролей: `tight` 4 · `items` 8 · `compact` 12 · `blocks` 16 · `groups` 24 · `sections` 32 — в классах (`gap-items`, `p-blocks`); у `Stack` и `Inline` — шаг шкалы Carbon spacing того же размера: `gap={2}` 4 · `3` 8 · `4` 12 · `5` 16 · `6` 24 · `7` 32 | `scale.json → space` |
-| Высота | `icon` 16 · `dense` 32 · `control` 40 · `touch` 48: у кнопок и раскрытия — `size` Carbon: `sm` 32 · `md` 40 · `lg` 48 постоянно; без `size` — 48 на телефоне и 40 на ноутбуке | `scale.json → size` |
+| Высота | `icon` 16 · `dense` 32 · `control` 40 · `touch` 48: у кнопок, полей и раскрытия — `size` Carbon: `sm` 32 · `md` 40 · `lg` 48 постоянно; без `size` — 48 на телефоне и 40 на ноутбуке | `scale.json → size` |
 | Ширина | предел колонки, окна, страницы: `number` 10rem (поле числа) · `rail` 16rem · `hint` · `narrow` · `popup` · `form` · `panel` · `wide` · `window` · `page` 80rem — `max-w-window`, `w-rail`; размеров контейнеров Tailwind (`max-w-md`) нет | `scale.json → measure` |
 | Угол | `control` 4 · `surface` 6 · `full` — только метка, счётчик, аватар, точка | `scale.json → radius` |
 | Глубина | плоско (рамка) · всплывает (`shadow-raised`) · поверх (`shadow-overlay` и затемнение `scrim`) | `scale.json → elevation` |
@@ -40,7 +40,7 @@
 | Основы | роли и шкалы (без компонентов) |
 | Раскладка | Stack, Inline, Grid, Column, Page, PageHeader, Section, SurfaceProvider, BottomBar |
 | Элементы | Icon, Button, ButtonSet, IconButton, Heading, Link, Tag, DismissibleTag, IconIndicator, CountBadge, Avatar, InlineLoading, Meter, ProgressIndicator, ProgressStep, Tooltip, Toggletip, ToggletipLabel, ToggletipButton, ToggletipContent, Accordion, AccordionItem, Delta, SkeletonText, SkeletonPlaceholder, Prose, ProseHtml, Chart |
-| Поля | TextField, TextArea, Select, NumberField, Checkbox, CheckboxGroup, Combobox, FileField, SearchField |
+| Поля | TextInput, PasswordInput, TextArea, NumberInput, Select, SelectItem, SelectItemGroup, Checkbox, CheckboxGroup, RadioButton, RadioButtonGroup, Toggle, ComboBox, FileUploader, FileUploaderItem, Search, Form, FormGroup |
 | Поверхности | Surface, Card, StatTile, Notification, StateView, CodeBlock, ChartFrame |
 | Коллекции | DataTable, List |
 | Слои | Dialog (окно и шторка), ConfirmProvider, Toaster |
@@ -70,6 +70,12 @@ Carbon, которые не нужны, не сделаны; сделанные 
 | `ProgressIndicator` | на телефоне — строка «Шаг 2 из 4 · Куда» вместо ряда шагов; шагов — от трёх (меньше — ошибка в разработке) | ряд шагов не влезает в 390 px |
 | `Tooltip`, `Toggletip` | `align` — стороны Carbon; `autoAlign`, `highContrast`, `dropShadow`, `leaveDelayMs` нет; `ToggletipActions` нет | Radix ставит сам у края экрана; одна тень и одна инверсия |
 | `DismissibleTag` | «убрать» — кнопка с подписью без всплывающей подсказки | метка — элемент, ему подсказка не нужна |
+| Подпись поля со справкой «i» | `Toggletip` кладут в `labelText` (`TextInput`, `Select`, `Checkbox`…) — без предупреждения; Carbon 1.119 в разработке предупреждает «labelText must have no interactive content», в v12 обещает запрет | решение договора: справка — у подписи, своего свойства `help` нет |
+| Поля: что не сделано | `TextInput`, `TextArea`: `enableCounter`, `maxCount`, `decorator`; `Select`: `readOnly`, `noLabel`; `ComboBox`: `typeahead`, `allowCustomValue`, `downshiftProps`, `autoAlign`; `Search`: `isExpanded`, `onExpand`, `renderIcon`; `FileUploader`: `FileUploaderButton`, `FileUploaderDropContainer`, `Filename`, `getCurrentFiles` | не нужны примерам и продуктам |
+| `NumberInput` | поле `role="spinbutton"`, не `<input type="number">`: PageUp/PageDown — десять шагов, Home/End — к границам; без `invalidText` вне границ — «Число от … до …», пусто без `allowEmpty` — «Введите число»; `type`, `locale`, `formatOptions`, `validate`, `disableWheel`, `stepStartValue` нет | родное поле числа меняет значение колесом и не держит ввод «-»; ошибка — словами |
+| `FileUploader` | `labelTitle` — строка роли `heading`, не `<h3>`; не тот тип (`accept`) или больше `maxFileSize` — строка `FileUploaderItem invalid` с причиной (у Carbon — только `invalidFileType` в `onAddFiles`, тип не проверяется) | уровень заголовка даёт `Section`; не взятый молча файл — потеря без слова |
+| `Toggle` | включено — инверсия (у Carbon — зелёный); слова по умолчанию «Выкл» · «Вкл» | цвет тона — только смысл |
+| `Form`, `FormGroup` | своих отступов нет: поля внутри ставит `Stack` | только роли и шкалы, как у `Section` |
 | П5 | «одна главная на поверхность», «опасное не рядом с главной», «в строке — только ghost» — проверка в разработке (`rule()`), у Carbon её нет | правило ДС |
 
 ### Расширения сверх Carbon
@@ -77,6 +83,7 @@ Carbon, которые не нужны, не сделаны; сделанные 
 | Что | Зачем |
 |---|---|
 | `ButtonSet` на телефоне — одним рядом поровну | столбец кнопок съел бы четверть экрана |
+| `unit` у `TextInput`, `NumberInput`, `Select` с `inline` — единица после поля («дней»); `NumberInput inline` — узкое (роль ширины `number`) | поле настройки одной строкой: `Подпись ……… [ 10 ] дней`, ошибка — у поля |
 
 ### Без пары в Carbon
 
@@ -136,7 +143,7 @@ Carbon, которые не нужны, не сделаны; сделанные 
 | Облик и анатомия: каждая история × светлая и тёмная × 390 и 1280 против эталона; поля, роль заголовка, угол и метка — по реестру; текст, углы и высоты контролов — только из шкал | `react/visual/run.mjs` (`npm run test:visual`), эталоны `react/visual/baseline/` | `__tests__/visual.test.ts`: кадр со сдвигом на 1 px, снимок с полями 12 вместо 16 |
 | Контраст: текст ≥ 4,5 : 1 (и на заливке статуса), знаки, границы контролов, фокус и ряды данных ≥ 3 : 1 — обе темы | `lib/contrast.mjs`, `contrast.test.ts` | пара светло-серого текста на белом |
 | Форма ролей, шкал и матрицы облика — закрытые списки | `tokens.schema.json`, `matrix.schema.json`, `schemas.test.ts` | `__tests__/fixtures/schemas/*/invalid` |
-| Одна `kind="primary"` на поверхность и в наборе; опасное (`danger…`) не в одном `ButtonSet` с главной; в строке списка — только `kind="ghost"`; на лице карточки ≤ 3 фактов, раскрытие ≤ 2 уровней; одна липкая полоса на страницу; шагов — от трёх; справка «i» — у подписи строкой | сами компоненты (`rule()` бросает в разработке), тесты `react/src/__tests__` | `elements.test.tsx`: вторая главная на странице, `danger` рядом с главной, не-ghost в строке — красные |
+| Одна `kind="primary"` на поверхность и в наборе; опасное (`danger…`) не в одном `ButtonSet` с главной; в строке списка — только `kind="ghost"`; на лице карточки ≤ 3 фактов, раскрытие ≤ 2 уровней; одна липкая полоса на страницу; шагов — от трёх | сами компоненты (`rule()` бросает в разработке), тесты `react/src/__tests__` | `elements.test.tsx`: вторая главная на странице, `danger` рядом с главной, не-ghost в строке — красные |
 | История на каждое обещанное состояние, теги состояний — из `matrix.yaml`; a11y axe в обеих темах | `rules.test.tsx`, `a11y.test.tsx` | — |
 | Продукт: экраны только на полке `Экраны/SCR-NN …`; своего компонента с именем компонента ДС нет; новое нарушение «только роли» — красное, старое — долг | `lint/principles.mjs --kind product --base origin/main` в `check` продукта | `principles.test.ts` |
 

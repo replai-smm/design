@@ -78,6 +78,13 @@ export const isDangerKind = (kind: ButtonKind) => kind.startsWith('danger')
 export const SIZES = ['sm', 'md', 'lg'] as const
 export type Size = (typeof SIZES)[number]
 
+/** Toggle `size` (Carbon: sm · md): дорожка 32 × 16 и 48 × 24. */
+export type ToggleSize = Extract<Size, 'sm' | 'md'>
+
+/** Состояние файла в FileUploader и FileUploaderItem (Carbon: edit — можно убрать · complete — загружен · uploading — идёт). */
+export const FILENAME_STATUSES = ['edit', 'complete', 'uploading'] as const
+export type FilenameStatus = (typeof FILENAME_STATUSES)[number]
+
 /** Где всплывающее относительно элемента — Tooltip, IconButton, Toggletip (Carbon: PopoverAlignment). */
 export type PopoverAlignment = 'top' | 'top-start' | 'top-end' | 'bottom' | 'bottom-start' | 'bottom-end' | 'left' | 'left-start' | 'left-end' | 'right' | 'right-start' | 'right-end'
 

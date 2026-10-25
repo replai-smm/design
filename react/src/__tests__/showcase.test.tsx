@@ -34,11 +34,13 @@ const SECTIONS: Array<{ title: string; note: string; items: Array<[string, strin
   },
   {
     title: 'Поля',
-    note: 'Подпись над полем, подсказка под ним, ошибка — знаком и словом вместо подсказки. Высота 48 на телефоне, 40 на ноутбуке, плотное — 32.',
+    note: 'Подпись над полем, подсказка под ним, ошибка — знаком и словом вместо подсказки. Высота 48 на телефоне, 40 на ноутбуке; size="sm" — 32.',
     items: [
-      ['TextField.stories.tsx', 'Обычное'],
-      ['TextField.stories.tsx', 'Ошибка'],
+      ['TextInput.stories.tsx', 'Обычное'],
+      ['TextInput.stories.tsx', 'Ошибка'],
       ['Checkbox.stories.tsx', 'Обычное'],
+      ['RadioButton.stories.tsx', 'Обычное'],
+      ['Toggle.stories.tsx', 'Обычное'],
     ],
   },
   {

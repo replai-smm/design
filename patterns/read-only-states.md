@@ -2,7 +2,7 @@
 
 Carbon: Read-only states · Источник: carbon-website src/pages/patterns/read-only-states-pattern/index.mdx @ 5e9cd1d · Перевод с английского, Apache-2.0
 
-Компоненты примера: `NumberField`, `Stack`, `TextField`
+Компоненты примера: `NumberInput`, `RadioButton`, `RadioButtonGroup`, `Stack`, `TextInput`, `Toggle`
 
 Состояние «только чтение» применяют к компонентам, которые человек может просматривать, но не может менять; оно убирает интерактивные функции компонента.
 

@@ -1,59 +1,73 @@
 /**
- * Выбор из короткого списка: родной `<select>` системы — на телефоне колесо системы, клавиатура и читалка работают сами.
- * Вид — как у поля ввода. Список длинный или нужен поиск — `Combobox`.
+ * Выбор из короткого списка (Carbon: Select, SelectItem, SelectItemGroup): родной `<select>` системы — на телефоне колесо
+ * системы, клавиатура и читалка работают сами. Пункты — детьми `<SelectItem value text />`, группы — `<SelectItemGroup
+ * label>`; «Выберите…» — `<SelectItem value="" text="Выберите…" disabled hidden />` и `defaultValue=""`. `onChange(event)` —
+ * событие `<select>`, как у Carbon. Вид — как у поля ввода. Список длинный или нужен поиск — `ComboBox`.
  */
-import { forwardRef, type SelectHTMLAttributes } from 'react'
+import { forwardRef, type OptionHTMLAttributes, type ReactNode, type SelectHTMLAttributes } from 'react'
 import { cx } from '../lib/cx'
+import type { Size } from '../lib/vocab'
 import { Icon } from './Icon'
-import { FieldShell, fieldAria, fieldBox, useFieldIds, type FieldBaseProps, type FieldRowProps } from './TextField'
+import { FieldShell, checkFieldSize, fieldAria, fieldBox, fieldState, useFieldIds, type FieldMessages, type FieldRowProps } from './TextInput'
 
-export interface SelectOption {
-  value: string
-  label: string
-  disabled?: boolean
+export interface SelectProps extends FieldMessages, FieldRowProps, Omit<SelectHTMLAttributes<HTMLSelectElement>, 'size' | 'id' | 'className'> {
+  id: string
+  labelText?: ReactNode
+  hideLabel?: boolean
+  size?: Size
+  /** `SelectItem` и `SelectItemGroup`. */
+  children?: ReactNode
+  className?: string
 }
 
-export interface SelectProps extends FieldBaseProps, FieldRowProps, Omit<SelectHTMLAttributes<HTMLSelectElement>, 'size' | 'children' | 'className' | 'onChange' | 'value' | 'defaultValue'> {
-  options: SelectOption[]
-  value?: string
-  defaultValue?: string
-  onChange?: (value: string) => void
-  /** Пустой первый пункт «Выберите …», пока ничего не выбрано; выбрать его обратно нельзя. */
-  placeholder?: string
-}
-
+/** Выбор из короткого списка системой (Carbon: Select). */
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select(
-  { label, hideLabel, helperText, error, dense, className, id, disabled, options, value, defaultValue, onChange, placeholder, inline, unit, help, ...rest },
+  { id, labelText, hideLabel, helperText, invalid, invalidText, warn, warnText, size, className, disabled, inline, unit, children, ...rest },
   ref,
 ) {
+  checkFieldSize(size)
   const ids = useFieldIds(id)
+  const messages = { helperText, invalid, invalidText, warn, warnText }
+  const state = fieldState({ invalid, warn, disabled })
   return (
-    <FieldShell slot="select" ids={ids} label={label} hideLabel={hideLabel} helperText={helperText} error={error} disabled={disabled} className={className} inline={inline} unit={unit} help={help}>
+    <FieldShell slot="select" ids={ids} label={labelText} hideLabel={hideLabel} disabled={disabled} className={className} inline={inline} unit={unit} {...messages}>
       <div className="relative flex items-center">
-        <select
-          ref={ref}
-          id={ids.id}
-          disabled={disabled}
-          value={value}
-          defaultValue={value === undefined ? (defaultValue ?? (placeholder ? '' : undefined)) : undefined}
-          onChange={(e) => onChange?.(e.target.value)}
-          {...fieldAria(ids, { helperText, error })}
-          {...rest}
-          className={cx(fieldBox({ invalid: Boolean(error), disabled, dense }), 'cursor-pointer appearance-none pr-sections pl-compact')}
-        >
-          {placeholder && (
-            <option value="" disabled>
-              {placeholder}
-            </option>
-          )}
-          {options.map((o) => (
-            <option key={o.value} value={o.value} disabled={o.disabled}>
-              {o.label}
-            </option>
-          ))}
+        <select ref={ref} id={ids.id} disabled={disabled} {...fieldAria(ids, messages, state)} {...rest} className={cx(fieldBox({ invalid: state.invalid, disabled, size }), 'cursor-pointer appearance-none pr-sections pl-compact')}>
+          {children}
         </select>
         <Icon name="chevron-down" className={cx('pointer-events-none absolute right-compact', disabled ? 'text-fg-disabled' : 'text-fg')} />
       </div>
     </FieldShell>
   )
 })
+
+export interface SelectItemProps extends Omit<OptionHTMLAttributes<HTMLOptionElement>, 'children' | 'label'> {
+  value: OptionHTMLAttributes<HTMLOptionElement>['value']
+  /** Слово пункта. */
+  text: string
+  disabled?: boolean
+  /** Спрятан из списка — пункт-подсказка «Выберите…». */
+  hidden?: boolean
+}
+
+/** Пункт выбора (Carbon: SelectItem). */
+export function SelectItem({ text, ...rest }: SelectItemProps) {
+  return <option {...rest}>{text}</option>
+}
+
+export interface SelectItemGroupProps {
+  /** Название группы пунктов. */
+  label: string
+  disabled?: boolean
+  children?: ReactNode
+  className?: string
+}
+
+/** Группа пунктов выбора (Carbon: SelectItemGroup). */
+export function SelectItemGroup({ label, disabled, children, className }: SelectItemGroupProps) {
+  return (
+    <optgroup label={label} disabled={disabled} className={className}>
+      {children}
+    </optgroup>
+  )
+}

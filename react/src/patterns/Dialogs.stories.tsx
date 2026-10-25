@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import md from '../../../patterns/dialogs.md?raw'
 import { Button, ButtonSet } from '../components/Button'
 import { Dialog } from '../components/Dialog'
-import { TextField } from '../components/TextField'
+import { TextInput } from '../components/TextInput'
 import { Stack } from '../components/layout'
 import { pattern } from './story'
 
@@ -34,7 +34,7 @@ function Example({ open = false }: { open?: boolean }) {
           </ButtonSet>
         }
       >
-        <TextField label="Имя проекта" defaultValue="Сайт" />
+        <TextInput id="project-name" labelText="Имя проекта" defaultValue="Сайт" />
       </Dialog>
     </Stack>
   )

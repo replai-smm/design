@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import md from '../../../patterns/fluid-styles.md?raw'
-import { TextField } from '../components/TextField'
-import { Select } from '../components/Select'
+import { TextInput } from '../components/TextInput'
+import { Select, SelectItem } from '../components/Select'
 import { Stack } from '../components/layout'
 import { pattern } from './story'
 
@@ -10,9 +10,12 @@ function Example() {
   return (
     <Stack gap={5} className="max-w-form p-blocks">
       <p className="m-0 text-body text-fg-muted">Текучих полей в ДС пока нет — та же форма адреса обычными полями.</p>
-      <TextField label="Улица и дом" defaultValue="ул. Садовая, 12" />
-      <TextField label="Квартира или офис" />
-      <Select label="Город" defaultValue="kzn" options={[{ value: 'kzn', label: 'Казань' }, { value: 'prm', label: 'Пермь' }]} />
+      <TextInput id="street" labelText="Улица и дом" defaultValue="ул. Садовая, 12" />
+      <TextInput id="flat" labelText="Квартира или офис" />
+      <Select id="city" labelText="Город" defaultValue="kzn">
+        <SelectItem value="kzn" text="Казань" />
+        <SelectItem value="prm" text="Пермь" />
+      </Select>
     </Stack>
   )
 }

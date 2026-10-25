@@ -39,7 +39,9 @@ export function Tooltip({ label, description, children, align = 'top', enterDela
   }, [])
   const text = label ?? description
   const [side, at = 'center'] = align.split('-') as [NonNullable<RTooltip.TooltipContentProps['side']>, NonNullable<RTooltip.TooltipContentProps['align']>?]
-  const trigger = cloneElement(children as ReactElement<Record<string, unknown>>, label !== undefined ? { 'aria-labelledby': id, 'aria-describedby': undefined } : { 'aria-describedby': id })
+  const child = children as ReactElement<Record<string, unknown>>
+  // при `label` описание Radix (тот же текст) не ставим — остаётся только своё описание элемента (ошибка строки и т. п.)
+  const trigger = cloneElement(child, label !== undefined ? { 'aria-labelledby': id, 'aria-describedby': child.props['aria-describedby'] } : { 'aria-describedby': id })
   return (
     <RTooltip.Provider delayDuration={enterDelayMs} skipDelayDuration={300}>
       <RTooltip.Root defaultOpen={defaultOpen}>

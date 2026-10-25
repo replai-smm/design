@@ -2,30 +2,33 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import md from '../../../patterns/login.md?raw'
 import { Button, ButtonSet } from '../components/Button'
 import { Link } from '../components/Link'
+import { Form } from '../components/Form'
 import { Notification } from '../components/Notification'
-import { TextField } from '../components/TextField'
+import { PasswordInput, TextInput } from '../components/TextInput'
 import { Stack } from '../components/layout'
 import { pattern } from './story'
 
 function Example({ error = false }: { error?: boolean }) {
   return (
     <div className="flex justify-center p-groups">
-      <Stack as="form" gap={5} className="w-full max-w-popup" aria-label="Вход">
-        <p className="m-0 text-title text-fg">Вход</p>
-        {error && (
-          <Notification tone="опасно" title="Не вышло войти">
-            Почта или пароль не подходят. Проверьте раскладку или восстановите пароль.
-          </Notification>
-        )}
-        <TextField label="Почта" type="email" autoComplete="email" defaultValue={error ? 'anna@example.com' : undefined} />
-        <TextField label="Пароль" type="password" autoComplete="current-password" />
-        <ButtonSet>
-          <Button type="submit">Войти</Button>
-        </ButtonSet>
-        <Link href="#reset" className="self-start">
-          Забыли пароль?
-        </Link>
-      </Stack>
+      <Form aria-label="Вход" className="w-full max-w-popup" onSubmit={(e) => e.preventDefault()}>
+        <Stack gap={5}>
+          <p className="m-0 text-title text-fg">Вход</p>
+          {error && (
+            <Notification tone="опасно" title="Не вышло войти">
+              Почта или пароль не подходят. Проверьте раскладку или восстановите пароль.
+            </Notification>
+          )}
+          <TextInput id="login-email" labelText="Почта" type="email" autoComplete="email" defaultValue={error ? 'anna@example.com' : undefined} />
+          <PasswordInput id="login-password" labelText="Пароль" autoComplete="current-password" />
+          <ButtonSet>
+            <Button type="submit">Войти</Button>
+          </ButtonSet>
+          <Link href="#reset" className="self-start">
+            Забыли пароль?
+          </Link>
+        </Stack>
+      </Form>
     </div>
   )
 }

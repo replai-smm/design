@@ -13,7 +13,7 @@
   "levelsWhy": "уровень — смысловой размер: компонент берёт только нижние уровни; полки Storybook ДС (как у Carbon): «Основы» → «Компоненты/<уровень>» → «Паттерны» (правило сборки типовой ситуации с примером, patterns/*.md); экраны и сборки продукта — только в продуктах",
   "base": {
     "Icon.tsx": "значок — часть каждого элемента: знак тона, кнопка-значок, стрелка",
-    "TextField.tsx": "каркас поля (подпись, подсказка, ошибка) и рамка поля — одни у всех полей",
+    "TextInput.tsx": "каркас поля (подпись, подсказка, ошибка) и рамка поля — одни у всех полей",
     "Surface.tsx": "поверхность — одна анатомия всего, что лежит слоем: остальные поверхности построены на ней"
   },
   "sameLevel": {
@@ -31,7 +31,9 @@
     "Avatar.tsx": "лицо — круг",
     "Meter.tsx": "дорожка шкалы",
     "StatTile.tsx": "точка цвета ряда",
-    "ChatThread.tsx": "точка «думает»"
+    "ChatThread.tsx": "точка «думает»",
+    "RadioButton.tsx": "кружок выбора — круг (Carbon: RadioButton)",
+    "Toggle.tsx": "дорожка и бегунок переключателя (Carbon: Toggle)"
   },
   "fill": {
     "Tag.tsx": "цвет метки — сам её смысл (Carbon: Tag type green, gray): заливка — фон с проверенной парой текста"
@@ -269,57 +271,109 @@
       "meaning": "рисунок рядов данных",
       "why": "рисунок без своей поверхности; рамку даёт ChartFrame"
     },
-    "TextField": {
+    "TextInput": {
       "level": "Поля",
-      "file": "TextField.tsx",
+      "file": "TextInput.tsx",
       "meaning": "строка ввода",
       "anatomy": {
-        "slot": "text-field",
+        "slot": "text-input",
         "density": true
       }
     },
+    "PasswordInput": {
+      "level": "Поля",
+      "file": "TextInput.tsx",
+      "meaning": "пароль: ввод скрыт, можно показать"
+    },
     "TextArea": {
       "level": "Поля",
-      "file": "TextField.tsx",
+      "file": "TextInput.tsx",
       "meaning": "многострочный ввод"
+    },
+    "NumberInput": {
+      "level": "Поля",
+      "file": "NumberInput.tsx",
+      "meaning": "число со стрелками"
     },
     "Select": {
       "level": "Поля",
       "file": "Select.tsx",
       "meaning": "выбор из короткого списка системой",
       "near": {
-        "Combobox": "родной выбор системы для коротких списков; Combobox — длинный список с поиском"
+        "ComboBox": "родной выбор системы для коротких списков; ComboBox — длинный список с поиском",
+        "RadioButtonGroup": "выбор в списке, варианты спрятаны; кружки — 2–5 вариантов видны сразу"
       }
     },
-    "NumberField": {
+    "SelectItem": {
       "level": "Поля",
-      "file": "NumberField.tsx",
-      "meaning": "целое число со стрелками"
+      "file": "Select.tsx",
+      "meaning": "пункт выбора"
+    },
+    "SelectItemGroup": {
+      "level": "Поля",
+      "file": "Select.tsx",
+      "meaning": "группа пунктов выбора"
     },
     "Checkbox": {
       "level": "Поля",
       "file": "Checkbox.tsx",
-      "meaning": "да или нет одной галочкой"
+      "meaning": "да или нет одной галочкой",
+      "near": {
+        "Toggle": "галочка — выбор, который отправляют формой; переключатель — действует сразу (Carbon: Checkbox и Toggle)"
+      }
     },
     "CheckboxGroup": {
       "level": "Поля",
       "file": "Checkbox.tsx",
       "meaning": "несколько галочек про одно"
     },
-    "Combobox": {
+    "RadioButton": {
       "level": "Поля",
-      "file": "Combobox.tsx",
+      "file": "RadioButton.tsx",
+      "meaning": "кружок одного варианта"
+    },
+    "RadioButtonGroup": {
+      "level": "Поля",
+      "file": "RadioButton.tsx",
+      "meaning": "один из нескольких вариантов",
+      "near": {
+        "CheckboxGroup": "кружки — ровно один вариант; галочки — сколько угодно"
+      }
+    },
+    "Toggle": {
+      "level": "Поля",
+      "file": "Toggle.tsx",
+      "meaning": "включить или выключить сразу"
+    },
+    "ComboBox": {
+      "level": "Поля",
+      "file": "ComboBox.tsx",
       "meaning": "выбор из длинного списка с поиском"
     },
-    "FileField": {
+    "FileUploader": {
       "level": "Поля",
-      "file": "FileField.tsx",
+      "file": "FileUploader.tsx",
       "meaning": "выбор файла"
     },
-    "SearchField": {
+    "FileUploaderItem": {
       "level": "Поля",
-      "file": "SearchField.tsx",
+      "file": "FileUploader.tsx",
+      "meaning": "строка выбранного файла"
+    },
+    "Search": {
+      "level": "Поля",
+      "file": "Search.tsx",
       "meaning": "поиск по списку"
+    },
+    "Form": {
+      "level": "Поля",
+      "file": "Form.tsx",
+      "meaning": "форма с отправкой"
+    },
+    "FormGroup": {
+      "level": "Поля",
+      "file": "Form.tsx",
+      "meaning": "группа связанных полей одной подписью"
     },
     "Surface": {
       "level": "Поверхности",
