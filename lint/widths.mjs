@@ -3,7 +3,9 @@
 // Storybook (`storybook-static`), открывает каждую историю полки `Экраны/SCR-NN …` на ширинах 360 · 1024 · 1280 · 1920 (светлая тема)
 // и смотрит две вещи:
 //   прокрутка  — страница шире окна (scrollWidth больше clientWidth документа): горизонтальной прокрутки у страницы нет;
-//   за краем   — видимый текст выходит за левый или правый край окна (не считая рядов, у которых своя прокрутка или обрезка).
+//   за краем   — видимый текст выходит за левый или правый край окна (не считая рядов, у которых своя прокрутка или обрезка);
+//   оболочка   — у истории с `main`: страница резиновая (на пути от `main` вверх нет `max-width` меньше окна) и левая панель
+//                (`data-slot="side-nav"`) идёт от шапки до низа окна.
 // История, которая не отрисовалась (экран Storybook «component failed to render»), — тоже нарушение: пустая страница ничего не доказывает.
 //
 //   node node_modules/@replai-smm/design/lint/widths.mjs --storybook storybook-static [--require <часть заголовка>…] [--widths 360,1024,1280,1920] [--shelf <regexp>]
@@ -47,7 +49,7 @@ function serve(root) {
 /** Измерение в странице: на сколько пикселей шире окна и какой текст ушёл за край. */
 function measure() {
   const de = document.documentElement
-  if (document.body.classList.contains('sb-show-errordisplay')) return { broken: true, over: 0, cut: [] }
+  if (document.body.classList.contains('sb-show-errordisplay')) return { broken: true, over: 0, cut: [], shell: [] }
   const over = de.scrollWidth - de.clientWidth
   const cut = []
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT)
@@ -83,7 +85,25 @@ function measure() {
       }
     }
   }
-  return { broken: false, over, cut: [...new Set(cut)].slice(0, 4) }
+  // Оболочка: страница резиновая (на пути от main к body нет max-width меньше окна), левая панель — от шапки до низа окна.
+  const shell = []
+  // вложенных `main` в странице не бывает, но обёртка истории тоже может быть `main` — берём самый глубокий
+  const main = [...document.querySelectorAll('main, [role="main"]')].at(-1)
+  for (let a = main; a && a !== de; a = a.parentElement) {
+    const mw = getComputedStyle(a).maxWidth
+    if (mw !== 'none' && parseFloat(mw) < de.clientWidth - 1) {
+      shell.push(`страница ограничена max-width ${mw} (${(a.getAttribute('data-slot') || a.tagName.toLowerCase())}) — резиновая страница без предела`)
+      break
+    }
+  }
+  const nav = document.querySelector('[data-slot="side-nav"]')
+  if (nav && getComputedStyle(nav).display !== 'none') {
+    const r = nav.getBoundingClientRect()
+    const header = document.querySelector('[data-slot="header"]')
+    const top = header ? header.getBoundingClientRect().bottom : 0
+    if (r.width > 0 && (r.top > top + 1 || r.bottom < innerHeight - 1)) shell.push(`левая панель ${Math.round(r.top)}–${Math.round(r.bottom)} px, а должна идти от шапки (${Math.round(top)}) до низа окна (${innerHeight})`)
+  }
+  return { broken: false, over, cut: [...new Set(cut)].slice(0, 4), shell }
 }
 
 /**
@@ -117,6 +137,7 @@ export async function check({ storybook, widths = WIDTHS, shelf = SHELF, require
         if (r.broken) problems.push('история не отрисовалась')
         if (r.over > 1) problems.push(`страница шире окна на ${r.over}px`)
         if (r.cut.length) problems.push(`текст за краем: ${r.cut.join(' | ')}`)
+        problems.push(...r.shell)
         cells[w] = { ok: problems.length === 0, text: problems.join('; ') }
         if (problems.length) bad.push(`${s.title} · ${s.name} @${w}: ${problems.join('; ')}`)
       }

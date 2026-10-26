@@ -18,7 +18,7 @@
 | Текст | 7 ролей: `caption` 12 · `body` 14 · `heading` 14/600 · `reading` 16 · `code` 13 моно · `title` 20 · `page` 28 | `scale.json → text` |
 | Отступ | 6 ролей: `tight` 4 · `items` 8 · `compact` 12 · `blocks` 16 · `groups` 24 · `sections` 32 — в классах (`gap-items`, `p-blocks`); у `Stack` и `Inline` — шаг шкалы Carbon spacing того же размера: `gap={2}` 4 · `3` 8 · `4` 12 · `5` 16 · `6` 24 · `7` 32 | `scale.json → space` |
 | Высота | `icon` 16 · `dense` 32 · `control` 40 · `touch` 48: у кнопок, полей и раскрытия — `size` Carbon: `sm` 32 · `md` 40 · `lg` 48 постоянно; без `size` — 48 на телефоне и 40 на ноутбуке | `scale.json → size` |
-| Ширина | предел колонки, окна, страницы: `number` 10rem (поле числа) · `rail` 16rem · `hint` · `narrow` · `popup` · `form` · `panel` · `wide` · `window` · `page` 80rem — `max-w-window`, `w-rail`; размеров контейнеров Tailwind (`max-w-md`) нет | `scale.json → measure` |
+| Ширина | меры содержимого, не страницы (строка, форма, окно): `number` 10rem (поле числа) · `rail` 16rem · `hint` · `narrow` · `popup` · `form` · `panel` · `wide` · `window` — `max-w-window`, `w-rail`; размеров контейнеров Tailwind (`max-w-md`) нет. **Страница резиновая всегда:** предела ширины страницы нет, содержимое занимает всё место справа от левой панели на любой ширине; поля — 16 px на узком, 32 px от md | `scale.json → measure` |
 | Угол | `control` 4 · `surface` 6 · `full` — только метка, счётчик, аватар, точка | `scale.json → radius` |
 | Глубина | плоско (рамка) · всплывает (`shadow-raised`) · поверх (`shadow-overlay` и затемнение `scrim`) | `scale.json → elevation` |
 | Движение | `duration-fast` 110 мс (отклик) · `duration-move` 0,6 с (раскрытие, выезд), одна кривая; «уменьшить движение» — обе 0 | `scale.json → motion` |
