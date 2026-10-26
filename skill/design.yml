@@ -33,6 +33,7 @@ jobs:
         run: node __APP__/node_modules/@replai-smm/design/bin/design.mjs init --check
       - name: design check
         run: node __APP__/node_modules/@replai-smm/design/bin/design.mjs check --base "$BASE"
+      # widths:begin
       - name: storybook build
         working-directory: __APP__
         run: npm run storybook:build
@@ -41,3 +42,4 @@ jobs:
         run: npx playwright install chromium-headless-shell
       - name: design widths
         run: node __APP__/node_modules/@replai-smm/design/bin/design.mjs widths
+      # widths:end

@@ -39,9 +39,21 @@ const binFrom = (repo, app) => posix(relative(repo, join(app, 'node_modules', NA
 /** Файлы ДС в репо продукта: путь → текст. */
 export function ownFiles({ repo, app }) {
   const rel = posix(relative(repo, app)) || '.'
+  let workflow = read(join(SKILL_DIR, 'design.yml')).replaceAll('__APP__', rel)
+  // `"design": { "widths": false }` в package.json приложения — сторож ширин в CI пока не включён (продукт сам называет почему)
+  if (appConfig(app).widths === false) workflow = workflow.replace(/ {6}# widths:begin[\s\S]*?# widths:end\n/, '')
   return {
     '.claude/skills/design/SKILL.md': read(join(SKILL_DIR, 'SKILL.md')),
-    '.github/workflows/design.yml': read(join(SKILL_DIR, 'design.yml')).replaceAll('__APP__', rel),
+    '.github/workflows/design.yml': workflow,
+  }
+}
+
+/** Настройки сторожа в package.json приложения: `"design": { "require": [...], "storybook": "storybook-static", "widths": false }`. */
+export function appConfig(app) {
+  try {
+    return JSON.parse(read(join(app, 'package.json')) ?? '{}').design ?? {}
+  } catch {
+    return {}
   }
 }
 
@@ -154,12 +166,7 @@ async function main(argv) {
     return run('principles.mjs', ['--kind', 'product', ...(base ? ['--base', base] : []), '--repo', repo, posix(relative(repo, join(app, 'src')))], repo)
   }
   if (command === 'widths') {
-    let cfg = {}
-    try {
-      cfg = JSON.parse(read(join(app, 'package.json')) ?? '{}').design ?? {}
-    } catch {
-      /* без настроек */
-    }
+    const cfg = appConfig(app)
     const storybook = opt('--storybook')[0] ?? join(app, cfg.storybook ?? 'storybook-static')
     return run('widths.mjs', ['--storybook', storybook, ...(cfg.require ?? []).flatMap((r) => ['--require', r])], app)
   }

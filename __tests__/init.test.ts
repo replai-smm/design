@@ -62,6 +62,17 @@ describe('design init', () => {
     expect(withScript(JSON.stringify({ scripts: { design: 'свой сторож' } }), 'x').text).toBeUndefined()
   })
 
+  it('"design": { "widths": false } — в шаге CI нет сторожа ширин (включают вместе с правкой экранов)', () => {
+    writeFileSync(join(app, 'package.json'), JSON.stringify({ design: { widths: false } }))
+    const wf = ownFiles({ repo, app })['.github/workflows/design.yml']
+    expect(wf).toContain('design.mjs check')
+    expect(wf).not.toContain('design.mjs widths')
+    expect(wf).not.toContain('storybook:build')
+    expect(wf).not.toContain('playwright')
+    writeFileSync(join(app, 'package.json'), JSON.stringify({ design: { require: ['Кабинет'] } }))
+    expect(ownFiles({ repo, app })['.github/workflows/design.yml']).toContain('design.mjs widths')
+  })
+
   it('файлы ДС сходятся с пакетом: skill/ лежит в публикуемых', () => {
     const own = ownFiles({ repo, app })
     expect(Object.keys(own)).toEqual(['.claude/skills/design/SKILL.md', '.github/workflows/design.yml'])
