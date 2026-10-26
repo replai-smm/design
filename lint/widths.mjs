@@ -60,16 +60,27 @@ function measure() {
     const range = document.createRange()
     range.selectNodeContents(n)
     for (const rc of range.getClientRects()) {
-      if (rc.width === 0 || rc.height === 0 || (rc.left >= -1 && rc.right <= de.clientWidth + 1)) continue
-      // у ряда своя прокрутка или обрезка (вкладки, таблица, «…») — текст не «за краем окна», а за краем ряда
+      if (rc.width === 0 || rc.height === 0) continue
+      const inWindow = rc.left >= -1 && rc.right <= de.clientWidth + 1
+      // Первый предок с прокруткой или обрезкой: ряд вкладок, таблица или «…» сами называют свою прокрутку (class `overflow-x-auto`,
+      // `ds-scroll-row`, `text-overflow: ellipsis`); всё остальное — текст обязан лежать внутри предка (панель, которая прокручивается
+      // вбок сама из-за `overflow-y-auto`, — нарушение). Предка нет — текст обязан лежать в окне.
       let a = el
-      let clipped = false
+      let ok = inWindow
       while (a && a !== document.body && a !== de) {
-        if (getComputedStyle(a).overflowX !== 'visible') { clipped = true; break }
+        const c = getComputedStyle(a)
+        if (c.overflowX !== 'visible') {
+          const own = /(^|\s)(overflow-x-auto|overflow-x-scroll|overflow-auto|overflow-scroll|ds-scroll-row)(\s|$)/.test(String(a.className))
+          const b = a.getBoundingClientRect()
+          ok = own || c.textOverflow === 'ellipsis' || (rc.left >= b.left - 1 && rc.right <= b.right + 1 && inWindow)
+          break
+        }
         a = a.parentElement
       }
-      if (!clipped) cut.push(text.slice(0, 32))
-      break
+      if (!ok) {
+        cut.push(text.slice(0, 32))
+        break
+      }
     }
   }
   return { broken: false, over, cut: [...new Set(cut)].slice(0, 4) }

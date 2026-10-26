@@ -156,13 +156,16 @@ export function SideNav({ expanded = false, onOverlayClick, onKeyDown, className
         data-expanded={expanded || undefined}
         onKeyDown={keys}
         className={cx(
-          'w-rail max-w-full shrink-0 flex-col border-r border-line bg-surface lg:sticky lg:top-touch lg:flex lg:self-start',
+          'w-rail max-w-full shrink-0 flex-col border-r border-line bg-surface lg:flex lg:self-stretch',
           expanded ? 'fixed bottom-0 left-0 top-touch z-30 flex' : 'hidden',
           className,
         )}
         {...rest}
       >
-        <div className="relative flex min-h-0 max-h-dvh flex-1 flex-col overflow-y-auto">{children}</div>
+        {/* Фон и рамка — на всю высоту колонки под шапкой; пункты липнут под шапкой и прокручиваются сами */}
+        <div className="flex min-h-0 flex-1 flex-col lg:sticky lg:top-touch lg:max-h-dvh lg:flex-none">
+          <div className="relative flex min-h-0 flex-1 flex-col overflow-y-auto">{children}</div>
+        </div>
       </nav>
     </>
   )
