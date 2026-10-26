@@ -36,5 +36,8 @@ jobs:
       - name: storybook build
         working-directory: __APP__
         run: npm run storybook:build
+      - name: playwright (браузер сторожа ширин; уже стоит — шаг мгновенный)
+        working-directory: __APP__
+        run: npx playwright install chromium-headless-shell
       - name: design widths
         run: node __APP__/node_modules/@replai-smm/design/bin/design.mjs widths
