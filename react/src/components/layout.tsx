@@ -175,11 +175,11 @@ export interface PageProps {
   fill?: boolean
 }
 
-/** Страница: шапка, плашка, содержимое. Ширина — до 1280 px; поля — `blocks` на телефоне, `sections` на ноутбуке. */
+/** Страница: шапка, плашка, содержимое. Резиновая: предела ширины нет, содержимое занимает всё место; поля — `blocks` на телефоне, `sections` от md. */
 export function Page({ header, notice, children, className, fill = false }: PageProps) {
   return (
     <SurfaceProvider name="страница">
-      <div data-slot="page" className={cx('mx-auto flex w-full max-w-page flex-col gap-groups px-blocks pt-groups md:px-sections', fill && 'min-h-dvh', className)}>
+      <div data-slot="page" className={cx('flex w-full flex-col gap-groups px-blocks pt-groups md:px-sections', fill && 'min-h-dvh', className)}>
         {header}
         <main className={cx('flex min-w-0 flex-col gap-groups pb-sections', fill && 'flex-1')}>
           {notice}

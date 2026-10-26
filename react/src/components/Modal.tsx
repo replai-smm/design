@@ -53,7 +53,7 @@ export interface ModalProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'
   onLoadingSuccess?: () => void
 }
 
-const WIDTH: Record<ModalSize, string> = { xs: 'md:max-w-popup', sm: 'md:max-w-form', md: 'md:max-w-window', lg: 'md:w-11/12 md:max-w-page' }
+const WIDTH: Record<ModalSize, string> = { xs: 'md:max-w-popup', sm: 'md:max-w-form', md: 'md:max-w-window', lg: 'md:w-5/6' }
 const PLACE = {
   bottom: 'inset-x-0 bottom-0 max-h-11/12 rounded-b-none md:inset-x-auto md:top-1/2 md:bottom-auto md:left-1/2 md:max-h-10/12 md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-b-surface',
   left: 'inset-y-0 left-0 w-11/12 max-w-popup rounded-l-none',

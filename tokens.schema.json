@@ -541,8 +541,7 @@
             "form",
             "panel",
             "wide",
-            "window",
-            "page"
+            "window"
           ],
           "properties": {
             "number": {
@@ -570,9 +569,6 @@
               "$ref": "#/$defs/space"
             },
             "window": {
-              "$ref": "#/$defs/space"
-            },
-            "page": {
               "$ref": "#/$defs/space"
             }
           }

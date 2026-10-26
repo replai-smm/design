@@ -12,6 +12,9 @@ const STORIES: Record<string, { title: string; name: string; html: string; broke
   'cut-text': { title: 'Экраны/SCR-03 Режет текст', name: 'Обычное', html: '<div style="position:absolute;left:-60px">Обрезанный слева</div>' },
   'implicit-scroll': { title: 'Экраны/SCR-06 Панель с неявной прокруткой', name: 'Обычное', html: '<div style="width:200px;overflow-y:auto"><div style="width:600px;white-space:nowrap">текст шире панели без своей прокрутки</div></div>' },
   'scroll-row': { title: 'Экраны/SCR-04 Ряд с прокруткой', name: 'Обычное', html: '<div class="overflow-x-auto" style="overflow-x:auto;width:200px"><div style="width:900px">ряд вкладок со своей прокруткой</div></div>' },
+  'shell-ok': { title: 'Экраны/SCR-07 Оболочка в порядке', name: 'Обычное', html: '<header data-slot="header" style="height:48px">шапка</header><div style="display:flex;min-height:calc(100vh - 48px)"><nav data-slot="side-nav" style="width:200px">панель</nav><main style="flex:1">содержимое</main></div>' },
+  'shell-boxed': { title: 'Экраны/SCR-08 Коробка по центру', name: 'Обычное', html: '<header data-slot="header" style="height:48px">шапка</header><div style="display:flex;min-height:calc(100vh - 48px)"><nav data-slot="side-nav" style="width:200px">панель</nav><main style="flex:1;max-width:300px;margin:0 auto">содержимое</main></div>' },
+  'shell-short-nav': { title: 'Экраны/SCR-09 Короткая панель', name: 'Обычное', html: '<header data-slot="header" style="height:48px">шапка</header><div style="display:flex"><nav data-slot="side-nav" style="width:200px">панель</nav><main style="flex:1">содержимое</main></div>' },
   'broken': { title: 'Экраны/SCR-05 Не отрисовалась', name: 'Обычное', html: '', broken: true },
   'not-a-screen': { title: 'Компоненты/Поля/TextInput', name: 'Обычное', html: '<div style="width:5000px">не экран — не проверяется</div>' },
 }
@@ -37,7 +40,7 @@ describe('сторож ширин', () => {
   it('ходит только по полке экранов и по четырём ширинам', async () => {
     const r = await check({ storybook: dir })
     expect(WIDTHS).toEqual([360, 1024, 1280, 1920])
-    expect(r.rows.map((x: { id: string }) => x.id).sort()).toEqual(['broken', 'cut-text', 'implicit-scroll', 'ok', 'scroll-row', 'wide-page'])
+    expect(r.rows.map((x: { id: string }) => x.id).sort()).toEqual(['broken', 'cut-text', 'implicit-scroll', 'ok', 'scroll-row', 'shell-boxed', 'shell-ok', 'shell-short-nav', 'wide-page'])
     expect(SHELF.test('Экраны/SCR-12 Пульс/Пульс')).toBe(true)
     expect(SHELF.test('Компоненты/Поля/TextInput')).toBe(false)
   }, 60000)
@@ -49,6 +52,9 @@ describe('сторож ширин', () => {
     expect(bad.some((b) => b.includes('SCR-03') && b.includes('за краем'))).toBe(true)
     expect(bad.some((b) => b.includes('SCR-05') && b.includes('не отрисовалась'))).toBe(true)
     expect(bad.some((b) => b.includes('SCR-06') && b.includes('за краем'))).toBe(true)
+    expect(bad.some((b) => b.includes('SCR-08') && b.includes('резиновая страница'))).toBe(true)
+    expect(bad.some((b) => b.includes('SCR-09') && b.includes('левая панель'))).toBe(true)
+    expect(bad.some((b) => b.includes('SCR-07'))).toBe(false)
     expect(bad.some((b) => b.includes('SCR-01'))).toBe(false)
     expect(bad.some((b) => b.includes('SCR-04'))).toBe(false)
   }, 60000)

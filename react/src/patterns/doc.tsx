@@ -75,7 +75,7 @@ export const patternTitle = (md: string) => /^# (.+)$/m.exec(md)?.[1] ?? ''
 export function PatternDoc({ md, page = false, children }: { md: string; page?: boolean; children: ReactNode }) {
   const box = 'min-w-0 rounded-surface border border-line bg-canvas'
   return (
-    <div className="mx-auto flex w-full max-w-page flex-col gap-items px-blocks py-groups md:px-sections">
+    <div className="flex w-full flex-col gap-items px-blocks py-groups md:px-sections">
       <section aria-label="Правило" className="flex flex-col gap-blocks pb-groups">
         <h1 className="m-0 text-page text-fg">{patternTitle(md)}</h1>
         <Prose>{blocks(md)}</Prose>
