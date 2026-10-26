@@ -673,6 +673,61 @@
       "level": "Составные",
       "file": "ReplyBox.tsx",
       "meaning": "поле ответа с отправкой"
+    },
+    "Header": {
+      "level": "Составные",
+      "file": "UIShell.tsx",
+      "meaning": "шапка продукта: одна липкая строка, системное справа"
+    },
+    "HeaderMenuButton": {
+      "level": "Составные",
+      "file": "UIShell.tsx",
+      "meaning": "кнопка меню в шапке — открывает левую панель"
+    },
+    "HeaderName": {
+      "level": "Составные",
+      "file": "UIShell.tsx",
+      "meaning": "название продукта в шапке: ссылка на главную страницу"
+    },
+    "HeaderGlobalBar": {
+      "level": "Составные",
+      "file": "UIShell.tsx",
+      "meaning": "правая часть шапки: системные кнопки у правого края"
+    },
+    "HeaderGlobalAction": {
+      "level": "Составные",
+      "file": "UIShell.tsx",
+      "meaning": "системная кнопка-значок в шапке: открывает панель"
+    },
+    "HeaderPanel": {
+      "level": "Составные",
+      "file": "UIShell.tsx",
+      "meaning": "правая панель под шапкой: профиль, уведомления, настройки"
+    },
+    "SideNav": {
+      "level": "Составные",
+      "file": "UIShell.tsx",
+      "meaning": "левая панель навигации продукта: постоянная от lg, уже — поверх страницы"
+    },
+    "SideNavItems": {
+      "level": "Составные",
+      "file": "UIShell.tsx",
+      "meaning": "список пунктов левой панели"
+    },
+    "SideNavLink": {
+      "level": "Составные",
+      "file": "UIShell.tsx",
+      "meaning": "пункт левой панели: переход или действие, число после слова"
+    },
+    "SideNavDivider": {
+      "level": "Составные",
+      "file": "UIShell.tsx",
+      "meaning": "разделитель групп пунктов левой панели"
+    },
+    "SkipToContent": {
+      "level": "Составные",
+      "file": "UIShell.tsx",
+      "meaning": "первая ссылка страницы: пропустить навигацию"
     }
   }
 }

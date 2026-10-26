@@ -1,5 +1,18 @@
 # Что поменялось
 
+## 2.3.0
+
+Минор: ничего не снято и не переименовано. Оболочка продукта (Carbon: UI Shell) — конфигурация «шапка с левой панелью».
+
+### Добавлено
+
+- `Header`, `HeaderMenuButton`, `HeaderName`, `HeaderGlobalBar`, `HeaderGlobalAction`, `HeaderPanel`, `SideNav`, `SideNavItems`, `SideNavLink`, `SideNavDivider`,
+  `SkipToContent` (уровень «Составные», файл `UIShell.tsx`): шапка 48 px одной строкой, кнопка меню, название (ссылка или действие), правая панель профиля/утилит
+  (`isActive`, Esc → `onClose`), левая панель постоянна от `lg` и поверх страницы уже (`expanded`, `onOverlayClick`), пункт — ссылка или действие (`isActive` → `aria-current`).
+  Не сделаны: `HeaderNavigation`, `HeaderMenu`, `HeaderMenuItem`, `SideNavMenu`, `SideNavMenuItem`, `SideNavHeader`, `SideNavFooter`, `Switcher`, `isRail`, `isFixedNav`.
+  Истории «UI Shell» (обычное, меню открыто, панель профиля, много пунктов), тесты, README → «Договор Carbon».
+- `patterns/global-header.md`: раздел «Ширины в ДС» — что куда уходит от 1024 px и уже, до 360.
+
 ## 2.2.1
 
 - `design init`: `"design": { "widths": false }` в `package.json` приложения — в шаге CI нет сторожа ширин (продукт включает его, когда экраны проходят); без настройки — как в 2.2.0.

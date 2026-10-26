@@ -60,6 +60,7 @@ export { FilterBar, useUrlFilters, type FilterDef, type FilterOption, type Filte
 export { ThreeColumn, type ThreeColumnProps, type ColumnIndex } from './components/ThreeColumn'
 export { ChatThread, type ChatMessage, type ChatThreadProps } from './components/ChatThread'
 export { ReplyBox, type ReplyBoxProps, type ReplyBoxHandle } from './components/ReplyBox'
+export { Header, HeaderMenuButton, HeaderName, HeaderGlobalBar, HeaderGlobalAction, HeaderPanel, SideNav, SideNavItems, SideNavLink, SideNavDivider, SkipToContent, type HeaderProps, type HeaderMenuButtonProps, type HeaderNameProps, type HeaderGlobalActionProps, type HeaderPanelProps, type SideNavProps, type SideNavLinkProps, type SkipToContentProps } from './components/UIShell'
 
 // Словари
 export { TONES, TONE_ORDER, BUTTON_KINDS, SIZES, TAG_TYPES, ICON_INDICATOR_KINDS, FILENAME_STATUSES, NOTIFICATION_KINDS, MODAL_SIZES, SORT_STATES, CONTAINED_LIST_KINDS, type Tone, type Progress, type StateKind, type DataState, type EmptyView, type ErrorView, type ButtonKind, type IconButtonKind, type Size, type InlineLoadingStatus, type TagType, type IconIndicatorKind, type PopoverAlignment, type ProgressStepState, type ToggleSize, type FilenameStatus, type NotificationKind, type ModalSize, type DataTableSortState, type ContainedListKind } from './lib/vocab'
