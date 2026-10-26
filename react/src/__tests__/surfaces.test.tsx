@@ -53,6 +53,25 @@ describe('одна поверхность', () => {
 })
 
 describe('плитки (Carbon: Tile, ClickableTile, ExpandableTile)', () => {
+  it('Tile kind: метка слева цвета вида, как у уведомления; без kind — тихая плитка', () => {
+    const { container } = render(
+      <>
+        <Tile>тихая</Tile>
+        <Tile kind="error">беда</Tile>
+        <Tile kind="warning">внимание</Tile>
+      </>,
+    )
+    const [quietTile, error, warning] = [...container.querySelectorAll<HTMLElement>('[data-slot="tile"]')]
+    expect(quietTile!.hasAttribute('data-mark')).toBe(false)
+    expect(quietTile!.className).not.toContain('border-l-2')
+    expect(error!.getAttribute('data-kind')).toBe('error')
+    expect(error!.hasAttribute('data-mark')).toBe(true)
+    expect(error!.className).toContain('border-l-2')
+    expect(error!.className).toContain('border-l-danger')
+    expect(warning!.className).toContain('border-l-warning')
+    for (const t of [error!, warning!]) for (const c of ANATOMY) expect(t.className).toContain(c)
+  })
+
   it('ClickableTile: с href — ссылка, без него — кнопка; выключенная не нажимается', () => {
     const onClick = vi.fn()
     render(

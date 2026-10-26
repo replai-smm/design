@@ -42,3 +42,19 @@ export const Обычное: S = {
     </Grid>
   ),
 }
+
+/** Тон плитки — метка слева цвета вида (как у уведомления); слово состояния называет заголовок, цвет не один. */
+export const СТоном: S = {
+  render: () => (
+    <Grid narrow withRowGap>
+      {(['error', 'warning', 'info', 'success'] as const).map((kind) => (
+        <Column key={kind} sm={4} md={4} lg={4}>
+          <Tile kind={kind}>
+            <p className="m-0 text-heading">{{ error: 'Критичные', warning: 'Плановые', info: 'Сведения', success: 'Готово' }[kind]}</p>
+            <p className="m-0 text-body text-fg-muted">Раздел списка с тоном: {kind}.</p>
+          </Tile>
+        </Column>
+      ))}
+    </Grid>
+  ),
+}
