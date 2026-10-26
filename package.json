@@ -1,6 +1,6 @@
 {
   "name": "@replai-smm/design",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "private": true,
   "type": "module",
   "description": "Дизайн-система replai-smm: роли и шкалы, ДС-React по уровням, правила машиной. Продукты ставят по тегу: github:replai-smm/design#vX.Y.Z (в теге лежит собранный dist/).",
@@ -33,6 +33,8 @@
     "!dist/showcase.html",
     "fonts",
     "licenses",
+    "bin",
+    "skill",
     "lint",
     "react/src",
     "!react/src/**/__tests__",
@@ -74,5 +76,8 @@
     "ajv": "^8.20.0",
     "vitest": "^4.1.7",
     "yaml": "^2.9.1"
+  },
+  "bin": {
+    "design": "./bin/design.mjs"
   }
 }
