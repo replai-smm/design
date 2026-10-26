@@ -44,7 +44,7 @@
 | Поверхности | Tile, ClickableTile, ExpandableTile, TileAboveTheFoldContent, TileBelowTheFoldContent, StatTile, InlineNotification, ActionableNotification, StateView, CodeSnippet, ChartFrame |
 | Коллекции | DataTable, Table, TableContainer, TableHead, TableRow, TableHeader, TableBody, TableCell, DataTableSkeleton, ContainedList, ContainedListItem, Pagination |
 | Слои | Modal (окно и шторка), ConfirmProvider, OverflowMenu, OverflowMenuItem, Toaster |
-| Составные | Tabs, TabList, Tab, TabPanels, TabPanel, FilterBar, ThreeColumn, ChatThread, ReplyBox |
+| Составные | Tabs, TabList, Tab, TabPanels, TabPanel, FilterBar, ThreeColumn, ChatThread, ReplyBox, Header, HeaderMenuButton, HeaderName, HeaderGlobalBar, HeaderGlobalAction, HeaderPanel, SideNav, SideNavItems, SideNavLink, SideNavDivider, SkipToContent |
 
 Уровень, смысл и анатомия (поверхность, поля, роль заголовка, метка, форма) каждого компонента — в
 `react/src/registry.json`. ДС ничья: компонентов одного продукта в ней нет.
@@ -122,6 +122,7 @@ Carbon, которые не нужны, не сделаны; сделанные 
 | `ThreeColumn` | список → лента → карточка рядом, на телефоне — по одной или шторками |
 | `ChatThread` | лента переписки (у Carbon — отдельный пакет `@carbon/ai-chat`) |
 | `ReplyBox` | поле ответа с отправкой по клавишам; свойства поля — как у `TextArea` (`labelText`, `invalid`, `invalidText`, `helperText`) |
+| UI Shell (`Header`, `SideNav`, `HeaderPanel`…) | конфигурация «шапка с левой панелью» (паттерн «Шапка и навигация»); не сделаны `HeaderNavigation`, `HeaderMenu`, `HeaderMenuItem`, `HeaderSideNavItems`, `SideNavMenu`, `SideNavMenuItem`, `SideNavHeader`, `SideNavFooter`, `Switcher`, `HeaderSwitcher`, `isRail`, `isFixedNav`; `HeaderName`, `SideNavLink` без `href` — `<button>`; точка перелома левой панели — `lg` Tailwind (1024), не 1056; `HeaderPanel` закрыта — в странице её нет, Esc закрывает (`onClose`); `SideNav` закрывает Esc (`onOverlayClick`) | точки перелома одни на ДС; продукт сам решает, что открывается |
 | «Показать ещё» | не компонент, а сборка паттерна «Обрезка содержимого»: `ContainedList` + `Button kind="ghost"`; страницы таблицы — `Pagination` |
 
 ## Паттерны

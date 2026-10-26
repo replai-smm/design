@@ -75,6 +75,7 @@ const PROMISED: Record<string, string[]> = {
   'ThreeColumn.stories.tsx': ['обычное', 'первый запуск'],
   'ChatThread.stories.tsx': ['обычное', 'загрузка', 'ошибка', 'первый запуск', 'много'],
   'ReplyBox.stories.tsx': ['обычное', 'загрузка', 'ошибка', 'нет доступа'],
+  'UIShell.stories.tsx': ['обычное', 'много'],
   'patterns/CommonActions.stories.tsx': ['обычное'],
   'patterns/Dialogs.stories.tsx': ['обычное'],
   'patterns/DisabledStates.stories.tsx': ['обычное'],

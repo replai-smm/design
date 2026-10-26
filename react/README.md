@@ -34,6 +34,7 @@
 | | `OverflowMenu` + `OverflowMenuItem`, `Toaster`/`useToast` | меню «…» (`iconDescription`, `itemText`, `isDelete`, `hasDivider`); «готово» всплывашкой (поля Carbon ToastNotification: `kind`, `title`, `subtitle`, `caption`, `timeout`) |
 | Составные | `Tabs` + `TabList`/`Tab`/`TabPanels`/`TabPanel`, `FilterBar`/`useUrlFilters` | один ряд сегментов: вкладки по номеру (`selectedIndex`, `onChange({ selectedIndex })`, все панели смонтированы), фильтры рядами `ContentSwitcher` в адресе; не влезает — вкладки одной строкой с прокруткой, фильтры переносятся |
 | | `ThreeColumn`, `ChatThread`, `ReplyBox` | список → лента → карточка; переписка; поле ответа (`labelText`, `invalid` + `invalidText`, `helperText`; `send`: `enter` · `ctrl-enter` · `button`) |
+| | `Header` + `HeaderMenuButton`/`HeaderName`/`HeaderGlobalBar`/`HeaderGlobalAction`/`HeaderPanel`, `SideNav` + `SideNavItems`/`SideNavLink`/`SideNavDivider`, `SkipToContent` | оболочка продукта «шапка с левой панелью»: одна строка шапки на любой ширине (кнопка меню · название · контекст · справа системные кнопки → панель); левая панель постоянна от `lg`, уже — поверх страницы (`expanded`, `onOverlayClick`) |
 
 Общие имена: у компонентов с парой в Carbon — имена и значения Carbon (`kind`, `size`, `renderIcon`, `label`,
 `description`, `status`); у наших — `state` (`ready` · `loading` · `error`), `empty`, `error` (у `ChartFrame`, `ChatThread`),
