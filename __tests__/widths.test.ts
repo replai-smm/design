@@ -1,0 +1,68 @@
+/** Сторож ширин (lint/widths.mjs): на фикстурном «Storybook» красный там, где страница шире окна, текст за краем или история не отрисовалась. */
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+// @ts-expect-error — .mjs без типов
+import { SHELF, WIDTHS, check, table } from '../lint/widths.mjs'
+
+const STORIES: Record<string, { title: string; name: string; html: string; broken?: boolean }> = {
+  'ok': { title: 'Экраны/SCR-01 Вход', name: 'Обычное', html: '<p>Вход в кабинет</p>' },
+  'wide-page': { title: 'Экраны/SCR-02 Широкая страница', name: 'Обычное', html: '<div style="width:2400px">шапка шире окна</div>' },
+  'cut-text': { title: 'Экраны/SCR-03 Режет текст', name: 'Обычное', html: '<div style="position:absolute;left:-60px">Обрезанный слева</div>' },
+  'scroll-row': { title: 'Экраны/SCR-04 Ряд с прокруткой', name: 'Обычное', html: '<div style="overflow-x:auto;width:200px"><div style="width:900px">ряд вкладок со своей прокруткой</div></div>' },
+  'broken': { title: 'Экраны/SCR-05 Не отрисовалась', name: 'Обычное', html: '', broken: true },
+  'not-a-screen': { title: 'Компоненты/Поля/TextInput', name: 'Обычное', html: '<div style="width:5000px">не экран — не проверяется</div>' },
+}
+
+let dir = ''
+beforeAll(() => {
+  dir = mkdtempSync(join(tmpdir(), 'widths-'))
+  const entries = Object.fromEntries(Object.entries(STORIES).map(([id, s]) => [id, { id, type: 'story', title: s.title, name: s.name }]))
+  writeFileSync(join(dir, 'index.json'), JSON.stringify({ v: 5, entries }))
+  mkdirSync(dir, { recursive: true })
+  const data = JSON.stringify(STORIES)
+  writeFileSync(
+    join(dir, 'iframe.html'),
+    `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head><body><div id="storybook-root"></div><script>
+const s = ${data}[new URLSearchParams(location.search).get('id')]
+if (s.broken) document.body.classList.add('sb-show-errordisplay'); else document.getElementById('storybook-root').innerHTML = '<div>' + s.html + '</div>'
+</script></body></html>`,
+  )
+})
+afterAll(() => rmSync(dir, { recursive: true, force: true }))
+
+describe('сторож ширин', () => {
+  it('ходит только по полке экранов и по четырём ширинам', async () => {
+    const r = await check({ storybook: dir })
+    expect(WIDTHS).toEqual([360, 1024, 1280, 1920])
+    expect(r.rows.map((x: { id: string }) => x.id).sort()).toEqual(['broken', 'cut-text', 'ok', 'scroll-row', 'wide-page'])
+    expect(SHELF.test('Экраны/SCR-12 Пульс/Пульс')).toBe(true)
+    expect(SHELF.test('Компоненты/Поля/TextInput')).toBe(false)
+  }, 60000)
+
+  it('красный: страница шире окна, текст за краем, история не отрисовалась; зелёный: тихий экран и ряд со своей прокруткой', async () => {
+    const r = await check({ storybook: dir })
+    const bad = r.bad as string[]
+    expect(bad.some((b) => b.includes('SCR-02') && b.includes('шире окна'))).toBe(true)
+    expect(bad.some((b) => b.includes('SCR-03') && b.includes('за краем'))).toBe(true)
+    expect(bad.some((b) => b.includes('SCR-05') && b.includes('не отрисовалась'))).toBe(true)
+    expect(bad.some((b) => b.includes('SCR-01'))).toBe(false)
+    expect(bad.some((b) => b.includes('SCR-04'))).toBe(false)
+  }, 60000)
+
+  it('обязательная история: нет её на полке — проверка называет, что нет', async () => {
+    const r = await check({ storybook: dir, require: ['Вход', 'Оболочка кабинета/Кабинет'] })
+    expect(r.missing).toEqual(['Оболочка кабинета/Кабинет'])
+  }, 60000)
+
+  it('таблица «история × ширина» для лога CI', async () => {
+    const r = await check({ storybook: dir })
+    const t = table(r) as string
+    expect(t).toContain('SCR-01 Вход · Обычное')
+    expect(t).toContain('360')
+    expect(t).toContain('1920')
+    expect(t).toContain('✗')
+    expect(t).toContain('✓')
+  }, 60000)
+})
