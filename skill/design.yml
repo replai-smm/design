@@ -29,6 +29,11 @@ jobs:
       - name: npm ci
         working-directory: __APP__
         run: $(command -v rsmm-npm-ci || echo npm ci) --prefer-offline --no-audit --no-fund
+      # root-ci:begin
+      - name: npm ci (корень репо: Playwright сторожа ширин)
+        working-directory: .
+        run: $(command -v rsmm-npm-ci || echo npm ci) --prefer-offline --no-audit --no-fund
+      # root-ci:end
       - name: design init --check
         run: node __APP__/node_modules/@replai-smm/design/bin/design.mjs init --check
       - name: design check
@@ -38,7 +43,7 @@ jobs:
         working-directory: __APP__
         run: npm run storybook:build
       - name: playwright (браузер сторожа ширин; уже стоит — шаг мгновенный)
-        working-directory: __APP__
+        working-directory: __ROOT__
         run: npx playwright install chromium-headless-shell
       - name: design widths
         run: node __APP__/node_modules/@replai-smm/design/bin/design.mjs widths

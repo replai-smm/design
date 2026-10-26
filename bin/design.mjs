@@ -40,6 +40,10 @@ const binFrom = (repo, app) => posix(relative(repo, join(app, 'node_modules', NA
 export function ownFiles({ repo, app }) {
   const rel = posix(relative(repo, app)) || '.'
   let workflow = read(join(SKILL_DIR, 'design.yml')).replaceAll('__APP__', rel)
+  // Корень репо со своим package.json (там Playwright e2e продукта) — ставится отдельным шагом, браузер сторожа берётся оттуда;
+  // нет корня — приложение само (`rel`).
+  const rootPkg = rel !== '.' && existsSync(join(repo, 'package.json'))
+  workflow = rootPkg ? workflow.replaceAll('__ROOT__', '.') : workflow.replace(/ {6}# root-ci:begin[\s\S]*?# root-ci:end\n/, '').replaceAll('__ROOT__', rel)
   // `"design": { "widths": false }` в package.json приложения — сторож ширин в CI пока не включён (продукт сам называет почему)
   if (appConfig(app).widths === false) workflow = workflow.replace(/ {6}# widths:begin[\s\S]*?# widths:end\n/, '')
   return {
