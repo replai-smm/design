@@ -87,7 +87,7 @@ Carbon, которые не нужны, не сделаны; сделанные 
 | `Modal` | на телефоне — шторка снизу (у Carbon — окно); `size` по умолчанию `md`; `secondaryButtons`, `isFullWidth`, `alert`, `shouldSubmitOnEnter`, `launcherButtonRef`, `selectorsFloatingMenus`, `hasScrollingContent` нет — фокус после закрытия возвращает слой сам; шторки слева в API нет (её берёт только `ThreeColumn`) | на телефоне окно по центру закрывает палец; шторка слева — колонка раскладки, не окно |
 | `OverflowMenu` | кнопка — всегда `kind="ghost"`; `focusTrap`, `menuOffset`, `menuOffsetFlip`, `selectorPrimaryFocus`, `light` нет; пункты — `itemText` (дети не берутся) | меню стоит в строке списка (П5) |
 | `ContentSwitcher`, `Switch` | `size`, `lowContrast`, `light`, `IconSwitch` нет; ряд переносится по `className` (фильтры) | ряд сегментов один на ДС — тот же, что у вкладок |
-| `Tabs` | все панели смонтированы, неактивные `hidden` (как у Carbon); `contained`, `fullWidth`, `dismissable`, `IconTab`, `TabsVertical`, `secondaryLabel` нет — счётчик — `CountBadge` в слове вкладки; ряд не влезает — прокрутка без полосы, без стрелок прокрутки | счётчик тона — наш компонент |
+| `Tabs` | линейные по умолчанию, `contained` — сегменты в рамке (Carbon); все панели смонтированы, неактивные `hidden` (как у Carbon); `fullWidth`, `dismissable`, `IconTab`, `TabsVertical`, `secondaryLabel` нет — счётчик — `CountBadge` в слове вкладки; ряд не влезает — прокрутка без полосы, без стрелок прокрутки | счётчик тона — наш компонент |
 | П5 | «одна главная на поверхность», «опасное не рядом с главной», «в строке — только ghost» (`TableRow`, `ContainedListItem action`) — проверка в разработке (`rule()`), у Carbon её нет | правило ДС |
 
 ### Расширения сверх Carbon

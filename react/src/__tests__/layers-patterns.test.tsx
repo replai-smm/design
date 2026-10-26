@@ -159,6 +159,31 @@ describe('всплывашка и меню «…»', () => {
 })
 
 describe('вкладки, ряд сегментов, фильтры', () => {
+  it('вкладки: линейные по умолчанию (линия под рядом, подчёркнута выбранная), contained — ряд сегментов в рамке', () => {
+    const { container, rerender } = render(
+      <Tabs>
+        <TabList aria-label="Разделы">
+          <Tab>Одна</Tab>
+          <Tab>Две</Tab>
+        </TabList>
+      </Tabs>,
+    )
+    let row = container.querySelector('[role=tablist]') as HTMLElement
+    expect(row.getAttribute('data-part')).toBe('line')
+    expect(row.className).toContain('border-b')
+    rerender(
+      <Tabs>
+        <TabList aria-label="Разделы" contained>
+          <Tab>Одна</Tab>
+          <Tab>Две</Tab>
+        </TabList>
+      </Tabs>,
+    )
+    row = container.querySelector('[role=tablist]') as HTMLElement
+    expect(row.getAttribute('data-part')).toBe('segments')
+    expect((screen.getByRole('tab', { name: 'Одна' }) as HTMLElement).className).toContain('data-[state=active]:bg-selected')
+  })
+
   const tabs = (props: Partial<React.ComponentProps<typeof Tabs>> = {}) => (
     <Tabs {...props}>
       <TabList aria-label="Разделы">
@@ -186,7 +211,7 @@ describe('вкладки, ряд сегментов, фильтры', () => {
     const onChange = vi.fn()
     const { rerender } = render(tabs({ selectedIndex: 1, onChange }))
     expect(screen.getByRole('tab', { name: /Вторая/ }).getAttribute('aria-selected')).toBe('true')
-    expect(screen.getByRole('tab', { name: /Вторая/ }).className).toContain('data-[state=active]:bg-selected')
+    expect(screen.getByRole('tab', { name: /Вторая/ }).className).toContain('data-[state=active]:border-inverse')
     expect(document.querySelector('[role=tab] [data-slot=count-badge]')).toBeTruthy()
     const first = screen.getByText('первая').closest('[role=tabpanel]') as HTMLElement
     expect(first.hidden).toBe(true)

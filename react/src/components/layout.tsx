@@ -197,26 +197,31 @@ export interface PageHeaderProps {
   subtitle?: ReactNode
   /** Тихие действия шапки; главная кнопка — не здесь (Carbon: pageActions). */
   pageActions?: ReactNode
+  /** Вкладки раздела под заголовком (Carbon: tabs): `<Tabs><TabList>…</TabList></Tabs>` — линейные, без панелей. */
+  tabs?: ReactNode
 }
 
-/** Шапка страницы (Carbon: PageHeader): заголовок уровня 1, строка под ним, действия справа. */
-export function PageHeader({ title, subtitle, pageActions }: PageHeaderProps) {
+/** Шапка страницы (Carbon: PageHeader): заголовок уровня 1, строка под ним, действия справа, вкладки раздела под ними. */
+export function PageHeader({ title, subtitle, pageActions, tabs }: PageHeaderProps) {
   const h1 = (
     <h1 data-part="title" className="m-0 min-w-0 text-page text-fg">
       {title}
     </h1>
   )
   return (
-    <header data-slot="page-header" className="flex min-w-0 items-start justify-between gap-blocks">
-      {subtitle ? (
-        <div className="flex min-w-0 flex-col gap-tight">
-          {h1}
-          <p className="m-0 max-w-prose text-body text-fg-muted">{subtitle}</p>
-        </div>
-      ) : (
-        h1
-      )}
-      {pageActions && <div className="flex shrink-0 items-center gap-items">{pageActions}</div>}
+    <header data-slot="page-header" className="flex min-w-0 flex-col gap-blocks">
+      <div className="flex min-w-0 items-start justify-between gap-blocks">
+        {subtitle ? (
+          <div className="flex min-w-0 flex-col gap-tight">
+            {h1}
+            <p className="m-0 max-w-prose text-body text-fg-muted">{subtitle}</p>
+          </div>
+        ) : (
+          h1
+        )}
+        {pageActions && <div className="flex shrink-0 items-center gap-items">{pageActions}</div>}
+      </div>
+      {tabs}
     </header>
   )
 }
