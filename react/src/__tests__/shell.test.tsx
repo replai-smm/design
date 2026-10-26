@@ -75,7 +75,7 @@ describe('левая панель', () => {
     const nav = container.querySelector('[data-slot=side-nav]') as HTMLElement
     expect(nav.className).toContain('hidden')
     expect(nav.className).toContain('lg:flex')
-    expect(nav.className).toContain('lg:sticky')
+    expect(nav.className).toContain('lg:self-stretch')
     expect(container.querySelector('[data-slot=side-nav-overlay]')).toBeNull()
     rerender(
       <SideNav aria-label="Разделы" expanded onOverlayClick={close}>

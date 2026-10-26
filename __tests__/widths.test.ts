@@ -10,7 +10,8 @@ const STORIES: Record<string, { title: string; name: string; html: string; broke
   'ok': { title: 'Экраны/SCR-01 Вход', name: 'Обычное', html: '<p>Вход в кабинет</p>' },
   'wide-page': { title: 'Экраны/SCR-02 Широкая страница', name: 'Обычное', html: '<div style="width:2400px">шапка шире окна</div>' },
   'cut-text': { title: 'Экраны/SCR-03 Режет текст', name: 'Обычное', html: '<div style="position:absolute;left:-60px">Обрезанный слева</div>' },
-  'scroll-row': { title: 'Экраны/SCR-04 Ряд с прокруткой', name: 'Обычное', html: '<div style="overflow-x:auto;width:200px"><div style="width:900px">ряд вкладок со своей прокруткой</div></div>' },
+  'implicit-scroll': { title: 'Экраны/SCR-06 Панель с неявной прокруткой', name: 'Обычное', html: '<div style="width:200px;overflow-y:auto"><div style="width:600px;white-space:nowrap">текст шире панели без своей прокрутки</div></div>' },
+  'scroll-row': { title: 'Экраны/SCR-04 Ряд с прокруткой', name: 'Обычное', html: '<div class="overflow-x-auto" style="overflow-x:auto;width:200px"><div style="width:900px">ряд вкладок со своей прокруткой</div></div>' },
   'broken': { title: 'Экраны/SCR-05 Не отрисовалась', name: 'Обычное', html: '', broken: true },
   'not-a-screen': { title: 'Компоненты/Поля/TextInput', name: 'Обычное', html: '<div style="width:5000px">не экран — не проверяется</div>' },
 }
@@ -36,7 +37,7 @@ describe('сторож ширин', () => {
   it('ходит только по полке экранов и по четырём ширинам', async () => {
     const r = await check({ storybook: dir })
     expect(WIDTHS).toEqual([360, 1024, 1280, 1920])
-    expect(r.rows.map((x: { id: string }) => x.id).sort()).toEqual(['broken', 'cut-text', 'ok', 'scroll-row', 'wide-page'])
+    expect(r.rows.map((x: { id: string }) => x.id).sort()).toEqual(['broken', 'cut-text', 'implicit-scroll', 'ok', 'scroll-row', 'wide-page'])
     expect(SHELF.test('Экраны/SCR-12 Пульс/Пульс')).toBe(true)
     expect(SHELF.test('Компоненты/Поля/TextInput')).toBe(false)
   }, 60000)
@@ -47,6 +48,7 @@ describe('сторож ширин', () => {
     expect(bad.some((b) => b.includes('SCR-02') && b.includes('шире окна'))).toBe(true)
     expect(bad.some((b) => b.includes('SCR-03') && b.includes('за краем'))).toBe(true)
     expect(bad.some((b) => b.includes('SCR-05') && b.includes('не отрисовалась'))).toBe(true)
+    expect(bad.some((b) => b.includes('SCR-06') && b.includes('за краем'))).toBe(true)
     expect(bad.some((b) => b.includes('SCR-01'))).toBe(false)
     expect(bad.some((b) => b.includes('SCR-04'))).toBe(false)
   }, 60000)
