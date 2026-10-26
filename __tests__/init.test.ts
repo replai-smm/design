@@ -29,10 +29,20 @@ describe('design init', () => {
     expect(wf).toContain('node web/node_modules/@replai-smm/design/bin/design.mjs check')
     expect(wf).toContain('working-directory: web')
     expect(wf).not.toContain('__APP__')
+    expect(wf).not.toContain('__ROOT__')
+    // корень репо со своим package.json: ставится отдельным шагом, браузер сторожа — из корня
+    expect(wf).toContain('npm ci (корень репо')
     const settings = JSON.parse(readFileSync(join(repo, '.claude/settings.json'), 'utf8'))
     expect(settings.hooks.PreToolUse[0].matcher).toBe('Edit|Write|MultiEdit')
     expect(settings.hooks.PreToolUse[0].hooks[0].command).toContain('web/node_modules/@replai-smm/design/bin/design.mjs hook')
     expect(JSON.parse(readFileSync(join(repo, 'package.json'), 'utf8')).scripts.design).toBe('node web/node_modules/@replai-smm/design/bin/design.mjs check --base origin/main')
+  })
+
+  it('нет корневого package.json: шага корня нет, браузер ставится из приложения', () => {
+    rmSync(join(repo, 'package.json'))
+    const wf = ownFiles({ repo, app })['.github/workflows/design.yml']
+    expect(wf).not.toContain('npm ci (корень репо')
+    expect(wf).toMatch(/playwright[^\n]*\n\s+working-directory: web/)
   })
 
   it('идемпотентен: второй запуск ничего не пишет', () => {
