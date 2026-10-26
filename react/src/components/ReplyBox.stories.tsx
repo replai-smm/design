@@ -1,23 +1,22 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { Add } from '../lib/icons.gen'
 import { Button } from './Button'
-import { CommandMenu } from './CommandMenu'
 import { ReplyBox } from './ReplyBox'
-import { commands } from '../stories/agent-fixtures'
 
 const meta = {
-  title: 'Паттерны/Поле ответа',
+  title: 'Компоненты/Составные/ReplyBox',
   component: ReplyBox,
   parameters: { layout: 'padded' },
   args: {
-    label: 'Ответ от имени сообщества',
-    placeholder: 'Ответ от имени сообщества',
+    labelText: 'Ответ от имени команды',
+    placeholder: 'Ответ от имени команды',
     onSend: () => {},
     tools: (
       <>
-        <Button variant="ghost" icon="add">
+        <Button kind="ghost" renderIcon={Add}>
           Черновик ИИ
         </Button>
-        <Button variant="ghost">Ответ не нужен</Button>
+        <Button kind="ghost">Ответ не нужен</Button>
       </>
     ),
     className: 'max-w-window',
@@ -29,17 +28,15 @@ type S = StoryObj<typeof meta>
 /** «Отправить» — главная; рядом тихие; подсказка о клавишах. */
 export const Обычное: S = {}
 export const Загрузка: S = { tags: ['state:загрузка'], args: { value: 'Да, с 9 до 21.', sending: true } }
-export const Ошибка: S = { tags: ['state:ошибка'], args: { value: 'Да, с 9 до 21.', error: 'ВК не принял ответ: нет доступа к сообществу' } }
-export const НетДоступа: S = { tags: ['state:нет доступа'], args: { disabled: 'Только просмотр: отвечает админ сообщества' } }
-/** Чат агента: кнопки в ряд, «Стоп» пока агент работает, меню «/» над полем. */
+export const Ошибка: S = { tags: ['state:ошибка'], args: { value: 'Да, с 9 до 21.', invalid: true, invalidText: 'Сервер не принял ответ: нет доступа к диалогу' } }
+export const НетДоступа: S = { tags: ['state:нет доступа'], args: { disabled: true, helperText: 'Только просмотр: отвечает админ команды' } }
+/** Разговор с агентом: кнопки в ряд, «Стоп» пока агент работает. */
 export const Агент: S = {
   args: {
-    label: 'Сообщение агенту',
+    labelText: 'Сообщение агенту',
     placeholder: 'Сообщение агенту',
-    value: '/re',
     layout: 'row',
     stop: { onStop: () => {} },
     tools: undefined,
-    menu: <CommandMenu label="Команды и скиллы" items={commands} query="re" onPick={() => {}} />,
   },
 }

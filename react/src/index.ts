@@ -1,60 +1,65 @@
-// ДС-React: компоненты по уровням (registry.json). Импорт: `@replai-smm/design`.
+// ДС-React: компоненты по уровням (registry.json). Импорт — из корня пакета.
 
 // Раскладка
-export { Stack, Inline, Grid, Page, PageHeader, Section, SurfaceProvider, type Space, type StackProps, type InlineProps, type GridProps, type PageProps, type PageHeaderProps, type SectionProps } from './components/layout'
+export { Stack, Inline, Grid, Column, Page, PageHeader, Section, SurfaceProvider, BottomBar, useHeadingLevel, type SpacingStep, type StackProps, type InlineProps, type GridProps, type ColumnProps, type ColumnSpan, type PageProps, type PageHeaderProps, type SectionProps, type HeadingLevel, type BottomBarProps } from './components/layout'
 
 // Элементы
 export { Icon, type IconName } from './components/Icon'
-export { Button, ActionArea, type ButtonProps, type ButtonVariant, type ActionAreaProps, type PrimaryAction } from './components/Button'
-export { StatusBadge, type StatusBadgeProps } from './components/StatusBadge'
+export { Button, ButtonSet, IconButton, type ButtonProps, type ButtonSetProps, type IconButtonProps } from './components/Button'
+export { Heading, type HeadingProps } from './components/Heading'
+export { Link, type LinkProps } from './components/Link'
+export { Tag, DismissibleTag, type TagProps, type DismissibleTagProps } from './components/Tag'
+export { IconIndicator, type IconIndicatorProps } from './components/IconIndicator'
 export { CountBadge, countText, type CountBadgeProps } from './components/CountBadge'
 export { Avatar, type AvatarProps } from './components/Avatar'
 export { InlineLoading, type InlineLoadingProps } from './components/InlineLoading'
 export { Meter, meterTone, type MeterProps } from './components/Meter'
-export { Steps, stepProgress, type StepsProps } from './components/Steps'
+export { ProgressIndicator, ProgressStep, type ProgressIndicatorProps, type ProgressStepProps } from './components/ProgressIndicator'
 export { Tooltip, type TooltipProps } from './components/Tooltip'
+export { Toggletip, ToggletipLabel, ToggletipButton, ToggletipContent, type ToggletipProps, type ToggletipLabelProps, type ToggletipButtonProps, type ToggletipContentProps } from './components/Toggletip'
+export { Accordion, AccordionItem, type AccordionProps, type AccordionItemProps } from './components/Accordion'
+export { ContentSwitcher, Switch, type ContentSwitcherProps, type SwitchProps, type SwitchEventHandlersParams } from './components/ContentSwitcher'
 export { Delta, deltaText, type DeltaProps, type DeltaUnit } from './components/Delta'
-export { Skeleton, Loading } from './components/Skeleton'
+export { SkeletonText, SkeletonPlaceholder, type SkeletonTextProps, type SkeletonPlaceholderProps } from './components/SkeletonText'
 export { Prose, ProseHtml, type ProseProps } from './components/Prose'
 export { Chart, chartHasData, niceMax, ticksOf, tickIndexes, SERIES, type ChartProps, type ChartSeries, type SeriesLine } from './components/Chart'
 
 // Поля
-export { TextField, TextArea, type TextFieldProps, type TextAreaProps, type FieldBaseProps } from './components/TextField'
-export { Select, type SelectProps, type SelectOption } from './components/Select'
-export { NumberField, type NumberFieldProps } from './components/NumberField'
-export { Checkbox, CheckboxGroup, type CheckboxProps, type CheckboxGroupProps, type CheckedState } from './components/Checkbox'
-export { Combobox, type ComboboxProps, type ComboboxOption } from './components/Combobox'
-export { FileField, fileSizeText, acceptText, fileMatches, type FileFieldProps, type FileFieldHandle } from './components/FileField'
-export { SearchField, type SearchFieldProps } from './components/SearchField'
+export { TextInput, PasswordInput, TextArea, type TextInputProps, type PasswordInputProps, type TextAreaProps } from './components/TextInput'
+export { NumberInput, type NumberInputProps } from './components/NumberInput'
+export { Select, SelectItem, SelectItemGroup, type SelectProps, type SelectItemProps, type SelectItemGroupProps } from './components/Select'
+export { Checkbox, CheckboxGroup, type CheckboxProps, type CheckboxGroupProps } from './components/Checkbox'
+export { RadioButton, RadioButtonGroup, type RadioButtonProps, type RadioButtonGroupProps } from './components/RadioButton'
+export { Toggle, type ToggleProps } from './components/Toggle'
+export { ComboBox, type ComboBoxProps } from './components/ComboBox'
+export { FileUploader, FileUploaderItem, type FileUploaderProps, type FileUploaderItemProps, type FileUploaderHandle } from './components/FileUploader'
+export { Search, type SearchProps } from './components/Search'
+export { Form, FormGroup, type FormProps, type FormGroupProps } from './components/Form'
 
 // Поверхности
-export { Surface, type SurfaceProps } from './components/Surface'
-export { Card, type CardProps } from './components/Card'
+export { Tile, ClickableTile, ExpandableTile, TileAboveTheFoldContent, TileBelowTheFoldContent, type TileProps, type ClickableTileProps, type ExpandableTileProps, type TileAboveTheFoldContentProps, type TileBelowTheFoldContentProps } from './components/Tile'
 export { StatTile, type StatTileProps, type StatTileCompare } from './components/StatTile'
-export { Notification, type NotificationProps, type NotificationTone } from './components/Notification'
+export { InlineNotification, ActionableNotification, type InlineNotificationProps, type ActionableNotificationProps, type NotificationCloseHandler } from './components/InlineNotification'
 export { StateView, type StateViewProps } from './components/StateView'
-export { CodeBlock, type CodeBlockProps } from './components/CodeBlock'
+export { CodeSnippet, type CodeSnippetProps } from './components/CodeSnippet'
 export { ChartFrame, type ChartFrameProps, type LegendItem } from './components/ChartFrame'
-export { DecisionCard, type DecisionCardProps, type DecisionAnswer } from './components/DecisionCard'
-export { Diagram, edgePath, litSet, type DiagramProps, type DiagramNode, type DiagramItem, type DiagramDot, type DiagramEdge } from './components/Diagram'
 
 // Коллекции
-export { DataTable, List, compareSortValues, type Column, type SortDirection, type SortState, type DataTableProps, type ListProps, type CollectionProps } from './components/Collection'
-export { ProofreadGrid, GridLegend, StatusRow, type ProofreadGridProps, type GridColumn, type GridCell, type GridLegendProps, type StatusRowProps } from './components/ProofreadGrid'
-export { WeekCalendar, mondayOf, addWeeks, weekTitle, type WeekCalendarProps } from './components/WeekCalendar'
+export { DataTable, Table, TableContainer, TableHead, TableRow, TableHeader, TableBody, TableCell, DataTableSkeleton, type DataTableProps, type DataTableRenderProps, type DataTableHeader, type DataTableRow, type DataTableCell, type DataTableInputRow, type SortRowFn, type SortRowParams, type TableProps, type TableContainerProps, type TableHeadProps, type TableRowProps, type TableHeaderProps, type TableBodyProps, type TableCellProps, type DataTableSkeletonProps } from './components/DataTable'
+export { ContainedList, ContainedListItem, type ContainedListProps, type ContainedListItemProps } from './components/ContainedList'
+export { Pagination, type PaginationProps, type PaginationPageSize } from './components/Pagination'
 
 // Слои
-export { Dialog, ConfirmProvider, useConfirm, type DialogProps, type DialogSize, type ConfirmOptions } from './components/Dialog'
-export { Toaster, useToast, type ToasterProps } from './components/Toast'
-export { CommandMenu, matchCommands, type CommandMenuProps, type CommandMenuHandle, type CommandItem } from './components/CommandMenu'
+export { Modal, ConfirmProvider, useConfirm, type ModalProps, type ConfirmOptions } from './components/Modal'
+export { OverflowMenu, OverflowMenuItem, type OverflowMenuProps, type OverflowMenuItemProps } from './components/OverflowMenu'
+export { Toaster, useToast, type ToasterProps, type ToastNotificationProps } from './components/Toaster'
 
-// Паттерны
-export { Tabs, type TabItem, type TabsProps } from './components/Tabs'
+// Составные
+export { Tabs, TabList, Tab, TabPanels, TabPanel, type TabsProps, type TabListProps, type TabProps, type TabPanelsProps, type TabPanelProps } from './components/Tabs'
 export { FilterBar, useUrlFilters, type FilterDef, type FilterOption, type FilterValue, type FilterBarProps } from './components/FilterBar'
 export { ThreeColumn, type ThreeColumnProps, type ColumnIndex } from './components/ThreeColumn'
 export { ChatThread, type ChatMessage, type ChatThreadProps } from './components/ChatThread'
 export { ReplyBox, type ReplyBoxProps, type ReplyBoxHandle } from './components/ReplyBox'
-export { AgentStep, type AgentStepProps } from './components/AgentStep'
 
 // Словари
-export { TONES, TONE_ORDER, STATUS_IDS, statusOf, toneOf, type Tone, type Progress, type StateKind, type StatusId, type DataState, type EmptyView, type ErrorView } from './lib/vocab'
+export { TONES, TONE_ORDER, BUTTON_KINDS, SIZES, TAG_TYPES, ICON_INDICATOR_KINDS, FILENAME_STATUSES, NOTIFICATION_KINDS, MODAL_SIZES, SORT_STATES, CONTAINED_LIST_KINDS, type Tone, type Progress, type StateKind, type DataState, type EmptyView, type ErrorView, type ButtonKind, type IconButtonKind, type Size, type InlineLoadingStatus, type TagType, type IconIndicatorKind, type PopoverAlignment, type ProgressStepState, type ToggleSize, type FilenameStatus, type NotificationKind, type ModalSize, type DataTableSortState, type ContainedListKind } from './lib/vocab'

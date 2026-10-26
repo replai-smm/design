@@ -3,10 +3,9 @@ export { Twin } from './components/Twin'
 export { Low } from './components/Low'
 export { High } from './components/High'
 export { Weird } from './components/Weird'
-export { Prod } from './components/Prod'
-export { Unlisted } from './components/Prod'
+export { Unlisted } from './components/Unlisted'
 export { Ext } from './components/Ext'
 export { Rel } from './components/Rel'
 export { Dyn } from './components/Dyn'
 export * from './components/Hidden'
-export default Prod
+export default Unlisted

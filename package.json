@@ -1,6 +1,6 @@
 {
   "name": "@replai-smm/design",
-  "version": "1.2.0",
+  "version": "2.0.0",
   "private": true,
   "type": "module",
   "description": "Дизайн-система replai-smm: роли и шкалы, ДС-React по уровням, правила машиной. Продукты ставят по тегу: github:replai-smm/design#vX.Y.Z (в теге лежит собранный dist/).",
@@ -12,14 +12,15 @@
   ],
   "exports": {
     ".": "./react/src/index.ts",
+    "./icons": "./react/src/icons.ts",
     "./styles.css": "./react/src/ds.css",
     "./tokens.css": "./dist/tokens.css",
     "./tailwind.css": "./dist/tailwind.css",
     "./tokens": "./dist/tokens.ts",
     "./tokens.json": "./tokens.json",
     "./scale.json": "./scale.json",
-    "./statuses.json": "./statuses.json",
     "./matrix.yaml": "./matrix.yaml",
+    "./patterns/*": "./patterns/*",
     "./fonts/*": "./fonts/*",
     "./lint": "./lint/principles.mjs",
     "./lint/cli": "./lint/cli.mjs",
@@ -37,17 +38,18 @@
     "!react/src/**/__tests__",
     "!react/src/**/*.stories.tsx",
     "!react/src/stories",
+    "!react/src/patterns",
     "!react/src/showcase.css",
     "!react/src/storybook.css",
     "tokens.json",
     "scale.json",
-    "statuses.json",
-    "statuses.schema.json",
     "tokens.schema.json",
     "matrix.schema.json",
     "matrix.yaml",
+    "patterns",
     "NOTICE.md",
-    "README.md"
+    "README.md",
+    "CHANGELOG.md"
   ],
   "scripts": {
     "build": "node build.mjs",
@@ -59,7 +61,9 @@
     "lint": "npm run lint -w react",
     "storybook": "npm run storybook -w react",
     "storybook:build": "npm run storybook:build -w react",
-    "check": "node build.mjs && npm run typecheck && npm run lint && npm test && npm run test:visual"
+    "check": "node build.mjs && npm run typecheck && npm run lint && npm test && npm run test:visual",
+    "check:ci": "node build.mjs && npm run typecheck && npm run lint && npm test",
+    "release": "node release.mjs deploy && node release.mjs watch"
   },
   "peerDependencies": {
     "radix-ui": "^1.4.3",

@@ -1,5 +1,5 @@
 /**
- * dist/ и значки — вывод из tokens.json, scale.json, statuses.json и набора Carbon. Правка руками или забытая
+ * dist/ и значки — вывод из tokens.json, scale.json и набора Carbon. Правка руками или забытая
  * пересборка — красный. Плюс главное, что обещает каждый вывод.
  */
 import { describe, it, expect } from 'vitest'
@@ -11,7 +11,6 @@ const design = resolve(import.meta.dirname, '..')
 const read = (p: string) => readFileSync(resolve(design, p), 'utf8')
 const tokens = JSON.parse(read('tokens.json'))
 const scale = JSON.parse(read('scale.json'))
-const { statuses } = JSON.parse(read('statuses.json'))
 
 describe('dist', () => {
   const out = outputs()
@@ -41,12 +40,11 @@ describe('dist', () => {
     expect(tw).not.toMatch(/#[0-9a-f]{3,8}\b/)
   })
 
-  it('tokens.ts: роли обеих тем, тоны и статусы — те же, что в источнике', async () => {
+  it('tokens.ts: роли обеих тем и тоны — те же, что в источнике', async () => {
     const m = await import('../dist/tokens.ts')
     expect(Object.keys(m.colors)).toEqual(['light', 'dark'])
     expect(m.colors.dark.surface).toBe(tokens.colors.surface.dark)
     expect(m.tones).toEqual(tokens.tones)
-    expect(m.statuses.map((s: { say: string }) => s.say)).toEqual(statuses.map((s: { say: string }) => s.say))
     expect(m.cssVar('accent')).toBe('var(--ds-accent)')
   })
 

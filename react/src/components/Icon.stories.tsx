@@ -3,7 +3,7 @@ import { TONES } from '../lib/vocab'
 import { Icon } from './Icon'
 
 const meta = {
-  title: 'Элементы/Значок',
+  title: 'Компоненты/Элементы/Icon',
   component: Icon,
   parameters: { layout: 'padded' },
   args: { name: 'close' },

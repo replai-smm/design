@@ -76,6 +76,10 @@ async function main(argv) {
       await page.evaluate(() => document.fonts.ready)
       // История показана: Storybook ставит sb-show-main (окна рисуются вне корня — по корню не узнать); под нагрузкой иначе снимается заставка.
       await page.waitForFunction(() => document.body.classList.contains('sb-show-main') || document.body.classList.contains('sb-show-errordisplay'), null, { timeout: 60_000 })
+      // Липкая полоса низа снимается на своём месте — в конце страницы: окно во всю высоту, иначе полоса «застывает» посреди
+      // кадра поверх содержимого (снимок во всю страницу не растягивает окно, а sticky считает от окна).
+      const tall = await page.evaluate(() => (document.querySelector('[data-slot="bottom-bar"]') ? document.documentElement.scrollHeight : 0))
+      if (tall > HEIGHT[width]) await page.setViewportSize({ width, height: tall })
       // Кадр — когда два снимка подряд совпали: пауза фиксированной длины под нагрузкой машины снимает недорисованное.
       let png = await page.screenshot({ fullPage: true })
       for (let i = 0; i < 20; i++) {

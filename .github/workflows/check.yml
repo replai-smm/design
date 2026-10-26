@@ -1,0 +1,34 @@
+name: check
+
+# Проверка ДС на PR и на push в main: сборка, типы, сторож, все тесты (`npm run check:ci`). Раннер — облачный GitHub
+# (репо публичное: свой ПК под чужой код не ставим), секретов нет. Сверка облика (снимки) — на ПК перед слиянием
+# (`npm run check`): эталоны сняты на ПК, а растр шрифтов на другой машине Linux отличается. Выпуска здесь нет:
+# тег ставит `npm run release` из клона (README → «Выпуск»).
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      IBM_TELEMETRY_DISABLED: 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npm run check:ci

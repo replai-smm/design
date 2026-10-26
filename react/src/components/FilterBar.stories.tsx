@@ -8,7 +8,7 @@ function Demo() {
     <FilterBar
       value={v}
       onChange={set}
-      search={{ label: 'Поиск по группам' }}
+      search={{ labelText: 'Поиск по группам' }}
       filters={[
         { key: 'статус', label: 'Статус', options: [{ value: 'падает', label: 'падает', count: 2 }, { value: 'работает', label: 'работает', count: 5 }] },
         { key: 'период', label: 'Период', required: true, options: [{ value: '30', label: '30 дней' }, { value: '90', label: '90 дней' }] },
@@ -18,7 +18,7 @@ function Demo() {
 }
 
 const meta = {
-  title: 'Паттерны/Фильтры',
+  title: 'Компоненты/Составные/FilterBar',
   component: Demo,
   parameters: { layout: 'padded' },
 } satisfies Meta<typeof Demo>

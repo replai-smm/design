@@ -18,7 +18,7 @@ const registry = JSON.parse(readFileSync(resolve(design, 'react/src/registry.jso
 const { max_diff_pixels } = YAML.parse(readFileSync(resolve(design, 'matrix.yaml'), 'utf8'))
 
 describe('сверка снимков', () => {
-  const file = readdirSync(base).find((f) => f.startsWith('элементы-кнопка--виды.light.1280'))!
+  const file = readdirSync(base).find((f) => f.startsWith('компоненты-элементы-button--виды.light.1280'))!
   const png = readFileSync(resolve(base, file))
 
   it('тот же кадр — разницы нет', () => {
@@ -41,7 +41,7 @@ describe('сверка снимков', () => {
 
 describe('анатомия по реестру', () => {
   const good = {
-    slots: [{ slot: 'card', padding: 16, radius: 6, height: 120, markWidth: 1, hasMark: false, title: { size: 14, weight: 600 } }],
+    slots: [{ slot: 'state-view', padding: 16, radius: 6, height: 120, markWidth: 1, hasMark: false, title: { size: 14, weight: 600 } }],
     fonts: [12, 14],
     radii: [0, 4, 6],
     controls: [{ what: 'кнопка «Да»', height: 40 }],
@@ -54,8 +54,8 @@ describe('анатомия по реестру', () => {
   it('приманка: поля, заголовок, метка, угол, текст, плотность — каждое названо', () => {
     const bait = {
       slots: [
-        { slot: 'card', padding: 12, radius: 6, height: 120, markWidth: 1, hasMark: false, title: { size: 16, weight: 600 } },
-        { slot: 'notification', padding: 16, radius: 6, height: 60, markWidth: 4, hasMark: true, title: { size: 14, weight: 600 } },
+        { slot: 'state-view', padding: 12, radius: 6, height: 120, markWidth: 1, hasMark: false, title: { size: 16, weight: 600 } },
+        { slot: 'inline-notification', padding: 16, radius: 6, height: 60, markWidth: 4, hasMark: true, title: { size: 14, weight: 600 } },
         { slot: 'button', padding: 16, radius: 0, height: 40, markWidth: 1, hasMark: false, title: null },
       ],
       fonts: [14, 15],

@@ -1,7 +1,7 @@
 /**
  * Сторожа пакета: истории на каждое обещанное состояние (П12), теги состояний — только из матрицы облика; только роли
  * и шкалы в исходниках и историях; движение — токенами, раскрытие и выезд — 0,6 с без прыжка; классы тонов — те же
- * роли, что в словаре тонов tokens.json (и заливка сетки статуса).
+ * роли, что в словаре тонов tokens.json.
  */
 import { describe, it, expect } from 'vitest'
 import { readFileSync, readdirSync } from 'node:fs'
@@ -9,7 +9,6 @@ import { resolve, join } from 'node:path'
 import { scan } from '../../../lint/scan.mjs'
 import { tones } from '../../../dist/tokens.ts'
 import { TONE, TONES } from '../lib/vocab'
-import { FILL } from '../components/ProofreadGrid'
 import { stories, stateOf, STORY_FILES } from './stories'
 
 const root = resolve(import.meta.dirname, '..', '..')
@@ -23,49 +22,76 @@ const ALL = ['обычное', 'загрузка', 'ошибка', 'первый
 const PROMISED: Record<string, string[]> = {
   'Foundations.stories.tsx': ['обычное'],
   'layout.stories.tsx': ['обычное'],
+  'Stack.stories.tsx': ['обычное'],
+  'Grid.stories.tsx': ['обычное'],
   'Icon.stories.tsx': ['обычное'],
-  'Button.stories.tsx': ['обычное', 'загрузка'],
-  'StatusBadge.stories.tsx': ['обычное'],
+  'Button.stories.tsx': ['обычное'],
+  'ButtonSet.stories.tsx': ['обычное', 'загрузка'],
+  'IconButton.stories.tsx': ['обычное'],
+  'Heading.stories.tsx': ['обычное'],
+  'Link.stories.tsx': ['обычное'],
+  'Tag.stories.tsx': ['обычное'],
+  'IconIndicator.stories.tsx': ['обычное'],
   'CountBadge.stories.tsx': ['обычное', 'много'],
   'Avatar.stories.tsx': ['обычное', 'ошибка'],
   'InlineLoading.stories.tsx': ['обычное'],
   'Meter.stories.tsx': ['обычное', 'много'],
-  'Steps.stories.tsx': ['обычное', 'ошибка', 'всё сделано'],
+  'ProgressIndicator.stories.tsx': ['обычное', 'ошибка', 'всё сделано'],
   'Tooltip.stories.tsx': ['обычное'],
+  'Toggletip.stories.tsx': ['обычное'],
+  'Accordion.stories.tsx': ['обычное', 'много'],
+  'ContentSwitcher.stories.tsx': ['обычное'],
   'Delta.stories.tsx': ['обычное'],
-  'Skeleton.stories.tsx': ['загрузка'],
+  'SkeletonText.stories.tsx': ['загрузка'],
   'Prose.stories.tsx': ['обычное'],
   'Chart.stories.tsx': ['обычное'],
-  'TextField.stories.tsx': ['обычное', 'ошибка'],
+  'TextInput.stories.tsx': ['обычное', 'ошибка'],
+  'PasswordInput.stories.tsx': ['обычное', 'ошибка'],
+  'TextArea.stories.tsx': ['обычное', 'ошибка'],
+  'NumberInput.stories.tsx': ['обычное', 'ошибка'],
   'Select.stories.tsx': ['обычное', 'ошибка'],
-  'NumberField.stories.tsx': ['обычное', 'ошибка'],
   'Checkbox.stories.tsx': ['обычное', 'ошибка'],
-  'Combobox.stories.tsx': ['обычное', 'загрузка', 'ошибка', 'ничего не найдено', 'много'],
-  'FileField.stories.tsx': ['обычное', 'ошибка'],
-  'SearchField.stories.tsx': ['обычное'],
-  'Surface.stories.tsx': ['обычное'],
-  'Card.stories.tsx': ['обычное'],
+  'RadioButton.stories.tsx': ['обычное', 'ошибка'],
+  'Toggle.stories.tsx': ['обычное'],
+  'ComboBox.stories.tsx': ['обычное', 'ошибка', 'много'],
+  'FileUploader.stories.tsx': ['обычное', 'ошибка'],
+  'Search.stories.tsx': ['обычное'],
+  'Form.stories.tsx': ['обычное', 'ошибка'],
+  'Tile.stories.tsx': ['обычное'],
+  'ExpandableTile.stories.tsx': ['обычное'],
   'StatTile.stories.tsx': ['обычное'],
-  'Notification.stories.tsx': ['обычное', 'ошибка'],
+  'InlineNotification.stories.tsx': ['обычное', 'ошибка'],
   'StateView.stories.tsx': ['загрузка', 'ошибка', 'первый запуск', 'всё сделано', 'ничего не найдено', 'нет доступа'],
-  'CodeBlock.stories.tsx': ['обычное', 'много'],
+  'CodeSnippet.stories.tsx': ['обычное', 'много'],
   'ChartFrame.stories.tsx': ['обычное', 'загрузка', 'ошибка', 'первый запуск', 'ничего не найдено'],
-  'DecisionCard.stories.tsx': ['обычное', 'загрузка', 'ошибка'],
-  'Diagram.stories.tsx': ['обычное'],
   'DataTable.stories.tsx': ALL,
-  'List.stories.tsx': ALL,
-  'ProofreadGrid.stories.tsx': ['обычное', 'загрузка', 'ошибка', 'ничего не найдено', 'много'],
-  'WeekCalendar.stories.tsx': ['обычное', 'загрузка', 'ошибка', 'первый запуск', 'ничего не найдено', 'много'],
-  'Dialog.stories.tsx': ['обычное', 'загрузка', 'ошибка'],
-  'Toast.stories.tsx': ['обычное'],
-  'CommandMenu.stories.tsx': ['обычное', 'ничего не найдено', 'много'],
+  'ContainedList.stories.tsx': ALL,
+  'Pagination.stories.tsx': ['обычное', 'много'],
+  'Modal.stories.tsx': ['обычное', 'загрузка', 'ошибка'],
+  'OverflowMenu.stories.tsx': ['обычное'],
+  'Toaster.stories.tsx': ['обычное'],
   'Tabs.stories.tsx': ['обычное', 'много'],
   'FilterBar.stories.tsx': ['обычное'],
   'ThreeColumn.stories.tsx': ['обычное', 'первый запуск'],
   'ChatThread.stories.tsx': ['обычное', 'загрузка', 'ошибка', 'первый запуск', 'много'],
   'ReplyBox.stories.tsx': ['обычное', 'загрузка', 'ошибка', 'нет доступа'],
-  'AgentStep.stories.tsx': ['обычное', 'ошибка', 'много'],
-  'ListPage.stories.tsx': ['обычное', 'загрузка', 'ошибка', 'много'],
+  'patterns/CommonActions.stories.tsx': ['обычное'],
+  'patterns/Dialogs.stories.tsx': ['обычное'],
+  'patterns/DisabledStates.stories.tsx': ['обычное'],
+  'patterns/Disclosures.stories.tsx': ['обычное'],
+  'patterns/EmptyStates.stories.tsx': ['обычное'],
+  'patterns/Filtering.stories.tsx': ['обычное', 'загрузка', 'ошибка', 'много'],
+  'patterns/FluidStyles.stories.tsx': ['обычное'],
+  'patterns/Forms.stories.tsx': ['обычное', 'ошибка'],
+  'patterns/GlobalHeader.stories.tsx': ['обычное', 'много'],
+  'patterns/Loading.stories.tsx': ['обычное'],
+  'patterns/Login.stories.tsx': ['обычное', 'ошибка'],
+  'patterns/Notifications.stories.tsx': ['обычное'],
+  'patterns/OverflowContent.stories.tsx': ['обычное'],
+  'patterns/ReadOnlyStates.stories.tsx': ['обычное'],
+  'patterns/Search.stories.tsx': ['обычное', 'ничего не найдено'],
+  'patterns/StatusIndicators.stories.tsx': ['обычное'],
+  'patterns/TextToolbar.stories.tsx': ['обычное'],
 }
 
 describe('истории на каждое состояние', () => {
@@ -73,8 +99,7 @@ describe('истории на каждое состояние', () => {
 
   it('у каждого файла компонента есть истории; список обещаний — ровно файлы историй', () => {
     const comps = readdirSync(resolve(root, 'src/components')).filter((f) => f.endsWith('.tsx') && !f.includes('.stories.'))
-    const covered = new Set(['Collection.tsx']) // DataTable и List
-    for (const c of comps) if (!covered.has(c)) expect(STORY_FILES, `нет историй у ${c}`).toContain(c.replace('.tsx', '.stories.tsx'))
+    for (const c of comps) expect(STORY_FILES, `нет историй у ${c}`).toContain(c.replace('.tsx', '.stories.tsx'))
     expect(Object.keys(PROMISED).sort()).toEqual([...STORY_FILES].sort())
   })
 
@@ -113,10 +138,6 @@ describe('только роли и шкалы', () => {
       expect(TONE[t], t).toMatchObject({ key: x.key, mark: `text-${x.mark}`, text: `text-${x.text}`, bg: x.bg ? `bg-${x.bg}` : null, icon: `tone-${x.key}` })
     }
   })
-
-  it('заливка сетки статуса — те же роли, что tokens.json → tones.*.fill', () => {
-    for (const t of TONES) expect(FILL[t], t).toBe(tones[t].fill ? `bg-${tones[t].fill}` : null)
-  })
 })
 
 describe('движение: 110 мс и 0,6 с, без прыжка', () => {
@@ -138,7 +159,8 @@ describe('движение: 110 мс и 0,6 с, без прыжка', () => {
     for (const k of keyframes) expect(k.replace(/\b(?:from|to|transform|opacity)\b|[{}:;\s\d%().-]|translate[XY]|rotate|deg|var|--[\w-]+/g, '')).toBe('')
   })
 
-  it('свёрнутое не ловит фокус: у раскрываемого — inert, пока закрыто', () => {
-    expect(tsx.match(/className="ds-expand"[^>]*inert=\{!/g)?.length).toBeGreaterThanOrEqual(3)
+  it('свёрнутое не ловит фокус: у раскрываемого — inert, пока закрыто (механика одна — lib/disclosure.tsx)', () => {
+    expect(read('src/lib/disclosure.tsx')).toMatch(/className="ds-expand" data-open=\{open\} inert=\{!open\}/)
+    expect(tsx).not.toMatch(/\bds-expand\b/)
   })
 })

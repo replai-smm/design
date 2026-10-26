@@ -63,7 +63,7 @@ export function snapshotInPage() {
     const cs = getComputedStyle(el)
     if ([...el.childNodes].some((c) => c.nodeType === 3 && c.textContent.trim())) fonts.add(n(cs.fontSize))
     for (const side of ['borderTopLeftRadius', 'borderTopRightRadius', 'borderBottomLeftRadius', 'borderBottomRightRadius']) radii.add(n(cs[side]))
-    const textInput = el.matches('input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=hidden]), select') && !el.closest('[data-slot=number-field],[data-slot=combobox]')
+    const textInput = el.matches('input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=hidden]), select') && !el.closest('[data-slot=number-input],[data-slot=combo-box],[data-slot=password-input]')
     if (el.dataset.slot === 'button' || textInput) controls.push({ what: el.dataset.slot === 'button' ? `кнопка «${el.textContent.trim().slice(0, 24) || el.getAttribute('aria-label')}»` : `поле ${el.tagName.toLowerCase()}`, height: n(el.getBoundingClientRect().height) })
   }
   return { slots, fonts: [...fonts], radii: [...radii], controls }

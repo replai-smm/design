@@ -1,11 +1,11 @@
 /**
  * Значок — один набор (IBM Carbon, 16 px) через один компонент. По имени (`name="close"`) или по тону (`tone="опасно"`):
  * у тона своя форма и цвет знака из словаря тонов — цвет никогда не один. Значок — украшение: смысл несёт слово
- * рядом или `label` (тогда значок — картинка для читалки).
+ * рядом или `label` (тогда значок — картинка для читалки). Значок для `renderIcon` кнопки, ссылки и метки — компонент
+ * с именем Carbon из входа пакета `/icons` (`Add`, `ChevronDown`): та же картинка.
  */
-import { createElement } from 'react'
 import { cx } from '../lib/cx'
-import { ICONS, type IconName } from '../lib/icons.gen'
+import { glyph, type CarbonIconProps, type IconName } from '../lib/icons.gen'
 import { TONE, type Tone } from '../lib/vocab'
 
 export type { IconName }
@@ -18,18 +18,7 @@ type IconProps = ({ name: IconName; tone?: never } | { tone: Tone; name?: never 
 
 export function Icon({ name, tone, label, className }: IconProps) {
   const look = tone ? TONE[tone] : null
-  const icon = ICONS[look ? look.icon : name!]
-  return (
-    <svg
-      viewBox={icon.viewBox}
-      fill="currentColor"
-      focusable="false"
-      data-icon={look ? look.icon : name}
-      data-tone={look?.key}
-      {...(label ? { role: 'img', 'aria-label': label } : { 'aria-hidden': true })}
-      className={cx('size-icon shrink-0', look?.mark, className)}
-    >
-      {icon.parts.map(([elem, attrs], i) => createElement(elem, { key: i, ...attrs }))}
-    </svg>
-  )
+  const icon = look ? look.icon : name!
+  const props = { 'data-icon': icon, 'data-tone': look?.key, ...(label ? { role: 'img', 'aria-label': label } : {}), className: cx(look?.mark, className) }
+  return glyph(icon, props as CarbonIconProps)
 }

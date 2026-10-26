@@ -26,55 +26,24 @@
   display: none;
 }
 
-/* таблица: сетка с подсеткой — колонки ровные во всех строках, свёрнутая группа раскрывается без прыжка */
-.ds-table {
-  display: grid;
-  grid-template-columns: var(--table-cols-phone);
-}
-@media (min-width: 48rem) {
-  .ds-table {
-    grid-template-columns: var(--table-cols);
-  }
-}
-.ds-table > *,
-.ds-table .ds-row,
-.ds-table .ds-rowgroup,
-.ds-table .ds-expand,
-.ds-table .ds-expand > * {
-  grid-column: 1 / -1;
-}
-.ds-table .ds-row,
-.ds-table .ds-rowgroup,
-.ds-table .ds-expand > * {
-  display: grid;
-  grid-template-columns: subgrid;
-}
-.ds-table .ds-expand {
-  grid-template-columns: subgrid;
-}
-@media (max-width: 47.99rem) {
-  .ds-table .ds-cell-more {
-    display: none;
-  }
-}
-/* первая колонка стоит при прокрутке вбок; в свёрнутой группе обрезка — clip (hidden ломает закрепление) */
-.ds-table .ds-row > [role='cell']:first-child,
-.ds-table .ds-row > [role='columnheader']:first-child {
+/* таблица: не влезает — прокрутка вбок внутри TableContainer, первая колонка стоит (цвет — строки) */
+.ds-table :is(th, td):first-child {
   position: sticky;
   left: 0;
   z-index: 1;
   background-color: inherit;
 }
-.ds-table .ds-expand > * {
-  overflow: clip;
-}
 
-/* окно: на ноутбуке главная справа */
-@media (min-width: 48rem) {
-  .ds-dialog-footer [data-slot='action-area'] {
-    flex-direction: row-reverse;
-    justify-content: flex-start;
-  }
+/* липкая полоса низа (BottomBar): над нижней панелью продукта (её высота — --ds-bottom-inset на :root); полоска телефона —
+   запасом снизу, только если панели нет или она ниже полоски */
+.ds-bottom-bar {
+  position: sticky;
+  bottom: var(--ds-bottom-inset, 0px);
+  padding-bottom: calc(var(--ds-space-compact) + max(0px, env(safe-area-inset-bottom) - var(--ds-bottom-inset, 0px)));
+}
+/* всплывашки — над нижней панелью продукта, не поверх неё */
+.ds-toasts {
+  bottom: var(--ds-bottom-inset, 0px);
 }
 
 /* выезды: шторка снизу, шторка слева, окно по центру — проявляется с подъёмом */
@@ -166,11 +135,6 @@
 .ds-pop[data-state='closed'] {
   animation: ds-fade-out var(--ds-motion-fast) var(--ds-ease);
 }
-/* меню у поля: не выше половины экрана */
-.ds-menu {
-  max-height: 50dvh;
-}
-
 /* три колонки на телефоне: колонка выезжает — вперёд справа, назад слева */
 @media (max-width: 63.99rem) {
   .ds-col[data-dir='forward'] {
@@ -294,12 +258,12 @@
   animation: ds-blink var(--ds-motion-move) var(--ds-ease) infinite alternate;
 }
 
-/* схема: указатель агента — мягкое мерцание рамки на месте */
-@keyframes ds-glow {
-  to {
-    opacity: 0.35;
-  }
-}
-.ds-lit-ring {
-  animation: ds-glow var(--ds-motion-move) var(--ds-ease) infinite alternate;
+/* список: разделители строк с отступом от края (ContainedList isInset) */
+.ds-rule-inset:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: var(--ds-space-compact);
+  right: var(--ds-space-compact);
+  bottom: 0;
+  border-bottom: 1px solid var(--ds-line);
 }

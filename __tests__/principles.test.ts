@@ -27,8 +27,10 @@ describe('полка из файла историй', () => {
 
 describe('полки', () => {
   it('ДС: Основы · Компоненты · Паттерны', () => {
-    for (const t of ['Основы/Роли', 'Элементы/Кнопка', 'Поверхности/Карточка', 'Паттерны/Три колонки']) expect(shelfProblem(t, 'ds')).toBeNull()
-    for (const t of ['Компоненты/Кнопка', 'Атомы/Кнопка', 'Кнопка', 'Экраны/SCR-01 Вход']) expect(shelfProblem(t, 'ds')).toMatch(/не полка/)
+    for (const t of ['Основы/Роли', 'Компоненты/Элементы/Кнопка', 'Компоненты/Поверхности/Карточка', 'Компоненты/Составные/Три колонки', 'Паттерны/Формы'])
+      expect(shelfProblem(t, 'ds')).toBeNull()
+    for (const t of ['Компоненты/Кнопка', 'Компоненты/Основы/Роли', 'Элементы/Кнопка', 'Атомы/Кнопка', 'Кнопка', 'Экраны/SCR-01 Вход'])
+      expect(shelfProblem(t, 'ds')).toMatch(/не полка/)
   })
   it('продукт: только Экраны/SCR-NN …; полка ДС — «не дублируется»', () => {
     for (const t of ['Экраны/SCR-03 Инбокс', 'Экраны/SCR-12', 'Экраны/SCR-03 Инбокс/Пусто', 'Экраны/SCR-03 Инбокс/Строка очереди'])
@@ -38,6 +40,7 @@ describe('полки', () => {
     expect(shelfProblem('Части продукта/Шапка', 'product')).toMatch(/не полка/)
     expect(shelfProblem('Элементы/Кнопка', 'product')).toMatch(/не дублируется/)
     expect(shelfProblem('Компоненты/Вкладки', 'product')).toMatch(/не дублируется/)
+    expect(shelfProblem('Паттерны/Формы', 'product')).toMatch(/не дублируется/)
     expect(shelfProblem(null, 'product')).toMatch(/нет title/)
   })
   it('истории самой ДС-React — все на полках', () => {
@@ -49,24 +52,24 @@ describe('полки', () => {
 describe('свои компоненты с именами ДС', () => {
   const names = dsNames()
   it('имена — компоненты из react/src/index.ts, без типов и хуков', () => {
-    for (const n of ['Button', 'Dialog', 'ThreeColumn', 'ChatThread', 'StatusBadge', 'ConfirmProvider']) expect(names.has(n)).toBe(true)
-    for (const n of ['ButtonProps', 'useToast', 'cx', 'STATUS_IDS', 'SERIES', 'TONES']) expect(names.has(n)).toBe(false)
+    for (const n of ['Button', 'Modal', 'ThreeColumn', 'ChatThread', 'Tag', 'ConfirmProvider']) expect(names.has(n)).toBe(true)
+    for (const n of ['ButtonProps', 'useToast', 'cx', 'TAG_TYPES', 'SERIES', 'TONES']) expect(names.has(n)).toBe(false)
   })
   it('ловит function, const, class; не ловит импорт, вызов и строку с ds-allow', () => {
     const src = [
       `import { Button } from '@replai-smm/design'`,
-      `export function Dialog(props) { return null }`,
+      `export function Modal(props) { return null }`,
       `const Tabs = ({ items }) => null`,
-      `export const Card: FC = () => null`,
+      `export const Tile: FC = () => null`,
       `class Tooltip extends Component {}`,
       `const x = <Button>ok</Button>`,
       `const Avatar = forwardRef(() => null) // ds-allow: своя картинка продукта, интент I-avatar`,
-      `const DialogTitle = () => null`,
+      `const ModalTitle = () => null`,
     ].join('\n')
     expect(ownComponents(src, names)).toEqual([
-      { name: 'Dialog', line: 2 },
+      { name: 'Modal', line: 2 },
       { name: 'Tabs', line: 3 },
-      { name: 'Card', line: 4 },
+      { name: 'Tile', line: 4 },
       { name: 'Tooltip', line: 5 },
     ])
   })
@@ -123,7 +126,7 @@ describe('храповик против базы PR', () => {
   put('src/ui/button.tsx', `export function Button() { return null }\n`)
   put('src/a.css', `.a { color: #fff; padding: 12px }\n`)
   put('src/legacy.ts', `import { Button } from '@replai-smm/design/react/src/components/Button'\n`)
-  put('src/__tests__/x.test.tsx', `const Dialog = () => null; expect(c).toBe('#fff')\n`)
+  put('src/__tests__/x.test.tsx', `const Modal = () => null; expect(c).toBe('#fff')\n`)
   g('add', '.')
   g('commit', '-qm', 'база')
   g('checkout', '-qb', 'pr')
@@ -132,10 +135,10 @@ describe('храповик против базы PR', () => {
   put('src/new.stories.tsx', `export default { title: 'Компоненты/Кнопка' }\n`)
   put('src/ui/button.tsx', `export function Button() { return null }\nexport const x = 1\n`)
   put('src/a.css', `.a { color: #fff; padding: 12px; margin: 8px }\n`)
-  put('src/dialog.tsx', `export function Dialog() { return <div style={{ padding: 12 }} /> }\n`)
+  put('src/dialog.tsx', `export function Modal() { return <div style={{ padding: 12 }} /> }\n`)
   put('src/legacy.ts', `import { Button } from '@replai-smm/design/react/src/components/Button'\nexport const x = 1\n`)
-  put('src/deep.ts', `import { Card } from '@replai-smm/design/react/src/components/Card'\n`)
-  put('src/__tests__/x.test.tsx', `const Dialog = () => null; expect(c).toBe('#000')\n`)
+  put('src/deep.ts', `import { Tile } from '@replai-smm/design/react/src/components/Tile'\n`)
+  put('src/__tests__/x.test.tsx', `const Modal = () => null; expect(c).toBe('#000')\n`)
   g('add', '.')
   g('commit', '-qm', 'PR')
   afterAll(() => rmSync(dir, { recursive: true, force: true }))

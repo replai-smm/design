@@ -1,15 +1,15 @@
 /**
- * Рамка графика — поверхность: заголовок, тихие кнопки, легенда словом и видом линии, вывод словами для читалки
+ * Рамка графика — плитка: заголовок, тихие кнопки, легенда словом и видом линии, вывод словами для читалки
  * (`summary`, обязателен), состояния той же высоты, что график (без прыжка). Сам график — `Chart` внутри.
  */
 import { useId, type ReactNode } from 'react'
+import { SURFACE } from '../lib/anatomy'
 import { cx } from '../lib/cx'
 import type { DataState, EmptyView, ErrorView } from '../lib/vocab'
 import { Button } from './Button'
 import { SERIES, seriesIndex, type SeriesLine } from './Chart'
-import { Loading, Skeleton } from './Skeleton'
+import { SkeletonPlaceholder } from './SkeletonText'
 import { StateView } from './StateView'
-import { Surface } from './Surface'
 
 export interface LegendItem {
   key: string
@@ -23,7 +23,7 @@ export interface LegendItem {
 export interface ChartFrameProps {
   title: ReactNode
   description?: ReactNode
-  /** Главный вывод словами — для читалки: «Охват вырос на 12 % за неделю». */
+  /** Главный вывод словами — для читалки: «Посещения выросли на 12 % за неделю». */
   summary: string
   legend?: LegendItem[]
   /** Тихие кнопки справа от заголовка. */
@@ -45,11 +45,12 @@ export function ChartFrame({ title, description, summary, legend, tools, state =
   let area: ReactNode
   if (state === 'loading')
     area = (
-      <Loading label={`${typeof title === 'string' ? title : 'график'}: загрузка`}>
+      <div role="status" aria-busy="true" data-state="загрузка">
+        <span className="sr-only">{`${typeof title === 'string' ? title : 'график'}: загрузка`}</span>
         <div className={cx('flex flex-col justify-end gap-items', AREA)}>
-          <Skeleton className="h-full" />
+          <SkeletonPlaceholder className="h-full w-full" />
         </div>
-      </Loading>
+      </div>
     )
   else if (state === 'error')
     area = (
@@ -58,7 +59,7 @@ export function ChartFrame({ title, description, summary, legend, tools, state =
         kind="ошибка"
         title={error?.title ?? 'График не загрузился'}
         description={error?.description}
-        action={error?.onRetry && <Button onClick={error.onRetry}>Повторить</Button>}
+        action={error?.onRetry && <Button kind="secondary" onClick={error.onRetry}>Повторить</Button>}
       />
     )
   else if (empty) area = <StateView className={AREA} kind={empty.kind} title={empty.title} description={empty.description} action={empty.action} />
@@ -70,7 +71,7 @@ export function ChartFrame({ title, description, summary, legend, tools, state =
     )
   const ready = state === 'ready' && !empty
   return (
-    <Surface as="figure" data-slot="chart-frame" aria-labelledby={`${id}-t`} aria-describedby={`${id}-s`} className={cx('m-0 gap-blocks', className)}>
+    <figure data-slot="chart-frame" aria-labelledby={`${id}-t`} aria-describedby={`${id}-s`} className={cx('m-0 flex min-w-0 flex-col gap-blocks p-blocks', SURFACE, className)}>
       <div className="flex min-w-0 flex-wrap items-start justify-between gap-items">
         <figcaption className="flex min-w-0 flex-col gap-tight">
           <span id={`${id}-t`} data-part="title" className="text-heading text-fg">
@@ -102,6 +103,6 @@ export function ChartFrame({ title, description, summary, legend, tools, state =
           })}
         </ul>
       )}
-    </Surface>
+    </figure>
   )
 }

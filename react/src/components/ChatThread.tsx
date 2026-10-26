@@ -1,22 +1,24 @@
 /**
- * Переписка (DF: «Сообщения», «ИИ», «Чаты»; чат orbit): входящие слева, наши справа, автор, время, вложения,
+ * Переписка (сообщения людей, разговор с агентом): входящие слева, наши справа, автор, время, вложения,
  * разделитель дня; «Показать более ранние» сверху без прыжка; новое внизу — лента остаётся внизу.
  * - Вид сообщения (`variant`): `bubble` — пузырь (переписка людей; наше — утопленное, входящее — на поверхности);
- *   `wide` — во всю ширину без рамки (ответ агента: текст, шаги, решения); `notice` — весть со стороны (система,
- *   orbit) — поверхность с меткой, как уведомление.
+ *   `wide` — во всю ширину без рамки (ответ агента: текст, код); `notice` — весть со стороны (система)
+ *   — плитка с меткой, как уведомление.
  * - Наше — словарь хода: в очереди, отправляется, не отправлено — словом; у ошибки — знак «опасно» и «Повторить».
  * - Лента — `role="log"`: читалка слышит новое, не перечитывая старое.
  * Состояния: загрузка (скелет пузырей той же формы), ошибка, пусто, много.
  */
 import { Fragment, useLayoutEffect, useRef, type ReactNode } from 'react'
-import { SUNKEN, SURFACE } from '../lib/anatomy'
+import { MARK, SUNKEN, SURFACE } from '../lib/anatomy'
 import { cx } from '../lib/cx'
 import type { DataState, EmptyView, ErrorView, Progress } from '../lib/vocab'
+import { ArrowUp } from '../lib/icons.gen'
 import { Button } from './Button'
 import { Icon } from './Icon'
-import { Loading, Skeleton } from './Skeleton'
+import { InlineLoading } from './InlineLoading'
+import { SkeletonText } from './SkeletonText'
 import { StateView } from './StateView'
-import { Surface } from './Surface'
+import { Tile } from './Tile'
 
 export interface ChatMessage {
   id: string
@@ -83,9 +85,9 @@ function Message({ m, ownLabel }: { m: ChatMessage; ownLabel: string }) {
           <time dateTime={m.datetime}>{m.time}</time>
         </div>
         {variant === 'notice' ? (
-          <Surface mark="инфо" className="w-full gap-items text-body break-words">
+          <Tile data-mark="info" className={cx('w-full gap-items text-body break-words', MARK, 'border-l-fg')}>
             {body}
-          </Surface>
+          </Tile>
         ) : (
           <div
             className={cx(
@@ -106,7 +108,7 @@ function Message({ m, ownLabel }: { m: ChatMessage; ownLabel: string }) {
               {m.status === 'error' && m.error ? <>: {m.error}</> : null}
             </span>
             {m.status === 'error' && m.onRetry && (
-              <Button variant="ghost" dense onClick={m.onRetry}>
+              <Button kind="ghost" size="sm" onClick={m.onRetry}>
                 Повторить
               </Button>
             )}
@@ -159,26 +161,27 @@ export function ChatThread({ messages, label, state = 'ready', error, empty, ear
   if (state === 'error')
     return (
       <div data-slot="chat-thread" className={className}>
-        <StateView kind="ошибка" title={error?.title ?? 'Переписка не загрузилась'} description={error?.description} action={error?.onRetry && <Button onClick={error.onRetry}>Повторить</Button>} />
+        <StateView kind="ошибка" title={error?.title ?? 'Переписка не загрузилась'} description={error?.description} action={error?.onRetry && <Button kind="secondary" onClick={error.onRetry}>Повторить</Button>} />
       </div>
     )
 
   if (state === 'loading')
     return (
       <div data-slot="chat-thread" className={cx('flex min-h-0 flex-col', className)}>
-        <Loading label={`${label}: загрузка`}>
+        <div role="status" aria-busy="true" data-state="загрузка">
+          <span className="sr-only">{`${label}: загрузка`}</span>
           <ul className="m-0 flex list-none flex-col gap-blocks p-blocks">
             {(['in', 'out', 'in'] as const).map((d, i) => (
               <li key={i} className={cx('flex flex-col gap-tight', d === 'out' ? 'items-end' : 'items-start')}>
-                <Skeleton width="1/3" />
+                <SkeletonText width="33%" />
                 <div className={cx('flex w-2/3 flex-col gap-items px-compact py-items', d === 'out' ? SUNKEN : SURFACE)}>
-                  <Skeleton />
-                  <Skeleton width="1/2" />
+                  <SkeletonText />
+                  <SkeletonText width="50%" />
                 </div>
               </li>
             ))}
           </ul>
-        </Loading>
+        </div>
       </div>
     )
 
@@ -198,9 +201,13 @@ export function ChatThread({ messages, label, state = 'ready', error, empty, ear
               Это вся переписка
             </span>
           ) : (
-            <Button variant="ghost" dense icon="arrow-up" loading={earlier.loading} onClick={earlier.onLoad} data-part="earlier">
-              Показать более ранние
-            </Button>
+            earlier.loading ? (
+              <InlineLoading description="Загружаем более ранние" data-part="earlier" />
+            ) : (
+              <Button kind="ghost" size="sm" renderIcon={ArrowUp} onClick={earlier.onLoad} data-part="earlier">
+                Показать более ранние
+              </Button>
+            )
           )}
         </div>
       )}

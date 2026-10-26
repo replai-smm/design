@@ -1,6 +1,6 @@
 /**
- * Выпуск (release.mjs) — правило номера и весь путь на песочнице: origin — голый репо во временной папке, клон — как у orbit, пакет —
- * маленький, со своей сборкой dist/. Сеть и ключ не нужны: тег уходит в путь --push, архив тега берётся по --archive.
+ * Выпуск (release.mjs) — правило номера и весь путь на песочнице: origin — голый репо во временной папке, клон — как у того, кто
+ * выпускает, пакет — маленький, со своей сборкой dist/. Сеть и ключ не нужны: тег уходит в путь --push, архив тега — по --archive.
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import { execFileSync, spawnSync } from 'node:child_process'
@@ -31,8 +31,9 @@ describe('выпуск на песочнице', () => {
   let tmp: string, origin: string, clone: string, archives: string
   const sh = (cmd: string, args: string[], cwd = clone) => execFileSync(cmd, args, { cwd, encoding: 'utf8', env: { ...process.env, GIT_AUTHOR_NAME: 't', GIT_AUTHOR_EMAIL: 't@t', GIT_COMMITTER_NAME: 't', GIT_COMMITTER_EMAIL: 't@t' } }).trim()
   const git = (...args: string[]) => sh('git', args)
-  const release = (verb: string, sha = '', key = '/нет/ключа') =>
-    spawnSync('node', [script, verb, '--push', origin, '--archive', join(archives, '{tag}.tgz')], { cwd: clone, encoding: 'utf8', env: { PATH: process.env.PATH, HOME: process.env.HOME, ...(sha ? { ORBIT_SHA: sha } : {}), ...(key ? { ORBIT_DEPLOY_KEY: key } : {}) } })
+  const who = { GIT_AUTHOR_NAME: 't', GIT_AUTHOR_EMAIL: 't@t', GIT_COMMITTER_NAME: 't', GIT_COMMITTER_EMAIL: 't@t' }
+  const release = (verb: string, sha = '') =>
+    spawnSync('node', [script, verb, ...(sha ? [sha] : []), '--push', origin, '--archive', join(archives, '{tag}.tgz')], { cwd: clone, encoding: 'utf8', env: { PATH: process.env.PATH, HOME: process.env.HOME, ...who } })
   const tags = () => git('ls-remote', '--tags', '--refs', origin).split('\n').filter(Boolean).map((l) => l.split('refs/tags/')[1]).sort()
   const commit = (msg: string, files: Record<string, string>) => {
     for (const [f, text] of Object.entries(files)) writeFileSync(join(clone, f), text)
@@ -57,7 +58,7 @@ describe('выпуск на песочнице', () => {
   })
   afterAll(() => rmSync(tmp, { recursive: true, force: true }))
 
-  it('deploy: тег — коммит поверх ORBIT_SHA с dist/ из его дерева и номером в package.json; main не тронут; повтор — ничего', () => {
+  it('deploy: тег — коммит поверх выпускаемого коммита с dist/ из его дерева и номером в package.json; main не тронут; повтор — ничего', () => {
     const r = release('deploy', s1)
     expect(r.status, r.stderr).toBe(0)
     expect(tags()).toEqual(['v1.1.0'])
@@ -73,14 +74,12 @@ describe('выпуск на песочнице', () => {
     expect(tags()).toEqual(['v1.1.0'])
   })
 
-  it('deploy следующего main — patch, version и lock — номер выпуска; без ключа — отказ, тега нет', () => {
+  it('deploy без коммита — выпуск origin/main следующим номером (patch), version и lock — номер выпуска; ключ не нужен', () => {
     s2 = commit('цвет', { 'tokens.json': '{"fg":"#222"}\n' })
     git('push', '-q', 'origin', 'main')
-    const none = release('deploy', s2, '')
-    expect(none.status).not.toBe(0)
-    expect(none.stderr).toContain('ORBIT_DEPLOY_KEY')
-    expect(tags()).toEqual(['v1.1.0'])
-    expect(release('deploy', s2).status).toBe(0)
+    const r = release('deploy')
+    expect(r.status, r.stderr).toBe(0)
+    expect(r.stdout).toContain(`= main ${s2.slice(0, 7)}`)
     expect(tags()).toEqual(['v1.1.0', 'v1.1.1'])
     git('fetch', '-q', 'origin', 'refs/tags/v1.1.1')
     expect(JSON.parse(git('show', 'FETCH_HEAD:package.json')).version).toBe('1.1.1')
@@ -90,20 +89,20 @@ describe('выпуск на песочнице', () => {
   })
 
   it('version — коммит main последнего выпуска', () => {
-    const r = release('version', '', '')
+    const r = release('version')
     expect(r.status, r.stderr).toBe(0)
     expect(r.stdout.trim()).toBe(s2)
   })
 
-  it('watch: последний тег — выпуск ORBIT_SHA и его архив ставится; чужой выпуск или архив без exports — красное', () => {
+  it('watch: последний тег — выпуск этого коммита и его архив ставится; чужой выпуск или архив без exports — красное', () => {
     pack('v1.1.1')
-    const r = release('watch', s2, '')
+    const r = release('watch', s2)
     expect(r.status, r.stderr).toBe(0)
-    expect(release('watch', s1, '').status).not.toBe(0) // последний выпуск — не s1
+    expect(release('watch', s1).status).not.toBe(0) // последний выпуск — не s1
     git('checkout', '-qb', 'bait')
     pack(commit('без dist/', { 'package.json': pkg('1.1.1') }), 'v1.1.1') // номер тот, а dist/ нет: exports ./tokens.css не на месте
     git('checkout', '-q', 'main')
-    const bad = release('watch', s2, '')
+    const bad = release('watch', s2)
     expect(bad.status).not.toBe(0)
     expect(bad.stderr).toContain('dist/tokens.css')
   })
@@ -118,7 +117,7 @@ describe('выпуск на песочнице', () => {
     git('fetch', '-q', 'origin', 'refs/tags/v1.1.3')
     expect(git('rev-parse', 'FETCH_HEAD^1')).toBe(s2)
     expect(git('show', 'FETCH_HEAD:dist/tokens.css')).toContain('#222')
-    expect(release('version', '', '').stdout.trim()).toBe(s2)
+    expect(release('version').stdout.trim()).toBe(s2)
     const again = release('rollback', s3)
     expect(again.status).toBe(0)
     expect(again.stdout).toContain('откатывать нечего')

@@ -1,193 +1,208 @@
-/** Коллекции: срочное сверху (П2), норма свёрнута (П3), много (П12), выбранная строка, сортировка, подсказка, широкая таблица; сетка и неделя. */
+/** Коллекции (Carbon: DataTable + Table-части, ContainedList, Pagination): строки в порядке данных, сортировка по кругу, в строке — только ghost, страницы. */
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, fireEvent, within, act, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, within } from '@testing-library/react'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { addWeeks, compareSortValues, DataTable, GridLegend, List, mondayOf, ProofreadGrid, StatusRow, weekTitle, WeekCalendar, type Column, type SortState } from '../index'
-import { TONE_ORDER, toneOf } from '../lib/vocab'
-import { cabinets, groups, many, type CabinetRow, type GroupRow } from '../stories/fixtures'
-import { communities, manyCommunities, monthColumns, posts, proofCell, today, weekStart, type Post } from '../stories/df-fixtures'
+import type { ReactNode } from 'react'
+import { ContainedList, ContainedListItem, DataTable, DataTableSkeleton, Pagination, Table, TableBody, TableCell, TableContainer, TableHead, TableHeader, TableRow, type DataTableHeader, type DataTableInputRow, type DataTableProps } from '../index'
+import { accounts, projects } from '../stories/fixtures'
 
-const cols: Column<GroupRow>[] = [{ key: 'n', header: 'Группа', cell: (r) => r.name, face: true }]
+/** Таблица как у Carbon: render-prop и части. */
+function Grid(props: Omit<DataTableProps, 'children'> & { title?: string }) {
+  return (
+    <DataTable {...props}>
+      {({ rows, headers, getHeaderProps, getRowProps, getTableProps, getTableContainerProps, getCellProps }) => (
+        <TableContainer title={props.title} {...getTableContainerProps()}>
+          <Table {...getTableProps()}>
+            <TableHead>
+              <TableRow>
+                {headers.map((header) => (
+                  <TableHeader key={header.key} {...getHeaderProps({ header })}>
+                    {header.header}
+                  </TableHeader>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {rows.map((row) => (
+                <TableRow key={row.id} {...getRowProps({ row })}>
+                  {row.cells.map((cell) => (
+                    <TableCell key={cell.id} {...getCellProps({ cell })}>
+                      {cell.value as ReactNode}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
+    </DataTable>
+  )
+}
 
-describe('таблица и список: срочное сверху, норма свёрнута, много', () => {
-  it('группы по порядку внимания: опасно → … → хорошо', () => {
-    const { container } = render(<DataTable<GroupRow> label="т" rows={groups} columns={cols} getKey={(r) => r.id} getStatus={(r) => r.status} />)
-    const order = [...container.querySelectorAll('[data-group]')].map((g) => toneOf(g.getAttribute('data-group') as never))
-    expect(order).toEqual([...order].sort((a, b) => TONE_ORDER.indexOf(a) - TONE_ORDER.indexOf(b)))
-    expect([order[0], order.at(-1)]).toEqual(['опасно', 'хорошо'])
+const H: DataTableHeader[] = [
+  { key: 'name', header: 'Счёт' },
+  { key: 'left', header: 'Остаток' },
+]
+const rowsOf = (): DataTableInputRow[] => accounts.map(({ id, name, left }) => ({ id, name, left }))
+const names = () => screen.getAllByRole('row').slice(1).map((r) => within(r).getAllByRole('cell')[0]?.textContent)
+const header = (n: string) => screen.getByRole('columnheader', { name: new RegExp(n) })
+
+describe('DataTable: строки и части', () => {
+  it('строки — в порядке данных; ячейка связана с заголовком (headers → id); заголовок контейнера — имя таблицы', () => {
+    render(<Grid title="Счета" rows={rowsOf()} headers={H} />)
+    expect(names()).toEqual(accounts.map((a) => a.name))
+    const table = screen.getByRole('table', { name: 'Счета' })
+    const cell = within(table).getAllByRole('cell')[1]
+    expect(document.getElementById(cell.getAttribute('headers')!)?.textContent).toBe('Остаток')
+    expect(table.closest('[data-part=scroll]')!.className.split(/\s+/)).toEqual(expect.arrayContaining(['relative', 'overflow-x-auto']))
   })
 
-  it('«работает» свёрнуто: строки недоступны, пока не раскрыли (0,6 с, ds-expand)', () => {
-    const { container } = render(<List<GroupRow> label="т" rows={groups} renderRow={(r) => r.name} getKey={(r) => r.id} getStatus={(r) => r.status} />)
-    const ok = container.querySelector('[data-group="work.working"]') as HTMLElement
-    const region = ok.querySelector('.ds-expand')!
-    expect(region.hasAttribute('inert')).toBe(true)
-    fireEvent.click(within(ok).getByRole('button', { expanded: false }))
-    expect(region.getAttribute('data-open')).toBe('true')
+  it('isSelected строки — роль «выбрано»; размер — высота ячеек; без него — 48/40', () => {
+    const rows = rowsOf().map((r) => ({ ...r, isSelected: r.id === 'a2' }))
+    const { rerender } = render(<Grid rows={rows} headers={H} />)
+    expect(document.querySelector('[data-selected]')?.className).toContain('bg-selected')
+    expect(screen.getAllByRole('cell')[0].className).toContain('h-touch md:h-control')
+    rerender(<Grid rows={rows} headers={H} size="sm" />)
+    expect(screen.getAllByRole('cell')[0].className).toContain('h-dense')
   })
 
-  it('150 строк: видно 50, «показать ещё · N» добавляет', () => {
-    const rows = many.filter((r) => r.status !== 'work.working')
-    const { container } = render(<DataTable<GroupRow> label="т" rows={rows} columns={cols} getKey={(r) => r.id} getStatus={(r) => r.status} />)
-    expect(container.querySelectorAll('[data-slot=row]').length).toBe(50)
-    fireEvent.click(screen.getByRole('button', { name: new RegExp(`показать ещё · ${rows.length - 50}`) }))
-    expect(container.querySelectorAll('[data-slot=row]').length).toBe(Math.min(100, rows.length))
+  it('первая колонка стоит при прокрутке вбок (ds.css)', () => {
+    const css = readFileSync(resolve(import.meta.dirname, '..', 'ds.css'), 'utf8')
+    expect(css).toMatch(/\.ds-table :is\(th, td\):first-child \{\s*position: sticky;/)
+  })
+})
+
+describe('DataTable: сортировка — выбор человека (Carbon)', () => {
+  it('по кругу NONE → ASC → DESC → NONE; aria-sort; onClick заголовка — с новым состоянием', () => {
+    const onClick = vi.fn()
+    function Own() {
+      return (
+        <DataTable isSortable rows={rowsOf()} headers={H}>
+          {({ rows, headers, getHeaderProps, getCellProps, getRowProps }) => (
+            <Table aria-label="К">
+              <TableHead>
+                <TableRow>
+                  {headers.map((header) => (
+                    <TableHeader key={header.key} {...getHeaderProps({ header, onClick })}>
+                      {header.header}
+                    </TableHeader>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {rows.map((row) => (
+                  <TableRow key={row.id} {...getRowProps({ row })}>
+                    {row.cells.map((cell) => (
+                      <TableCell key={cell.id} {...getCellProps({ cell })}>
+                        {String(cell.value ?? '')}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </DataTable>
+      )
+    }
+    render(<Own />)
+    const button = () => within(header('Остаток')).getByRole('button')
+    expect(header('Остаток').getAttribute('aria-sort')).toBe('none')
+    fireEvent.click(button())
+    expect(header('Остаток').getAttribute('aria-sort')).toBe('ascending')
+    expect(onClick).toHaveBeenLastCalledWith(expect.anything(), { sortHeaderKey: 'left', sortDirection: 'ASC' })
+    expect(names()[0]).toBe('Счёт склада') // пустое — как пустая строка (Carbon), вверху по возрастанию
+    expect(names()[1]).toBe('Счёт маркетинга')
+    fireEvent.click(button())
+    expect(header('Остаток').getAttribute('aria-sort')).toBe('descending')
+    expect(names()[0]).toBe('Счёт поддержки')
+    fireEvent.click(button())
+    expect(header('Остаток').getAttribute('aria-sort')).toBe('none')
+    expect(names()).toEqual(accounts.map((a) => a.name))
   })
 
-  it('загрузка — скелет; ошибка — «Повторить»; пусто — своё состояние', () => {
-    const retry = vi.fn()
-    const { container, rerender } = render(<DataTable<GroupRow> label="т" rows={[]} columns={cols} getKey={(r) => r.id} state="loading" />)
-    expect(container.querySelectorAll('[data-slot=skeleton]').length).toBeGreaterThan(0)
-    rerender(<DataTable<GroupRow> label="т" rows={[]} columns={cols} getKey={(r) => r.id} state="error" error={{ title: 'Не загрузилось', onRetry: retry }} />)
-    fireEvent.click(screen.getByRole('button', { name: 'Повторить' }))
-    expect(retry).toHaveBeenCalled()
-    rerender(<DataTable<GroupRow> label="т" rows={[]} columns={cols} getKey={(r) => r.id} empty={{ kind: 'первый запуск', title: 'Групп пока нет' }} />)
-    expect(container.querySelector('[data-state="первый запуск"]')).toBeTruthy()
+  it('isSortable у заголовка сильнее таблицы; sortRow — своё сравнение', () => {
+    const sortRow = vi.fn((a: unknown, b: unknown, { sortDirection }: { sortDirection: string }) => (sortDirection === 'ASC' ? String(b).localeCompare(String(a)) : 0))
+    render(<Grid isSortable sortRow={sortRow} rows={rowsOf()} headers={[{ ...H[0]! }, { ...H[1]!, isSortable: false }]} />)
+    expect(within(header('Остаток')).queryByRole('button')).toBeNull()
+    fireEvent.click(within(header('Счёт')).getByRole('button'))
+    expect(sortRow).toHaveBeenCalled()
+    expect(names()[0]).toBe([...accounts].map((a) => a.name).sort((a, b) => b.localeCompare(a))[0])
   })
+})
 
-  it('выбранная строка — «выбрано» и aria-current; одно слово selectedKey у таблицы и списка', () => {
-    const { rerender } = render(<List label="Группы" rows={groups} getKey={(r: GroupRow) => r.id} renderRow={(r: GroupRow) => r.name} onSelect={() => {}} selectedKey="g1" />)
+describe('DataTableSkeleton', () => {
+  it('та же форма: заголовки колонок видны, строки — скелетами', () => {
+    const { container } = render(<DataTableSkeleton headers={H} rowCount={3} showHeader={false} showToolbar={false} />)
+    expect(screen.getAllByRole('columnheader').map((h) => h.textContent)).toEqual(['Счёт', 'Остаток'])
+    expect(container.querySelectorAll('tbody tr')).toHaveLength(3)
+    expect(container.querySelectorAll('tbody [data-slot=skeleton-text]').length).toBe(6)
+  })
+})
+
+describe('ContainedList', () => {
+  it('подпись — имя списка; строка с onClick — кнопка; открытая — aria-current и «выбрано»', () => {
+    const onClick = vi.fn()
+    render(
+      <ContainedList label="Проекты">
+        {projects.slice(0, 3).map((p) => (
+          <ContainedListItem key={p.id} onClick={onClick} aria-current={p.id === 'p2' || undefined}>
+            {p.name}
+          </ContainedListItem>
+        ))}
+      </ContainedList>,
+    )
+    const list = screen.getByRole('list', { name: 'Проекты' })
+    expect(within(list).getAllByRole('listitem')).toHaveLength(3)
+    fireEvent.click(screen.getByRole('button', { name: projects[0]!.name }))
+    expect(onClick).toHaveBeenCalled()
     const cur = document.querySelectorAll('[aria-current=true]')
     expect(cur).toHaveLength(1)
-    expect(cur[0].closest('li')!.className).toContain('bg-selected')
-    rerender(<DataTable<GroupRow> label="т" rows={groups} columns={cols} getKey={(r) => r.id} onSelect={() => {}} selectedKey="g1" />)
-    expect(document.querySelector('[data-selected]')?.className).toContain('bg-selected')
+    expect(cur[0].className).toContain('aria-[current=true]:bg-selected')
   })
 
-  it('на телефоне видны колонки лица: остальные — ds-cell-more', () => {
-    const { container } = render(<DataTable<GroupRow> label="т" rows={groups.slice(0, 1)} columns={[...cols, { key: 'c', header: 'Клиент', cell: (r) => r.client }]} getKey={(r) => r.id} />)
-    const head = container.querySelectorAll('[role=columnheader]')
-    expect([head[0].className.includes('ds-cell-more'), head[1].className.includes('ds-cell-more')]).toEqual([false, true])
-  })
-})
-
-describe('таблица: сортировка — выбор человека, срочное сверху остаётся', () => {
-  const ccols: Column<CabinetRow>[] = [
-    { key: 'name', header: 'Кабинет', cell: (r) => r.name, face: true, sortValue: (r) => r.name },
-    { key: 'tg', header: 'Таргетолог', cell: (r) => r.targetologist, hint: 'Кто ведёт кабинет' },
-    { key: 'left', header: 'Остаток', cell: (r) => (r.left == null ? '—' : String(r.left)), align: 'end', nowrap: true, sortValue: (r) => r.left, sortFirst: 'descending', hint: 'Остаток на вчера' },
-  ]
-  const names = () => screen.getAllByRole('row').slice(1).map((r) => within(r).getAllByRole('cell')[0]?.textContent)
-  const header = (n: string) => screen.getByRole('columnheader', { name: new RegExp(n) })
-
-  it('нажатие — в сторону колонки, повторное — в обратную, пустое внизу', () => {
-    render(<DataTable<CabinetRow> label="К" rows={cabinets} columns={ccols} getKey={(r) => r.id} />)
-    expect(names()).toEqual(cabinets.map((c) => c.name))
-    fireEvent.click(within(header('Остаток')).getByRole('button'))
-    expect(header('Остаток').getAttribute('aria-sort')).toBe('descending')
-    expect(names()).toEqual(['Студия йоги', 'Барбершоп', 'Цветы на Ленина', 'Кофейня «Зерно»', 'Детский клуб', 'Автосервис «Ключ»'])
-    fireEvent.click(within(header('Остаток')).getByRole('button'))
-    expect(names().at(-1)).toBe('Автосервис «Ключ»')
-  })
-
-  it('с группами тона — внутри группы; управляемая — зовёт onSortChange', () => {
-    const onSortChange = vi.fn()
-    render(<DataTable<CabinetRow> label="К" rows={cabinets} columns={ccols} getKey={(r) => r.id} getStatus={(r) => r.status} sort={null} onSortChange={onSortChange} />)
-    expect([...document.querySelectorAll('[data-group]')].map((g) => g.getAttribute('data-group'))).toEqual(['work.failing', 'work.unchecked', 'work.working'])
-    fireEvent.click(within(header('Кабинет')).getByRole('button'))
-    expect(onSortChange).toHaveBeenCalledWith({ key: 'name', direction: 'ascending' } satisfies SortState)
-  })
-
-  it('сравнение: числа как числа, строки по-русски, пустое внизу', () => {
-    expect([10, 9, null, 100].sort((a, b) => compareSortValues(a, b, 'ascending'))).toEqual([9, 10, 100, null])
-    expect(['Жук', 'ель', 'ёж'].sort((a, b) => compareSortValues(a, b, 'ascending'))).toEqual(['ёж', 'ель', 'Жук'])
-  })
-
-  it('подсказка у заголовка — Tooltip ДС и описание; у сортируемой — у той же кнопки (одна остановка Tab)', async () => {
-    render(<DataTable<CabinetRow> label="К" rows={cabinets} columns={ccols} getKey={(r) => r.id} />)
-    const b = within(header('Таргетолог')).getByRole('button')
-    expect(document.getElementById(b.getAttribute('aria-describedby')!)?.textContent).toBe('Кто ведёт кабинет')
-    act(() => b.focus())
-    await waitFor(() => expect(screen.getByRole('tooltip').textContent).toBe('Кто ведёт кабинет'))
-    expect(within(header('Остаток')).getAllByRole('button')).toHaveLength(1)
-  })
-
-  it('широкая: колонка не уже значения (min-content), nowrap — в одну строку, прокрутка вбок внутри, первая колонка стоит', () => {
-    render(<DataTable<CabinetRow> label="К" rows={cabinets} columns={ccols} getKey={(r) => r.id} rowMuted={(r) => Boolean(r.idle)} />)
-    const table = screen.getByRole('table')
-    expect(table.style.getPropertyValue('--table-cols')).toBe('minmax(min-content, 1fr) minmax(min-content, 1fr) minmax(min-content, 1fr)')
-    expect(screen.getByText('15400').className).toContain('whitespace-nowrap')
-    expect(table.parentElement!.className.split(/\s+/)).toEqual(expect.arrayContaining(['relative', 'overflow-x-auto']))
-    const css = readFileSync(resolve(import.meta.dirname, '..', 'ds.css'), 'utf8')
-    expect(css).toMatch(/\.ds-table \.ds-row > \[role='cell'\]:first-child,\s*\.ds-table \.ds-row > \[role='columnheader'\]:first-child \{\s*position: sticky;/)
-    const muted = screen.getByText('Барбершоп').closest('[role=row]')!
-    expect(muted.className).toContain('text-fg-muted')
-  })
-})
-
-describe('сетка сверки (DF)', () => {
-  const props = { label: 'Посты по дням', rowHeader: 'Сообщество', columns: monthColumns, rows: communities, getKey: (r: (typeof communities)[number]) => r.id, renderRowHeader: (r: (typeof communities)[number]) => r.name, getCell: proofCell }
-
-  it('настоящая таблица; клетка — значение и слово для читалки; залита тоном статуса, впереди — тихо', () => {
-    const { container } = render(<ProofreadGrid {...props} />)
-    expect(screen.getByRole('table', { name: 'Посты по дням' })).toBeTruthy()
-    const danger = container.querySelector('td[data-tone=danger]')!
-    expect(danger.className).toContain('bg-danger-fill')
-    expect(danger.textContent).toContain('пропуск')
-    expect(container.querySelector('td[data-tone=success]')!.className).toContain('bg-success-fill')
-    expect(container.querySelector('td[data-quiet]')!.className).toContain('text-fg-muted')
-    expect(container.querySelector('td[data-note]')!.className).toContain('border-b-warning')
-  })
-
-  it('нажатие на строку — onSelect, выбранная — «выбрано»; много — «показать ещё»', () => {
-    const onSelect = vi.fn()
-    render(<ProofreadGrid {...props} rows={manyCommunities} getKey={(r) => r.id} renderRowHeader={(r) => r.name} onSelect={onSelect} selectedKey="mc0" />)
-    fireEvent.click(screen.getByRole('button', { name: 'Сообщество 2' }))
-    expect(onSelect).toHaveBeenCalledWith(expect.objectContaining({ id: 'mc1' }))
-    expect(screen.getByRole('button', { name: 'Сообщество 1' }).closest('th')!.className).toContain('bg-selected')
-    expect(screen.getByRole('button', { name: /показать ещё · 20/ })).toBeTruthy()
-  })
-
-  it('легенда: образец у тонов с заливкой, слово — у всех', () => {
-    const { container } = render(<GridLegend items={[{ tone: 'опасно', label: 'пропуск' }, { tone: 'хорошо', label: 'в норме' }, { label: 'нет нормы' }]} />)
-    expect([...container.querySelectorAll('li span[aria-hidden]')].map((x) => x.className.split(' ').find((c) => c.endsWith('-fill')))).toEqual(['bg-danger-fill', 'bg-success-fill'])
-    expect(container.textContent).toBe('пропускв норменет нормы')
-  })
-
-  it('строка статуса: заливка того же тона, что у клетки; без тона — без заливки; свои data-атрибуты продукта', () => {
-    const { container } = render(
-      <>
-        <StatusRow tone="хорошо" title="1-е · план выполнен" data-day="1">
-          <p>12:00 Пост 1</p>
-        </StatusRow>
-        <StatusRow title="4-е · нет нормы в плане" />
-      </>,
+  it('без onClick — не кнопка; выключенная кнопка не нажимается', () => {
+    const onClick = vi.fn()
+    render(
+      <ContainedList>
+        <ContainedListItem>просто</ContainedListItem>
+        <ContainedListItem onClick={onClick} disabled>
+          выкл
+        </ContainedListItem>
+      </ContainedList>,
     )
-    const [ok, none] = container.querySelectorAll('[data-slot=status-row]')
-    expect(ok.className).toContain('bg-success-fill')
-    expect(ok.getAttribute('data-tone')).toBe('success')
-    expect(ok.getAttribute('data-day')).toBe('1')
-    expect(ok.textContent).toBe('1-е · план выполнен12:00 Пост 1')
-    expect(none.className).not.toMatch(/-fill\b/)
+    expect(screen.queryByRole('button', { name: 'просто' })).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'выкл' }))
+    expect(onClick).not.toHaveBeenCalled()
   })
 })
 
-describe('неделя (DF)', () => {
-  it('с понедельника; посты по дням и времени; сегодня — словом; «+» и нажатие', () => {
-    const onAddDay = vi.fn()
-    const onSelect = vi.fn()
-    const { container } = render(<WeekCalendar<Post> label="Неделя" weekStart={weekStart} today={today} items={posts} getKey={(p) => p.id} getDate={(p) => p.at} renderItem={(p) => p.text} onAddDay={onAddDay} onSelect={onSelect} />)
-    const days = container.querySelectorAll('[data-part=day]')
-    expect(days).toHaveLength(7)
-    expect(days[2].getAttribute('data-today')).toBe('true')
-    expect(days[2].textContent).toContain('сегодня')
-    expect(days[0].querySelectorAll('[data-part=week-item]')).toHaveLength(2)
-    fireEvent.click(screen.getByRole('button', { name: 'Запланировать на 5 октября' }))
-    expect(onAddDay.mock.calls[0][0].getDate()).toBe(5)
-    fireEvent.click(screen.getByRole('button', { name: /Новый круассан/ }))
-    expect(onSelect).toHaveBeenCalledWith(posts[2])
+describe('Pagination', () => {
+  it('видные строки, выбор страницы и размера, стрелки; onChange({ page, pageSize })', () => {
+    const onChange = vi.fn()
+    render(<Pagination totalItems={150} pageSize={25} pageSizes={[10, 25, 50]} onChange={onChange} />)
+    expect(document.querySelector('[data-part=range]')!.textContent).toBe('1–25 из 150')
+    const back = screen.getByRole('button', { name: 'Предыдущая страница' }) as HTMLButtonElement
+    expect(back.disabled).toBe(true)
+    fireEvent.click(screen.getByRole('button', { name: 'Следующая страница' }))
+    expect(onChange).toHaveBeenLastCalledWith({ page: 2, pageSize: 25 })
+    expect(document.querySelector('[data-part=range]')!.textContent).toBe('26–50 из 150')
+    fireEvent.change(screen.getByRole('combobox', { name: 'Страница из 6' }), { target: { value: '6' } })
+    expect(onChange).toHaveBeenLastCalledWith({ page: 6, pageSize: 25 })
+    expect((screen.getByRole('button', { name: 'Следующая страница' }) as HTMLButtonElement).disabled).toBe(true)
+    fireEvent.change(screen.getByRole('combobox', { name: 'Строк на странице:' }), { target: { value: '50' } })
+    expect(onChange).toHaveBeenLastCalledWith({ page: 1, pageSize: 50 })
+    expect(document.querySelector('[data-part=range]')!.textContent).toBe('1–50 из 150')
   })
 
-  it('понедельник, сдвиг, подпись; навигация — значки, не символы', () => {
-    expect(mondayOf(new Date(2026, 9, 11)).getDate()).toBe(5)
-    expect(addWeeks(weekStart, 1).getDate()).toBe(12)
-    expect(weekTitle(weekStart)).toBe('5 окт. — 11 окт.')
-    const prev = vi.fn()
-    render(<WeekCalendar<Post> label="Неделя" weekStart={weekStart} items={[]} getKey={(p) => p.id} getDate={(p) => p.at} renderItem={(p) => p.text} nav={{ onPrev: prev, onNext: () => {} }} />)
-    const b = screen.getByRole('button', { name: 'Прошлая неделя' })
-    expect(b.querySelector('svg[data-icon=chevron-left]')).toBeTruthy()
-    fireEvent.click(b)
-    expect(prev).toHaveBeenCalled()
+  it('число неизвестно: «страница N», вперёд — пока не isLastPage', () => {
+    const { rerender } = render(<Pagination pagesUnknown page={3} pageSize={10} />)
+    expect(screen.getByText('страница 3')).toBeTruthy()
+    expect(document.querySelector('[data-part=range]')!.textContent).toBe('21–30')
+    expect((screen.getByRole('button', { name: 'Следующая страница' }) as HTMLButtonElement).disabled).toBe(false)
+    rerender(<Pagination pagesUnknown page={3} pageSize={10} isLastPage />)
+    expect((screen.getByRole('button', { name: 'Следующая страница' }) as HTMLButtonElement).disabled).toBe(true)
   })
 })

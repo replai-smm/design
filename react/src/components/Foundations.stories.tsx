@@ -4,7 +4,6 @@ import { colors, scale, tones } from '../../../dist/tokens.ts'
 import { ICONS, type IconName } from '../lib/icons.gen'
 import { TONES } from '../lib/vocab'
 import { Icon } from './Icon'
-import { StatusBadge } from './StatusBadge'
 
 function Sheet({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -41,10 +40,13 @@ function Tones() {
       <ul className="m-0 flex list-none flex-col gap-items p-0">
         {TONES.map((t) => (
           <li key={t} className="flex flex-wrap items-center gap-compact">
-            <StatusBadge tone={t} label={t} />
+            <span className="inline-flex items-center gap-tight text-body">
+              <Icon tone={t} />
+              {t}
+            </span>
             <span className="text-caption text-fg-muted">
               знак {tones[t].mark} · текст {tones[t].text} · {tones[t].bg ? `подложка ${tones[t].bg}` : 'без подложки'}
-              {tones[t].fill ? ` · сетка статуса ${tones[t].fill}` : ''}
+              {tones[t].fill ? ` · заливка ${tones[t].fill}` : ''}
             </span>
           </li>
         ))}

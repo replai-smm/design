@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Delta } from './Delta'
 
 const meta = {
-  title: 'Элементы/Разница',
+  title: 'Компоненты/Элементы/Delta',
   component: Delta,
   parameters: { layout: 'padded' },
   args: { value: 12.5 },

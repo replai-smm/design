@@ -1,15 +1,16 @@
 /**
- * Три колонки «список → лента → карточка» (DF: «Контент», «Сообщения»; чат orbit). С 1024 px видны все, каждая
+ * Три колонки «список → лента → карточка» (почта, сообщения, заказы). С 1024 px видны все, каждая
  * прокручивается сама; уже — по одной (`active`), во второй и третьей сверху «← назад» к предыдущей, переход — выезд
  * 0,6 с, фокус — на колонку. Без `third` — две колонки «список → карточка». `header` — полоса над колонками.
  * `phone="sheets"` — рабочее место: на телефоне видна лента, первая колонка — шторкой слева, третья — снизу
- * (`sheet`, `onSheetChange`); шторка — то же окно ДС (`Dialog`), что и везде.
+ * (`sheet`, `onSheetChange`); шторка — то же окно ДС (`Modal` без кнопок; слева — его внутренняя шторка `LeftSheet`).
  */
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { FOCUS } from '../lib/anatomy'
 import { cx } from '../lib/cx'
 import { Button } from './Button'
-import { Dialog } from './Dialog'
+import { Icon } from './Icon'
+import { LeftSheet, Modal } from './Modal'
 
 export type ColumnIndex = 0 | 1 | 2
 
@@ -80,12 +81,14 @@ export function ThreeColumn({ first, second, third, labels, active, onBack, firs
       )}
       <div className="flex min-h-0 min-w-0 flex-1">
         {cols.map((content, i) => {
-          if (sheets && i !== 1)
+          if (sheets && i !== 1) {
+            const Sheet = i === 0 ? LeftSheet : Modal
             return (
-              <Dialog key={i} side={i === 0 ? 'left' : undefined} title={labels[i]} open={sheet === i} onOpenChange={(o) => !o && onSheetChange?.(null)}>
+              <Sheet key={i} passiveModal modalHeading={labels[i]} open={sheet === i} onRequestClose={() => onSheetChange?.(null)}>
                 {content}
-              </Dialog>
+              </Sheet>
             )
+          }
           const on = sheets || i === active
           return (
             <section
@@ -110,7 +113,8 @@ export function ThreeColumn({ first, second, third, labels, active, onBack, firs
             >
               {i > 0 && phoneMode === 'stack' && (
                 <div className="border-b border-line px-items py-tight lg:hidden">
-                  <Button variant="ghost" dense icon="arrow-left" onClick={() => onBack((i - 1) as ColumnIndex)} data-part="column-back">
+                  <Button kind="ghost" size="sm" onClick={() => onBack((i - 1) as ColumnIndex)} data-part="column-back">
+                    <Icon name="arrow-left" />
                     {labels[i - 1]}
                   </Button>
                 </div>

@@ -9,7 +9,7 @@ import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { checkArchitecture, importsOf, readmeProblems, readTree } from '../lib/architecture.mjs'
 
-const RULES = ['anatomy/missing', 'anatomy/index', 'level/unknown', 'level/file', 'level/import', 'meaning/duplicate', 'near/unknown', 'shelf/level', 'product/unknown', 'vocab/own', 'glyph/unicode', 'svg/own', 'shape/pill', 'tone/fill', 'scroll/relative']
+const RULES = ['anatomy/missing', 'anatomy/index', 'level/unknown', 'level/file', 'level/import', 'meaning/duplicate', 'near/unknown', 'shelf/level', 'vocab/own', 'glyph/unicode', 'svg/own', 'shape/pill', 'tone/fill', 'scroll/relative', 'expand/own']
 
 describe('устройство ДС', () => {
   it('настоящая ДС-React: нарушений нет', () => {
