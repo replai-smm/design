@@ -31,4 +31,10 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci --no-audit --no-fund
+      # Браузер для сторожа ширин (`__tests__/widths.test.ts`): ставит сам CI, с кэшем — не руками на раннере.
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - run: npx playwright install --with-deps chromium-headless-shell
       - run: npm run check:ci

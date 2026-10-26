@@ -1,0 +1,43 @@
+# design — пишет `npx design init` (пакет @replai-smm/design): правка руками — красный `design init --check`, следующий init её затрёт.
+# На PR и на push в main: интерфейс держит дизайн-систему. Красный шаг блокирует слив (karta gate смотрит все проверки PR):
+# `design check` — только роли и шкалы, полки `Экраны/SCR-NN …`, нет своего компонента с именем ДС, против origin/main;
+# `design widths` — Storybook собран, и на 360 · 1024 · 1280 · 1920 ни один экран не шире окна и не режет текст.
+name: design
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: design-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  design:
+    runs-on: [self-hosted, rsmm-pool]
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    env:
+      BASE: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: npm ci
+        working-directory: __APP__
+        run: $(command -v rsmm-npm-ci || echo npm ci) --prefer-offline --no-audit --no-fund
+      - name: design init --check
+        run: node __APP__/node_modules/@replai-smm/design/bin/design.mjs init --check
+      - name: design check
+        run: node __APP__/node_modules/@replai-smm/design/bin/design.mjs check --base "$BASE"
+      - name: storybook build
+        working-directory: __APP__
+        run: npm run storybook:build
+      - name: playwright (браузер сторожа ширин; уже стоит — шаг мгновенный)
+        working-directory: __APP__
+        run: npx playwright install chromium-headless-shell
+      - name: design widths
+        run: node __APP__/node_modules/@replai-smm/design/bin/design.mjs widths
