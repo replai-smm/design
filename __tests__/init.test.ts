@@ -4,6 +4,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import YAML from 'yaml'
 // @ts-expect-error — .mjs без типов
 import { hookMessage, init, ownFiles, withHook, withScript } from '../bin/design.mjs'
 
@@ -43,6 +44,15 @@ describe('design init', () => {
     const wf = ownFiles({ repo, app })['.github/workflows/design.yml']
     expect(wf).not.toContain('npm ci (корень репо')
     expect(wf).toMatch(/playwright[^\n]*\n\s+working-directory: web/)
+  })
+
+  it('шаг CI — валидный YAML при любых настройках (корень, без корня, без сторожа ширин)', () => {
+    const parse = () => YAML.parse(ownFiles({ repo, app })['.github/workflows/design.yml'])
+    expect(parse().jobs.design.steps.length).toBeGreaterThan(5)
+    writeFileSync(join(app, 'package.json'), JSON.stringify({ design: { widths: false } }))
+    expect(parse().jobs.design.steps.map((x: { name?: string }) => x.name)).not.toContain('design widths')
+    rmSync(join(repo, 'package.json'))
+    expect(parse().jobs.design.steps.length).toBeGreaterThan(4)
   })
 
   it('идемпотентен: второй запуск ничего не пишет', () => {

@@ -30,7 +30,7 @@ jobs:
         working-directory: __APP__
         run: $(command -v rsmm-npm-ci || echo npm ci) --prefer-offline --no-audit --no-fund
       # root-ci:begin
-      - name: npm ci (корень репо: Playwright сторожа ширин)
+      - name: npm ci (корень репо — для Playwright сторожа ширин)
         working-directory: .
         run: $(command -v rsmm-npm-ci || echo npm ci) --prefer-offline --no-audit --no-fund
       # root-ci:end
