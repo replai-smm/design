@@ -40,6 +40,8 @@
   position: sticky;
   bottom: var(--ds-bottom-inset, 0px);
   padding-bottom: calc(var(--ds-space-compact) + max(0px, env(safe-area-inset-bottom) - var(--ds-bottom-inset, 0px)));
+  /* короткое содержимое: в колонке на высоту окна (Page) полоса стоит у нижнего края, а не под последним блоком */
+  margin-top: auto;
 }
 /* всплывашки — над нижней панелью продукта, не поверх неё */
 .ds-toasts {

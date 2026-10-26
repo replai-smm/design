@@ -17,6 +17,13 @@ export const SURFACE = 'border border-line bg-surface rounded-surface text-fg'
 export const SUNKEN = 'border border-line bg-canvas rounded-surface text-fg'
 /** Метка слева — знак тона или «ждёт тебя»: одна ширина на всю систему. */
 export const MARK = 'border-l-2'
+/** Цвет метки слева по виду уведомления (Carbon kind): те же четыре вида у уведомлений, всплывашек и плитки. */
+export const KIND_MARK = {
+  error: 'border-l-danger',
+  warning: 'border-l-warning',
+  info: 'border-l-fg',
+  success: 'border-l-success',
+} as const
 
 /** Отклик — быстро; раскрытие и выезд — 0,6 с (ds.css). */
 export const FAST = 'transition-colors duration-fast ease-standard'

@@ -9,19 +9,34 @@
  * Своей глубины (Carbon: Layer) нет: слоёв в ролях два — холст и поверхность; утопленное (код) — анатомия `SUNKEN`.
  */
 import { Children, createContext, forwardRef, useContext, useEffect, type ElementType, type HTMLAttributes, type KeyboardEvent, type MouseEvent, type ReactNode } from 'react'
-import { FOCUS, SURFACE } from '../lib/anatomy'
+import { FOCUS, KIND_MARK, MARK, SURFACE } from '../lib/anatomy'
 import { cx, rule } from '../lib/cx'
 import { Expand, chevron, useDisclosure } from '../lib/disclosure'
+import { NOTIFICATION_TONE, TONE, type NotificationKind } from '../lib/vocab'
 import { Icon } from './Icon'
 
 export interface TileProps extends HTMLAttributes<HTMLDivElement> {
   children?: ReactNode
   className?: string
+  /**
+   * Тон плитки — метка слева цвета вида (как у уведомления: error · warning · info · success). Без `kind` — тихая плитка.
+   * Цвет не один: слово состояния называет само содержимое плитки (заголовок раздела: «Критичные», «Плановые»).
+   */
+  kind?: NotificationKind
 }
 
-/** Слой с рамкой (Carbon: Tile). */
-export const Tile = forwardRef<HTMLDivElement, TileProps>(function Tile({ className, ...rest }, ref) {
-  return <div ref={ref} data-slot="tile" className={cx('flex min-w-0 flex-col p-blocks', SURFACE, className)} {...rest} />
+/** Слой с рамкой (Carbon: Tile); `kind` ставит метку тона слева. */
+export const Tile = forwardRef<HTMLDivElement, TileProps>(function Tile({ className, kind, ...rest }, ref) {
+  return (
+    <div
+      ref={ref}
+      data-slot="tile"
+      data-kind={kind}
+      data-mark={kind ? TONE[NOTIFICATION_TONE[kind]].key : undefined}
+      className={cx('flex min-w-0 flex-col p-blocks', SURFACE, kind && cx(MARK, KIND_MARK[kind]), className)}
+      {...rest}
+    />
+  )
 })
 
 export interface ClickableTileProps extends Omit<HTMLAttributes<HTMLElement>, 'onClick'> {

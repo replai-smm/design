@@ -10,20 +10,13 @@
  * «Готово» — не сюда, а всплывашкой (`useToast`).
  */
 import { useEffect, useId, useRef, useState, type HTMLAttributes, type KeyboardEvent, type MouseEvent, type ReactNode } from 'react'
-import { MARK, SURFACE } from '../lib/anatomy'
+import { KIND_MARK, MARK, SURFACE } from '../lib/anatomy'
 import { cx } from '../lib/cx'
 import { Close } from '../lib/icons.gen'
 import { NOTIFICATION_TONE, TONE, type NotificationKind } from '../lib/vocab'
 import { Button, IconButton } from './Button'
 import { Icon } from './Icon'
 
-/** Метка слева — цвет вида (одна ширина на систему). */
-const NOTIFICATION_MARK: Record<NotificationKind, string> = {
-  error: 'border-l-danger',
-  warning: 'border-l-warning',
-  info: 'border-l-fg',
-  success: 'border-l-success',
-}
 /** Слово знака для читалки (Carbon: statusIconDescription). */
 const KIND_WORD: Record<NotificationKind, string> = { error: 'Ошибка', warning: 'Предупреждение', info: 'Сведения', success: 'Готово' }
 
@@ -54,7 +47,7 @@ export function NotificationIcon({ kind, description }: { kind: NotificationKind
 
 /** Каркас уведомления: метка, знак, слова и кнопки — у всех трёх видов один. */
 export function notificationFrame(kind: NotificationKind) {
-  return { 'data-kind': kind, 'data-mark': TONE[NOTIFICATION_TONE[kind]].key, className: cx('flex min-w-0 items-start gap-items p-blocks text-body', SURFACE, MARK, NOTIFICATION_MARK[kind]) }
+  return { 'data-kind': kind, 'data-mark': TONE[NOTIFICATION_TONE[kind]].key, className: cx('flex min-w-0 items-start gap-items p-blocks text-body', SURFACE, MARK, KIND_MARK[kind]) }
 }
 
 /** Закрыть: открыто ли и обработчик кнопки (как у Carbon: onCloseButtonClick, затем onClose). */
