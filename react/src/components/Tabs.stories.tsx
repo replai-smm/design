@@ -36,7 +36,7 @@ const meta = {
 export default meta
 type S = StoryObj<typeof meta>
 
-/** Тот же ряд сегментов, что у ContentSwitcher; выбранная — «выбрано»; счётчик — CountBadge в слове вкладки. */
+/** Линейные вкладки (по умолчанию): выбранная подчёркнута; счётчик — CountBadge в слове вкладки. */
 export const Обычное: S = {}
 
 const sections = ['Обзор', 'Сообщения', 'Задачи', 'Файлы', 'Отчёты', 'Заказы', 'Оплата', 'Команда', 'Профиль', 'Настройки']
@@ -64,4 +64,22 @@ export const Много: S = {
       </>
     ),
   },
+}
+
+/** `contained` — ряд сегментов в рамке (как у ContentSwitcher): вкладки внутри содержимого, а не под заголовком страницы. */
+export const Contained: S = {
+  render: () => (
+    <Tabs>
+      <TabList aria-label="Разделы" contained>
+        <Tab>Ждут ответа</Tab>
+        <Tab>Новые</Tab>
+        <Tab>Отвечено</Tab>
+      </TabList>
+      <TabPanels>
+        <TabPanel>{panel('Ждут ответа.')}</TabPanel>
+        <TabPanel>{panel('Новые.')}</TabPanel>
+        <TabPanel>{panel('Отвечено.')}</TabPanel>
+      </TabPanels>
+    </Tabs>
+  ),
 }

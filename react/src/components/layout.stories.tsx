@@ -3,6 +3,7 @@ import { Menu } from '../lib/icons.gen'
 import { Button, IconButton } from './Button'
 import { Heading } from './Heading'
 import { Column, Grid, Inline, Page, PageHeader, Section, Stack } from './layout'
+import { Tab, TabList, Tabs } from './Tabs'
 import { Tile } from './Tile'
 
 const meta = {
@@ -55,5 +56,27 @@ export const Обычное: S = {
         </Section>
       </>
     ),
+  },
+}
+
+/** Шапка страницы с вкладками раздела: заголовок, под ним линейные вкладки (`tabs`); коробки — только внутри содержимого. */
+export const СВкладками: S = {
+  args: {
+    header: (
+      <PageHeader
+        title="Проекты"
+        subtitle="Все проекты команды."
+        tabs={
+          <Tabs>
+            <TabList aria-label="Разделы проектов">
+              <Tab>Активные</Tab>
+              <Tab>Архив</Tab>
+              <Tab>Шаблоны</Tab>
+            </TabList>
+          </Tabs>
+        }
+      />
+    ),
+    children: <p className="m-0 text-body text-fg-muted">Содержимое выбранной вкладки.</p>,
   },
 }
