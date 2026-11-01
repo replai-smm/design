@@ -114,7 +114,7 @@ Carbon, которые не нужны, не сделаны; сделанные 
 | `Prose`, `ProseHtml` | длинный текст ответа ролью «чтение» |
 | `Chart` | рисунок рядов данных (у Carbon — отдельный пакет `@carbon/charts`) |
 | `StatTile` | одно число с подписью и сравнением периодов (у Carbon — только ibm-products `BigNumber`) |
-| `StateView` | что показать вместо данных: первый запуск, всё сделано, ничего не найдено, нет доступа, ошибка (у Carbon — ibm-products `EmptyState`) |
+| `StateView` | что показать вместо данных: первый запуск, всё сделано, ничего не найдено, нет доступа, сведения, ошибка (у Carbon — ibm-products `EmptyState`) |
 | `ChartFrame` | рамка графика: заголовок, легенда словом и видом линии, вывод словами для читалки, состояния той же высоты |
 | `ConfirmProvider` / `useConfirm` | `await confirm({ modalHeading, danger })` вместо `window.confirm` — на том же `Modal` (у Carbon — только сам `Modal danger`) |
 | `Toaster` / `useToast` | очередь всплывашек, место и свайп; одна всплывашка — поля Carbon `ToastNotification` (`kind`, `title`, `subtitle`, `caption`, `timeout`), отдельного компонента нет |
