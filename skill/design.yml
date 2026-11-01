@@ -2,6 +2,9 @@
 # На PR и на push в main: интерфейс держит дизайн-систему. Красный шаг блокирует слив (karta gate смотрит все проверки PR):
 # `design check` — только роли и шкалы, полки `Экраны/SCR-NN …`, нет своего компонента с именем ДС, против origin/main;
 # `design widths` — Storybook собран, и на 360 · 1024 · 1280 · 1920 ни один экран не шире окна и не режет текст.
+# Проверка идёт один раз на голову и только когда задето приложение (RSMM-141): задание `changes` читает список файлов, и
+# `design` без правок приложения честно пропущено (skipped) — karta gate считает пропуск пройденным, отсутствие проверки —
+# красным. Fail-closed: список не прочитан, урезан или пуст, `changes` упало — `design` идёт.
 name: design
 on:
   pull_request:
@@ -9,11 +12,51 @@ on:
     branches: [main]
 permissions:
   contents: read
+  pull-requests: read # список файлов PR — задание changes
 concurrency:
   group: design-${{ github.ref }}
   cancel-in-progress: true
 jobs:
+  changes:
+    name: changes · задето ли приложение
+    runs-on: [self-hosted, rsmm-pool]
+    timeout-minutes: 5
+    outputs:
+      app: ${{ steps.scope.outputs.app }}
+    steps:
+      - id: scope
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Приложение задето: его папка, корневые package*.json (Playwright сторожа ширин), сам этот workflow.
+            // Приложение — корень репо: задето всегда. Сомнение — в пользу проверки.
+            const app = '__APP__'
+            const touches = (f) =>
+              app === '.' || f.startsWith(`${app}/`) || ['package.json', 'package-lock.json', '.github/workflows/design.yml'].includes(f)
+            let files = null
+            let truncated = false
+            try {
+              const { owner, repo } = context.repo
+              if (context.eventName === 'pull_request') {
+                const list = await github.paginate(github.rest.pulls.listFiles, { owner, repo, pull_number: context.payload.pull_request.number, per_page: 100 })
+                files = list.map((f) => f.filename)
+                truncated = files.length >= 3000 // потолок API списка файлов PR
+              } else if (context.payload.before && !/^0+$/.test(context.payload.before)) {
+                const { data } = await github.rest.repos.compareCommitsWithBasehead({ owner, repo, basehead: `${context.payload.before}...${context.sha}` })
+                files = (data.files ?? []).map((f) => f.filename)
+                truncated = files.length >= 300 // потолок API сравнения
+              }
+            } catch (err) {
+              core.warning(`список файлов не прочитан: ${err.message} — design идёт`)
+            }
+            const doubt = !files || files.length === 0 || truncated
+            const touched = doubt || files.some(touches)
+            core.setOutput('app', String(touched))
+            core.notice(doubt ? 'список файлов не прочитан, урезан или пуст — design идёт' : touched ? `приложение ${app} задето — design идёт` : `приложение ${app} не задето — design пропущен`)
+
   design:
+    needs: changes
+    if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.app != 'false') }}
     runs-on: [self-hosted, rsmm-pool]
     timeout-minutes: 30
     defaults:
