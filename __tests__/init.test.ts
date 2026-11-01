@@ -122,3 +122,52 @@ describe('design hook', () => {
     rmSync(tmp, { recursive: true, force: true })
   })
 })
+
+/**
+ * Задание `changes` шага CI (RSMM-141): исполняем НАСТОЯЩИЙ скрипт из сгенерированного workflow на подставных github,
+ * context и core — так проверяется ровно то, что уедет в продукт, а не пересказ.
+ */
+describe('шаг CI: design идёт только когда задето приложение', () => {
+  type Run = { app?: string; files?: string[] | Error; event?: string }
+  async function decide({ app: rel, files = [], event = 'pull_request' }: Run) {
+    const target = rel === '.' ? repo : app
+    const wf = YAML.parse(ownFiles({ repo, app: target })['.github/workflows/design.yml'])
+    const script: string = wf.jobs.changes.steps[0].with.script
+    const out: Record<string, string> = {}
+    const list = () => (files instanceof Error ? Promise.reject(files) : Promise.resolve(files.map((filename) => ({ filename }))))
+    const github = {
+      paginate: list,
+      rest: { pulls: { listFiles: {} }, repos: { compareCommitsWithBasehead: () => list().then((f) => ({ data: { files: f } })) } },
+    }
+    const context = { repo: { owner: 'o', repo: 'r' }, eventName: event, sha: 'b'.repeat(40), payload: { pull_request: { number: 1 }, before: 'a'.repeat(40) } }
+    const core = { setOutput: (k: string, v: string) => (out[k] = v), notice: () => {}, warning: () => {} }
+    const AsyncFunction = Object.getPrototypeOf(async () => {}).constructor
+    await new AsyncFunction('github', 'context', 'core', script)(github, context, core)
+    return { app: out.app, wf }
+  }
+
+  it('PR только бэка — design пропущен; условие задания design читает этот ответ', async () => {
+    const r = await decide({ files: ['backend/src/a.ts', 'karta/x.yaml'] })
+    expect(r.app).toBe('false')
+    expect(r.wf.jobs.design.needs).toBe('changes')
+    expect(r.wf.jobs.design.if).toContain("needs.changes.outputs.app != 'false'")
+    expect(r.wf.jobs.design.if).toContain("needs.changes.result != 'success'")
+  })
+
+  it('задето приложение, корневой package*.json или сам workflow — design идёт (и на push в main)', async () => {
+    for (const f of ['web/src/App.tsx', 'package-lock.json', '.github/workflows/design.yml']) {
+      expect((await decide({ files: [f] })).app, f).toBe('true')
+      expect((await decide({ files: [f], event: 'push' })).app, f).toBe('true')
+    }
+  })
+
+  it('приманки fail-closed: список не прочитан или пуст — design идёт; похожее имя — не приложение', async () => {
+    expect((await decide({ files: new Error('API молчит') })).app).toBe('true')
+    expect((await decide({ files: [] })).app).toBe('true')
+    expect((await decide({ files: ['web-old/a.ts'] })).app).toBe('false')
+  })
+
+  it('приложение — корень репо: задето всегда', async () => {
+    expect((await decide({ app: '.', files: ['backend/src/a.ts'] })).app).toBe('true')
+  })
+})
