@@ -16,6 +16,8 @@ export const ПервыйЗапуск: S = { tags: ['state:первый запу
 export const ВсёСделано: S = { tags: ['state:всё сделано'], args: { kind: 'всё сделано', title: 'Все отзывы отвечены', description: 'Новые появятся здесь сами.' } }
 export const НичегоНеНайдено: S = { tags: ['state:ничего не найдено'], args: { kind: 'ничего не найдено', title: 'По фильтру ничего', description: undefined, action: <Button kind="secondary">Сбросить фильтры</Button> } }
 export const НетДоступа: S = { tags: ['state:нет доступа'], args: { kind: 'нет доступа', title: 'Доступов нет — обратитесь к руководителю', description: undefined } }
+/** Сведения — не беда: данных нет, потому что человеку есть что сделать. Знак «инфо», не красный. */
+export const Сведения: S = { args: { kind: 'сведения', title: 'Вышла новая версия', description: 'Эта страница открыта до обновления. Обновите её, чтобы продолжить.', action: <Button kind="primary">Обновить страницу</Button> } }
 export const Ошибка: S = { tags: ['state:ошибка'], args: { kind: 'ошибка', title: 'Список не загрузился', description: 'Сервер не ответил за 30 с.', action: <Button kind="secondary">Повторить</Button> } }
 /** Загрузка — не StateView, а скелет той же формы. */
 export const Загрузка: S = {

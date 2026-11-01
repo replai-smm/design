@@ -131,6 +131,14 @@ describe('плитка с цифрой и состояние', () => {
     render(<StateView kind="ошибка" title="Не загрузилось" />)
     expect(screen.getByRole('alert')).toBeTruthy()
   })
+
+  it('состояние «сведения»: знак «инфо», не красный, и не alert — ничего не сломано', () => {
+    const { container } = render(<StateView kind="сведения" title="Кабинет обновился" />)
+    expect(container.querySelector('svg[data-icon=tone-info]')).toBeTruthy()
+    expect(container.querySelector('svg[data-icon=tone-danger]')).toBeNull()
+    expect(container.querySelector('[role=alert]')).toBeNull()
+    expect(container.querySelector('[role=status]')).toBeTruthy()
+  })
 })
 
 describe('уведомления (Carbon: InlineNotification, ActionableNotification)', () => {

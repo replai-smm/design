@@ -38,13 +38,14 @@ export type Progress = 'idle' | 'running' | 'done' | 'error'
 export const PROGRESS_WORD: Record<Progress, string> = { idle: 'впереди', running: 'идёт', done: 'готово', error: 'ошибка' }
 
 /** Что показать вместо данных — слова матрицы облика (matrix.yaml → states). */
-export type StateKind = 'первый запуск' | 'всё сделано' | 'ничего не найдено' | 'нет доступа' | 'ошибка'
+export type StateKind = 'первый запуск' | 'всё сделано' | 'ничего не найдено' | 'нет доступа' | 'сведения' | 'ошибка'
 /** Знак состояния — тон словаря. */
 export const STATE_TONE: Record<StateKind, Tone> = {
   'первый запуск': 'инфо',
   'всё сделано': 'хорошо',
   'ничего не найдено': 'нейтрально',
   'нет доступа': 'внимание',
+  сведения: 'инфо',
   ошибка: 'опасно',
 }
 
