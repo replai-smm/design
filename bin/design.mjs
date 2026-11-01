@@ -77,7 +77,10 @@ export function withHook(text, bin) {
   const pre = hooks && typeof hooks === 'object' && !Array.isArray(hooks) ? (hooks.PreToolUse ?? []) : undefined
   if (!hooks || !Array.isArray(pre)) return { bad: true }
   const entry = { matcher: 'Edit|Write|MultiEdit', hooks: [{ type: 'command', command: hookCommand(bin), timeout: 10, statusMessage: 'design hook' }] }
-  const now = [...pre.filter((e) => !isOurs(e)), entry]
+  // Своя запись меняется НА СВОЁМ МЕСТЕ, новая — в конец: порядок хуков не зависит от того, чей init шёл последним (karta init
+  // делает так же), и два init по очереди не дают диффа (RSMM-151).
+  const at = pre.findIndex(isOurs)
+  const now = at < 0 ? [...pre, entry] : pre.flatMap((e, i) => (i === at ? [entry] : isOurs(e) ? [] : [e]))
   return JSON.stringify(now) === JSON.stringify(pre) ? {} : { text: JSON.stringify({ ...s, hooks: { ...hooks, PreToolUse: now } }, null, 2) + '\n' }
 }
 
