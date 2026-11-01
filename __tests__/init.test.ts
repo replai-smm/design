@@ -82,6 +82,16 @@ describe('design init', () => {
     expect(withScript(JSON.stringify({ scripts: { design: 'свой сторож' } }), 'x').text).toBeUndefined()
   })
 
+  it('свой хук меняется на своём месте, а не уезжает в конец: хук karta после нашего остаётся после (RSMM-151)', () => {
+    const old = { matcher: 'Edit|Write|MultiEdit', hooks: [{ type: 'command', command: 'node x/design.mjs hook' }] } // наш, прежний путь
+    const karta = { matcher: 'Bash', hooks: [{ type: 'command', command: 'node node_modules/@replai-smm/karta/bin/karta.mjs hook' }] }
+    const once = withHook(JSON.stringify({ hooks: { PreToolUse: [old, karta] } }), 'web/node_modules/@replai-smm/design/bin/design.mjs')
+    const pre = JSON.parse(once.text).hooks.PreToolUse
+    expect(pre.map((e: { matcher: string }) => e.matcher)).toEqual(['Edit|Write|MultiEdit', 'Bash'])
+    expect(pre[0].hooks[0].command).toContain('web/node_modules/@replai-smm/design/bin/design.mjs hook')
+    expect(withHook(once.text, 'web/node_modules/@replai-smm/design/bin/design.mjs').text).toBeUndefined()
+  })
+
   it('"design": { "widths": false } — в шаге CI нет сторожа ширин (включают вместе с правкой экранов)', () => {
     writeFileSync(join(app, 'package.json'), JSON.stringify({ design: { widths: false } }))
     const wf = ownFiles({ repo, app })['.github/workflows/design.yml']
