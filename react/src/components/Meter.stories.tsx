@@ -23,3 +23,6 @@ export const Обычное: S = {
 
 /** Почти предел — тон «опасно». */
 export const Много: S = { tags: ['state:много'], args: { value: 97, helperText: '97 % · сброс 18:40' } }
+
+/** Путь к цели: 95 % до цели — без тона, это почти успех, не беда. */
+export const Цель: S = { args: { label: 'До цели', value: 95, helperText: '95 из 100 шагов', kind: 'goal' } }
