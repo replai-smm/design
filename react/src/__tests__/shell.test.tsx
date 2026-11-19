@@ -116,7 +116,53 @@ describe('левая панель', () => {
   })
 })
 
+describe('левая панель поверх страницы — как окно', () => {
+  function Shell({ open }: { open: boolean }) {
+    return (
+      <>
+        <button type="button">Меню</button>
+        <SideNav aria-label="Разделы" expanded={open}>
+          <SideNavItems>
+            <SideNavLink onClick={() => {}}>Первый</SideNavLink>
+            <SideNavLink onClick={() => {}}>Второй</SideNavLink>
+          </SideNavItems>
+        </SideNav>
+      </>
+    )
+  }
+
+  it('открылась — фокус на первом пункте, Tab по кругу внутри; закрылась — фокус обратно на кнопке', () => {
+    const { rerender } = render(<Shell open={false} />)
+    const menu = screen.getByRole('button', { name: 'Меню' })
+    menu.focus()
+    rerender(<Shell open />)
+    const first = screen.getByRole('button', { name: 'Первый' })
+    const second = screen.getByRole('button', { name: 'Второй' })
+    expect(document.activeElement).toBe(first)
+    second.focus()
+    fireEvent.keyDown(second, { key: 'Tab' })
+    expect(document.activeElement, 'наживка: Tab с последнего пункта не уходит из панели').toBe(first)
+    fireEvent.keyDown(first, { key: 'Tab', shiftKey: true })
+    expect(document.activeElement).toBe(second)
+    rerender(<Shell open={false} />)
+    expect(document.activeElement).toBe(menu)
+  })
+})
+
 describe('перейти к содержимому', () => {
+  it('переводит фокус на содержимое и не меняет адрес — годится для роутера на хэше', () => {
+    window.location.hash = '#/admin'
+    render(
+      <>
+        <SkipToContent />
+        <main id="main-content">содержимое</main>
+      </>,
+    )
+    fireEvent.click(screen.getByRole('link', { name: 'Перейти к основному содержимому' }))
+    expect(window.location.hash, 'наживка: адрес остался маршрутом').toBe('#/admin')
+    expect(document.activeElement).toBe(screen.getByRole('main'))
+  })
+
   it('первая ссылка страницы: по умолчанию на #main-content, видна только по фокусу', () => {
     render(<SkipToContent />)
     const a = screen.getByRole('link', { name: 'Перейти к основному содержимому' })

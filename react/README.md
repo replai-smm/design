@@ -8,7 +8,7 @@
 | Уровень | Компонент | Смысл |
 |---|---|---|
 | Раскладка | `Page`, `PageHeader`, `Section` | страница; шапка (`title`, строка «о чём экран» — `subtitle`, тихие действия — `pageActions`); раздел поднимает уровень `Heading` внутри (Carbon: Section) |
-| | `BottomBar` | липкая полоса низа страницы, одна на страницу: `ButtonSet` группой слева, на телефоне одним рядом; над нижней панелью продукта — `--ds-bottom-inset` |
+| | `BottomBar` | липкая полоса низа страницы, одна на страницу: `ButtonSet` группой слева, на телефоне одним рядом; над нижней панелью продукта — `--ds-bottom-inset`; свою высоту кладёт в `--ds-bottom-bar` — всплывашки встают над ней |
 | | `Stack`, `Inline`, `Grid` + `Column` | блоки столбиком или в ряд (`orientation`), в строку с переносом, сеткой 16 колонок; отступ — шаг шкалы (`gap={3}`) |
 | | `SurfaceProvider` | область одной главной кнопки (своя область продукта) |
 | Элементы | `Icon` | значок набора по имени или знак тона (`tone="опасно"`); значки для `renderIcon` — `@replai-smm/design/icons` |
@@ -34,7 +34,7 @@
 | | `OverflowMenu` + `OverflowMenuItem`, `Toaster`/`useToast` | меню «…» (`iconDescription`, `itemText`, `isDelete`, `hasDivider`); «готово» всплывашкой (поля Carbon ToastNotification: `kind`, `title`, `subtitle`, `caption`, `timeout`) |
 | Составные | `Tabs` + `TabList`/`Tab`/`TabPanels`/`TabPanel`, `FilterBar`/`useUrlFilters` | один ряд сегментов: вкладки по номеру (`selectedIndex`, `onChange({ selectedIndex })`, все панели смонтированы), фильтры рядами `ContentSwitcher` в адресе; не влезает — вкладки одной строкой с прокруткой, фильтры переносятся |
 | | `ThreeColumn`, `ChatThread`, `ReplyBox` | список → лента → карточка; переписка; поле ответа (`labelText`, `invalid` + `invalidText`, `helperText`; `send`: `enter` · `ctrl-enter` · `button`) |
-| | `Header` + `HeaderMenuButton`/`HeaderName`/`HeaderGlobalBar`/`HeaderGlobalAction`/`HeaderPanel`, `SideNav` + `SideNavItems`/`SideNavLink`/`SideNavDivider`, `SkipToContent` | оболочка продукта «шапка с левой панелью»: одна строка шапки на любой ширине (кнопка меню · название · контекст · справа системные кнопки → панель); левая панель постоянна от `lg`, уже — поверх страницы (`expanded`, `onOverlayClick`) |
+| | `Header` + `HeaderMenuButton`/`HeaderName`/`HeaderGlobalBar`/`HeaderGlobalAction`/`HeaderPanel`, `SideNav` + `SideNavItems`/`SideNavLink`/`SideNavDivider`, `SkipToContent` | оболочка продукта «шапка с левой панелью»: одна строка шапки на любой ширине (кнопка меню · название · контекст · справа системные кнопки → панель); левая панель постоянна от `lg`, уже — поверх страницы (`expanded`, `onOverlayClick`): фокус внутри, Esc и нажатие мимо закрывают, фокус возвращается; `SkipToContent` переводит фокус без смены адреса (годится для роутера на хэше) |
 
 Общие имена: у компонентов с парой в Carbon — имена и значения Carbon (`kind`, `size`, `renderIcon`, `label`,
 `description`, `status`); у наших — `state` (`ready` · `loading` · `error`), `empty`, `error` (у `ChartFrame`, `ChatThread`),

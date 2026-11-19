@@ -226,6 +226,9 @@ export function PageHeader({ title, subtitle, pageActions, tabs }: PageHeaderPro
   )
 }
 
+/** Высота липкой полосы на `:root` — для всплывашек; одна полоса на страницу, поэтому одна переменная. */
+const BAR_HEIGHT = '--ds-bottom-bar'
+
 export interface BottomBarProps {
   children?: ReactNode
   className?: string
@@ -236,7 +239,9 @@ export interface BottomBarProps {
  * (сохранить правки, «Назад — Далее» мастера). Одна на страницу: вторая — ошибка в разработке. Кнопки — `ButtonSet`
  * (главная — последней, правее второстепенной); на ноутбуке группа слева (Carbon: кнопки формы на странице — слева), на
  * телефоне одним рядом поровну. Над нижней панелью продукта: её высоту продукт кладёт в `--ds-bottom-inset` на `:root`;
- * полоску телефона полоса учитывает сама.
+ * полоску телефона полоса учитывает сама. Свою высоту полоса объявляет в `--ds-bottom-bar` на `:root`, пока стоит на
+ * экране, — по ней всплывашки (`Toaster`) встают над полосой, а не поверх её кнопок. Не в `--ds-bottom-inset`: по нему
+ * стоит сама полоса, и она поднялась бы на собственную высоту.
  */
 export function BottomBar({ children, className }: BottomBarProps) {
   const surface = useSurface()
@@ -253,6 +258,19 @@ export function BottomBar({ children, className }: BottomBarProps) {
       surface.bars.delete(id)
     }
   }, [surface, id])
+  useLayoutEffect(() => {
+    const bar = at.current
+    if (!bar) return
+    const root = document.documentElement.style
+    const announce = () => root.setProperty(BAR_HEIGHT, `${bar.offsetHeight}px`)
+    announce()
+    const watch = typeof ResizeObserver === 'function' ? new ResizeObserver(announce) : null
+    watch?.observe(bar)
+    return () => {
+      watch?.disconnect()
+      root.removeProperty(BAR_HEIGHT)
+    }
+  }, [])
   return (
     <div
       ref={at}
