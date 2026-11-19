@@ -37,7 +37,11 @@ export interface NumberInputProps
 type Num = number | ''
 const toNum = (v: number | string | undefined): Num => (v === undefined || v === '' ? '' : Number(v))
 const fmt = (n: Num) => (n === '' ? '' : String(n))
-const parse = (t: string): Num => (t === '' || t === '-' ? '' : Number(t.replace(',', '.')))
+/** Недописанное («-», «.», «-,») — ещё не число: наружу пусто, текст в поле остаётся как набран. */
+const parse = (t: string): Num => {
+  const n = Number(t.replace(',', '.'))
+  return t === '' || Number.isNaN(n) ? '' : n
+}
 const places = (n: number) => String(n).split('.')[1]?.length ?? 0
 
 /** Число со стрелками (Carbon: NumberInput). */

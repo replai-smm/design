@@ -1,10 +1,10 @@
 /**
  * Один из нескольких (Carbon: RadioButton, RadioButtonGroup): родной `<input type="radio">` — круг 16 px, выбранный —
- * точка внутри. Группа — fieldset с `legendText`: держит `name`, выбранное (`valueSelected` или своё с `defaultSelected`)
+ * точка внутри. Группа — fieldset с `legendText`: держит `name`, выбранное (`valueSelected` — управляемая, без своей копии; иначе своё с `defaultSelected`)
  * и зовёт `onChange(value, name, event)`; по умолчанию кружки в ряд, `orientation="vertical"` — столбиком (Carbon).
  * Стрелки ходят по кружкам сами (так работает браузер). Вариантов 2–5 и их видно сразу; больше — `Select` или `ComboBox`.
  */
-import { createContext, forwardRef, useContext, useEffect, useState, type ChangeEvent, type InputHTMLAttributes, type ReactNode } from 'react'
+import { createContext, forwardRef, useContext, useState, type ChangeEvent, type InputHTMLAttributes, type ReactNode } from 'react'
 import { FOCUS } from '../lib/anatomy'
 import { cx } from '../lib/cx'
 import { FieldNote, fieldAria, fieldState, useFieldIds, type FieldMessages } from './TextInput'
@@ -94,20 +94,19 @@ export interface RadioButtonGroupProps extends FieldMessages {
 }
 
 /** Один из нескольких (Carbon: RadioButtonGroup): fieldset с legend — читалка называет группу у каждого кружка. */
-export const RadioButtonGroup = forwardRef<HTMLFieldSetElement, RadioButtonGroupProps>(function RadioButtonGroup(
-  { name, legendText, valueSelected, defaultSelected, onChange, orientation = 'horizontal', disabled, readOnly, required, helperText, invalid, invalidText, warn, warnText, children, className },
-  ref,
-) {
+export const RadioButtonGroup = forwardRef<HTMLFieldSetElement, RadioButtonGroupProps>(function RadioButtonGroup(props, ref) {
+  const { name, legendText, valueSelected, defaultSelected, onChange, orientation = 'horizontal', disabled, readOnly, required, helperText, invalid, invalidText, warn, warnText, children, className } = props
   const ids = useFieldIds()
-  const [selected, setSelected] = useState(valueSelected ?? defaultSelected)
-  useEffect(() => {
-    if (valueSelected !== undefined) setSelected(valueSelected)
-  }, [valueSelected])
+  // Управляемая — когда `valueSelected` передан (как `value` у input, и `undefined` — «ничего не выбрано»): выбранное
+  // всегда из пропа, своей копии нет — отказ или замена выбора родителем видны сразу, без кадра со старым выбором.
+  const controlled = 'valueSelected' in props
+  const [own, setOwn] = useState(defaultSelected)
+  const selected = controlled ? valueSelected : own
   const messages = { helperText, invalid, invalidText, warn, warnText }
   const state = fieldState({ invalid, warn, disabled, readOnly })
   const select = (value: Value, event: ChangeEvent<HTMLInputElement>) => {
     if (readOnly || value === selected) return
-    setSelected(value)
+    if (!controlled) setOwn(value)
     onChange?.(value, name, event)
   }
   return (

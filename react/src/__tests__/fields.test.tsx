@@ -1,7 +1,7 @@
 /** Поля по Carbon: подпись, подсказка, ошибка и предупреждение для читалки; ввод, пароль, число, выбор, галочка, кружки, переключатель, выбор с поиском, файл, поиск, форма. */
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
-import { createRef } from 'react'
+import { createRef, useLayoutEffect, useState } from 'react'
 import {
   Checkbox,
   CheckboxGroup,
@@ -211,6 +211,45 @@ describe('RadioButton, RadioButtonGroup', () => {
   })
 })
 
+describe('RadioButtonGroup управляемая — без своей копии выбора', () => {
+  const Kinds = ({ valueSelected, onChange }: { valueSelected?: string; onChange?: (v: string | number) => void }) => (
+    <RadioButtonGroup name="kind" legendText="Вид" valueSelected={valueSelected} onChange={onChange}>
+      <RadioButton labelText="Бессрочно" value="open" />
+      <RadioButton labelText="Даты" value="dates" />
+    </RadioButtonGroup>
+  )
+  const checked = () => (screen.getAllByRole('radio') as HTMLInputElement[]).map((r) => r.checked)
+
+  it('родитель не принял выбор — остаётся его значение', () => {
+    const onChange = vi.fn()
+    render(<Kinds valueSelected="open" onChange={onChange} />)
+    fireEvent.click(screen.getByText('Даты'))
+    expect(onChange).toHaveBeenCalledWith('dates', 'kind', expect.anything())
+    expect(checked()).toEqual([true, false])
+  })
+
+  it('смена снаружи видна в том же рендере; undefined — ничего не выбрано', () => {
+    const { rerender } = render(<Kinds valueSelected="open" />)
+    // Слой после коммита, до эффектов: копия выбора, догоняемая эффектом, здесь ещё старая.
+    const seen: boolean[][] = []
+    const Probe = () => {
+      useLayoutEffect(() => {
+        seen.push(checked())
+      })
+      return null
+    }
+    rerender(
+      <>
+        <Kinds valueSelected="dates" />
+        <Probe />
+      </>,
+    )
+    expect(seen[0]).toEqual([false, true])
+    rerender(<Kinds valueSelected={undefined} />)
+    expect(checked()).toEqual([false, false])
+  })
+})
+
 describe('Toggle', () => {
   it('role="switch" с именем подписи; нажатие и слово рядом переключают; onToggle(checked)', () => {
     const onToggle = vi.fn()
@@ -270,6 +309,31 @@ describe('NumberInput', () => {
     expect(f.value).toBe('')
     expect(f.getAttribute('aria-invalid')).toBeNull()
     expect(screen.getByRole('button', { name: 'увеличить' }).tabIndex).toBe(-1)
+  })
+
+  it('недописанное «.», «,», «-.» — наружу пусто, не NaN; в поле остаётся набранное', () => {
+    const onChange = vi.fn()
+    render(<NumberInput id="n" label="Доля" defaultValue={5} allowEmpty onChange={onChange} />)
+    const f = screen.getByRole('spinbutton') as HTMLInputElement
+    for (const t of ['.', ',', '-.', '-,']) {
+      fireEvent.change(f, { target: { value: t } })
+      expect(f.value).toBe(t)
+    }
+    expect(onChange.mock.calls.map((c) => c[1].value)).toEqual([''])
+    fireEvent.change(f, { target: { value: '-.5' } })
+    expect(onChange.mock.lastCall![1].value).toBe(-0.5)
+  })
+
+  it('управляемое: недописанное не превращается в «NaN» в поле', () => {
+    const Host = () => {
+      const [v, setV] = useState<number | string>(5)
+      return <NumberInput id="c" label="Доля" allowEmpty value={v} onChange={(_, s) => setV(s.value)} />
+    }
+    render(<Host />)
+    const f = screen.getByRole('spinbutton') as HTMLInputElement
+    fireEvent.change(f, { target: { value: '.' } })
+    expect(f.value).toBe('.')
+    expect(f.getAttribute('aria-valuenow')).toBeNull()
   })
 
   it('дробь — с точностью шага; hideSteppers — без кнопок', () => {
