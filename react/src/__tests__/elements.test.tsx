@@ -540,6 +540,18 @@ describe('раскладка, заголовки, подсказка, справ
     ).toThrow(/последним блоком страницы/)
   })
 
+  it('липкая полоса объявляет свою высоту для всплывашек, пока стоит на экране', () => {
+    const root = document.documentElement.style
+    const { unmount } = render(
+      <Page header={<PageHeader title="Настройки" />}>
+        <BottomBar />
+      </Page>,
+    )
+    expect(root.getPropertyValue('--ds-bottom-bar')).toMatch(/^\d+px$/)
+    unmount()
+    expect(root.getPropertyValue('--ds-bottom-bar'), 'наживка: полоса ушла — всплывашки опускаются обратно').toBe('')
+  })
+
   it('Tooltip: label — имя элемента (aria-labelledby), description — описание (aria-describedby)', () => {
     render(
       <>

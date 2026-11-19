@@ -5,13 +5,15 @@
  * - `Header` — шапка, всегда видна (липкая): слева кнопка меню · название · контекст продукта, справа (`HeaderGlobalBar`) — системное:
  *   кнопки-значки (`HeaderGlobalAction`) открывают панель (`HeaderPanel`), а не ведут в раздел.
  * - `SideNav` — левая панель продукта: от ширины `lg` (1024) стоит постоянно рядом с содержимым, уже — скрыта и открывается поверх
- *   страницы по `expanded` (затемнение под ней, Esc и нажатие мимо закрывают: `onOverlayClick`). `HeaderMenuButton isCollapsible` в шапке
+ *   страницы по `expanded` (затемнение под ней, Esc и нажатие мимо закрывают: `onOverlayClick`). Открытая поверх — забирает фокус на
+ *   первый пункт и держит Tab внутри, закрытая — возвращает фокус туда, откуда её открыли. `HeaderMenuButton isCollapsible` в шапке
  *   прячется там, где панель постоянна. Имена пунктов уходят в панель, а не распирают шапку.
  * - `SideNavLink` — пункт: ссылка (`href`) или действие (`onClick`, без `href` — `<button>`); открытый — `isActive` (`aria-current`).
- * - `SkipToContent` — первая ссылка страницы: «Перейти к основному содержимому» (WCAG 2.4.1).
+ * - `SkipToContent` — первая ссылка страницы: «Перейти к основному содержимому» (WCAG 2.4.1). Переводит фокус сама, адрес не
+ *   меняет: при роутере на хэше (`#/раздел`) переход по `#main-content` увёл бы на неизвестный маршрут.
  * Точка перелома — `lg` Tailwind (1024), одна на ДС (у Carbon 1056). Размер шапки — 48 px (`touch`), как цель пальца.
  */
-import { forwardRef, type AnchorHTMLAttributes, type ButtonHTMLAttributes, type ElementType, type HTMLAttributes, type KeyboardEvent, type MouseEvent, type ReactNode } from 'react'
+import { forwardRef, useEffect, useRef, type AnchorHTMLAttributes, type ButtonHTMLAttributes, type ElementType, type HTMLAttributes, type KeyboardEvent, type MouseEvent, type ReactNode } from 'react'
 import { FAST, FOCUS } from '../lib/anatomy'
 import { cx } from '../lib/cx'
 import { Close, Menu } from '../lib/icons.gen'
@@ -144,14 +146,35 @@ export interface SideNavProps extends Omit<HTMLAttributes<HTMLElement>, 'aria-la
 
 /** Левая панель продукта (Carbon: SideNav): от `lg` — постоянно слева (липкая под шапкой), уже — поверх страницы по `expanded`. */
 export function SideNav({ expanded = false, onOverlayClick, onKeyDown, className, children, ...rest }: SideNavProps) {
+  const at = useRef<HTMLElement>(null)
+  // Поверх страницы панель — как окно: фокус внутрь, Tab по кругу внутри, после закрытия — обратно (Carbon: SideNav с
+  // затемнением). От `lg` панель постоянна — фокус не трогаем.
+  const over = expanded && !(typeof window.matchMedia === 'function' && window.matchMedia('(min-width: 1024px)').matches)
+  useEffect(() => {
+    if (!over) return
+    const from = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    focusable(at.current)[0]?.focus()
+    return () => {
+      if (from?.isConnected) from.focus()
+    }
+  }, [over])
   const keys = (e: KeyboardEvent<HTMLElement>) => {
     onKeyDown?.(e)
     if (e.key === 'Escape') onOverlayClick?.()
+    if (e.key === 'Tab' && over) {
+      const all = focusable(at.current)
+      const edge = e.shiftKey ? all[0] : all[all.length - 1]
+      if (all.length > 0 && document.activeElement === edge) {
+        e.preventDefault()
+        ;(e.shiftKey ? all[all.length - 1] : all[0])?.focus()
+      }
+    }
   }
   return (
     <>
       {expanded && <div data-slot="side-nav-overlay" aria-hidden="true" onClick={onOverlayClick} className="fixed inset-x-0 bottom-0 top-touch z-20 bg-scrim lg:hidden" />}
       <nav
+        ref={at}
         data-slot="side-nav"
         data-expanded={expanded || undefined}
         onKeyDown={keys}
@@ -170,6 +193,9 @@ export function SideNav({ expanded = false, onOverlayClick, onKeyDown, className
     </>
   )
 }
+
+const FOCUSABLE = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+const focusable = (root: HTMLElement | null): HTMLElement[] => (root ? [...root.querySelectorAll<HTMLElement>(FOCUSABLE)] : [])
 
 /** Список пунктов левой панели (Carbon: SideNavItems). */
 export function SideNavItems({ className, children, ...rest }: HTMLAttributes<HTMLUListElement>) {
@@ -229,9 +255,19 @@ export interface SkipToContentProps extends AnchorHTMLAttributes<HTMLAnchorEleme
 }
 
 /** Ссылка «Перейти к основному содержимому» (Carbon: SkipToContent): первая в странице, видна только с клавиатуры. */
-export function SkipToContent({ href = '#main-content', className, children = 'Перейти к основному содержимому', ...rest }: SkipToContentProps) {
+export function SkipToContent({ href = '#main-content', className, children = 'Перейти к основному содержимому', onClick, ...rest }: SkipToContentProps) {
+  // Фокус переводим сами и адрес не трогаем: при роутере на хэше переход по `#main-content` — неизвестный маршрут.
+  const skip = (e: MouseEvent<HTMLAnchorElement>) => {
+    onClick?.(e)
+    const target = href.startsWith('#') ? document.getElementById(href.slice(1)) : null
+    if (e.defaultPrevented || !target) return
+    e.preventDefault()
+    if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1')
+    target.focus()
+    target.scrollIntoView?.({ block: 'start' })
+  }
   return (
-    <a data-slot="skip-to-content" href={href} className={cx('sr-only focus:not-sr-only focus:fixed focus:left-tight focus:top-tight focus:z-40 focus:rounded-control focus:bg-surface focus:px-compact focus:py-items focus:text-body focus:text-accent focus:shadow-overlay', className)} {...rest}>
+    <a data-slot="skip-to-content" href={href} onClick={skip} className={cx('sr-only focus:not-sr-only focus:fixed focus:left-tight focus:top-tight focus:z-40 focus:rounded-control focus:bg-surface focus:px-compact focus:py-items focus:text-body focus:text-accent focus:shadow-overlay', className)} {...rest}>
       {children}
     </a>
   )
