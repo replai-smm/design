@@ -568,6 +568,29 @@ describe('раскладка, заголовки, подсказка, справ
     expect(document.getElementById(b.getAttribute('aria-describedby')!)?.textContent).toBe('Списано за 7 дней')
   })
 
+  it('Tooltip: на фокус открывается только с клавиатуры — фокус от скрипта (возврат из меню, касание) её не открывает', async () => {
+    render(
+      <Tooltip label="Меню" enterDelayMs={0}>
+        <button type="button">≡</button>
+      </Tooltip>,
+    )
+    const b = screen.getByRole('button', { name: 'Меню' })
+    // откуда фокус, jsdom не знает: ответ браузера про :focus-visible задаём сами
+    let keyboard = false
+    const matches = b.matches.bind(b)
+    vi.spyOn(b, 'matches').mockImplementation((q: string) => (q === ':focus-visible' ? keyboard : matches(q)))
+    act(() => b.focus())
+    await new Promise((r) => setTimeout(r, 20))
+    expect(document.querySelector('[data-slot=tooltip]'), 'наживка: фокус от скрипта открыл подсказку').toBeNull()
+    fireEvent.pointerMove(b)
+    await waitFor(() => expect(document.querySelector('[data-slot=tooltip]'), 'наведение открывает, как раньше').not.toBeNull())
+    act(() => b.blur())
+    await waitFor(() => expect(document.querySelector('[data-slot=tooltip]')).toBeNull())
+    keyboard = true
+    act(() => b.focus())
+    await waitFor(() => expect(document.querySelector('[data-slot=tooltip]')?.textContent).toBe('Меню'))
+  })
+
   it('Toggletip: кнопка «i» с подписью открывает содержимое по нажатию, его имя — подпись кнопки', () => {
     render(
       <Toggletip>

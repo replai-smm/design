@@ -4,8 +4,12 @@
  * описание вдобавок к тексту ребёнка (aria-describedby); оба — `label` главнее, как у Carbon. Не место для нужного: на
  * телефоне наведения нет — важное пишут словами рядом. Ребёнок — один элемент, который берёт фокус; не берёт — ошибка
  * в разработке.
+ *
+ * На фокус подсказка открывается только с клавиатуры (`:focus-visible`), на наведение — как всегда. Фокус от скрипта или
+ * касания её не открывает: после выбора в `SideNav` фокус возвращается на кнопку «Меню», и подсказка висела поверх
+ * заголовка страницы.
  */
-import { Children, cloneElement, isValidElement, useCallback, useId, type ReactElement, type ReactNode } from 'react'
+import { Children, cloneElement, isValidElement, useCallback, useId, useRef, useState, type PointerEvent, type ReactElement, type ReactNode } from 'react'
 import { Tooltip as RTooltip } from 'radix-ui'
 import { cx, rule } from '../lib/cx'
 import type { PopoverAlignment } from '../lib/vocab'
@@ -33,6 +37,9 @@ export function Tooltip({ label, description, children, align = 'top', enterDela
   rule(Children.count(children) === 1 && isValidElement(children), 'у подсказки один ребёнок — элемент, который берёт фокус (кнопка, ссылка)')
   rule(label !== undefined || description !== undefined, 'у подсказки нет текста: label (имя элемента) или description (описание)')
   const id = useId()
+  const [open, setOpen] = useState(defaultOpen ?? false)
+  // фокус пришёл не с клавиатуры — Radix открыл бы подсказку на любой фокус, держим закрытой до наведения
+  const quiet = useRef(false)
   const check = useCallback((el: HTMLElement | null) => {
     if (!el) return
     rule(el.matches(FOCUSABLE) && el.tabIndex >= 0, `подсказка у элемента <${el.tagName.toLowerCase()}>, который не берёт фокус: с клавиатуры её не открыть — оберните в кнопку`)
@@ -44,8 +51,16 @@ export function Tooltip({ label, description, children, align = 'top', enterDela
   const trigger = cloneElement(child, label !== undefined ? { 'aria-labelledby': id, 'aria-describedby': child.props['aria-describedby'] } : { 'aria-describedby': id })
   return (
     <RTooltip.Provider delayDuration={enterDelayMs} skipDelayDuration={300}>
-      <RTooltip.Root defaultOpen={defaultOpen}>
-        <RTooltip.Trigger asChild ref={check}>
+      <RTooltip.Root open={open} onOpenChange={(next) => (next && quiet.current ? undefined : setOpen(next))}>
+        <RTooltip.Trigger
+          asChild
+          ref={check}
+          onFocus={(e) => (quiet.current = !e.currentTarget.matches(':focus-visible'))}
+          onBlur={() => (quiet.current = false)}
+          onPointerMove={(e: PointerEvent) => {
+            if (e.pointerType !== 'touch') quiet.current = false
+          }}
+        >
           {trigger}
         </RTooltip.Trigger>
         <RTooltip.Portal>
