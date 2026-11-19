@@ -1,0 +1,211 @@
+/* Сгенерировано build.mjs из tokens.json и scale.json. Руками не править: правка — в источнике, потом `npm run build`.
+   Тема: <html data-theme="light|dark">; без атрибута — как в системе (prefers-color-scheme). */
+
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fonts/IBMPlexSans-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('../fonts/IBMPlexSans-SemiBold.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fonts/IBMPlexMono-Regular.woff2') format('woff2');
+}
+
+:root {
+  --ds-space-tight: 0.25rem;
+  --ds-space-items: 0.5rem;
+  --ds-space-compact: 0.75rem;
+  --ds-space-blocks: 1rem;
+  --ds-space-groups: 1.5rem;
+  --ds-space-sections: 2rem;
+  --ds-size-icon: 1rem;
+  --ds-size-dense: 2rem;
+  --ds-size-control: 2.5rem;
+  --ds-size-touch: 3rem;
+  --ds-measure-number: 10rem;
+  --ds-measure-rail: 16rem;
+  --ds-measure-hint: 18rem;
+  --ds-measure-narrow: 20rem;
+  --ds-measure-popup: 24rem;
+  --ds-measure-form: 28rem;
+  --ds-measure-panel: 32rem;
+  --ds-measure-wide: 36rem;
+  --ds-measure-window: 42rem;
+  --ds-font-sans: 'IBM Plex Sans', system-ui, sans-serif;
+  --ds-font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --ds-text-caption-size: 0.75rem;
+  --ds-text-caption-line: 1rem;
+  --ds-text-caption-weight: 400;
+  --ds-text-body-size: 0.875rem;
+  --ds-text-body-line: 1.25rem;
+  --ds-text-body-weight: 400;
+  --ds-text-heading-size: 0.875rem;
+  --ds-text-heading-line: 1.25rem;
+  --ds-text-heading-weight: 600;
+  --ds-text-reading-size: 1rem;
+  --ds-text-reading-line: 1.5rem;
+  --ds-text-reading-weight: 400;
+  --ds-text-code-size: 0.8125rem;
+  --ds-text-code-line: 1.25rem;
+  --ds-text-code-weight: 400;
+  --ds-text-title-size: 1.25rem;
+  --ds-text-title-line: 1.75rem;
+  --ds-text-title-weight: 400;
+  --ds-text-page-size: 1.75rem;
+  --ds-text-page-line: 2.25rem;
+  --ds-text-page-weight: 400;
+  --ds-radius-control: 4px;
+  --ds-radius-surface: 6px;
+  --ds-radius-full: 9999px;
+  --ds-elevation-flat: none;
+  --ds-elevation-raised: 0 2px 6px 0 var(--ds-shadow);
+  --ds-elevation-overlay: 0 8px 24px 0 var(--ds-shadow);
+  --ds-motion-fast: 110ms;
+  --ds-motion-move: 600ms;
+  --ds-ease: cubic-bezier(0.4, 0.14, 0.3, 1);
+}
+
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+  --ds-canvas: #f4f4f4;
+  --ds-surface: #ffffff;
+  --ds-inverse: #161616;
+  --ds-inverse-hover: #393939;
+  --ds-fg: #161616;
+  --ds-fg-muted: #525252;
+  --ds-fg-disabled: #a8a8a8;
+  --ds-fg-inverse: #ffffff;
+  --ds-line: #e0e0e0;
+  --ds-line-strong: #8d8d8d;
+  --ds-hover: #8d8d8d1f;
+  --ds-selected: #8d8d8d33;
+  --ds-accent: #0f62fe;
+  --ds-scrim: #16161680;
+  --ds-shadow: #0000002e;
+  --ds-danger: #da1e28;
+  --ds-danger-fg: #a2191f;
+  --ds-danger-bg: #fff1f1;
+  --ds-warning: #b28600;
+  --ds-warning-fg: #684e00;
+  --ds-warning-bg: #fcf4d6;
+  --ds-success: #198038;
+  --ds-decision: #8a3ffc;
+  --ds-decision-fg: #6929c4;
+  --ds-decision-bg: #f6f2ff;
+  --ds-danger-fill: #ffd7d9;
+  --ds-warning-fill: #fcf4d6;
+  --ds-neutral-fill: #e0e0e0;
+  --ds-success-fill: #a7f0ba;
+  --ds-decision-fill: #f6f2ff;
+  --ds-series-1: #6929c4;
+  --ds-series-2: #1192e8;
+  --ds-series-3: #005d5d;
+  --ds-series-4: #9f1853;
+  --ds-series-5: #8a3800;
+  --ds-series-6: #6f6f6f;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --ds-canvas: #0f0f11;
+  --ds-surface: #17171a;
+  --ds-inverse: #ececec;
+  --ds-inverse-hover: #c6c6c6;
+  --ds-fg: #ececec;
+  --ds-fg-muted: #a1a1aa;
+  --ds-fg-disabled: #5a5a60;
+  --ds-fg-inverse: #0f0f11;
+  --ds-line: #2a2a2f;
+  --ds-line-strong: #6f6f76;
+  --ds-hover: #8d8d8d29;
+  --ds-selected: #8d8d8d3d;
+  --ds-accent: #78a9ff;
+  --ds-scrim: #000000b3;
+  --ds-shadow: #000000a6;
+  --ds-danger: #fa4d56;
+  --ds-danger-fg: #ffb3b8;
+  --ds-danger-bg: #331417;
+  --ds-warning: #f1c21b;
+  --ds-warning-fg: #fddc69;
+  --ds-warning-bg: #2e2608;
+  --ds-success: #42be65;
+  --ds-decision: #be95ff;
+  --ds-decision-fg: #d4bbff;
+  --ds-decision-bg: #251a3d;
+  --ds-danger-fill: #5a1d22;
+  --ds-warning-fill: #433609;
+  --ds-neutral-fill: #35353b;
+  --ds-success-fill: #133e23;
+  --ds-decision-fill: #251a3d;
+  --ds-series-1: #a56eff;
+  --ds-series-2: #33b1ff;
+  --ds-series-3: #08bdba;
+  --ds-series-4: #ff7eb6;
+  --ds-series-5: #ba4e00;
+  --ds-series-6: #8d8d8d;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --ds-canvas: #0f0f11;
+    --ds-surface: #17171a;
+    --ds-inverse: #ececec;
+    --ds-inverse-hover: #c6c6c6;
+    --ds-fg: #ececec;
+    --ds-fg-muted: #a1a1aa;
+    --ds-fg-disabled: #5a5a60;
+    --ds-fg-inverse: #0f0f11;
+    --ds-line: #2a2a2f;
+    --ds-line-strong: #6f6f76;
+    --ds-hover: #8d8d8d29;
+    --ds-selected: #8d8d8d3d;
+    --ds-accent: #78a9ff;
+    --ds-scrim: #000000b3;
+    --ds-shadow: #000000a6;
+    --ds-danger: #fa4d56;
+    --ds-danger-fg: #ffb3b8;
+    --ds-danger-bg: #331417;
+    --ds-warning: #f1c21b;
+    --ds-warning-fg: #fddc69;
+    --ds-warning-bg: #2e2608;
+    --ds-success: #42be65;
+    --ds-decision: #be95ff;
+    --ds-decision-fg: #d4bbff;
+    --ds-decision-bg: #251a3d;
+    --ds-danger-fill: #5a1d22;
+    --ds-warning-fill: #433609;
+    --ds-neutral-fill: #35353b;
+    --ds-success-fill: #133e23;
+    --ds-decision-fill: #251a3d;
+    --ds-series-1: #a56eff;
+    --ds-series-2: #33b1ff;
+    --ds-series-3: #08bdba;
+    --ds-series-4: #ff7eb6;
+    --ds-series-5: #ba4e00;
+    --ds-series-6: #8d8d8d;
+  }
+}
+
+/* Система просит меньше движения — движения нет. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --ds-motion-fast: 0ms;
+    --ds-motion-move: 0ms;
+  }
+}
