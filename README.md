@@ -110,7 +110,7 @@ Carbon, которые не нужны, не сделаны; сделанные 
 | `CountBadge` | счётчик строки и вкладки (BadgeIndicator Carbon не экспортирован) |
 | `Avatar` | лицо (у Carbon — только ibm-products `UserAvatar`) |
 | `Delta` | разница двух чисел |
-| `Meter` | сколько взято из предела: ProgressBar Carbon — ход процесса; имена свойств — как у ProgressBar |
+| `Meter` | сколько взято из предела (`kind="limit"`, к концу тон) или путь к цели (`kind="goal"`, без тона): ProgressBar Carbon — ход процесса; имена свойств — как у ProgressBar |
 | `Prose`, `ProseHtml` | длинный текст ответа ролью «чтение» |
 | `Chart` | рисунок рядов данных (у Carbon — отдельный пакет `@carbon/charts`) |
 | `StatTile` | одно число с подписью и сравнением периодов (у Carbon — только ibm-products `BigNumber`) |

@@ -389,6 +389,14 @@ describe('ход работы', () => {
     expect(m.getAttribute('aria-valuetext')).toBe('97 % · сброс 18:40')
     expect(document.querySelector('[data-slot=meter] svg[data-icon=tone-danger]')).toBeTruthy()
   })
+
+  it('шкала цели: 95 % в режиме goal — без тона, без знака, полоса цвета текста', () => {
+    render(<Meter label="До уровня" value={95} kind="goal" />)
+    const root = document.querySelector('[data-slot=meter]')!
+    expect(root.hasAttribute('data-tone')).toBe(false)
+    expect(root.querySelector('svg[data-icon^=tone-]')).toBeNull()
+    expect(root.querySelector('[role=meter] > span')!.className).toContain('bg-fg')
+  })
 })
 
 describe('разница и график', () => {

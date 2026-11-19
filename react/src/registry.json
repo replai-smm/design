@@ -186,7 +186,7 @@
     "Meter": {
       "level": "Элементы",
       "file": "Meter.tsx",
-      "meaning": "сколько взято из предела"
+      "meaning": "сколько взято из предела или путь к цели"
     },
     "ProgressIndicator": {
       "level": "Элементы",
